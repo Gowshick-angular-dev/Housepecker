@@ -1,0 +1,48 @@
+{
+  "project_info": {
+    "project_number": "230627925686",
+    "project_id": "housingroyce-147b3",
+    "storage_bucket": "housingroyce-147b3.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:230627925686:android:8b7051b46c07e096b59017",
+        "android_client_info": {
+          "package_name": "com.housingroyce.app"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyCfXL0-9ix1O1Q5lMjVfcmdvhfYuByEryM"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    },
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:230627925686:android:a7dc68cc833e4290b59017",
+        "android_client_info": {
+          "package_name": "com.ownhouse.customer"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyCfXL0-9ix1O1Q5lMjVfcmdvhfYuByEryM"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
