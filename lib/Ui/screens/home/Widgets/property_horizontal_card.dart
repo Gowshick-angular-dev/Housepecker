@@ -17,6 +17,8 @@ import '../../../../utils/constant.dart';
 import '../../../../utils/helper_utils.dart';
 import '../../../../utils/ui_utils.dart';
 import '../../proprties/property_details.dart';
+import '../../widgets/AnimatedRoutes/blur_page_route.dart';
+import '../../widgets/all_gallary_image.dart';
 
 class PropertyHorizontalCard extends StatelessWidget {
   final PropertyModel property;
@@ -57,17 +59,11 @@ class PropertyHorizontalCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    String rentPrice = (property.price!
-        // .priceFormate(
-        //   disabled: Constant.isNumberWithSuffix == false,
-        // )
-        // .toString()
-        // .formatAmount(prefix: true)
-    );
+    String rentPrice = formatAmount(int.parse(property.price!));
 
     if (property.rentduration != "" && property.rentduration != null) {
       rentPrice =
-          ("$rentPrice / ") + (rentDurationMap[property.rentduration] ?? "");
+          ("$rentPrice/") + (rentDurationMap[property.rentduration] ?? "");
     }
 
     return BlocProvider(
@@ -104,28 +100,64 @@ class PropertyHorizontalCard extends StatelessWidget {
                               property.titleImage ?? "",
                               width: double.infinity,fit: BoxFit.cover,height: 103,
                             ),
-                            Positioned(
-                              left: 8,
-                              top: 8,
-                              child: Container(
-                                padding: EdgeInsets.symmetric(horizontal: 5),
-                                height: 19,
-                                clipBehavior: Clip.antiAlias,
-                                decoration: BoxDecoration(
-                                    color: context.color.secondaryColor
-                                        .withOpacity(0.7),
-                                    borderRadius:
-                                    BorderRadius.circular(4)),
-                                child: Row(
-                                  children: [
-                                    Image.asset("assets/Home/Offers.png", width:12, height: 12, color: Colors.blue),
-                                    SizedBox(width: 3,),
-                                    Text('offer').size(10)
-                                  ],
-                                ),
-                              ),
-                            ),
+                            // Positioned(
+                            //   left: 8,
+                            //   top: 8,
+                            //   child: Container(
+                            //     padding: EdgeInsets.symmetric(horizontal: 5),
+                            //     height: 19,
+                            //     clipBehavior: Clip.antiAlias,
+                            //     decoration: BoxDecoration(
+                            //         color: context.color.secondaryColor
+                            //             .withOpacity(0.7),
+                            //         borderRadius:
+                            //         BorderRadius.circular(4)),
+                            //     child: Row(
+                            //       children: [
+                            //         Image.asset("assets/Home/Offers.png", width:12, height: 12, color: Colors.blue),
+                            //         SizedBox(width: 3,),
+                            //         Text('offer').size(10)
+                            //       ],
+                            //     ),
+                            //   ),
+                            // ),
                             // Text(property.promoted.toString()),
+                            if(property.isPremium == 1)
+                              Positioned(
+                                  top: 10,
+                                  left: 10,
+                                  child: Container(
+                                    width: 30,
+                                    height: 30,
+                                    decoration: BoxDecoration(
+                                      color: Colors.black.withOpacity(0.5),
+                                      borderRadius: BorderRadius.circular(10),
+                                    ),
+                                    child: Center(child: Image.asset("assets/Home/__Premium.png",width: 18,height: 18,)),
+                                  )
+                              ),
+                            if(property.isDeal == 1)
+                              Positioned(
+                                  top: 10,
+                                  left: -5,
+                                  child: Container(
+                                    child: Stack(
+                                      children: [
+                                        Image.asset("assets/Home/offer.png", height: 20,),
+                                        Positioned(
+                                          top: 2,
+                                          left: 15,
+                                          child: Text('Offer',
+                                            style: TextStyle(
+                                              fontSize: 10,
+                                              color: Color(0xffffffff),
+                                            ),
+                                          ),
+                                        )
+                                      ],
+                                    ),
+                                  )
+                              ),
                             if (showLikeButton ?? true)
                               Positioned(
                                 right: 8,
@@ -152,44 +184,95 @@ class PropertyHorizontalCard extends StatelessWidget {
                                   ),
                                 ),
                               ),
+                            if(property.gallery != null)
+                              Positioned(
+                                right: 48,
+                                top: 8,
+                                child: InkWell(
+                                  onTap: () {
+                                    Navigator.push(context,
+                                        BlurredRouter(
+                                          builder: (context) {
+                                            return AllGallaryImages(
+                                                images: property
+                                                    ?.gallery ??
+                                                    []);
+                                          },
+                                        ));
+                                  },
+                                  child: Container(
+                                    width: 35,
+                                    height: 25,
+                                    decoration: BoxDecoration(
+                                      color: Color(0xff000000).withOpacity(0.35),
+                                      borderRadius: BorderRadius.circular(8),
+                                      border: Border.all(width: 1, color: Color(0xffe0e0e0)),
+                                      boxShadow: const [
+                                        BoxShadow(
+                                          color: Color.fromARGB(12, 0, 0, 0),
+                                          offset: Offset(0, 2),
+                                          blurRadius: 15,
+                                          spreadRadius: 0,
+                                        )
+                                      ],
+                                    ),
+                                    child: Row(
+                                      mainAxisAlignment: MainAxisAlignment.center,
+                                      children: [
+                                        Icon(
+                                            Icons.image,
+                                            color: Color(0xffe0e0e0),
+                                            size: 15
+                                        ),
+                                        SizedBox(width: 3,),
+                                        Text('${property.gallery!.length}',
+                                          style: TextStyle(
+                                              color: Color(0xffe0e0e0),
+                                              fontSize: 10
+                                          ),),
+                                      ],
+                                    ),
+                                  ),
+                                ),
+                              ),
                             if (property.promoted ?? false)
                               const PositionedDirectional(
                                   start: 5,
                                   top: 5,
                                   child: PromotedCard(
                                       type: PromoteCardType.icon)),
-                            PositionedDirectional(
-                              bottom: 6,
-                              start: 6,
-                              child: Container(
-                                height: 19,
-                                clipBehavior: Clip.antiAlias,
-                                decoration: BoxDecoration(
-                                    color: context.color.secondaryColor
-                                        .withOpacity(0.7),
-                                    borderRadius:
-                                        BorderRadius.circular(4)),
-                                child: BackdropFilter(
-                                  filter: ImageFilter.blur(
-                                      sigmaX: 2, sigmaY: 3),
-                                  child: Padding(
-                                    padding: const EdgeInsets.symmetric(
-                                        horizontal: 8.0),
-                                    child: Center(
-                                      child: Text(
-                                        property.properyType!
-                                            .translate(context),
-                                      )
-                                          .color(
-                                            context.color.textColorDark,
-                                          )
-                                          .bold(weight: FontWeight.w500)
-                                          .size(10),
-                                    ),
-                                  ),
-                                ),
-                              ),
-                            ),
+                            // PositionedDirectional(
+                            //   bottom: 6,
+                            //   start: 6,
+                            //   child: Container(
+                            //     height: 19,
+                            //     clipBehavior: Clip.antiAlias,
+                            //     decoration: BoxDecoration(
+                            //         color: context.color.secondaryColor
+                            //             .withOpacity(0.7),
+                            //         borderRadius:
+                            //             BorderRadius.circular(4)),
+                            //     child: BackdropFilter(
+                            //       filter: ImageFilter.blur(
+                            //           sigmaX: 2, sigmaY: 3),
+                            //       child: Padding(
+                            //         padding: const EdgeInsets.symmetric(
+                            //             horizontal: 8.0),
+                            //         child: Center(
+                            //           child: Text(
+                            //             property.properyType!
+                            //                 .translate(context),
+                            //           )
+                            //               .color(
+                            //                 context.color.textColorDark,
+                            //               )
+                            //               .bold(weight: FontWeight.w500)
+                            //               .size(10),
+                            //         ),
+                            //       ),
+                            //     ),
+                            //   ),
+                            // ),
                           ],
                         ),
                       ),
@@ -229,6 +312,64 @@ class PropertyHorizontalCard extends StatelessWidget {
                               fontSize: 12.5,
                               fontWeight: FontWeight.w500
                           ),
+                        ),
+                        SizedBox(height: 4,),
+                        Row(
+                          children: [
+                            if (property.properyType
+                                .toString()
+                                .toLowerCase() ==
+                                "rent") ...[
+                              Text(
+                                '₹${rentPrice}',
+                                maxLines: 1,
+                                overflow: TextOverflow.ellipsis,
+                                style: TextStyle(
+                                    color: Color(0xff333333),
+                                    fontSize: 12,
+                                    fontFamily: 'Roboto',
+                                    fontWeight: FontWeight.w500
+                                ),
+                              ),
+                            ] else ...[
+                              Text(
+                                '₹${formatAmount(int.parse(property.price!))}',
+                                // // .priceFormate(
+                                // //     disabled:
+                                // //         Constant.isNumberWithSuffix ==
+                                // //             false)
+                                //     .toString()
+                                //     .formatAmount(
+                                //   prefix: true,
+                                // ),
+                                maxLines: 1,
+                                overflow: TextOverflow.ellipsis,
+                                style: TextStyle(
+                                    color: Color(0xff333333),
+                                    fontSize: 12,
+                                    fontFamily: 'Roboto',
+                                    fontWeight: FontWeight.w500
+                                ),
+                              )
+                            ],
+                            Padding(
+                              padding: const EdgeInsets.symmetric(horizontal: 4),
+                              child: Container(
+                                height: 12,
+                                width: 2,
+                                color: Colors.black54,
+                              ),
+                            ),
+                            Text("${property.sqft} Sq.ft",
+                              maxLines: 1,
+                              overflow: TextOverflow.ellipsis,
+                              style: TextStyle(
+                                  color: Color(0xffa2a2a2),
+                                  fontSize: 9,
+                                  fontWeight: FontWeight.w400
+                              ),
+                            ),
+                          ],
                         ),
                         SizedBox(height: 4,),
                         if (property.city != "")
@@ -273,61 +414,7 @@ class PropertyHorizontalCard extends StatelessWidget {
                         //     .color(
                         //       context.color.textLightColor,
                         //     ),
-                        Row(
-                          children: [
-                            if (property.properyType
-                                .toString()
-                                .toLowerCase() ==
-                                "rent") ...[
-                              Text(
-                                rentPrice,
-                                maxLines: 1,
-                                overflow: TextOverflow.ellipsis,
-                                style: TextStyle(
-                                    color: Color(0xff333333),
-                                    fontSize: 9,
-                                    fontWeight: FontWeight.w500
-                                ),
-                              ),
-                            ] else ...[
-                              Text(
-                                formatAmount(int.parse(property.price!))
-                                // .priceFormate(
-                                //     disabled:
-                                //         Constant.isNumberWithSuffix ==
-                                //             false)
-                                    .toString()
-                                    .formatAmount(
-                                  prefix: true,
-                                ),
-                                maxLines: 1,
-                                overflow: TextOverflow.ellipsis,
-                                style: TextStyle(
-                                    color: Color(0xff333333),
-                                    fontSize: 9,
-                                    fontWeight: FontWeight.w500
-                                ),
-                              )
-                            ],
-                            Padding(
-                              padding: const EdgeInsets.symmetric(horizontal: 8),
-                              child: Container(
-                                height: 12,
-                                width: 2,
-                                color: Colors.black54,
-                              ),
-                            ),
-                            Text("${property.sqft} Sq.ft",
-                              maxLines: 1,
-                              overflow: TextOverflow.ellipsis,
-                              style: TextStyle(
-                                  color: Color(0xffa2a2a2),
-                                  fontSize: 9,
-                                  fontWeight: FontWeight.w400
-                              ),
-                            ),
-                          ],
-                        ),
+
                         SizedBox(height: 5,),
                         Row(
                           mainAxisAlignment: MainAxisAlignment.end,
@@ -443,7 +530,7 @@ class PropertyVerticalCard extends StatelessWidget {
     String rentPrice = (property.price!);
 
     if (property.rentduration != "" && property.rentduration != null) {
-      rentPrice = ("$rentPrice / ") + (rentDurationMap[property.rentduration] ?? "");
+      rentPrice = ("$rentPrice/") + (rentDurationMap[property.rentduration] ?? "");
     }
 
     return BlocProvider(
@@ -477,31 +564,67 @@ class PropertyVerticalCard extends StatelessWidget {
                         fit: BoxFit.cover,
                         height: 130,
                       ),
-                      Positioned(
-                        left: 8,
-                        top: 8,
-                        child: Container(
-                          padding: EdgeInsets.symmetric(horizontal: 5),
-                          height: 19,
-                          clipBehavior: Clip.antiAlias,
-                          decoration: BoxDecoration(
-                            color: context.color.secondaryColor.withOpacity(0.7),
-                            borderRadius: BorderRadius.circular(4),
-                          ),
-                          child: Row(
-                            children: [
-                              Image.asset(
-                                "assets/Home/Offers.png",
-                                width: 12,
-                                height: 12,
-                                color: Colors.blue,
-                              ),
-                              SizedBox(width: 3),
-                              Text('Offer').size(10),
-                            ],
-                          ),
+                      // Positioned(
+                      //   left: 8,
+                      //   top: 8,
+                      //   child: Container(
+                      //     padding: EdgeInsets.symmetric(horizontal: 5),
+                      //     height: 19,
+                      //     clipBehavior: Clip.antiAlias,
+                      //     decoration: BoxDecoration(
+                      //       color: context.color.secondaryColor.withOpacity(0.7),
+                      //       borderRadius: BorderRadius.circular(4),
+                      //     ),
+                      //     child: Row(
+                      //       children: [
+                      //         Image.asset(
+                      //           "assets/Home/Offers.png",
+                      //           width: 12,
+                      //           height: 12,
+                      //           color: Colors.blue,
+                      //         ),
+                      //         SizedBox(width: 3),
+                      //         Text('Offer').size(10),
+                      //       ],
+                      //     ),
+                      //   ),
+                      // ),
+                      if(property.isPremium == 1)
+                        Positioned(
+                          top: 10,
+                          left: 10,
+                          child: Container(
+                            width: 30,
+                            height: 30,
+                            decoration: BoxDecoration(
+                              color: Colors.black.withOpacity(0.5),
+                              borderRadius: BorderRadius.circular(10),
+                            ),
+                            child: Center(child: Image.asset("assets/Home/__Premium.png",width: 18,height: 18,)),
+                          )
                         ),
-                      ),
+                      if(property.isDeal == 1)
+                        Positioned(
+                            top: 10,
+                            left: -5,
+                            child: Container(
+                              child: Stack(
+                                children: [
+                                  Image.asset("assets/Home/offer.png", height: 20,),
+                                  Positioned(
+                                    top: 2,
+                                    left: 15,
+                                    child: Text('Offer',
+                                      style: TextStyle(
+                                        fontSize: 10,
+                                        color: Color(0xffffffff),
+                                      ),
+                                    ),
+                                  )
+                                ],
+                              ),
+                            )
+                        ),
                       if (showLikeButton ?? true)
                         Positioned(
                           right: 8,
@@ -527,38 +650,89 @@ class PropertyVerticalCard extends StatelessWidget {
                             ),
                           ),
                         ),
+                      if(property.gallery != null)
+                        Positioned(
+                        right: 48,
+                        top: 8,
+                        child: InkWell(
+                          onTap: () {
+                            Navigator.push(context,
+                                BlurredRouter(
+                                  builder: (context) {
+                                    return AllGallaryImages(
+                                        images: property
+                                            ?.gallery ??
+                                            []);
+                                  },
+                                ));
+                          },
+                          child: Container(
+                            width: 35,
+                            height: 25,
+                            decoration: BoxDecoration(
+                              color: Color(0xff000000).withOpacity(0.35),
+                              borderRadius: BorderRadius.circular(8),
+                              border: Border.all(width: 1, color: Color(0xffe0e0e0)),
+                              boxShadow: const [
+                                BoxShadow(
+                                  color: Color.fromARGB(12, 0, 0, 0),
+                                  offset: Offset(0, 2),
+                                  blurRadius: 15,
+                                  spreadRadius: 0,
+                                )
+                              ],
+                            ),
+                            child: Row(
+                              mainAxisAlignment: MainAxisAlignment.center,
+                              children: [
+                                Icon(
+                                  Icons.image,
+                                  color: Color(0xffe0e0e0),
+                                  size: 15
+                                ),
+                                SizedBox(width: 3,),
+                                Text('${property.gallery!.length}',
+                                style: TextStyle(
+                                  color: Color(0xffe0e0e0),
+                                  fontSize: 10
+                                ),),
+                              ],
+                            ),
+                          ),
+                        ),
+                      ),
                       if (property.promoted ?? false)
                         const PositionedDirectional(
                           start: 5,
                           top: 5,
                           child: PromotedCard(type: PromoteCardType.icon),
                         ),
-                      PositionedDirectional(
-                        bottom: 6,
-                        start: 6,
-                        child: Container(
-                          height: 19,
-                          clipBehavior: Clip.antiAlias,
-                          decoration: BoxDecoration(
-                            color: context.color.secondaryColor.withOpacity(0.7),
-                            borderRadius: BorderRadius.circular(4),
-                          ),
-                          child: BackdropFilter(
-                            filter: ImageFilter.blur(sigmaX: 2, sigmaY: 3),
-                            child: Padding(
-                              padding: const EdgeInsets.symmetric(horizontal: 8.0),
-                              child: Center(
-                                child: Text(
-                                  property.properyType!.translate(context),
-                                )
-                                    .color(context.color.textColorDark)
-                                    .bold(weight: FontWeight.w500)
-                                    .size(10),
-                              ),
-                            ),
-                          ),
-                        ),
-                      ),
+                      // PositionedDirectional(
+                      //   bottom: 6,
+                      //   start: 6,
+                      //   child: Container(
+                      //     height: 19,
+                      //     clipBehavior: Clip.antiAlias,
+                      //     decoration: BoxDecoration(
+                      //       color: context.color.secondaryColor.withOpacity(0.7),
+                      //       borderRadius: BorderRadius.circular(4),
+                      //     ),
+                      //     child: BackdropFilter(
+                      //       filter: ImageFilter.blur(sigmaX: 2, sigmaY: 3),
+                      //       child: Padding(
+                      //         padding: const EdgeInsets.symmetric(horizontal: 8.0),
+                      //         child: Center(
+                      //           child: Text(
+                      //             property.properyType!.translate(context),
+                      //           )
+                      //               .color(context.color.textColorDark)
+                      //               .bold(weight: FontWeight.w500)
+                      //               .size(10),
+                      //         ),
+                      //       ),
+                      //     ),
+                      //   ),
+                      // ),
                     ],
                   ),
                 ),
@@ -594,6 +768,54 @@ class PropertyVerticalCard extends StatelessWidget {
                         ),
                       ),
                       SizedBox(height: 4),
+                      Row(
+                        children: [
+                          if (property.properyType.toString().toLowerCase() == "rent") ...[
+                            Text(
+                              '₹${rentPrice}',
+                              maxLines: 1,
+                              overflow: TextOverflow.ellipsis,
+                              style: TextStyle(
+                                color: Color(0xff333333),
+                                fontSize: 12,
+                                fontFamily: 'Roboto',
+                                fontWeight: FontWeight.w500,
+                              ),
+                            ),
+                          ] else ...[
+                            Text(
+                              '₹${formatAmount(int.parse(property.price!))}',
+                              maxLines: 1,
+                              overflow: TextOverflow.ellipsis,
+                              style: TextStyle(
+                                color: Color(0xff333333),
+                                fontSize: 12,
+                                fontFamily: 'Roboto',
+                                fontWeight: FontWeight.w500,
+                              ),
+                            ),
+                          ],
+                          Padding(
+                            padding: const EdgeInsets.symmetric(horizontal: 4),
+                            child: Container(
+                              height: 12,
+                              width: 2,
+                              color: Colors.black54,
+                            ),
+                          ),
+                          Text(
+                            "${property.sqft} Sq.ft",
+                            maxLines: 1,
+                            overflow: TextOverflow.ellipsis,
+                            style: TextStyle(
+                              color: Color(0xff494949),
+                              fontSize: 10,
+                              fontWeight: FontWeight.w400,
+                            ),
+                          ),
+                        ],
+                      ),
+                      SizedBox(height: 4),
                       if (property.city != "")
                         Padding(
                           padding: const EdgeInsets.only(bottom: 4),
@@ -621,51 +843,7 @@ class PropertyVerticalCard extends StatelessWidget {
                             ],
                           ),
                         ),
-                      Row(
-                        children: [
-                          if (property.properyType.toString().toLowerCase() == "rent") ...[
-                            Text(
-                              rentPrice,
-                              maxLines: 1,
-                              overflow: TextOverflow.ellipsis,
-                              style: TextStyle(
-                                color: Color(0xff333333),
-                                fontSize: 10,
-                                fontWeight: FontWeight.w500,
-                              ),
-                            ),
-                          ] else ...[
-                            Text(
-                              formatAmount(int.parse(property.price!)),
-                              maxLines: 1,
-                              overflow: TextOverflow.ellipsis,
-                              style: TextStyle(
-                                color: Color(0xff333333),
-                                fontSize: 10,
-                                fontWeight: FontWeight.w500,
-                              ),
-                            ),
-                          ],
-                          Padding(
-                            padding: const EdgeInsets.symmetric(horizontal: 8),
-                            child: Container(
-                              height: 12,
-                              width: 2,
-                              color: Colors.black54,
-                            ),
-                          ),
-                          Text(
-                            "${property.sqft} Sq.ft",
-                            maxLines: 1,
-                            overflow: TextOverflow.ellipsis,
-                            style: TextStyle(
-                              color: Color(0xffa2a2a2),
-                              fontSize: 10,
-                              fontWeight: FontWeight.w400,
-                            ),
-                          ),
-                        ],
-                      ),
+
                       SizedBox(height: 5),
                       Row(
                         mainAxisAlignment: MainAxisAlignment.end,

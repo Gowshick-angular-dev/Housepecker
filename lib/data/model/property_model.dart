@@ -51,6 +51,8 @@ class PropertyModel {
       this.isFavourite,
       this.rentduration,
       this.isInterested,
+      this.isPremium,
+      this.isDeal,
       this.favouriteUsers,
       this.interestedUsers,
       this.totalInterestedUsers,
@@ -117,6 +119,8 @@ class PropertyModel {
   final int? isFavourite;
   final int? viewContact;
   final int? isInterested;
+  final int? isPremium;
+  final int? isDeal;
   final List<dynamic>? favouriteUsers;
   final List<dynamic>? interestedUsers;
   final int? totalInterestedUsers;
@@ -165,6 +169,8 @@ class PropertyModel {
           int? isFavourite,
           int? viewContact,
           int? isInterested,
+          int? isPremium,
+          int? isDeal,
           List<dynamic>? favouriteUsers,
           List<dynamic>? interestedUsers,
           int? totalInterestedUsers,
@@ -217,6 +223,8 @@ class PropertyModel {
           isFavourite: isFavourite ?? this.isFavourite,
           viewContact: viewContact ?? this.viewContact,
           isInterested: isInterested ?? this.isInterested,
+          isPremium: isPremium ?? this.isPremium,
+          isDeal: isDeal ?? this.isDeal,
           favouriteUsers: favouriteUsers ?? this.favouriteUsers,
           interestedUsers: interestedUsers ?? this.interestedUsers,
           totalInterestedUsers:
@@ -294,6 +302,8 @@ class PropertyModel {
         isFavourite: Adapter.forceInt(rawjson["is_favourite"]),
         viewContact: Adapter.forceInt(rawjson["view_contact"]),
         isInterested: Adapter.forceInt(rawjson["is_interested"]),
+        isPremium: Adapter.forceInt(rawjson["is_premium"]),
+        isDeal: Adapter.forceInt(rawjson["is_deal"]),
         favouriteUsers: rawjson["favourite_users"] == null
             ? null
             : List<dynamic>.from(rawjson["favourite_users"].map((x) => x)),
@@ -371,6 +381,8 @@ class PropertyModel {
         "is_favourite": isFavourite,
         "view_contact": viewContact,
         "is_interested": isInterested,
+        "is_premium": isPremium,
+        "is_deal": isDeal,
         "favourite_users": favouriteUsers == null
             ? null
             : List<dynamic>.from(favouriteUsers?.map((x) => x) ?? []),

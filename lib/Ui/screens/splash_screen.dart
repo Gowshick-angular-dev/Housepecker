@@ -196,23 +196,23 @@ class SplashScreenState extends State<SplashScreen>
         );
       });
     } else if (authenticationState == AuthenticationState.authenticated) {
-      Future.delayed(Duration.zero, () {
+      Future.delayed(Duration(seconds: 2), () {
         Navigator.of(context)
             .pushReplacementNamed(Routes.main, arguments: {'from': "main"});
       });
     } else if (authenticationState == AuthenticationState.unAuthenticated) {
       if (Hive.box(HiveKeys.userDetailsBox).get("isGuest") == true) {
-        Future.delayed(Duration.zero, () {
+        Future.delayed(Duration(seconds: 2), () {
           Navigator.of(context)
               .pushReplacementNamed(Routes.main, arguments: {"from": "splash"});
         });
       } else {
-        Future.delayed(Duration.zero, () {
+        Future.delayed(Duration(seconds: 2), () {
           Navigator.of(context).pushReplacementNamed(Routes.login);
         });
       }
     } else if (authenticationState == AuthenticationState.firstTime) {
-      Future.delayed(Duration.zero, () {
+      Future.delayed(Duration(seconds: 2), () {
         Navigator.of(context).pushReplacementNamed(Routes.onboarding);
       });
     }
@@ -281,10 +281,25 @@ class SplashScreenState extends State<SplashScreen>
             //     )
             //   ],
             // ),
-            body: Image.asset("assets/Splash/housepicker splash.png",
-              width:double.infinity,
-              height: MediaQuery.of(context).size.height,
-              fit: BoxFit.cover,
+            body: Stack(
+              children: [
+                Image.asset("assets/Splash/Splash.png",
+                  width:double.infinity,
+                  height: MediaQuery.of(context).size.height,
+                  fit: BoxFit.cover,
+                ),
+                Positioned(
+                  top: 50,
+                  right: 50,
+                  bottom: 50,
+                  left: 50,
+                  child: Image.asset("assets/Splash/Logo.png",
+                    width: 160,
+                    height: 30,
+                    fit: BoxFit.contain,
+                  ),
+                ),
+              ],
             ),
           ),
         ),

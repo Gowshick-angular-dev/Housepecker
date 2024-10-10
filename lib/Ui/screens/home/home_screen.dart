@@ -305,10 +305,12 @@ class HomeScreenState extends State<HomeScreen>
 
   List projectList = [];
   List premiumPropertiesList = [];
+  List recentPropertiesList = [];
   List propertyDealList = [];
   List banners = [];
   List<bool> likeLoading = [];
   List<bool> premiumPropertyLikeLoading = [];
+  List<bool> recentPropertyLikeLoading = [];
   List<bool> propertyDealLikeLoading = [];
   bool projectLoading = false;
   bool propertyLoading = false;
@@ -351,6 +353,19 @@ class HomeScreenState extends State<HomeScreen>
       setState(() {
         premiumPropertiesList = response['data'].where((e) => e['is_type'] == 'property').toList();
         premiumPropertyLikeLoading = List.filled(response['data'].length, false);
+      });
+    }
+    var recentResponse = await Api.get(url: Api.apiGetProprty, queryParameters: {
+      'offset': 0,
+      'limit': 10,
+      'recently_added': 1,
+      'city': currentMainCity,
+      'current_user': HiveUtils.getUserId()
+    });
+    if(!response['error']) {
+      setState(() {
+        recentPropertiesList = recentResponse['data'].where((e) => e['is_type'] == 'property').toList();
+        recentPropertyLikeLoading = List.filled(recentResponse['data'].length, false);
       });
     }
     var dealResponse = await Api.get(url: Api.apiGetProprty, queryParameters: {
@@ -591,20 +606,18 @@ class HomeScreenState extends State<HomeScreen>
                                       padding: const EdgeInsets.only(top: 10, bottom: 7),
                                       child: Row(
                                         children: [
-                                          // Image.asset(
-                                          //   'assets/Home/__Menu.png',
-                                          //   width: 20,
-                                          //   height: 20,
-                                          //   fit: BoxFit.cover,
-                                          // ),
-                                          // SizedBox(width: 10,),
-                                          if(systemSetting != null)
-                                            Image.network(
-                                              '${systemSetting!['web_placeholder_logo']}',
-                                              width: 140,
-                                              height: 20,
-                                              fit: BoxFit.cover,
-                                            ),
+                                          Image.asset("assets/Splash/Logo.png",
+                                            width: 140,
+                                            height: 20,
+                                            fit: BoxFit.contain,
+                                          )
+                                          // if(systemSetting != null)
+                                          //   Image.network(
+                                          //     '${systemSetting!['web_placeholder_logo']}',
+                                          //     width: 140,
+                                          //     height: 20,
+                                          //     fit: BoxFit.cover,
+                                          //   ),
                                         ],
                                       ),
                                     ),
@@ -641,7 +654,7 @@ class HomeScreenState extends State<HomeScreen>
                                           ),
                                           SizedBox(width: 5,),
                                           Container(
-                                            width: 100,
+                                            width: 80,
                                             child: Text('${currentMainCity}',
                                               overflow: TextOverflow.ellipsis,
                                               style: TextStyle(
@@ -755,23 +768,33 @@ class HomeScreenState extends State<HomeScreen>
                                     ),
                                   ),
                                 ),
-                                Stack(
-                                  children: [
-                                    Icon(Icons.notifications_on_outlined,
-                                      color: context.color.secondaryColor,),
-                                    Positioned(
-                                      top: 0,
-                                      right: 0,
-                                      child: Container(
-                                        decoration: BoxDecoration(
-                                          borderRadius: BorderRadius.circular(10),
-                                          color: Colors.red,
+                                InkWell(
+                                  onTap: () {
+                                    GuestChecker.check(onNotGuest: () {
+                                      Navigator.pushNamed(
+                                          context, Routes.notificationPage);
+                                    });
+                                  },
+                                  child: Container(
+                                    child: Stack(
+                                      children: [
+                                        Icon(Icons.notifications_on_outlined,
+                                          color: context.color.secondaryColor,),
+                                        Positioned(
+                                          top: 0,
+                                          right: 0,
+                                          child: Container(
+                                            decoration: BoxDecoration(
+                                              borderRadius: BorderRadius.circular(10),
+                                              color: Colors.red,
+                                            ),
+                                            height: 8,
+                                            width: 8,
+                                          ),
                                         ),
-                                        height: 10,
-                                        width: 10,
-                                      ),
+                                      ],
                                     ),
-                                  ],
+                                  ),
                                 )
                               ],
                             ),
@@ -902,9 +925,9 @@ class HomeScreenState extends State<HomeScreen>
                                 return bannerWidget();
                               }
 
-                              else if (section == HomeScreenSections.RecentlyAdded) {
-                                return  const RecentPropertiesSectionWidget();
-                              }
+                              // else if (section == HomeScreenSections.RecentlyAdded) {
+                              //   return  const RecentPropertiesSectionWidget();
+                              // }
 
                               else if (section == HomeScreenSections.Premiumpropertiesforsale) {
                                 return PremiumpropertiesforsaleWidget();
@@ -2281,7 +2304,7 @@ class HomeScreenState extends State<HomeScreen>
             ],
           ),
         ),
-        SizedBox(height: 20,),
+        // SizedBox(height: 20,),
         if(propertyLoading)
           Padding(
             padding: const EdgeInsets.symmetric(horizontal: 15),
@@ -2309,216 +2332,6 @@ class HomeScreenState extends State<HomeScreen>
               }
             ),
           ),
-          // SingleChildScrollView(
-          //     scrollDirection: Axis.horizontal,
-          //     child: Row(
-          //       mainAxisAlignment: MainAxisAlignment.start,
-          //       children: [
-          //         // for(int i = 0; i < premiumPropertiesList.length; i++)
-          //           // Padding(
-          //           //   padding: EdgeInsets.only(left: 10, right: premiumPropertiesList.length == (i + 1) ? 10 : 0),
-          //           //   child: InkWell(
-          //           //     onTap: () {
-          //           //       // Navigator.pushNamed(context, Routes.propertyDetails, arguments: {
-          //           //       //   'propertyData': PropertyModel.fromMap(premiumPropertiesList[i]),
-          //           //       //   'propertiesList': premiumPropertiesList.map((e) => PropertyModel.fromMap(e)).toList(),
-          //           //       //   'fromMyProperty': false,
-          //           //       // });
-          //           //       FocusScope.of(context).unfocus();
-          //           //       HelperUtils.goToNextPage(
-          //           //           Routes.propertyDetails, context, false, args: {
-          //           //         'propertyData': PropertyModel.fromMap(premiumPropertiesList[i]),
-          //           //         'propertiesList': []
-          //           //       });
-          //           //     },
-          //           //     child: Container(
-          //           //       width: 230,
-          //           //       // margin: EdgeInsets.only(right: 10, left: 10),
-          //           //       decoration: BoxDecoration(
-          //           //           color: Colors.white,
-          //           //           borderRadius: BorderRadius.circular(15),
-          //           //           border: Border.all(
-          //           //               width: 1,
-          //           //               color: Color(0xffe0e0e0)
-          //           //           )
-          //           //       ),
-          //           //       child: Column(
-          //           //         children: [
-          //           //           Stack(
-          //           //             children: [
-          //           //               ClipRRect(
-          //           //                   borderRadius: BorderRadius.only(
-          //           //                     topRight: Radius.circular(15),
-          //           //                     topLeft:Radius.circular(15),
-          //           //                   ),
-          //           //                   child: Image.network(premiumPropertiesList[i]['title_image'] ?? '',width: double.infinity,fit: BoxFit.cover,height: 150,)),
-          //           //               Positioned(
-          //           //                   top: 10,
-          //           //                   left: 10,
-          //           //                   child: Container(
-          //           //                     width: 30,
-          //           //                     height: 30,
-          //           //                     decoration: BoxDecoration(
-          //           //                       color: Colors.black.withOpacity(0.5),
-          //           //                       borderRadius: BorderRadius.circular(10),
-          //           //                     ),
-          //           //                     child: Center(child: Image.asset("assets/Home/__Premium.png",width: 18,height: 18,)),
-          //           //                   )),
-          //           //               Positioned(
-          //           //                 right: 8,
-          //           //                 top: 8,
-          //           //                 child: Container(
-          //           //                   width: 32,
-          //           //                   height: 32,
-          //           //                   decoration: BoxDecoration(
-          //           //                     color: context.color.secondaryColor,
-          //           //                     shape: BoxShape.circle,
-          //           //                     boxShadow: const [
-          //           //                       BoxShadow(
-          //           //                         color:
-          //           //                         Color.fromARGB(12, 0, 0, 0),
-          //           //                         offset: Offset(0, 2),
-          //           //                         blurRadius: 15,
-          //           //                         spreadRadius: 0,
-          //           //                       )
-          //           //                     ],
-          //           //                   ),
-          //           //                   child: LikeButtonWidget(
-          //           //                     property: PropertyModel.fromMap(premiumPropertiesList[i]),
-          //           //                     // onStateChange: (AddToFavoriteCubitState state) {
-          //           //                     //   if (state is AddToFavoriteCubitInProgress) {
-          //           //                     //     favoriteInProgress = true;
-          //           //                     //     setState(
-          //           //                     //           () {},
-          //           //                     //     );
-          //           //                     //   } else {
-          //           //                     //     favoriteInProgress = false;
-          //           //                     //     setState(
-          //           //                     //           () {},
-          //           //                     //     );
-          //           //                     //   }
-          //           //                     // },
-          //           //                   ),
-          //           //                 ),
-          //           //               ),
-          //           //             ],
-          //           //           ),
-          //           //           Padding(
-          //           //             padding: const EdgeInsets.only(left:10,right: 10),
-          //           //             child: Column(
-          //           //               crossAxisAlignment: CrossAxisAlignment.start,
-          //           //               children: [
-          //           //                 SizedBox(height: 8,),
-          //           //                 Text(premiumPropertiesList[i]['title'] ?? '',
-          //           //                   maxLines: 1,
-          //           //                   overflow: TextOverflow.ellipsis,
-          //           //                   style: TextStyle(
-          //           //                       color: Color(0xff333333),
-          //           //                       fontSize: 12.5,
-          //           //                       fontWeight: FontWeight.w500
-          //           //                   ),
-          //           //                 ),
-          //           //                 SizedBox(height: 6,),
-          //           //                 Row(
-          //           //                   children: [
-          //           //                     Text("Rs. ${formatAmount(premiumPropertiesList[i]['price']) ?? ''}",
-          //           //                       maxLines: 1,
-          //           //                       overflow: TextOverflow.ellipsis,
-          //           //                       style: TextStyle(
-          //           //                           color: Color(0xff333333),
-          //           //                           fontSize: 11,
-          //           //                           fontWeight: FontWeight.w500
-          //           //                       ),
-          //           //                     ),
-          //           //                     SizedBox(width: 15,),
-          //           //                     Container(width: 2,height: 12,color: Color(0xff7d7d7d),),
-          //           //                     SizedBox(width: 15,),
-          //           //                     Text("${premiumPropertiesList[i]['sqft'] ?? ''} sqft",
-          //           //                       maxLines: 1,
-          //           //                       overflow: TextOverflow.ellipsis,
-          //           //                       style: TextStyle(
-          //           //                           color: Color(0xff767676),
-          //           //                           fontSize: 11,
-          //           //                           fontWeight: FontWeight.w400
-          //           //                       ),
-          //           //                     ),
-          //           //                   ],
-          //           //                 ),
-          //           //                 SizedBox(height: 6,),
-          //           //                 Row(
-          //           //                   children: [
-          //           //                     Image.asset("assets/Home/__location.png",width:15,fit: BoxFit.cover,height: 15,),
-          //           //                     SizedBox(width: 5,),
-          //           //                     Expanded(
-          //           //                       child: Text(premiumPropertiesList[i]['address'] ?? '',
-          //           //                         maxLines: 1,
-          //           //                         overflow: TextOverflow.ellipsis,
-          //           //                         style: TextStyle(
-          //           //                             color: Color(0xffa2a2a2),
-          //           //                             fontSize: 10.5,
-          //           //                             fontWeight: FontWeight.w400
-          //           //                         ),
-          //           //                       ),
-          //           //                     ),
-          //           //                   ],
-          //           //                 ),
-          //           //                 SizedBox(height: 6,),
-          //           //                 Row(
-          //           //                   mainAxisAlignment: MainAxisAlignment.end,
-          //           //                   children: [
-          //           //                     // Text(premiumPropertiesList[i]['post_created'] ?? '',
-          //           //                     //   maxLines: 1,
-          //           //                     //   overflow: TextOverflow.ellipsis,
-          //           //                     //   style: TextStyle(
-          //           //                     //       color: Color(0xffa2a2a2),
-          //           //                     //       fontSize: 8,
-          //           //                     //       fontWeight: FontWeight.w400
-          //           //                     //   ),
-          //           //                     // ),
-          //           //                     Text('Posted By ${premiumPropertiesList[i]['role'] == 1 ? 'Owner' : premiumPropertiesList[i]['role'] == 2 ? 'Agent' : premiumPropertiesList[i]['role'] == 3 ? 'Builder' : 'Housepecker'}',
-          //           //                       maxLines: 1,
-          //           //                       overflow: TextOverflow.ellipsis,
-          //           //                       style: TextStyle(
-          //           //                           color: Color(0xffa2a2a2),
-          //           //                           fontSize: 8,
-          //           //                           fontWeight: FontWeight.w400
-          //           //                       ),
-          //           //                     ),
-          //           //                   ],
-          //           //                 ),
-          //           //                 SizedBox(height: 8,),
-          //           //               ],
-          //           //             ),
-          //           //           )
-          //           //         ],
-          //           //       ),
-          //           //     ),
-          //           //   ),
-          //           // ),
-          //           // Container(
-          //           //   height: 50,
-          //           //   width: 50,
-          //           //   child: Padding(
-          //           //     padding: const EdgeInsets.symmetric(
-          //           //       horizontal: 0,
-          //           //       vertical: 0,
-          //           //     ),
-          //           //     child: GestureDetector(
-          //           //       onTap: () {
-          //           //         FocusScope.of(context).unfocus();
-          //           //         HelperUtils.goToNextPage(
-          //           //             Routes.propertyDetails, context, false, args: {
-          //           //           'propertyData': PropertyModel.fromMap(premiumPropertiesList[i]),
-          //           //         });
-          //           //       },
-          //           //       // child: PropertyHorizontalCard(property: PropertyModel.fromMap(premiumPropertiesList[i])),
-          //           //       child: Container(),
-          //           //     ),
-          //           //   ),
-          //           // )
-          //       ],
-          //     )
-          // ),
         SizedBox(height: 20,),
 
         Stack(
@@ -2611,329 +2424,70 @@ class HomeScreenState extends State<HomeScreen>
                     width: double.infinity,fit: BoxFit.cover,))),
         // if(HiveUtils.getUserDetails().role != null && HiveUtils.getUserDetails().role == '3')
         RecentPropertiesSectionWidget(projectLoading: projectLoading, likeLoading: likeLoading, projectList: projectList),
+        SizedBox(height: 20,),
+        Padding(
+          padding: const EdgeInsets.only(left: 15,right: 15),
+          child: Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              Text("Recently Added",
+                style: TextStyle(
+                    color: Color(0xff333333),
+                    fontSize: 16,
+                    fontWeight: FontWeight.w500
+                ),
+              ),
+              InkWell(
+                onTap: () {
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(builder: (context) =>
+                        PropertiesListWidget(typeName: "Recently Added Properties"),
+                    ),
+                  );
+                },
+                child: Text("See All",
+                  style: TextStyle(
+                      color: Color(0xff117af9),
+                      fontSize: 13,
+                      fontWeight: FontWeight.w500
+                  ),
+                ),
+              ),
+            ],
+          ),
+        ),
+        // SizedBox(height: 20,),
+        if(propertyLoading)
+          Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 15),
+            child: buildPropertiesShimmer(context, 2),
+          ),
+        if(!propertyLoading)
+          Container(
+            height: 240,
+            child: ListView.builder(
+                itemCount: recentPropertiesList.length,
+                scrollDirection: Axis.horizontal,
+                // shrinkWrap: true,
+                itemBuilder: (context, index) {
+                  return GestureDetector(
+                    onTap: () {
+                      FocusScope.of(context).unfocus();
+                      HelperUtils.goToNextPage(
+                          Routes.propertyDetails, context, false, args: {
+                        'propertyData': PropertyModel.fromMap(
+                            recentPropertiesList[index]),
+                      });
+                    },
+                    child: PropertyVerticalCard(property: PropertyModel.fromMap(recentPropertiesList[index])),
+                  );
+                }
+            ),
+          ),
         TopAgents(city: currentMainCity),
         TopBuilders(city: currentMainCity),
 
-        // SizedBox(height: 20,),
-        // Padding(
-        //   padding: const EdgeInsets.only(left: 15,right: 15),
-        //   child: Row(
-        //     mainAxisAlignment: MainAxisAlignment.spaceBetween,
-        //     children: [
-        //       Text("Newly Launched Projects",
-        //         style: TextStyle(
-        //             color: Color(0xff333333),
-        //             fontSize: 16,
-        //             fontWeight: FontWeight.w500
-        //         ),
-        //       ),
-        //       Text("See All",
-        //         style: TextStyle(
-        //             color: Color(0xff117af9),
-        //             fontSize: 13,
-        //             fontWeight: FontWeight.w500
-        //         ),
-        //       ),
-        //     ],
-        //   ),
-        // ),
-        // SizedBox(height: 20,),
-        // Padding(
-        //   padding: const EdgeInsets.only(left: 15),
-        //   child: SingleChildScrollView(
-        //       scrollDirection : Axis.horizontal,
-        //       child:  Row(
-        //         mainAxisAlignment: MainAxisAlignment.start,
-        //         children: [
-        //           Container(
-        //             width: 230,
-        //             margin: EdgeInsets.only(right: 10),
-        //             decoration: BoxDecoration(
-        //                 color: Colors.white,
-        //                 borderRadius: BorderRadius.circular(15),
-        //                 border: Border.all(
-        //                     width: 1,
-        //                     color: Color(0xffe0e0e0)
-        //                 )
-        //             ),
-        //             child: Column(
-        //               children: [
-        //                 ClipRRect(
-        //                     borderRadius: BorderRadius.only(
-        //                       topRight: Radius.circular(15),
-        //                       topLeft:Radius.circular(15),
-        //                     ),
-        //                     child: Image.asset("assets/propertylist/1.png",width: double.infinity,fit: BoxFit.cover,height: 150,)),
-        //                 Padding(
-        //                   padding: const EdgeInsets.only(left:10,right: 10),
-        //                   child: Column(
-        //                     crossAxisAlignment: CrossAxisAlignment.start,
-        //                     children: [
-        //                       SizedBox(height: 8,),
-        //                       Text("3 BHK For Sale in Yashika Enclave",
-        //                         maxLines: 1,
-        //                         overflow: TextOverflow.ellipsis,
-        //                         style: TextStyle(
-        //                             color: Color(0xff333333),
-        //                             fontSize: 12.5,
-        //                             fontWeight: FontWeight.w500
-        //                         ),
-        //                       ),
-        //                       SizedBox(height: 6,),
-        //                       Row(
-        //                         children: [
-        //                           Image.asset("assets/Home/__location.png",width:15,fit: BoxFit.cover,height: 15,),
-        //                           SizedBox(width: 5,),
-        //                           Expanded(
-        //                             child: Text("Pattara Vakkam, Chennai",
-        //                               maxLines: 1,
-        //                               overflow: TextOverflow.ellipsis,
-        //                               style: TextStyle(
-        //                                   color: Color(0xffa2a2a2),
-        //                                   fontSize: 10.5,
-        //                                   fontWeight: FontWeight.w400
-        //                               ),
-        //                             ),
-        //                           ),
-        //                         ],
-        //                       ),
-        //                       SizedBox(height: 6,),
-        //                       Row(
-        //                         children: [
-        //                           Text("Rs. 58.5 L-63.75 L",
-        //                             maxLines: 1,
-        //                             overflow: TextOverflow.ellipsis,
-        //                             style: TextStyle(
-        //                                 color: Color(0xff333333),
-        //                                 fontSize: 11,
-        //                                 fontWeight: FontWeight.w500
-        //                             ),
-        //                           ),
-        //                           SizedBox(width: 15,),
-        //                           Container(width: 1,height: 10,color: Color(0xff7d7d7d),),
-        //                           SizedBox(width: 5,),
-        //                           Text("952 sqft",
-        //                             maxLines: 1,
-        //                             overflow: TextOverflow.ellipsis,
-        //                             style: TextStyle(
-        //                                 color: Color(0xff767676),
-        //                                 fontSize: 11,
-        //                                 fontWeight: FontWeight.w400
-        //                             ),
-        //                           ),
-        //                         ],
-        //                       ),
-        //                       SizedBox(height: 6,),
-        //                       Text("Ready To Move",
-        //                         maxLines: 1,
-        //                         overflow: TextOverflow.ellipsis,
-        //                         style: TextStyle(
-        //                             color: Color(0xffa2a2a2),
-        //                             fontSize: 11,
-        //                             fontWeight: FontWeight.w400
-        //                         ),
-        //                       ),
-        //                       SizedBox(height: 8,),
-        //                     ],
-        //                   ),
-        //                 )
-        //               ],
-        //             ),
-        //           ),
-        //           Container(
-        //             width: 230,
-        //             margin: EdgeInsets.only(right: 10),
-        //             decoration: BoxDecoration(
-        //                 color: Colors.white,
-        //                 borderRadius: BorderRadius.circular(15),
-        //                 border: Border.all(
-        //                     width: 1,
-        //                     color: Color(0xffe0e0e0)
-        //                 )
-        //             ),
-        //             child: Column(
-        //               children: [
-        //                 ClipRRect(
-        //                     borderRadius: BorderRadius.only(
-        //                       topRight: Radius.circular(15),
-        //                       topLeft:Radius.circular(15),
-        //                     ),
-        //                     child: Image.asset("assets/propertylist/2.png",width: double.infinity,fit: BoxFit.cover,height: 150,)),
-        //                 Padding(
-        //                   padding: const EdgeInsets.only(left:10,right: 10),
-        //                   child: Column(
-        //                     crossAxisAlignment: CrossAxisAlignment.start,
-        //                     children: [
-        //                       SizedBox(height: 8,),
-        //                       Text("3 BHK For Sale in Yashika Enclave",
-        //                         maxLines: 1,
-        //                         overflow: TextOverflow.ellipsis,
-        //                         style: TextStyle(
-        //                             color: Color(0xff333333),
-        //                             fontSize: 12.5,
-        //                             fontWeight: FontWeight.w500
-        //                         ),
-        //                       ),
-        //                       SizedBox(height: 6,),
-        //                       Row(
-        //                         children: [
-        //                           Image.asset("assets/Home/__location.png",width:15,fit: BoxFit.cover,height: 15,),
-        //                           SizedBox(width: 5,),
-        //                           Expanded(
-        //                             child: Text("Pattara Vakkam, Chennai",
-        //                               maxLines: 1,
-        //                               overflow: TextOverflow.ellipsis,
-        //                               style: TextStyle(
-        //                                   color: Color(0xffa2a2a2),
-        //                                   fontSize: 10.5,
-        //                                   fontWeight: FontWeight.w400
-        //                               ),
-        //                             ),
-        //                           ),
-        //                         ],
-        //                       ),
-        //                       SizedBox(height: 6,),
-        //                       Row(
-        //                         children: [
-        //                           Text("Rs. 58.5 L-63.75 L",
-        //                             maxLines: 1,
-        //                             overflow: TextOverflow.ellipsis,
-        //                             style: TextStyle(
-        //                                 color: Color(0xff333333),
-        //                                 fontSize: 11,
-        //                                 fontWeight: FontWeight.w500
-        //                             ),
-        //                           ),
-        //                           SizedBox(width: 15,),
-        //                           Container(width: 1,height: 10,color: Color(0xff7d7d7d),),
-        //                           SizedBox(width: 5,),
-        //                           Text("952 sqft",
-        //                             maxLines: 1,
-        //                             overflow: TextOverflow.ellipsis,
-        //                             style: TextStyle(
-        //                                 color: Color(0xff767676),
-        //                                 fontSize: 11,
-        //                                 fontWeight: FontWeight.w400
-        //                             ),
-        //                           ),
-        //                         ],
-        //                       ),
-        //                       SizedBox(height: 6,),
-        //                       Text("Ready To Move",
-        //                         maxLines: 1,
-        //                         overflow: TextOverflow.ellipsis,
-        //                         style: TextStyle(
-        //                             color: Color(0xffa2a2a2),
-        //                             fontSize: 11,
-        //                             fontWeight: FontWeight.w400
-        //                         ),
-        //                       ),
-        //                       SizedBox(height: 8,),
-        //                     ],
-        //                   ),
-        //                 )
-        //               ],
-        //             ),
-        //           ),
-        //           Container(
-        //             width: 230,
-        //             margin: EdgeInsets.only(right: 10),
-        //             decoration: BoxDecoration(
-        //                 color: Colors.white,
-        //                 borderRadius: BorderRadius.circular(15),
-        //                 border: Border.all(
-        //                     width: 1,
-        //                     color: Color(0xffe0e0e0)
-        //                 )
-        //             ),
-        //             child: Column(
-        //               children: [
-        //                 ClipRRect(
-        //                     borderRadius: BorderRadius.only(
-        //                       topRight: Radius.circular(15),
-        //                       topLeft:Radius.circular(15),
-        //                     ),
-        //                     child: Image.asset("assets/propertylist/3.png",width: double.infinity,fit: BoxFit.cover,height: 150,)),
-        //                 Padding(
-        //                   padding: const EdgeInsets.only(left:10,right: 10),
-        //                   child: Column(
-        //                     crossAxisAlignment: CrossAxisAlignment.start,
-        //                     children: [
-        //                       SizedBox(height: 8,),
-        //                       Text("3 BHK For Sale in Yashika Enclave",
-        //                         maxLines: 1,
-        //                         overflow: TextOverflow.ellipsis,
-        //                         style: TextStyle(
-        //                             color: Color(0xff333333),
-        //                             fontSize: 12.5,
-        //                             fontWeight: FontWeight.w500
-        //                         ),
-        //                       ),
-        //                       SizedBox(height: 6,),
-        //                       Row(
-        //                         children: [
-        //                           Image.asset("assets/Home/__location.png",width:15,fit: BoxFit.cover,height: 15,),
-        //                           SizedBox(width: 5,),
-        //                           Expanded(
-        //                             child: Text("Pattara Vakkam, Chennai",
-        //                               maxLines: 1,
-        //                               overflow: TextOverflow.ellipsis,
-        //                               style: TextStyle(
-        //                                   color: Color(0xffa2a2a2),
-        //                                   fontSize: 10.5,
-        //                                   fontWeight: FontWeight.w400
-        //                               ),
-        //                             ),
-        //                           ),
-        //                         ],
-        //                       ),
-        //                       SizedBox(height: 6,),
-        //                       Row(
-        //                         children: [
-        //                           Text("Rs. 58.5 L-63.75 L",
-        //                             maxLines: 1,
-        //                             overflow: TextOverflow.ellipsis,
-        //                             style: TextStyle(
-        //                                 color: Color(0xff333333),
-        //                                 fontSize: 11,
-        //                                 fontWeight: FontWeight.w500
-        //                             ),
-        //                           ),
-        //                           SizedBox(width: 15,),
-        //                           Container(width: 1,height: 10,color: Color(0xff7d7d7d),),
-        //                           SizedBox(width: 5,),
-        //                           Text("952 sqft",
-        //                             maxLines: 1,
-        //                             overflow: TextOverflow.ellipsis,
-        //                             style: TextStyle(
-        //                                 color: Color(0xff767676),
-        //                                 fontSize: 11,
-        //                                 fontWeight: FontWeight.w400
-        //                             ),
-        //                           ),
-        //                         ],
-        //                       ),
-        //                       SizedBox(height: 6,),
-        //                       Text("Ready To Move",
-        //                         maxLines: 1,
-        //                         overflow: TextOverflow.ellipsis,
-        //                         style: TextStyle(
-        //                             color: Color(0xffa2a2a2),
-        //                             fontSize: 11,
-        //                             fontWeight: FontWeight.w400
-        //                         ),
-        //                       ),
-        //                       SizedBox(height: 8,),
-        //                     ],
-        //                   ),
-        //                 )
-        //               ],
-        //             ),
-        //           ),
-        //         ],
-        //       )
-        //   ),
-        // ),
         Padding(
           padding: const EdgeInsets.only(right: 10, left: 10),
           child: TitleHeader(
@@ -3681,14 +3235,6 @@ class TopAgents extends StatefulWidget {
 }
 
 class _TopAgentsState extends State<TopAgents> {
-  // Dummy data for agents
-  final List<String> agents = [
-    "Agent Tobi Jr",
-    "Agent Jane Doe",
-    "Agent John Smith",
-    "Agent Max Lee",
-    "Agent Emma White",
-  ];
   bool AgentLOading = false;
   List Top_agenylist = [];
   Future<void> gettop_Agents () async {
@@ -3763,8 +3309,9 @@ class _TopAgentsState extends State<TopAgents> {
       height: size.height * 0.28,
       width: size.width * 0.75,
       decoration: BoxDecoration(
-        border: Border.all(color: Color(0xFF9ea1a7)),
+        border: Border.all(color: Color(0xFF9ea1a7).withOpacity(0.5)),
         borderRadius: BorderRadius.circular(12),
+        color: Color(0xffffffff),
       ),
       child: Padding(
         padding: const EdgeInsets.all(8.0),
@@ -3776,8 +3323,9 @@ class _TopAgentsState extends State<TopAgents> {
                   height: size.height * 0.07,
                   width: size.width * 0.15,
                   decoration: BoxDecoration(
-                    border: Border.all(color: Color(0xFF9ea1a7)),
+                    border: Border.all(color: Color(0xFF9ea1a7).withOpacity(0.5)),
                     borderRadius: BorderRadius.circular(15),
+                    // color: Color(0xffffffff),
                   ),
                   child: ClipRRect(
                     borderRadius: BorderRadius.circular(15),
