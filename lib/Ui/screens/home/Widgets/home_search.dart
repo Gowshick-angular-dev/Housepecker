@@ -112,7 +112,7 @@ class HomeSearchField extends StatelessWidget {
                             border: InputBorder.none, //OutlineInputBorder()
                             fillColor: Theme.of(context).colorScheme.secondaryColor,
                             hintText: UiUtils.getTranslatedLabel(
-                                context, "Search Here.."),
+                                context, "Search Here..."),
                             hintStyle: TextStyle(
                               color: Color(0xff9c9c9c),
                               fontSize: 13,

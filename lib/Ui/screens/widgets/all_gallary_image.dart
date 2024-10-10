@@ -17,6 +17,7 @@ class AllGallaryImages extends StatelessWidget {
  backgroundColor: Colors.white,
       appBar: UiUtils.buildAppBar(
         context,
+        title: "Images",
         showBackButton: true,
       ),
       body: GridView.builder(
