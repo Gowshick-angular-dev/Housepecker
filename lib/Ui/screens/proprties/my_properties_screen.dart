@@ -73,6 +73,7 @@ class MyPropertyState extends State<PropertiesScreen>
       child: Scaffold(
         backgroundColor: Colors.white,
         appBar: UiUtils.buildAppBar(
+          showBackButton: true,
           context,
           title: "myProperty".translate(context),
           // bottomHeight: 49,

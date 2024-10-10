@@ -103,7 +103,7 @@ dependency_overrides:
   wakelock: ^0.6.2
   package_info_plus: ^4.0.2
   wakelock_windows: any
-  win32:
+  win32: ^4.0.0
   flutter_launcher_icons: ^0.13.1
 
   # file_version_info: any
@@ -163,6 +163,7 @@ flutter:
    - assets/Sale_RentPropertydetailscreen/
    - assets/Service/
    - assets/Splash/
+   - assets/assets/Images/
 
   fonts:
     - family: Manrope

@@ -17,6 +17,7 @@ import '../../../../data/model/property_model.dart';
 import '../../../../utils/constant.dart';
 import '../../../../utils/helper_utils.dart';
 import '../../../../utils/ui_utils.dart';
+import '../../proprties/interested_users_details.dart';
 import '../../proprties/property_details.dart';
 
 class PropertyHorizontalCard1 extends StatelessWidget {
@@ -43,6 +44,18 @@ class PropertyHorizontalCard1 extends StatelessWidget {
         this.showLikeButton,
         this.additionalImageWidth});
 
+
+  String formatAmount(int number) {
+    String result = '';
+    if(number >= 10000000) {
+      result = '${(number/10000000).toStringAsFixed(2)} Cr';
+    } else if(number >= 100000) {
+      result = '${(number/100000).toStringAsFixed(2)} Laks';
+    } else {
+      result = '$number';
+    }
+    return result;
+  }
   @override
   Widget build(BuildContext context) {
     String rentPrice = (property.price!
@@ -57,6 +70,7 @@ class PropertyHorizontalCard1 extends StatelessWidget {
       rentPrice =
           ("$rentPrice / ") + (rentDurationMap[property.rentduration] ?? "");
     }
+
 
     return BlocProvider(
       create: (context) => AddToFavoriteCubitCubit(),
@@ -93,70 +107,70 @@ class PropertyHorizontalCard1 extends StatelessWidget {
                               width:100,fit: BoxFit.cover,height: 100,
                             ),
                             // Text(property.promoted.toString()),
-                            if (showLikeButton ?? true)
-                              Positioned(
-                                right: 8,
-                                top: 8,
-                                child: Container(
-                                  width: 32,
-                                  height: 32,
-                                  decoration: BoxDecoration(
-                                    color: context.color.secondaryColor,
-                                    shape: BoxShape.circle,
-                                    boxShadow: const [
-                                      BoxShadow(
-                                        color:
-                                        Color.fromARGB(12, 0, 0, 0),
-                                        offset: Offset(0, 2),
-                                        blurRadius: 15,
-                                        spreadRadius: 0,
-                                      )
-                                    ],
-                                  ),
-                                  child: LikeButtonWidget(
-                                    property: property,
-                                    onLikeChanged: onLikeChange,
-                                  ),
-                                ),
-                              ),
+                            // if (showLikeButton ?? true)
+                            //   Positioned(
+                            //     right: 8,
+                            //     top: 8,
+                            //     child: Container(
+                            //       width: 32,
+                            //       height: 32,
+                            //       decoration: BoxDecoration(
+                            //         color: context.color.secondaryColor,
+                            //         shape: BoxShape.circle,
+                            //         boxShadow: const [
+                            //           BoxShadow(
+                            //             color:
+                            //             Color.fromARGB(12, 0, 0, 0),
+                            //             offset: Offset(0, 2),
+                            //             blurRadius: 15,
+                            //             spreadRadius: 0,
+                            //           )
+                            //         ],
+                            //       ),
+                            //       child: LikeButtonWidget(
+                            //         property: property,
+                            //         onLikeChanged: onLikeChange,
+                            //       ),
+                            //     ),
+                            //   ),
                             if (property.promoted ?? false)
                               const PositionedDirectional(
                                   start: 5,
                                   top: 5,
                                   child: PromotedCard(
                                       type: PromoteCardType.icon)),
-                            PositionedDirectional(
-                              bottom: 6,
-                              start: 6,
-                              child: Container(
-                                height: 19,
-                                clipBehavior: Clip.antiAlias,
-                                decoration: BoxDecoration(
-                                    color: context.color.secondaryColor
-                                        .withOpacity(0.7),
-                                    borderRadius:
-                                    BorderRadius.circular(4)),
-                                child: BackdropFilter(
-                                  filter: ImageFilter.blur(
-                                      sigmaX: 2, sigmaY: 3),
-                                  child: Padding(
-                                    padding: const EdgeInsets.symmetric(
-                                        horizontal: 8.0),
-                                    child: Center(
-                                      child: Text(
-                                        property.properyType!
-                                            .translate(context),
-                                      )
-                                          .color(
-                                        context.color.textColorDark,
-                                      )
-                                          .bold()
-                                          .size(context.font.smaller),
-                                    ),
-                                  ),
-                                ),
-                              ),
-                            ),
+                            // PositionedDirectional(
+                            //   bottom: 6,
+                            //   start: 6,
+                            //   child: Container(
+                            //     height: 19,
+                            //     clipBehavior: Clip.antiAlias,
+                            //     decoration: BoxDecoration(
+                            //         color: context.color.secondaryColor
+                            //             .withOpacity(0.7),
+                            //         borderRadius:
+                            //         BorderRadius.circular(4)),
+                            //     child: BackdropFilter(
+                            //       filter: ImageFilter.blur(
+                            //           sigmaX: 2, sigmaY: 3),
+                            //       child: Padding(
+                            //         padding: const EdgeInsets.symmetric(
+                            //             horizontal: 8.0),
+                            //         child: Center(
+                            //           child: Text(
+                            //             property.properyType!
+                            //                 .translate(context),
+                            //           )
+                            //               .color(
+                            //             context.color.textColorDark,
+                            //           )
+                            //               .bold()
+                            //               .size(context.font.smaller),
+                            //         ),
+                            //       ),
+                            //     ),
+                            //   ),
+                            // ),
                           ],
                         ),
                       ),
@@ -241,7 +255,7 @@ class PropertyHorizontalCard1 extends StatelessWidget {
                           //     .color(
                           //       context.color.textLightColor,
                           //     ),
-                    
+
                           if (property.properyType
                               .toString()
                               .toLowerCase() ==
@@ -258,14 +272,7 @@ class PropertyHorizontalCard1 extends StatelessWidget {
                             ),
                           ] else ...[
                             Text(
-                              property.price!
-                              // .priceFormate(
-                              //     disabled:
-                              //         Constant.isNumberWithSuffix ==
-                              //             false)
-                                  .toString()
-                                  .formatAmount(
-                                prefix: true,
+                              formatAmount(int.parse(property.price!),
                               ),
                               maxLines: 1,
                               overflow: TextOverflow.ellipsis,
@@ -276,7 +283,7 @@ class PropertyHorizontalCard1 extends StatelessWidget {
                               ),
                             )
                           ],
-                    
+
                           SizedBox(height: 4,),
                           Text("Ready To Move",
                             maxLines: 1,
@@ -337,6 +344,52 @@ class PropertyHorizontalCard1 extends StatelessWidget {
                     ),
                   ),
                 ),
+
+              Positioned(
+                  top: 0,
+                  right: 0,
+                  child: GestureDetector(
+                    onTap: (){
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                          builder: (context) => InterestedUsersDetails(propertyId:property.id ,),
+                        ),
+                      );
+                    },
+                    child: Container(
+                      height: 28,
+                      padding: EdgeInsets.symmetric(horizontal: 10),
+                      decoration: BoxDecoration(
+                          borderRadius: BorderRadius.circular(6),
+                          border: Border.all(color: Color(0xff117af9))
+                      ),child: Row(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        Image.asset("assets/assets/Images/eye-icon.png",height: 15,),
+                        SizedBox(width: 5,),
+                        Text(property.totalInterestedUsers?.toString()??"0",style: TextStyle(fontSize: 12,color:  Color(0xff117af9)),)
+                      ],
+                    ),
+                    ),
+                  )),
+              Positioned(
+                  bottom: 0,
+                  right: 0,
+                  child: Container(
+                    height: 28,
+                    padding: EdgeInsets.symmetric(horizontal: 10),
+                    decoration: BoxDecoration(
+                        borderRadius: BorderRadius.circular(6),
+                        color: property.status==0?Color(0xfffff1f1):Color(0xffd9efcf),
+                        border: Border.all(color:  property.status==0?Colors.red:Colors.green)
+                    ),child: Row(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      Text( property.status == 0 ? "InActive" : "Active",style: TextStyle(fontSize: 12,color:property.status == 0 ?Colors.red: Colors.green),)
+                    ],
+                  ),
+                  ))
             ],
           ),
         ),

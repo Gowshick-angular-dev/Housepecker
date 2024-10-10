@@ -223,6 +223,11 @@ class Api {
   static String generateOTP = "generate_otp";
   static String gettop_agent = "top_agents";
   static String gettop_builder = "top_builders";
+  static String getInterstedList = "get_interested_users";
+  static String postInterstedStatus = "interested_property_status";
+  static String getInterestedUserProjects = "interested_user_projects";
+  static String postProjectInterstedStatus = "interested_project_status";
+
 
   //not in use yet
   // static String offset = "offset";
