@@ -7,17 +7,20 @@ class Category {
   String? id;
   String? category;
   String? image;
+  int? propertyCount;
   //String? typeids;
   //List<Type>? type;
   Map? parameterTypes;
   //List<Map> fields = [];
-  Category({this.id, this.category, this.image, this.parameterTypes});
+  Category({this.id, this.category, this.image, this.parameterTypes,this.propertyCount});
 
   Category.fromJson(Map<String, dynamic> json) {
     id = json[Api.id].toString();
     category = json[Api.category];
     image = json[Api.image] ?? "";
     parameterTypes = json[Api.parameterTypes] ?? {};
+    propertyCount = json['properties_count'];
+
   }
 
   Category.fromProperty(Map<String, dynamic> json) {

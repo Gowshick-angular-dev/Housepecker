@@ -94,7 +94,7 @@ class FetchCategoryCubit extends Cubit<FetchCategoryState> with HydratedMixin {
   final CategoryRepository _categoryRepository = CategoryRepository();
 
   Future<void> fetchCategories(
-      {bool? forceRefresh, bool? loadWithoutDelay}) async {
+      {bool? forceRefresh, bool? loadWithoutDelay,String? locationName}) async {
     try {
       if (forceRefresh != true) {
         if (state is FetchCategorySuccess) {
@@ -111,7 +111,7 @@ class FetchCategoryCubit extends Cubit<FetchCategoryState> with HydratedMixin {
 
       if (forceRefresh == true) {
         DataOutput<Category> categories =
-            await _categoryRepository.fetchCategories(offset: 0);
+            await _categoryRepository.fetchCategories(offset: 0, locationName: locationName);
 
         List<String> list =
             categories.modelList.map((element) => element.image!).toList();
@@ -126,7 +126,7 @@ class FetchCategoryCubit extends Cubit<FetchCategoryState> with HydratedMixin {
       } else {
         if (state is! FetchCategorySuccess) {
           DataOutput<Category> categories =
-              await _categoryRepository.fetchCategories(offset: 0);
+              await _categoryRepository.fetchCategories(offset: 0, locationName: locationName);
 
           List<String> list =
               categories.modelList.map((element) => element.image!).toList();
@@ -142,7 +142,7 @@ class FetchCategoryCubit extends Cubit<FetchCategoryState> with HydratedMixin {
           await CheckInternet.check(
             onInternet: () async {
               DataOutput<Category> categories =
-                  await _categoryRepository.fetchCategories(offset: 0);
+                  await _categoryRepository.fetchCategories(offset: 0, locationName: locationName);
 
               List<String> list = categories.modelList
                   .map((element) => element.image!)

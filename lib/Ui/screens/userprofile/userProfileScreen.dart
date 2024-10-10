@@ -122,6 +122,7 @@ class _ProfileScreenState extends State<UserDetailProfileScreen> {
     return Scaffold(
       backgroundColor: Color(0xfff9f9f9),
       appBar: UiUtils.buildAppBar(
+        showBackButton: true,
         context,
         title: 'Agent Profile',
       ),

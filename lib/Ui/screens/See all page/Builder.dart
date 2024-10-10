@@ -68,6 +68,7 @@ class _TopBuildersState extends State<see_allBuilders> {
 
     return Scaffold(
       appBar:  AppBar(
+
         backgroundColor: tertiaryColor_,
         leadingWidth: 40, // Adjust the width to decrease the space between back icon and title
         titleSpacing: 15,

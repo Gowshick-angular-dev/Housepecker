@@ -395,14 +395,44 @@ class HomeScreenState extends State<HomeScreen>
     }
   }
 
+  List<Map<String,dynamic>> allPropertyData = [];
+
   Future<void> getSystemSetting() async {
-    var response = await Api.post(url: Api.apiGetSystemSettings, parameter: {});
-    if(!response['error']) {
+    var response = await Api.post(url: Api.apiGetSystemSettings, parameter: {
+      'city': currentMainCity,
+    });
+    if (response != null && !response['error']) {
       setState(() {
-        systemSetting = response['data'];
+        systemSetting = response['data'] ?? {};
+        print("ssssssss: ${response}");
+
+        var data = response['data'] ?? {};
+        var allPostCount = data['all_post_count'] ?? 0;
+          print("dddddd: ${data["max_price"]}");
+         print("dddddd: ${allPostCount}");
+
+        // allPropertyData = [
+        //   {
+        //     "image": "",
+        //     "count": data['all_post_count'],
+        //     "name": "All Properties & Project"
+        //   },
+        //   {
+        //     "image": "",
+        //     "count": data['all_post_count'],
+        //     "name": "Properties"
+        //   },
+        //   {
+        //     "image": "",
+        //     "count": data['all_post_count'],
+        //     "name": "Project"
+        //   }
+        // ];
+
       });
     }
   }
+
 
   Future<void> getAdTypes() async {
     setState(() {
@@ -550,7 +580,7 @@ class HomeScreenState extends State<HomeScreen>
     getAdTypes();
     context.read<FetchMostViewedPropertiesCubit>().fetch(forceRefresh: true);
     context.read<SliderCubit>().fetchSlider(context, forceRefresh: true);
-    context.read<FetchCategoryCubit>().fetchCategories(forceRefresh: true);
+    context.read<FetchCategoryCubit>().fetchCategories(forceRefresh: true,locationName: currentMainCity);
     context.read<FetchRecentPropertiesCubit>().fetch(forceRefresh: true);
     context.read<FetchMostLikedPropertiesCubit>().fetch(forceRefresh: true);
     context.read<FetchNearbyPropertiesCubit>().fetch(forceRefresh: true);
@@ -589,220 +619,202 @@ class HomeScreenState extends State<HomeScreen>
                 elevation: 0,
                 leadingWidth: HiveUtils.getCityName() != null ? 200.rw(context) : 130,
                 leading: Container(),
-                flexibleSpace: Stack(
-                  children: [
-                    Container(
-                      child: Center(
-                        child:Padding(
-                          padding: const EdgeInsets.only(left: 15.0, right: 15),
-                          child: Container(
+                flexibleSpace: Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 10),
+                  child: Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          Image.asset("assets/Splash/Logo.png",
+                            width: 140,
+                            height: 20,
+                            fit: BoxFit.contain,
+                          ),
+                          InkWell(
+                            onTap: () async {
+                              FocusManager.instance.primaryFocus?.unfocus();
+                              Map? placeMark =
+                              await Navigator.pushNamed(context, Routes.chooseLocaitonMap) as Map?;
+                              var latlng = placeMark!['latlng'];
+                              if(latlng != null) {
+                                try {
+                                  List<Placemark> placemarks = await placemarkFromCoordinates(latlng.latitude, latlng.longitude);
+                                  Placemark place = placemarks.first;
+                                  String address = '${place.street}, ${place.thoroughfare}, ${place.subLocality}, ${place.locality}, ${place.administrativeArea}, ${place.postalCode}';
+                                  setState(() {
+                                    currentAddress = address;
+                                    currentPlace = '${place.locality}, ${place.administrativeArea}, ${place.postalCode}';
+                                    currentMainCity = '${place.locality}';
+                                  });
+                                  getBanners(address);
+                                  HiveUtils.setCurrentAddress(address);
+                                } catch (e) {
+                                  print("Error fetching address: $e");
+                                }
+                              }
+                            },
                             child: Row(
-                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
                               children: [
-                                Column(
-                                  crossAxisAlignment: CrossAxisAlignment.start,
-                                  children: [
-                                    Padding(
-                                      padding: const EdgeInsets.only(top: 10, bottom: 7),
-                                      child: Row(
-                                        children: [
-                                          Image.asset("assets/Splash/Logo.png",
-                                            width: 140,
-                                            height: 20,
-                                            fit: BoxFit.contain,
-                                          )
-                                          // if(systemSetting != null)
-                                          //   Image.network(
-                                          //     '${systemSetting!['web_placeholder_logo']}',
-                                          //     width: 140,
-                                          //     height: 20,
-                                          //     fit: BoxFit.cover,
-                                          //   ),
-                                        ],
-                                      ),
-                                    ),
-                                    InkWell(
-                                      onTap: () async {
-                                        FocusManager.instance.primaryFocus?.unfocus();
-                                        Map? placeMark =
-                                            await Navigator.pushNamed(context, Routes.chooseLocaitonMap) as Map?;
-                                        var latlng = placeMark!['latlng'];
-                                        if(latlng != null) {
-                                          try {
-                                            List<Placemark> placemarks = await placemarkFromCoordinates(latlng.latitude, latlng.longitude);
-                                            Placemark place = placemarks.first;
-                                            String address = '${place.street}, ${place.thoroughfare}, ${place.subLocality}, ${place.locality}, ${place.administrativeArea}, ${place.postalCode}';
-                                            setState(() {
-                                              currentAddress = address;
-                                              currentPlace = '${place.locality}, ${place.administrativeArea}, ${place.postalCode}';
-                                              currentMainCity = '${place.locality}';
-                                            });
-                                            getBanners(address);
-                                            HiveUtils.setCurrentAddress(address);
-                                          } catch (e) {
-                                            print("Error fetching address: $e");
-                                          }
-                                        }
-                                      },
-                                      child: Row(
-                                        children: [
-                                          Image.asset(
-                                            'assets/AddPostforms/__White location.png',
-                                            width: 10,
-                                            height: 10,
-                                            fit: BoxFit.cover,
-                                          ),
-                                          SizedBox(width: 5,),
-                                          Container(
-                                            width: 80,
-                                            child: Text('${currentMainCity}',
-                                              overflow: TextOverflow.ellipsis,
-                                              style: TextStyle(
-                                                  fontSize: 12,
-                                                  fontWeight: FontWeight.w500,
-                                                  color: Colors.white
-                                              ),
-                                            ),
-                                          ),
-                                          SizedBox(width: 5,),
-                                          Image.asset(
-                                            'assets/AddPostforms/__Down white.png',
-                                            width: 10,
-                                            height: 10,
-                                            fit: BoxFit.cover,
-                                          ),
-                                        ],
-                                      ),
-                                    ),
-                                  ],
+                                Image.asset(
+                                  'assets/AddPostforms/__White location.png',
+                                  width: 10,
+                                  height: 10,
+                                  fit: BoxFit.cover,
                                 ),
-                                if(!showSellRentButton)
-                                  InkWell(
-                                  // onTap: () async {
-                                  //   GuestChecker.check(onNotGuest: ()
-                                  //     {
-                                  //       if (adList!.length > 0) {
-                                  //         Navigator.push(
-                                  //           context,
-                                  //           MaterialPageRoute(builder: (context) =>
-                                  //               SelectAdType(cat: adList)),
-                                  //         );
-                                  //       }
-                                  //     });
-                                  // },
-                                  // onTap: () => widget.openDrawer,
-                                  onTap: () {
-                                    Timer? _timer;
-                                    if (isReverse?.value == true) {
-                                      isReverse?.value = false;
-                                      showSellRentButton = true;
-                                      _forRentController.forward();
-                                      _forAdsController.forward();
-                                      _forSellAnimationController.forward();
-                                      setState(() {});
-                                      _timer = Timer(Duration(seconds: 3), () {
-                                        showSellRentButton = false;
-                                        isReverse?.value = true;
-                                        _forRentController.reverse();
-                                        _forAdsController.reverse();
-                                        _forSellAnimationController.reverse();
-                                        setState(() {});
-                                      });
-                                    } else {
-                                      showSellRentButton = false;
-                                      isReverse?.value = true;
-                                      _forRentController.reverse();
-                                      _forAdsController.reverse();
-                                      _forSellAnimationController.reverse();
-                                      setState(() {});
-                                      if (_timer != null && _timer.isActive) {
-                                        _timer.cancel();
-                                      }
-                                    }
-                                    setState(() {});
-                                  },
-                                  child: Container(
-                                    decoration: BoxDecoration(
-                                      color: Colors.white,
-                                      borderRadius: BorderRadius.circular(30),
-                                    ),
-                                    child: Padding(
-                                      padding: const EdgeInsets.only(right: 8.0,left: 8,top: 5,bottom: 5),
-                                      child: Row(
-                                        children: [
-                                          Image.asset(
-                                            'assets/Home/__Add post.png',
-                                            width: 18,
-                                            height: 18,
-                                            fit: BoxFit.cover,
-                                          ),
-                                          SizedBox(width: 5,),
-                                          Text(
-                                            'Post Ads',
-                                            style: TextStyle(
-                                              fontFamily: 'Poppins',
-                                              color: Colors.black,
-                                              fontSize: 11,
-                                              fontWeight: FontWeight.w500,
-                                            ),
-                                          ),
-                                          SizedBox(width: 5,),
-                                          Container(
-                                            padding: const EdgeInsets.only(right: 8.0,left: 8,top: 5,bottom: 5),
-                                            decoration: BoxDecoration(
-                                              color: Color(0xffffa920),
-                                              borderRadius: BorderRadius.circular(30),
-                                            ),
-                                            child: Text(
-                                              'FREE',
-                                              style: TextStyle(
-                                                fontFamily: 'Poppins',
-                                                color: Colors.white,
-                                                fontSize: 10,
-                                                fontWeight: FontWeight.w400,
-                                              ),
-                                            ),
-                                          ),
-                                        ],
-                                      ),
+                                SizedBox(width: 5,),
+                                Container(
+                                  width: 80,
+                                  child: Text('${currentMainCity}',
+                                    overflow: TextOverflow.ellipsis,
+                                    style: TextStyle(
+                                        fontSize: 12,
+                                        fontWeight: FontWeight.w500,
+                                        color: Colors.white
                                     ),
                                   ),
                                 ),
-                                InkWell(
-                                  onTap: () {
-                                    GuestChecker.check(onNotGuest: () {
-                                      Navigator.pushNamed(
-                                          context, Routes.notificationPage);
-                                    });
-                                  },
-                                  child: Container(
-                                    child: Stack(
-                                      children: [
-                                        Icon(Icons.notifications_on_outlined,
-                                          color: context.color.secondaryColor,),
-                                        Positioned(
-                                          top: 0,
-                                          right: 0,
-                                          child: Container(
-                                            decoration: BoxDecoration(
-                                              borderRadius: BorderRadius.circular(10),
-                                              color: Colors.red,
-                                            ),
-                                            height: 8,
-                                            width: 8,
-                                          ),
-                                        ),
-                                      ],
-                                    ),
-                                  ),
-                                )
+                                SizedBox(width: 5,),
+                                Image.asset(
+                                  'assets/AddPostforms/__Down white.png',
+                                  width: 10,
+                                  height: 10,
+                                  fit: BoxFit.cover,
+                                ),
                               ],
                             ),
                           ),
-                        ),
+                        ],
                       ),
-                    ),
-                  ],
+                      Row(
+                        children: [
+                          if(!showSellRentButton)
+                            InkWell(
+                              // onTap: () async {
+                              //   GuestChecker.check(onNotGuest: ()
+                              //     {
+                              //       if (adList!.length > 0) {
+                              //         Navigator.push(
+                              //           context,
+                              //           MaterialPageRoute(builder: (context) =>
+                              //               SelectAdType(cat: adList)),
+                              //         );
+                              //       }
+                              //     });
+                              // },
+                              // onTap: () => widget.openDrawer,
+                              onTap: () {
+                                Timer? _timer;
+                                if (isReverse?.value == true) {
+                                  isReverse?.value = false;
+                                  showSellRentButton = true;
+                                  _forRentController.forward();
+                                  _forAdsController.forward();
+                                  _forSellAnimationController.forward();
+                                  setState(() {});
+                                  _timer = Timer(Duration(seconds: 3), () {
+                                    showSellRentButton = false;
+                                    isReverse?.value = true;
+                                    _forRentController.reverse();
+                                    _forAdsController.reverse();
+                                    _forSellAnimationController.reverse();
+                                    setState(() {});
+                                  });
+                                } else {
+                                  showSellRentButton = false;
+                                  isReverse?.value = true;
+                                  _forRentController.reverse();
+                                  _forAdsController.reverse();
+                                  _forSellAnimationController.reverse();
+                                  setState(() {});
+                                  if (_timer != null && _timer.isActive) {
+                                    _timer.cancel();
+                                  }
+                                }
+                                setState(() {});
+                              },
+                              child: Container(
+                                decoration: BoxDecoration(
+                                  color: Colors.white,
+                                  borderRadius: BorderRadius.circular(30),
+                                ),
+                                child: Padding(
+                                  padding: const EdgeInsets.only(right: 8.0,left: 8,top: 5,bottom: 5),
+                                  child: Row(
+                                    children: [
+                                      Image.asset(
+                                        'assets/Home/__Add post.png',
+                                        width: 18,
+                                        height: 18,
+                                        fit: BoxFit.cover,
+                                      ),
+                                      SizedBox(width: 5,),
+                                      Text(
+                                        'Post Ads',
+                                        style: TextStyle(
+                                          fontFamily: 'Poppins',
+                                          color: Colors.black,
+                                          fontSize: 11,
+                                          fontWeight: FontWeight.w500,
+                                        ),
+                                      ),
+                                      SizedBox(width: 5,),
+                                      Container(
+                                        padding: const EdgeInsets.only(right: 8.0,left: 8,top: 5,bottom: 5),
+                                        decoration: BoxDecoration(
+                                          color: Color(0xffffa920),
+                                          borderRadius: BorderRadius.circular(30),
+                                        ),
+                                        child: Text(
+                                          'FREE',
+                                          style: TextStyle(
+                                            fontFamily: 'Poppins',
+                                            color: Colors.white,
+                                            fontSize: 10,
+                                            fontWeight: FontWeight.w400,
+                                          ),
+                                        ),
+                                      ),
+                                    ],
+                                  ),
+                                ),
+                              ),
+                            ),
+                          SizedBox(width: 10,),
+                          InkWell(
+                            onTap: () {
+                              GuestChecker.check(onNotGuest: () {
+                                Navigator.pushNamed(
+                                    context, Routes.notificationPage);
+                              });
+                            },
+                            child: Container(
+                              child: Stack(
+                                children: [
+                                  Icon(Icons.notifications_on_outlined,
+                                    color: context.color.secondaryColor,),
+                                  Positioned(
+                                    top: 0,
+                                    right: 0,
+                                    child: Container(
+                                      decoration: BoxDecoration(
+                                        borderRadius: BorderRadius.circular(10),
+                                        color: Colors.red,
+                                      ),
+                                      height: 8,
+                                      width: 8,
+                                    ),
+                                  ),
+                                ],
+                              ),
+                            ),
+                          )
+                        ],
+                      )
+                    ],
+                  ),
                 ),
                 backgroundColor: Color(0xff117af9),
                 // actions: [
@@ -2417,13 +2429,17 @@ class HomeScreenState extends State<HomeScreen>
           ],
         ),
         SizedBox(height: 20,),
-        if(systemSetting != null)
-          Padding( padding: const EdgeInsets.only(right: 15,left: 15),
-              child: ClipRRect( borderRadius : BorderRadius.circular(20),
-                  child: Image.network("${systemSetting!['second_banner']}",
-                    width: double.infinity,fit: BoxFit.cover,))),
+        buildExpolerPropertiesType(),
+        // if(systemSetting != null)
+        //   Padding( padding: const EdgeInsets.only(right: 15,left: 15),
+        //       child: ClipRRect( borderRadius : BorderRadius.circular(20),
+        //           child: Image.network("${systemSetting!['second_banner']}",
+        //             width: double.infinity,fit: BoxFit.cover,))),
         // if(HiveUtils.getUserDetails().role != null && HiveUtils.getUserDetails().role == '3')
+
         RecentPropertiesSectionWidget(projectLoading: projectLoading, likeLoading: likeLoading, projectList: projectList),
+        SizedBox(height: 20,),
+        buildAllPropertyNeeds(),
         SizedBox(height: 20,),
         Padding(
           padding: const EdgeInsets.only(left: 15,right: 15),
@@ -2629,6 +2645,210 @@ class HomeScreenState extends State<HomeScreen>
     );
   }
 
+  Widget buildAllPropertyNeeds(){
+    return Container(
+      color: Color(0xffebf4ff),
+      child: Column(
+        children: [
+          Padding(
+            padding: const EdgeInsets.only(right: 10, left: 10),
+            child: TitleHeader(
+              enableShowAll: false,
+              title: "All Property Needs - One Portal".translate(context),
+              subTitle: "Find Better Places to Live, Work and Wonder...",
+              onSeeAll: () {
+
+              },
+            ),
+          ),
+          Container(
+            height: 220,
+            child: ListView.separated(
+              separatorBuilder: (context,i)=>SizedBox(width: 15,),
+              padding: EdgeInsets.symmetric(horizontal: 15),
+                scrollDirection: Axis.horizontal,
+                itemCount: 3,
+                itemBuilder: (context,index){
+              return Container(
+                padding: EdgeInsets.all(8),
+                margin: EdgeInsets.symmetric(vertical: 10),
+                width: MediaQuery.of(context).size.width/1.7,
+                decoration: BoxDecoration(
+                  color: Colors.white,
+                    border: Border.all(
+                        width: 1,
+                        color: Color(0xffe0e0e0)
+                    ),
+                  borderRadius: BorderRadius.circular(10),
+                ),child: Column(
+                children: [
+                  Expanded(
+                    child: Container(
+                      decoration: BoxDecoration(
+                        color: Colors.blue,
+                        borderRadius: BorderRadius.circular(10),
+                      ),
+                    ),
+                  ),
+                  Container(
+                    height: 50,
+                    color: Colors.white,
+                    child: const Column(
+                      mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                       crossAxisAlignment:CrossAxisAlignment.start,
+                      children: [
+                        Text("190",style: TextStyle(fontSize: 14,fontWeight: FontWeight.w600),),
+                        Row(
+                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                          children: [
+                            Text("All Properties & Project",style: TextStyle(fontSize: 10),),
+                            Row(
+                              children: [
+                                Text("Explore Now",style: TextStyle(fontSize: 10),),
+                                Icon(Icons.arrow_forward,size: 15,)
+                              ],
+                            ),
+                          ],
+                        ),
+                      ],
+                    ),
+                  )
+                ],
+              ),
+              );
+            }),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget buildExpolerPropertiesType(){
+    return Container(
+      color: Color(0xffebf4ff),
+      child: Column(
+        children: [
+          Padding(
+            padding: const EdgeInsets.only(right: 10, left: 10),
+            child: TitleHeader(
+              enableShowAll: false,
+              title: "Explore Properties Types".translate(context),
+              subTitle: "Get some Inspirations from 171 skills",
+              onSeeAll: () {
+
+              },
+            ),
+          ),
+          BlocConsumer<FetchCategoryCubit, FetchCategoryState>(
+            listener: (context, state) {
+              if (state is FetchCategoryFailure) {
+                if (state.errorMessage == "auth-expired") {
+                  HelperUtils.showSnackBarMessage(context,
+                      UiUtils.getTranslatedLabel(context, "authExpired"));
+
+                  HiveUtils.logoutUser(
+                    context,
+                    onLogout: () {},
+                  );
+                }
+              }
+
+              if (state is FetchCategorySuccess) {
+                isCategoryEmpty = state.categories.isEmpty;
+                setState(() {});
+              }
+            },
+            builder: (context, state) {
+              if (state is FetchCategoryInProgress) {
+                return Padding(
+                  padding: const EdgeInsets.only(bottom: 20,left: 15,right: 15),
+                  child: const CategoryShimmer(),
+                );
+              }
+              if (state is FetchCategoryFailure) {
+                return Center(
+                  child: Text(state.errorMessage.toString()),
+                );
+              }
+              if (state is FetchCategorySuccess) {
+                return Container(
+                  padding: EdgeInsets.only(bottom: 15,top: 0,),
+                  height: 190,
+                  color: Color(0xffebf4ff),
+                  child: ListView.separated(
+                      separatorBuilder: (context,i)=>SizedBox(width: 0,),
+                      padding: EdgeInsets.symmetric(horizontal: 15),
+                      scrollDirection: Axis.horizontal,
+                      itemCount: state.categories.length,
+                      itemBuilder: (context,index){
+                        final category = state.categories[index];
+                        return InkWell(
+                          onTap: (){
+                            Navigator.of(context).pushNamed(Routes.propertiesList,
+                                arguments: {'catID': category.id, 'catName': category.category});
+                          },
+                          child: Container(
+                            margin: EdgeInsets.all(6),
+                            padding: EdgeInsets.all(10),
+                            width: 140,
+                            decoration: BoxDecoration(
+                                borderRadius: BorderRadius.circular(10),
+                                color: Colors.white,
+                              boxShadow: [
+                                BoxShadow(
+                                  color: Colors.grey.withOpacity(0.1),
+                                  spreadRadius: 3,
+                                  blurRadius: 4,
+                                  offset: Offset(0, 2),
+                                ),
+                              ],
+                            ),child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                            children: [
+                              Row(
+                                children: [
+                                  Container(
+                                    padding: EdgeInsets.all(15),
+                                    height: 65,
+                                    width: 65,
+                                    decoration: BoxDecoration(
+                                      color: Color(0xffebf4ff),
+                                      borderRadius: BorderRadius.circular(8),
+                                    ),
+                                    child: UiUtils.imageType(category.image!,
+                                        width: 35,
+                                        height: 35,
+                                        fit: BoxFit.cover,
+                                        color: Constant.adaptThemeColorSvg
+                                            ? context.color.tertiaryColor
+                                            : null),
+                                  )
+                                ],
+                              ),
+                             Column(
+                               crossAxisAlignment: CrossAxisAlignment.start,
+                               children: [
+                                 Text(category.category??'',style: TextStyle(fontWeight: FontWeight.w500),),
+                                 Text("${category.propertyCount?.toString()??'0'} Properties",style: TextStyle(fontSize: 12),)
+                               ],
+                             )
+                            ],
+                          ),
+                          ),
+                        );
+                      }),
+                );
+              }
+              return Container();
+            },
+          )
+
+        ],
+      ),
+    );
+  }
+
   Widget buildPropertiesShimmer(BuildContext context, int count) {
     return GridView.builder(
       shrinkWrap: true,
@@ -2717,6 +2937,8 @@ class HomeScreenState extends State<HomeScreen>
         category: category);
   }
 }
+
+
 
 class RecentPropertiesSectionWidget extends StatefulWidget {
   final List? projectList;
@@ -3287,7 +3509,7 @@ class _TopAgentsState extends State<TopAgents> {
         SizedBox(
           height: size.height * 0.26,
           child: AgentLOading
-              ? buildShimmerList(size)  // Show shimmer effect if loading
+              ? buildShimmerList(size)
               : ListView.builder(
             scrollDirection: Axis.horizontal,
             itemCount: Top_agenylist.length,
@@ -3306,7 +3528,6 @@ class _TopAgentsState extends State<TopAgents> {
   // Build agent card widget dynamically from data
   Widget buildAgentCard(Size size, dynamic agent) {
     return Container(
-      height: size.height * 0.28,
       width: size.width * 0.75,
       decoration: BoxDecoration(
         border: Border.all(color: Color(0xFF9ea1a7).withOpacity(0.5)),
@@ -3562,7 +3783,7 @@ class _TopBuildersState extends State<TopBuilders> {
           ),
         ),
         SizedBox(
-          height: size.height * 0.21, // Fixed height for the list
+          height: size.width/2,
           child: builderLoading
               ? _buildShimmerList(size) // Show shimmer when loading
               : topBuilderList.isEmpty
@@ -3626,7 +3847,9 @@ class _TopBuildersState extends State<TopBuilders> {
       child: Padding(
         padding: const EdgeInsets.all(8.0),
         child: Column(
+          mainAxisAlignment: MainAxisAlignment.spaceBetween,
           children: [
+            Spacer(),
             Row(
               children: [
                 Container(
@@ -3676,7 +3899,7 @@ class _TopBuildersState extends State<TopBuilders> {
                 ),
               ],
             ),
-            SizedBox(height: 10), // Space between agent details and properties
+            Spacer(),
             Container(
               height: size.height * 0.11,
               decoration: BoxDecoration(
@@ -3708,6 +3931,7 @@ class _TopBuildersState extends State<TopBuilders> {
                 ],
               ),
             ),
+            Spacer(),
           ],
         ),
       ),

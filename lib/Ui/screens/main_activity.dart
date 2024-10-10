@@ -101,7 +101,7 @@ class MainActivityState extends State<MainActivity>
   final List _pageHistory = [];
   late PageController pageController;
   DateTime? currentBackPressTime;
-  //This is rive file artboards and setting you can check rive package's documentation at [pub.dev]
+
   Artboard? artboard;
   SMIBool? isReverse;
   StateMachineController? _controller;
@@ -568,6 +568,7 @@ class MainActivityState extends State<MainActivity>
 
   @override
   Widget build(BuildContext context) {
+
     return AnnotatedRegion(
       value: UiUtils.getSystemUiOverlayStyle(context: context),
       child: WillPopScope(

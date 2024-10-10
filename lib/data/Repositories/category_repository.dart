@@ -5,10 +5,12 @@ import '../model/data_output.dart';
 
 class CategoryRepository {
   Future<DataOutput<Category>> fetchCategories({
+     String? locationName,
     required int offset,
   }) async {
     Map<String, dynamic> parameters = {
       Api.offset: offset,
+      Api.city:locationName,
       Api.limit: Constant.loadLimit,
     };
     Map<String, dynamic> response =

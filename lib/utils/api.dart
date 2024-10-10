@@ -182,6 +182,7 @@ class Api {
   static String topRated = "top_rated";
   static String promoted = "promoted";
   static String limit = "limit";
+  static String city = "city";
   static String packageId = "package_id";
   static String notification = "notification";
   static String v360degImage = "threeD_image";
