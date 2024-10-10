@@ -4,6 +4,7 @@ import 'dart:ui';
 import 'package:Housepecker/Ui/screens/projects/project_interested_user_details.dart';
 import 'package:Housepecker/utils/Extensions/extensions.dart';
 import 'package:excel/excel.dart' as excelTable;
+import 'package:flutter/cupertino.dart';
 import 'package:hive/hive.dart';
 import 'package:Housepecker/Ui/screens/projects/projectAdd1.dart';
 import 'package:Housepecker/Ui/screens/projects/projectCategoryScreen.dart';
@@ -153,10 +154,10 @@ class _MyProjectScreenState extends State<MyProjectScreen> {
                                     )
                                   ],
                                 ),
-                       /*         Row(
+                          /*      Row(
                                   mainAxisAlignment: MainAxisAlignment.start,
                                   children: [
-                              *//*      InkWell(
+                                    InkWell(
                                       onTap: () {
                                         Navigator.push(
                                           context,
@@ -297,12 +298,12 @@ class _MyProjectScreenState extends State<MyProjectScreen> {
                                         ),
                                       ),
                                     ),
-                                    SizedBox(width: 5),*//*
+                                    SizedBox(width: 5),
 
                                   ],
                                 ),*/
                                 Row(
-                                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                                  mainAxisAlignment: MainAxisAlignment.start,
                                   children: [
                                     GestureDetector(
                                       onTap: (){
@@ -314,7 +315,7 @@ class _MyProjectScreenState extends State<MyProjectScreen> {
                                         );
                                       },
                                       child: Container(
-                                        height: 28,
+                                        height: 25,
                                         padding: EdgeInsets.symmetric(horizontal: 10),
                                         decoration: BoxDecoration(
                                             borderRadius: BorderRadius.circular(6),
@@ -329,9 +330,10 @@ class _MyProjectScreenState extends State<MyProjectScreen> {
                                       ),
                                       ),
                                     ),
+                                    SizedBox(width: 15,),
                                     Container(
                                       height: 28,
-                                      padding: EdgeInsets.symmetric(horizontal: 10),
+                                      padding: EdgeInsets.symmetric(horizontal: 15),
                                       decoration: BoxDecoration(
                                           borderRadius: BorderRadius.circular(6),
                                           color:item['status'] == 0?Color(0xfffff1f1):Color(0xffd9efcf),
@@ -343,48 +345,148 @@ class _MyProjectScreenState extends State<MyProjectScreen> {
                                       ],
                                     ),
                                     ),
-                                    InkWell(
-                                      onTap: () async {
-                                        var excel = excelTable.Excel.createExcel();
+                                    // InkWell(
+                                    //   onTap: () {
+                                    //     Navigator.push(
+                                    //       context,
+                                    //       MaterialPageRoute(builder: (context) => ProjectFormOne(data: item, isEdit: true)),
+                                    //     );
+                                    //   },
+                                    //   child: Container(
+                                    //     padding: EdgeInsets.all(5),
+                                    //     decoration: BoxDecoration(
+                                    //       color: Colors.green,
+                                    //       borderRadius: BorderRadius.circular(15),
+                                    //     ),
+                                    //     child: Row(
+                                    //       children: [
+                                    //         // Text('Edit',style: TextStyle(
+                                    //         //     fontSize: 11,
+                                    //         //     color: Colors.white,
+                                    //         //     fontWeight: FontWeight.w500),
+                                    //         // ),
+                                    //         // SizedBox(width: 3,),
+                                    //         Icon(Icons.edit,color:Colors.white,size: 15,),
+                                    //       ],
+                                    //     ),
+                                    //   ),
+                                    // ),
+                                    // InkWell(
+                                    //   onTap: () {
+                                    //     showDialog(
+                                    //       context: context,
+                                    //       barrierDismissible: false,
+                                    //       builder: (BuildContext context) {
+                                    //         // return object of type Dialog
+                                    //         return Dialog(
+                                    //           elevation: 0.0,
+                                    //           shape:
+                                    //           RoundedRectangleBorder(borderRadius: BorderRadius.circular(20.0)),
+                                    //           child: Wrap(
+                                    //             children: [
+                                    //               Container(
+                                    //                 padding: EdgeInsets.all(20.0),
+                                    //                 child: Column(
+                                    //                   mainAxisAlignment: MainAxisAlignment.center,
+                                    //                   crossAxisAlignment: CrossAxisAlignment.center,
+                                    //                   children: <Widget>[
+                                    //                     Text('Are You Sure',
+                                    //                       style: TextStyle(
+                                    //                           fontSize: 15,
+                                    //                           color: Color(0xff333333),
+                                    //                           fontWeight: FontWeight.w600
+                                    //                       ),
+                                    //                     ),
+                                    //                     SizedBox(height: 15,),
+                                    //                     Text('Do you want to delete this ?'),
+                                    //                     SizedBox(height: 15,),
+                                    //                     Row(
+                                    //                       mainAxisAlignment: MainAxisAlignment.end,
+                                    //                       children: [
+                                    //                         InkWell(
+                                    //                           onTap: () {
+                                    //                             Navigator.pop(context);
+                                    //                           },
+                                    //                           child: Container(
+                                    //                             padding: EdgeInsets.only(left: 10, right: 10, top: 5, bottom: 5),
+                                    //                             decoration: BoxDecoration(
+                                    //                               color: Colors.green,
+                                    //                               borderRadius: BorderRadius.circular(15),
+                                    //                             ),
+                                    //                             child: Row(
+                                    //                               children: [
+                                    //                                 Text('Cancel',style: TextStyle(
+                                    //                                     fontSize: 13,
+                                    //                                     color: Colors.white,
+                                    //                                     fontWeight: FontWeight.w500),
+                                    //                                 ),
+                                    //                               ],
+                                    //                             ),
+                                    //                           ),
+                                    //                         ),
+                                    //                         SizedBox(width: 10),
+                                    //                         InkWell(
+                                    //                           onTap: () async {
+                                    //                             var response = await Api.post(url: Api.deleteProject, parameter: {
+                                    //                               "id": item['id']
+                                    //                             });
+                                    //                             if(!response['error']) {
+                                    //                               HelperUtils.showSnackBarMessage(
+                                    //                                   context, UiUtils.getTranslatedLabel(context, "${response['message']}"),
+                                    //                                   type: MessageType.warning, messageDuration: 3);
+                                    //                               Navigator.pop(context);
+                                    //                               getMyprojects();
+                                    //                             }
+                                    //                           },
+                                    //                           child: Container(
+                                    //                             padding: EdgeInsets.only(left: 10, right: 10, top: 5, bottom: 5),
+                                    //                             decoration: BoxDecoration(
+                                    //                               color: Colors.red,
+                                    //                               borderRadius: BorderRadius.circular(15),
+                                    //                             ),
+                                    //                             child: Row(
+                                    //                               children: [
+                                    //                                 Text('Delete',style: TextStyle(
+                                    //                                     fontSize: 13,
+                                    //                                     color: Colors.white,
+                                    //                                     fontWeight: FontWeight.w500),
+                                    //                                 ),
+                                    //                               ],
+                                    //                             ),
+                                    //                           ),
+                                    //                         ),
+                                    //                       ],
+                                    //                     ),
+                                    //                   ],
+                                    //                 ),
+                                    //               ),
+                                    //             ],
+                                    //           ),
+                                    //         );
+                                    //       },
+                                    //     );
+                                    //   },
+                                    //   child: Container(
+                                    //     padding: EdgeInsets.all(5),
+                                    //     decoration: BoxDecoration(
+                                    //       color: Colors.red,
+                                    //       borderRadius: BorderRadius.circular(15),
+                                    //     ),
+                                    //     child: Row(
+                                    //       children: [
+                                    //         // Text('Delete',style: TextStyle(
+                                    //         //     fontSize: 11,
+                                    //         //     color: Colors.white,
+                                    //         //     fontWeight: FontWeight.w500),
+                                    //         // ),
+                                    //         // SizedBox(width: 3,),
+                                    //         Icon(Icons.delete, color:Colors.white, size: 15,),
+                                    //       ],
+                                    //     ),
+                                    //   ),
+                                    // ),
+                                    // SizedBox()
 
-                                        excelTable.Sheet sheetObject = excel['Interested Users'];
-                                        var cell = sheetObject.cell(excelTable.CellIndex.indexByString('A1'));
-                                        cell.value = excelTable.TextCellValue('Some Text');
-                                        // sheetObject.appendRow([CellValue('ID'), CellValue('Name'), CellValue('Age')]);
-                                        // sheetObject.appendRow([1, 'John Doe', 25]);
-                                        // sheetObject.appendRow([2, 'Jane Smith', 30]);
-                                        // sheetObject.appendRow([3, 'Sam Brown', 22]);
-
-                                        // Save the file to a local directory
-                                        final directory = await getApplicationDocumentsDirectory();
-                                        final path = '${directory.path}/example.xlsx';
-                                        File file = File(path)
-                                          ..createSync(recursive: true)
-                                          ..writeAsBytesSync(excel.save()!);
-
-                                        // Open the file after generating it
-                                        OpenFilex.open(file.path);
-                                      },
-                                      child: Container(
-                                        height: 28,
-                                        padding: EdgeInsets.symmetric(horizontal: 10),
-                                        decoration: BoxDecoration(
-                                          color: Colors.blue,
-                                          borderRadius: BorderRadius.circular(6),
-                                        ),
-                                        child: Row(
-                                          children: [
-                                            Text('Interested',style: TextStyle(
-                                                fontSize: 10,
-                                                color: Colors.white,
-                                                fontWeight: FontWeight.w500),
-                                            ),
-                                            SizedBox(width: 3,),
-                                            Icon(Icons.download, color:Colors.white, size: 15,),
-                                          ],
-                                        ),
-                                      ),
-                                    ),
                                   ],
                                 )
                               ],

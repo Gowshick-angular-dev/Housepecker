@@ -1,9 +1,12 @@
 import 'dart:convert';
+import 'dart:io';
 
 import 'package:Housepecker/utils/Extensions/extensions.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
+import 'package:intl/intl.dart';
+import 'package:permission_handler/permission_handler.dart';
 
 import '../../../utils/api.dart';
 import '../../../utils/constant.dart';
@@ -12,6 +15,7 @@ import '../../../utils/ui_utils.dart';
 import 'package:http/http.dart' as http;
 
 import '../widgets/Erros/no_data_found.dart';
+import 'package:excel/excel.dart' as excelTable;
 
 
 class InterestedUsersDetails extends StatefulWidget {
@@ -67,7 +71,51 @@ class _InterestedUsersDetailsState extends State<InterestedUsersDetails> {
     }
   }
 
+  Future<void> generateExcel() async {
+    var status = await Permission.storage.request();
+    if (status.isGranted) {
+      var excel = excelTable.Excel.createExcel();
+      excelTable.Sheet sheetObject = excel['Property Interested users Details'];
 
+      sheetObject.appendRow(['Id', 'Name', 'Email', 'Mobile No', 'Status']);
+
+      var userDetails = intersetedList ?? [];
+      print("Number of sales data entries: ${userDetails.length}");
+
+      for (int i = 0; i < userDetails.length; i++) {
+        var userData = userDetails[i];
+        String id = (i + 1).toString();
+        String name = userData['customer']['name'] ?? '-';
+        String email = userData['customer']['email'] ?? '-';
+        String mobile = userData['customer']['mobile'] ?? '-';
+        String status = userData['status'] == 0 ? 'Pending' : 'Contacted';
+
+        print("Appending data: $id, $name, $email, $mobile, $status");
+        sheetObject.appendRow([id, name, email, mobile, status]);
+      }
+
+      try {
+        final directory = Directory('/storage/emulated/0/Download');
+        String formattedDate = DateFormat('yyyyMMdd_HHmmss').format(DateTime.now());
+        String filePath = '${directory.path}/property_user_details_$formattedDate.xlsx';
+        var fileBytes = excel.save();
+
+        File(filePath)
+          ..createSync(recursive: true)
+          ..writeAsBytesSync(fileBytes!);
+
+        print("File saved at $filePath");
+        ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
+          backgroundColor: Color(0xff117af9),
+          content: Text("File downloaded successfully", style: TextStyle(color: Colors.white)),
+        ));
+      } catch (e) {
+        print("Error while saving file: $e");
+      }
+    } else {
+      print("Permission Denied");
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -87,9 +135,36 @@ class _InterestedUsersDetailsState extends State<InterestedUsersDetails> {
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             const SizedBox(height: 15),
-            const Text(
-              "Interested Users Details",
-              style: TextStyle(color: Colors.black, fontWeight: FontWeight.w500),
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                Text(
+                  "Interested Users Details",
+                  style: TextStyle(color: Colors.black, fontWeight: FontWeight.w500),
+                ),
+                if(intersetedList.isNotEmpty)
+                  InkWell(
+                    onTap: (){
+                      generateExcel();
+                    },
+                    child: Container(
+                      height: 40,
+                      padding: EdgeInsets.symmetric(horizontal: 15),
+                      decoration: BoxDecoration(
+                          color: Color(0xff117af9),
+                          borderRadius: BorderRadius.circular(8)
+                      ),child: const Row(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        Text("Download",style: TextStyle(fontSize: 14,color: Colors.white,fontWeight: FontWeight.w500),),
+                        SizedBox(width: 5,),
+                        Icon(Icons.download,color: Colors.white,size: 18,)
+
+                      ],
+                    ),
+                    ),
+                  )
+              ],
             ),
             const SizedBox(height: 15),
            if(intersetedList.isNotEmpty)
