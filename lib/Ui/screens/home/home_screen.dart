@@ -3617,11 +3617,11 @@ class _TopBuildersState extends State<TopBuilders> {
   // Build the agent card as a reusable widget
   Widget buildBuilderCard(Size size, dynamic agent) {
     return Container(
-      // height: size.height * 0.02,
       width: size.width * 0.7,
       decoration: BoxDecoration(
-        border: Border.all(color: Color(0xFF9ea1a7)),
+        border: Border.all(color: Color(0xFF9ea1a7).withOpacity(0.5)),
         borderRadius: BorderRadius.circular(12),
+        color: Color(0xffffffff),
       ),
       child: Padding(
         padding: const EdgeInsets.all(8.0),
@@ -3633,7 +3633,7 @@ class _TopBuildersState extends State<TopBuilders> {
                   height: size.height * 0.07,
                   width: size.width * 0.15,
                   decoration: BoxDecoration(
-                    border: Border.all(color: Color(0xFF9ea1a7)),
+                    border: Border.all(color: Color(0xFF9ea1a7).withOpacity(0.5)),
                     borderRadius: BorderRadius.circular(15),
                   ),
                   child: ClipRRect(
@@ -3667,7 +3667,7 @@ class _TopBuildersState extends State<TopBuilders> {
                           Text(
                             'RERA ID : ${agent['rera'] ?? 'N/A'}', // Fallback if null
                             style: TextStyle(
-                                fontSize: 11, color: Color(0xFF9ea1a7)),
+                                fontSize: 10, color: Color(0xFF9ea1a7)),
                           ),
                         ],
                       ),
