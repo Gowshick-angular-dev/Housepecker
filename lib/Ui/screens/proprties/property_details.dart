@@ -148,11 +148,14 @@ class PropertyDetailsState extends State<PropertyDetails>
   bool? _isLoaded;
 
   InterstitialAdManager interstitialAdManager = InterstitialAdManager();
+  ScrollController _scrollController = ScrollController();
+  int _currentImage = 0;
 
   @override
   void initState() {
     super.initState();
     loadAd();
+    _scrollController.addListener(_onScroll);
     getSimilarProperties();
     getAgentProperties();
     interstitialAdManager.load();
@@ -296,7 +299,8 @@ class PropertyDetailsState extends State<PropertyDetails>
   @override
   void dispose() {
     flickManager?.dispose();
-
+    _scrollController.removeListener(_onScroll);
+    _scrollController.dispose();
     super.dispose();
   }
 
@@ -358,6 +362,18 @@ class PropertyDetailsState extends State<PropertyDetails>
     return value;
   }
 
+
+
+  void _onScroll() {
+    final int index = (_scrollController.offset / MediaQuery.of(context).size.width).round();
+    if (_currentImage != index) {
+      setState(() {
+        _currentImage = index;
+      });
+    }
+  }
+
+
   @override
   Widget build(BuildContext context) {
     super.build(context);
@@ -393,123 +409,129 @@ class PropertyDetailsState extends State<PropertyDetails>
           ),
           child: SafeArea(
               child: Scaffold(
-
-                appBar: AppBar(
-                  elevation: 0,
-                  backgroundColor: tertiaryColor_,
-                  title: Text(property!.title!,style: TextStyle(
-                    fontSize: 14,
-                    fontWeight: FontWeight.w500,
-                    color: Colors.white
-                  ),),
+                appBar: UiUtils.buildAppBar(context,
+                    showBackButton: true,
+                    title: property!.title!,
                     actions: [
-                      if (!HiveUtils.isGuest()) ...[
-                        if (int.parse(HiveUtils.getUserId() ?? "0") ==
-                            property?.addedBy)
-                          IconButton(
-                              onPressed: () {
-                                Navigator.push(context, BlurredRouter(
-                                  builder: (context) {
-                                    return AnalyticsScreen(
-                                      interestUserCount: widget
-                                          .property!.totalInterestedUsers
-                                          .toString(),
-                                    );
-                                  },
-                                ));
-                              },
-                              icon: Icon(
-                                Icons.analytics,
-                                color: context.color.tertiaryColor,
-                              )),
-                      ],
-                      if (property?.addedBy.toString() == HiveUtils.getUserId() &&
-                          property!.properyType != "Sold" &&
-                          property?.status == 1)
-                        PopupMenuButton<String>(
-                          onSelected: (value) async {
-                            var action = await UiUtils.showBlurredDialoge(
-                              context,
-                              dialoge: BlurredDialogBuilderBox(
-                                  title: "changePropertyStatus".translate(context),
-                                  acceptButtonName: "change".translate(context),
-                                  contentBuilder: (context, s) {
-                                    return FittedBox(
-                                      fit: BoxFit.none,
-                                      child: Row(
-                                        mainAxisAlignment: MainAxisAlignment.start,
-                                        children: [
-                                          Container(
-                                            decoration: BoxDecoration(
-                                                color: context.color.tertiaryColor,
-                                                borderRadius:
-                                                BorderRadius.circular(10)),
-                                            width: s.maxWidth / 4,
-                                            height: 50,
-                                            child: Center(
-                                                child: Text(property!.properyType!
-                                                    .translate(context))
-                                                    .color(
-                                                    context.color.buttonColor)),
-                                          ),
-                                          Text(
-                                            "toArrow".translate(context),
-                                          ),
-                                          Container(
-                                            width: s.maxWidth / 4,
-                                            decoration: BoxDecoration(
-                                                color: context.color.tertiaryColor
-                                                    .withOpacity(0.4),
-                                                borderRadius:
-                                                BorderRadius.circular(10)),
-                                            height: 50,
-                                            child: Center(
-                                                child: Text(_statusFilter(property!
-                                                    .properyType!) ??
-                                                    "")
-                                                    .color(
-                                                    context.color.buttonColor)),
-                                          ),
-                                        ],
-                                      ),
-                                    );
-                                  }),
-                            );
-                            if (action == true) {
-                              Future.delayed(Duration.zero, () {
-                                context.read<UpdatePropertyStatusCubit>().update(
-                                  propertyId: property!.id,
-                                  status: _getStatus(property!.properyType),
-                                );
-                              });
-                            }
-                          },
-                          color: context.color.secondaryColor,
-                          itemBuilder: (BuildContext context) {
-                            return {
-                              'changeStatus'.translate(context),
-                            }.map((String choice) {
-                              return PopupMenuItem<String>(
-                                value: choice,
-                                textStyle:
-                                TextStyle(color: context.color.textColorDark),
-                                child: Text(choice),
-                              );
-                            }).toList();
-                          },
-                          child: Padding(
-                            padding: const EdgeInsets.symmetric(horizontal: 4.0),
-                            child: Icon(
-                              Icons.more_vert_rounded,
-                              color: context.color.tertiaryColor,
-                            ),
-                          ),
-                        ),
-                      const SizedBox(
-                        width: 10,
-                      )
-                    ]
-                ),
+
+                    ]),
+                // appBar: AppBar(
+                //   elevation: 0,
+                //   backgroundColor: tertiaryColor_,
+                //
+                //   title: Text(property!.title!,style: TextStyle(
+                //     fontSize: 14,
+                //     fontWeight: FontWeight.w500,
+                //     color: Colors.white
+                //   ),),
+                //     actions: [
+                //       if (!HiveUtils.isGuest()) ...[
+                //         if (int.parse(HiveUtils.getUserId() ?? "0") ==
+                //             property?.addedBy)
+                //           IconButton(
+                //               onPressed: () {
+                //                 Navigator.push(context, BlurredRouter(
+                //                   builder: (context) {
+                //                     return AnalyticsScreen(
+                //                       interestUserCount: widget
+                //                           .property!.totalInterestedUsers
+                //                           .toString(),
+                //                     );
+                //                   },
+                //                 ));
+                //               },
+                //               icon: Icon(
+                //                 Icons.analytics,
+                //                 color: context.color.tertiaryColor,
+                //               )),
+                //       ],
+                //       if (property?.addedBy.toString() == HiveUtils.getUserId() &&
+                //           property!.properyType != "Sold" &&
+                //           property?.status == 1)
+                //         PopupMenuButton<String>(
+                //           onSelected: (value) async {
+                //             var action = await UiUtils.showBlurredDialoge(
+                //               context,
+                //               dialoge: BlurredDialogBuilderBox(
+                //                   title: "changePropertyStatus".translate(context),
+                //                   acceptButtonName: "change".translate(context),
+                //                   contentBuilder: (context, s) {
+                //                     return FittedBox(
+                //                       fit: BoxFit.none,
+                //                       child: Row(
+                //                         mainAxisAlignment: MainAxisAlignment.start,
+                //                         children: [
+                //                           Container(
+                //                             decoration: BoxDecoration(
+                //                                 color: context.color.tertiaryColor,
+                //                                 borderRadius: BorderRadius.circular(10)
+                //                             ),
+                //                             width: s.maxWidth / 4,
+                //                             height: 50,
+                //                             child: Center(
+                //                                 child: Text(property!.properyType!
+                //                                     .translate(context))
+                //                                     .color(
+                //                                     context.color.buttonColor)),
+                //                           ),
+                //                           Text(
+                //                             "toArrow".translate(context),
+                //                           ),
+                //                           Container(
+                //                             width: s.maxWidth / 4,
+                //                             decoration: BoxDecoration(
+                //                                 color: context.color.tertiaryColor
+                //                                     .withOpacity(0.4),
+                //                                 borderRadius:
+                //                                 BorderRadius.circular(10)),
+                //                             height: 50,
+                //                             child: Center(
+                //                                 child: Text(_statusFilter(property!
+                //                                     .properyType!) ??
+                //                                     "")
+                //                                     .color(
+                //                                     context.color.buttonColor)),
+                //                           ),
+                //                         ],
+                //                       ),
+                //                     );
+                //                   }),
+                //             );
+                //             if (action == true) {
+                //               Future.delayed(Duration.zero, () {
+                //                 context.read<UpdatePropertyStatusCubit>().update(
+                //                   propertyId: property!.id,
+                //                   status: _getStatus(property!.properyType),
+                //                 );
+                //               });
+                //             }
+                //           },
+                //           color: context.color.secondaryColor,
+                //           itemBuilder: (BuildContext context) {
+                //             return {
+                //               'changeStatus'.translate(context),
+                //             }.map((String choice) {
+                //               return PopupMenuItem<String>(
+                //                 value: choice,
+                //                 textStyle:
+                //                 TextStyle(color: context.color.textColorDark),
+                //                 child: Text(choice),
+                //               );
+                //             }).toList();
+                //           },
+                //           child: Padding(
+                //             padding: const EdgeInsets.symmetric(horizontal: 4.0),
+                //             child: Icon(
+                //               Icons.more_vert_rounded,
+                //               color: context.color.tertiaryColor,
+                //             ),
+                //           ),
+                //         ),
+                //       const SizedBox(
+                //         width: 10,
+                //       )
+                //     ]
+                // ),
             // appBar: UiUtils.buildAppBar(context,
             //     hideTopBorder: true,
             //     showBackButton: true,
@@ -695,34 +717,156 @@ class PropertyDetailsState extends State<PropertyDetails>
                         const SizedBox(
                           height: 15,
                         ),
-                        if (!isPlayingYoutubeVideo)
                           Column(
                             crossAxisAlignment: CrossAxisAlignment.start,
                             children: <Widget>[
                               Padding(
-                                padding: EdgeInsets.symmetric( horizontal: 15,),
-                                child: ClipRRect(
-                                  borderRadius: BorderRadius.circular(20),
-                                  child: SizedBox(
-                                    height: 227.rh(context),
+                                padding: EdgeInsets.symmetric(horizontal: 13),
+                                child: SizedBox(
+                                  height: 227.rh(context),
+                                  child: ClipRRect(
+                                    borderRadius: BorderRadius.circular(10),
                                     child: Stack(
                                       children: [
-                                        GestureDetector(
-                                          onTap: () {
-                                            // google map doesn't allow blur so we hide it:)
-                                            showGoogleMap = false;
-                                            setState(() {});
+                                        if (gallary?.isNotEmpty ?? false) ...[
+                                          ListView.builder(
+                                            itemCount: (gallary?.length ?? 0) + 1,
+                                            controller: _scrollController,
+                                            scrollDirection: Axis.horizontal,
+                                            itemBuilder: (context, index) {
+
+                                              if (index == gallary?.length) {
+                                                return Container(
+                                                  width: MediaQuery.of(context).size.width,
+                                                  decoration: BoxDecoration(
+                                                      borderRadius: BorderRadius.circular(10),
+                                                      color: Colors.red
+                                                  ),
+                                                  child: ClipRRect(
+                                                    borderRadius: BorderRadius.circular(10),
+                                                    child: UiUtils.getImage(
+                                                      property!.titleImage!,
+                                                      fit: BoxFit.cover,
+                                                      width: double.infinity,
+                                                      height: 227.rh(context),
+                                                      showFullScreenImage: true,
+                                                    ),
+                                                  ),
+                                                );
+                                              }
+
+                                              final galleryItem = gallary![index];
+                                             // print("Gallary: $gallary, Title Image: ${property?.titleImage}");
+
+                                              return Padding(
+                                                padding: const EdgeInsets.only(right: 10),
+                                                child: ClipRRect(
+                                                  borderRadius: BorderRadius.circular(10),
+                                                  child: Stack(
+                                                    children: [
+                                                      GestureDetector(
+                                                        onTap: () {
+                                                          if (galleryItem.isVideo == true) return;
+
+                                                          showGoogleMap = false;
+                                                          setState(() {});
+
+                                                          var images = gallary?.map((e) => e.imageUrl).toList();
+
+                                                          UiUtils.imageGallaryView(
+                                                            context,
+                                                            images: images!,
+                                                            initalIndex: index,
+                                                            then: () {
+                                                              showGoogleMap = true;
+                                                              setState(() {});
+                                                            },
+                                                          );
+                                                        },
+                                                        child: SizedBox(
+                                                          width: MediaQuery.of(context).size.width,
+                                                          height: 227.rh(context),
+                                                          child:  gallary?[index].isVideo == true
+                                                              ? Container(
+                                                            child: UiUtils.getImage(
+                                                              youtubeVideoThumbnail,
+                                                              fit: BoxFit.cover,
+                                                            ),
+                                                          )
+                                                              : UiUtils.getImage(
+                                                            gallary?[index].imageUrl ?? "",
+                                                            fit: BoxFit.cover,
+                                                          ),
+
+                                                        ),
+                                                      ),
+                                                      if (gallary?[index].isVideo == true)
+                                                        Positioned.fill(
+                                                          child: GestureDetector(
+                                                            onTap: () {
+                                                              Navigator.push(
+                                                                context,
+                                                                MaterialPageRoute(
+                                                                  builder: (context) {
+                                                                    return VideoViewScreen(
+                                                                      videoUrl: galleryItem.image ?? "",
+                                                                      flickManager: flickManager,
+                                                                    );
+                                                                  },
+                                                                ),
+                                                              );
+                                                            },
+                                                            child: Container(
+                                                              color: Colors.black.withOpacity(0.3),
+                                                              child: FittedBox(
+                                                                fit: BoxFit.none,
+                                                                child: Container(
+                                                                  decoration: BoxDecoration(
+                                                                    shape: BoxShape.circle,
+                                                                    color: context.color.tertiaryColor.withOpacity(0.8),
+                                                                  ),
+                                                                  width: 30,
+                                                                  height: 30,
+                                                                  child: Icon(
+                                                                    Icons.play_arrow,
+                                                                    color: Colors.white,
+                                                                  ),
+                                                                ),
+                                                              ),
+                                                            ),
+                                                          ),
+                                                        ),
+                                                    ],
+                                                  ),
+                                                ),
+                                              );
+                                            },
+                                          ),
+                                          // SingleChildScrollView(
+                                          //   scrollDirection: Axis.horizontal,
+                                          //   controller: _scrollController,
+                                          //   child: Row(
+                                          //     children: [
+                                          //
+                                          //
+                                          //     ],
+                                          //   ),
+                                          // ),
+                                        ]else GestureDetector(
+                                             onTap: () {
+                                                  showGoogleMap = false;
+                                                  setState(() {});
                                             UiUtils.showFullScreenImage(
-                                              context,
-                                              provider: NetworkImage(
-                                                property!.titleImage!,
-                                              ),
-                                              then: () {
-                                                showGoogleMap = true;
-                                                setState(() {});
-                                              },
-                                            );
-                                          },
+                                            context,
+                                            provider: NetworkImage(
+                                              property!.titleImage!,
+                                            ),
+                                            then: () {
+                                              showGoogleMap = true;
+                                              setState(() {});
+                                            },
+                                          );
+                                        },
                                           child: UiUtils.getImage(
                                             property!.titleImage!,
                                             fit: BoxFit.cover,
@@ -783,7 +927,7 @@ class PropertyDetailsState extends State<PropertyDetails>
                                             ),
                                           ),
                                         ),
-                                        PositionedDirectional(
+                                     /*   PositionedDirectional(
                                           bottom: 5,
                                           end: 18,
                                           child: Visibility(
@@ -821,13 +965,38 @@ class PropertyDetailsState extends State<PropertyDetails>
                                               ),
                                             ),
                                           ),
-                                        ),
+                                        ),*/
                                         // advertismentLable()
                                       ],
                                     ),
                                   ),
                                 ),
                               ),
+
+                            if (gallary?.isNotEmpty ?? false) ...[
+                              const SizedBox(height: 15),
+                              Row(
+                                mainAxisAlignment: MainAxisAlignment.center,
+                                children: List.generate(
+                                  (gallary?.length ?? 0) + 1,
+                                      (index) {
+                                    return AnimatedContainer(
+                                      duration: Duration(milliseconds: 300),
+                                      alignment: Alignment.center,
+                                      width: _currentImage == index ? 23 : 6.0,
+                                      height: 6.0,
+                                      margin: const EdgeInsets.symmetric(horizontal: 2.0),
+                                      decoration: BoxDecoration(
+                                        borderRadius: BorderRadius.circular(10),
+                                        color: _currentImage == index
+                                            ? Color(0xff117af9)
+                                            : Colors.grey.withOpacity(0.3),
+                                      ),
+                                    );
+                                  },
+                                ),
+                              ),
+                            ],
                               const SizedBox(
                                 height: 15,
                               ),
@@ -1028,7 +1197,7 @@ class PropertyDetailsState extends State<PropertyDetails>
                                   ],
                                 ),
                               ),
-                    
+
                               const SizedBox(
                                 height: 20,
                               ),
@@ -1479,7 +1648,7 @@ class PropertyDetailsState extends State<PropertyDetails>
                                 const SizedBox(height: 10),
                               ],
 
-                              
+
 
                               Padding(
                                 padding: EdgeInsets.only( left: 15,),
@@ -1488,7 +1657,7 @@ class PropertyDetailsState extends State<PropertyDetails>
                                         ?.assignedOutdoorFacility ??
                                         []),
                               ),
-                           
+
                               const SizedBox(
                                 height: 15,
                               ),
@@ -1545,13 +1714,13 @@ class PropertyDetailsState extends State<PropertyDetails>
                                       height: _bannerAd?.size.height.toDouble(),
                                       child: AdWidget(ad: _bannerAd!)),
                                 ),
-                    
+
                               // const SizedBox(
                               //   height: 20,
                               // ),
 
 
-                              const SizedBox( height: 15,),
+                           /*   const SizedBox( height: 15,),
                               if (gallary?.isNotEmpty ?? false) ...[
                                 Padding(
                                   padding: EdgeInsets.only( left: 15,right: 15),
@@ -1704,7 +1873,7 @@ class PropertyDetailsState extends State<PropertyDetails>
                                     )),
                                   ),
                                 )
-                              ],
+                              ],*/
 
                               // Padding(
                               //   padding: EdgeInsets.only( left: 15,right: 15),

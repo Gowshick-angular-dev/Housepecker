@@ -234,6 +234,14 @@ class HomeScreenState extends State<HomeScreen>
         currentCity = '${place.subLocality}';
         currentMainCity = '${place.locality}';
       });
+
+      // HiveUtils.setLocation(
+      //   city: place.locality ?? '',
+      //   state: place.administrativeArea ?? '',
+      //   country: place.country ?? '',
+      //   placeId: place.postalCode??'',
+      // );
+
       getBanners(address);
       getProjects();
       getProperties();
@@ -407,27 +415,24 @@ class HomeScreenState extends State<HomeScreen>
         print("ssssssss: ${response}");
 
         var data = response['data'] ?? {};
-        var allPostCount = data['all_post_count'] ?? 0;
-          print("dddddd: ${data["max_price"]}");
-         print("dddddd: ${allPostCount}");
 
-        // allPropertyData = [
-        //   {
-        //     "image": "",
-        //     "count": data['all_post_count'],
-        //     "name": "All Properties & Project"
-        //   },
-        //   {
-        //     "image": "",
-        //     "count": data['all_post_count'],
-        //     "name": "Properties"
-        //   },
-        //   {
-        //     "image": "",
-        //     "count": data['all_post_count'],
-        //     "name": "Project"
-        //   }
-        // ];
+        allPropertyData = [
+          {
+            "image": "assets/assets/Images/protal_2.png",
+            "count": data['all_post_count'] ?? 0,
+            "name": "All Properties & Project"
+          },
+          {
+            "image": "assets/assets/Images/protal_3.png",
+            "count": data['all_property'] ?? 0,
+            "name": "Properties"
+          },
+          {
+            "image": "assets/assets/Images/protal_4.png",
+            "count":  data['project_count'] ?? 0,
+            "name": "Project"
+          }
+        ];
 
       });
     }
@@ -2664,57 +2669,87 @@ class HomeScreenState extends State<HomeScreen>
           Container(
             height: 220,
             child: ListView.separated(
+              physics: BouncingScrollPhysics(),
               separatorBuilder: (context,i)=>SizedBox(width: 15,),
-              padding: EdgeInsets.symmetric(horizontal: 15),
+              padding: EdgeInsets.symmetric(horizontal: 10),
                 scrollDirection: Axis.horizontal,
-                itemCount: 3,
+                itemCount: allPropertyData.length,
                 itemBuilder: (context,index){
-              return Container(
-                padding: EdgeInsets.all(8),
-                margin: EdgeInsets.symmetric(vertical: 10),
-                width: MediaQuery.of(context).size.width/1.7,
-                decoration: BoxDecoration(
-                  color: Colors.white,
-                    border: Border.all(
-                        width: 1,
-                        color: Color(0xffe0e0e0)
-                    ),
-                  borderRadius: BorderRadius.circular(10),
-                ),child: Column(
-                children: [
-                  Expanded(
-                    child: Container(
-                      decoration: BoxDecoration(
-                        color: Colors.blue,
-                        borderRadius: BorderRadius.circular(10),
+                final data = allPropertyData[index];
+              return GestureDetector(
+                onTap: (){
+                  if (index == 1) {
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                        builder: (context) => PropertiesListWidget(
+                          typeName: "Properties",
+                        ),
+                      ),
+                    );
+                  }
+                  if (index == 2) {
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(builder: (context) =>
+                          ProjectViewAllScreen(city: currentMainCity,)),
+                    );
+                  }
+                },
+                child: Container(
+                  padding: EdgeInsets.all(7),
+                  margin: EdgeInsets.symmetric(vertical: 10),
+                  width: MediaQuery.of(context).size.width/1.7,
+                  decoration: BoxDecoration(
+                    color: Colors.white,
+                      border: Border.all(
+                          width: 1,
+                          color: Color(0xffe0e0e0)
+                      ),
+                    borderRadius: BorderRadius.circular(10),
+                  ),child: Column(
+                  children: [
+                    Expanded(
+                      child: Container(
+                        decoration: BoxDecoration(
+                          color: Colors.white,
+                          borderRadius: BorderRadius.circular(10),
+                          image: DecorationImage(image:AssetImage(data['image']!,),fit: BoxFit.cover)
+
+                        ),
                       ),
                     ),
-                  ),
-                  Container(
-                    height: 50,
-                    color: Colors.white,
-                    child: const Column(
-                      mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                       crossAxisAlignment:CrossAxisAlignment.start,
-                      children: [
-                        Text("190",style: TextStyle(fontSize: 14,fontWeight: FontWeight.w600),),
-                        Row(
-                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                          children: [
-                            Text("All Properties & Project",style: TextStyle(fontSize: 10),),
-                            Row(
-                              children: [
-                                Text("Explore Now",style: TextStyle(fontSize: 10),),
-                                Icon(Icons.arrow_forward,size: 15,)
-                              ],
-                            ),
-                          ],
-                        ),
-                      ],
-                    ),
-                  )
-                ],
-              ),
+                    Container(
+                      height: 50,
+                      color: Colors.white,
+                      child:  Column(
+                        mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                         crossAxisAlignment:CrossAxisAlignment.start,
+                        children: [
+                          Text(data["count"].toString(),style: TextStyle(fontSize: 14,fontWeight: FontWeight.w600),),
+                          Row(
+                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                            children: [
+                              Expanded(
+                                child: Container(
+                                  margin: EdgeInsets.only(right: 10),
+                                    child: Text(data["name"],style: TextStyle(fontSize: 10,fontWeight: FontWeight.w600),maxLines: 1,overflow: TextOverflow.ellipsis,)),
+                              ),
+                              Row(
+                                children: [
+                                  Text("Explore Now",style: TextStyle(fontSize: 10,fontWeight: FontWeight.w600),),
+                                  SizedBox(width: 3,),
+                                  Icon(Icons.arrow_forward,size: 15,)
+                                ],
+                              ),
+                            ],
+                          ),
+                        ],
+                      ),
+                    )
+                  ],
+                ),
+                ),
               );
             }),
           ),
@@ -3201,6 +3236,45 @@ class _RecentPropertiesSectionWidgetState
                                             ),
                                           ),
                                           SizedBox(height: 4,),
+
+                                          Row(
+                                            children: [
+                                              Text(
+                                                '${widget.projectList![index]['project_details'].length > 0 ? formatAmount(widget.projectList![index]['project_details'][0]['avg_price'] ?? 0) : 0}'
+                                                    .toString()
+                                                    .formatAmount(
+                                                  prefix: true,
+                                                ),
+                                                maxLines: 1,
+                                                overflow: TextOverflow.ellipsis,
+                                                style: TextStyle(
+                                                    color: Color(0xff333333),
+                                                    fontSize: 12,
+                                                    fontWeight: FontWeight.w500
+                                                ),
+                                              ),
+                                              Padding(
+                                                padding: const EdgeInsets.symmetric(horizontal: 8.0),
+                                                child: Container(
+                                                  height: 12,
+                                                  width: 2,
+                                                  color: Colors.black54,
+                                                ),
+                                              ),
+                                              Text(
+                                                '${widget.projectList![index]['project_details'].length > 0 ? formatAmount(widget.projectList![index]['project_details'][0]['size'] ?? 0) : 0} Sq.ft'
+                                                    .toString(),
+                                                maxLines: 1,
+                                                overflow: TextOverflow.ellipsis,
+                                                style: TextStyle(
+                                                    color: Color(0xffa2a2a2),
+                                                    fontSize: 9,
+                                                    fontWeight: FontWeight.w500
+                                                ),
+                                              ),
+                                            ],
+                                          ),
+                                          SizedBox(height: 4,),
                                           if (widget.projectList![index]['address'] != "")
                                             Padding(
                                               padding: const EdgeInsets.only(bottom: 4),
@@ -3221,44 +3295,6 @@ class _RecentPropertiesSectionWidgetState
                                                 ],
                                               ),
                                             ),
-                                          SizedBox(height: 4,),
-                                          Row(
-                                            children: [
-                                              Text(
-                                                '${widget.projectList![index]['project_details'].length > 0 ? formatAmount(widget.projectList![index]['project_details'][0]['avg_price'] ?? 0) : 0}'
-                                                    .toString()
-                                                    .formatAmount(
-                                                  prefix: true,
-                                                ),
-                                                maxLines: 1,
-                                                overflow: TextOverflow.ellipsis,
-                                                style: TextStyle(
-                                                    color: Color(0xff333333),
-                                                    fontSize: 9,
-                                                    fontWeight: FontWeight.w500
-                                                ),
-                                              ),
-                                              Padding(
-                                                padding: const EdgeInsets.symmetric(horizontal: 8.0),
-                                                child: Container(
-                                                  height: 12,
-                                                  width: 2,
-                                                  color: Colors.black54,
-                                                ),
-                                              ),
-                                              Text(
-                                                '${widget.projectList![index]['project_details'].length > 0 ? formatAmount(widget.projectList![index]['project_details'][0]['size'] ?? 0) : 0} Sq.ft'
-                                                    .toString(),
-                                                maxLines: 1,
-                                                overflow: TextOverflow.ellipsis,
-                                                style: TextStyle(
-                                                    color: Color(0xff333333),
-                                                    fontSize: 9,
-                                                    fontWeight: FontWeight.w500
-                                                ),
-                                              ),
-                                            ],
-                                          ),
                                           SizedBox(height: 4,),
                                           Row(
                                             mainAxisAlignment: MainAxisAlignment.end,

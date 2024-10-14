@@ -9,7 +9,9 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:hive/hive.dart';
 import 'package:launch_review/launch_review.dart';
+import 'package:percent_indicator/circular_percent_indicator.dart';
 import 'package:share_plus/share_plus.dart';
 import 'package:url_launcher/url_launcher.dart';
 
@@ -26,6 +28,7 @@ import '../../../utils/Network/apiCallTrigger.dart';
 import '../../../utils/api.dart';
 import '../../../utils/constant.dart';
 import '../../../utils/helper_utils.dart';
+import '../../../utils/hive_keys.dart';
 import '../../../utils/hive_utils.dart';
 import '../../../utils/responsiveSize.dart';
 import '../../../utils/ui_utils.dart';
@@ -71,16 +74,43 @@ class _ProfileScreenState extends State<ProfileScreen>
     super.initState();
   }
 
+  int propertyCount = 0;
+  int projectCount = 0;
+  int advertisementCount = 0;
+
+  int propertyLimit = 0;
+  int projectLimit = 0;
+  int advertisementLimit = 0;
+
+
   Future<void> getSystemSetting() async {
+    String city = Hive.box(HiveKeys.userDetailsBox).get(HiveKeys.city) ?? 'Unknown City';
+
     var response = await Api.post(url: Api.apiGetSystemSettings, parameter: {
-      'user_id': HiveUtils.getUserId()
+      'user_id': HiveUtils.getUserId(),
+     // 'city':city,
+
     });
     if(!response['error']) {
       setState(() {
         systemSetting = response['data'];
+        var data = response['data']['free_package'] ?? {};
+
+        propertyLimit = data['property_limit']??0;
+        projectLimit = data['project_limit']??0;
+        advertisementLimit = data['advertisement_limit']??0;
+
+
+        propertyCount = data['used_property_limit']??0;
+        projectCount = data['used_project_limit']??0;
+        advertisementCount = data['used_advertisement_limit']??0;
+
       });
     }
   }
+
+
+
 
   @override
   void didChangeDependencies() {
@@ -143,7 +173,7 @@ class _ProfileScreenState extends State<ProfileScreen>
         body: ScrollConfiguration(
           behavior: RemoveGlow(),
           child: SingleChildScrollView(
-            
+
             controller: profileScreenController,
             physics: const BouncingScrollPhysics(),
             child: Padding(
@@ -249,12 +279,20 @@ class _ProfileScreenState extends State<ProfileScreen>
                               Container(
                                 padding: EdgeInsets.all(7),
                                 decoration: BoxDecoration(
-                                  color: Color(0xffffffff).withOpacity(0.6),
+                                  color: Color(0xffffffff),
                                   borderRadius: BorderRadius.circular(11),
+                                  boxShadow: [
+                                    BoxShadow(
+                                      color: Colors.grey.withOpacity(0.15),
+                                      spreadRadius: 2,
+                                      blurRadius: 2,
+                                      offset: Offset(0, 3),
+                                    ),
+                                  ],
                                 ),
-                                child: Image.asset("assets/profile/_-80.png",width: 30,height: 30,fit: BoxFit.cover,),
+                                child: Image.asset("assets/profile/_-80.png",width: 30,height: 30,fit: BoxFit.cover,color: Color(0xff86beb4),),
                               ),
-                              SizedBox(width: 5,),
+                              SizedBox(width: 8,),
                               Column(
                                 crossAxisAlignment: CrossAxisAlignment.start,
                                 children: [
@@ -295,12 +333,20 @@ class _ProfileScreenState extends State<ProfileScreen>
                             Container(
                               padding: EdgeInsets.all(7),
                               decoration: BoxDecoration(
-                                color: Color(0xffffffff).withOpacity(0.6),
+                                color: Color(0xffffffff),
                                 borderRadius: BorderRadius.circular(11),
+                                boxShadow: [
+                                  BoxShadow(
+                                    color: Colors.grey.withOpacity(0.15),
+                                    spreadRadius: 2,
+                                    blurRadius: 2,
+                                    offset: Offset(0, 3),
+                                  ),
+                                ],
                               ),
-                              child: Image.asset("assets/profile/total-properties.png",width: 30,height: 30,fit: BoxFit.cover,),
+                              child: Image.asset("assets/profile/total-properties.png",width: 30,height: 30,fit: BoxFit.cover,color: Color(0xff5a97e0),),
                             ),
-                            SizedBox(width: 5,),
+                            SizedBox(width: 8,),
                             Column(
                               crossAxisAlignment: CrossAxisAlignment.start,
                               children: [
@@ -345,12 +391,20 @@ class _ProfileScreenState extends State<ProfileScreen>
                             Container(
                               padding: EdgeInsets.all(7),
                               decoration: BoxDecoration(
-                                color: Color(0xffffffff).withOpacity(0.6),
+                                boxShadow: [
+                                  BoxShadow(
+                                    color: Colors.grey.withOpacity(0.15),
+                                    spreadRadius: 2,
+                                    blurRadius: 2,
+                                    offset: Offset(0, 3),
+                                  ),
+                                ],
+                                color: Color(0xffffffff),
                                 borderRadius: BorderRadius.circular(11),
                               ),
-                              child: Image.asset("assets/profile/total-views.png",width: 30,height: 30,fit: BoxFit.cover,),
+                              child: Image.asset("assets/profile/total-views.png",width: 30,height: 30,fit: BoxFit.cover,color: Color(0xff5e64d0),),
                             ),
-                            SizedBox(width: 5,),
+                            SizedBox(width: 8,),
                             Column(
                               crossAxisAlignment: CrossAxisAlignment.start,
                               children: [
@@ -391,12 +445,20 @@ class _ProfileScreenState extends State<ProfileScreen>
                             Container(
                               padding: EdgeInsets.all(7),
                               decoration: BoxDecoration(
-                                color: Color(0xffffffff).withOpacity(0.6),
+                                color: Color(0xffffffff),
                                 borderRadius: BorderRadius.circular(11),
+                                boxShadow: [
+                                  BoxShadow(
+                                    color: Colors.grey.withOpacity(0.15),
+                                    spreadRadius: 2,
+                                    blurRadius: 2,
+                                    offset: Offset(0, 3),
+                                  ),
+                                ],
                               ),
-                              child: Image.asset("assets/profile/building.png",width: 30,height: 30,fit: BoxFit.cover,),
+                              child: Image.asset("assets/profile/building.png",width: 30,height: 30,fit: BoxFit.cover,color: Color(0xffb49a45),),
                             ),
-                            SizedBox(width: 5,),
+                            SizedBox(width: 8,),
                             Column(
                               crossAxisAlignment: CrossAxisAlignment.start,
                               children: [
@@ -426,6 +488,131 @@ class _ProfileScreenState extends State<ProfileScreen>
                     ),
                   ],
                 ),
+                SizedBox(height: 10,),
+                Container(
+                  decoration: BoxDecoration(
+                      borderRadius: BorderRadius.circular(15),
+                    color: Colors.white
+                  ),
+                  child: Column(
+                    children: [
+                      Container(
+                        width: MediaQuery.of(context).size.width,
+                        height: 50,
+                        padding: EdgeInsets.symmetric(horizontal: 10),
+                        alignment: Alignment.centerLeft,
+                        decoration: BoxDecoration(
+                          color: Color(0xffebedfe),
+                          borderRadius: BorderRadius.only(
+                            topRight: Radius.circular(10),
+                            topLeft:  Radius.circular(10),
+                          )
+                        ),child: const Text("Free Package",style: TextStyle(fontWeight: FontWeight.w600,fontSize: 15),),
+
+                      ),
+                      Padding(
+                        padding: const EdgeInsets.all(10),
+                        child: Row(
+                          children: [
+                            Expanded(
+                              child: Container(
+                                height: 120,
+                                decoration: BoxDecoration(
+                                    color: Color(0xfff9f9f9),
+                                    borderRadius: BorderRadius.circular(10)
+                                ),child:     Column(
+                                mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                                children: [
+                                  Padding(
+                                    padding: const EdgeInsets.symmetric(horizontal: 8),
+                                    child: Text("Property",style: TextStyle(fontSize: 12,fontWeight: FontWeight.w600),maxLines: 1,overflow: TextOverflow.ellipsis,),
+                                  ),
+                                  CircularPercentIndicator(
+                                    radius: 35.0,
+                                    lineWidth: 8.0,
+                                    animation: true,
+                                    percent: propertyLimit > 0 ? propertyCount / propertyLimit : 0,
+                                    center: Text(
+                                      "$propertyCount/$propertyLimit",
+                                      style: const TextStyle(fontWeight: FontWeight.w600, fontSize: 12.0),
+                                    ),
+                                    circularStrokeCap: CircularStrokeCap.round,
+                                    backgroundColor: const Color(0xffeaeaea),
+                                    progressColor: const Color(0xff117af9),
+                                  ),
+                                ],
+                              ),
+                              ),
+                            ),
+                            SizedBox(width: 10,),
+                            Expanded(
+                              child: Container(
+                                height: 120,
+                                decoration: BoxDecoration(
+                                    color: Color(0xfff9f9f9),
+                                    borderRadius: BorderRadius.circular(10)
+                                ),child:Column(
+                                mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                                children: [
+                                  Padding(
+                                    padding: const EdgeInsets.symmetric(horizontal: 8),
+                                    child: Text("Project",style: TextStyle(fontSize: 12,fontWeight: FontWeight.w600),maxLines: 1,overflow: TextOverflow.ellipsis,),
+                                  ),
+                                  CircularPercentIndicator(
+                                    radius: 35.0,
+                                    lineWidth: 8.0,
+                                    animation: true,
+                                    percent: projectLimit > 0 ? projectCount / projectLimit : 0,
+                                    center: Text(
+                                      "$projectCount/$projectLimit",
+                                      style: const TextStyle(fontWeight: FontWeight.w600, fontSize: 12.0),
+                                    ),
+                                    circularStrokeCap: CircularStrokeCap.round,
+                                    backgroundColor: const Color(0xffeaeaea),
+                                    progressColor: const Color(0xff117af9),
+                                  ),
+                                ],
+                              ),
+                              ),
+                            ),
+                            SizedBox(width: 10,),
+                            Expanded(
+                              child: Container(
+                                height: 120,
+                                decoration: BoxDecoration(
+                                    color: Color(0xfff9f9f9),
+                                    borderRadius: BorderRadius.circular(10)
+                                ),child:     Column(
+                                mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                                children: [
+                                  Padding(
+                                    padding: const EdgeInsets.symmetric(horizontal: 8),
+                                    child: Text("Advertisement",style: TextStyle(fontSize: 12,fontWeight: FontWeight.w600),maxLines: 1,overflow: TextOverflow.ellipsis,),
+                                  ),
+                                  CircularPercentIndicator(
+                                    radius: 35.0,
+                                    lineWidth: 8.0,
+                                    animation: true,
+                                    percent: advertisementLimit > 0 ? advertisementCount / advertisementLimit : 0,
+                                    center: Text(
+                                      "$advertisementCount/$advertisementLimit",
+                                      style: const TextStyle(fontWeight: FontWeight.w600, fontSize: 12.0),
+                                    ),
+                                    circularStrokeCap: CircularStrokeCap.round,
+                                    backgroundColor: const Color(0xffeaeaea),
+                                    progressColor: const Color(0xff117af9),
+                                  ),
+                                ],
+                              ),
+                              ),
+                            ),
+                          ],
+                        ),
+                      )
+                    ],
+                  ),
+                ),
+                SizedBox(height: 10,),
                 Container(
                   decoration: BoxDecoration(
                       color: Colors.white,
@@ -924,31 +1111,31 @@ class _ProfileScreenState extends State<ProfileScreen>
                         ),
                       ],
 
-                      if (isGuest == false) ...[
-                        dividerWithSpacing(),
-                        customTile(
-                          context,
-                          title: UiUtils.getTranslatedLabel(
-                              context, "deleteAccount"),
-                          pngImagePath: "assets/profile/_-95.png",
-                          onTap: () {
-                            if (Constant.isDemoModeOn) {
-                              HelperUtils.showSnackBarMessage(
-                                  context,
-                                  UiUtils.getTranslatedLabel(
-                                      context, "thisActionNotValidDemo"));
-                              return;
-                            }
-
-                            deleteConfirmWidget(
-                                UiUtils.getTranslatedLabel(
-                                    context, "deleteProfileMessageTitle"),
-                                UiUtils.getTranslatedLabel(
-                                    context, "deleteProfileMessageContent"),
-                                true);
-                          },
-                        ),
-                      ],
+                      // if (isGuest == false) ...[
+                      //   dividerWithSpacing(),
+                      //   customTile(
+                      //     context,
+                      //     title: UiUtils.getTranslatedLabel(
+                      //         context, "deleteAccount"),
+                      //     pngImagePath: "assets/profile/_-95.png",
+                      //     onTap: () {
+                      //       if (Constant.isDemoModeOn) {
+                      //         HelperUtils.showSnackBarMessage(
+                      //             context,
+                      //             UiUtils.getTranslatedLabel(
+                      //                 context, "thisActionNotValidDemo"));
+                      //         return;
+                      //       }
+                      //
+                      //       deleteConfirmWidget(
+                      //           UiUtils.getTranslatedLabel(
+                      //               context, "deleteProfileMessageTitle"),
+                      //           UiUtils.getTranslatedLabel(
+                      //               context, "deleteProfileMessageContent"),
+                      //           true);
+                      //     },
+                      //   ),
+                      // ],
 
                     ],
                   ),

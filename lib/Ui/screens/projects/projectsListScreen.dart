@@ -16,8 +16,9 @@ import '../widgets/Erros/no_data_found.dart';
 
 class ProjectViewAllScreen extends StatefulWidget {
   final Map? filter;
+  final String? city;
   ProjectViewAllScreen({
-    Key? key, this.filter
+    Key? key, this.filter,this.city
   });
 
   void open(BuildContext context) {
@@ -52,7 +53,8 @@ class _ViewAllScreenState extends State<ProjectViewAllScreen> {
       'current_user': HiveUtils.getUserId(),
       ...widget.filter!
     } : {
-      'current_user': HiveUtils.getUserId()
+      'current_user': HiveUtils.getUserId(),
+      'city':widget.city
     });
     if(!response['error']) {
       setState(() {
@@ -245,27 +247,7 @@ class _ViewAllScreenState extends State<ProjectViewAllScreen> {
                                               fontWeight: FontWeight.w500
                                           ),
                                         ),
-                                        SizedBox(height: 4,),
-                                        if (model['address'] != "")
-                                          Padding(
-                                            padding: const EdgeInsets.only(bottom: 4),
-                                            child: Row(
-                                              children: [
-                                                Image.asset("assets/Home/__location.png",width:15,fit: BoxFit.cover,height: 15,),
-                                                SizedBox(width: 5,),
-                                                Expanded(
-                                                    child: Text(
-                                                      model['address'] ?? "",  maxLines: 1,
-                                                      overflow: TextOverflow.ellipsis,
-                                                      style: TextStyle(
-                                                          color: Color(0xffa2a2a2),
-                                                          fontSize: 9,
-                                                          fontWeight: FontWeight.w400
-                                                      ),)
-                                                )
-                                              ],
-                                            ),
-                                          ),
+
                                         // UiUtils.imageType(
                                         //     property.category!.image ?? "",
                                         //     width: 18,
@@ -299,10 +281,31 @@ class _ViewAllScreenState extends State<ProjectViewAllScreen> {
                                           overflow: TextOverflow.ellipsis,
                                           style: TextStyle(
                                               color: Color(0xff333333),
-                                              fontSize: 9,
+                                              fontSize: 12,
                                               fontWeight: FontWeight.w500
                                           ),
                                         ),
+                                        SizedBox(height: 4,),
+                                        if (model['address'] != "")
+                                          Padding(
+                                            padding: const EdgeInsets.only(bottom: 4),
+                                            child: Row(
+                                              children: [
+                                                Image.asset("assets/Home/__location.png",width:15,fit: BoxFit.cover,height: 15,),
+                                                SizedBox(width: 5,),
+                                                Expanded(
+                                                    child: Text(
+                                                      model['address'] ?? "",  maxLines: 1,
+                                                      overflow: TextOverflow.ellipsis,
+                                                      style: TextStyle(
+                                                          color: Color(0xffa2a2a2),
+                                                          fontSize: 9,
+                                                          fontWeight: FontWeight.w400
+                                                      ),)
+                                                )
+                                              ],
+                                            ),
+                                          ),
                                         SizedBox(height: 4,),
                                         Text("Ready To Move",
                                           maxLines: 1,
