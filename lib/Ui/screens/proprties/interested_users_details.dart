@@ -72,8 +72,10 @@ class _InterestedUsersDetailsState extends State<InterestedUsersDetails> {
   }
 
   Future<void> generateExcel() async {
-    var status = await Permission.storage.request();
-    if (status.isGranted) {
+    // var status = await Permission.storage.request();
+    final manageStorageStatus = await Permission.storage.request();
+    print('tttttttttttttttttttttttt: ${manageStorageStatus}');
+    if (manageStorageStatus.isGranted) {
       var excel = excelTable.Excel.createExcel();
       excelTable.Sheet sheetObject = excel['Property Interested users Details'];
 
@@ -114,6 +116,7 @@ class _InterestedUsersDetailsState extends State<InterestedUsersDetails> {
       }
     } else {
       print("Permission Denied");
+      // await openAppSettings();
     }
   }
 
@@ -122,7 +125,7 @@ class _InterestedUsersDetailsState extends State<InterestedUsersDetails> {
     return Scaffold(
       appBar: UiUtils.buildAppBar(context,
           showBackButton: true,
-          title: UiUtils.getTranslatedLabel(context, "Interested Users Details")),
+          title: UiUtils.getTranslatedLabel(context, "Interested Users")),
       body:isLoading
           ? Center(child: Center(
         child: UiUtils.progress(

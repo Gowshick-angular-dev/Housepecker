@@ -90,24 +90,24 @@ class _PropertyGradiendCardState extends State<PropertyGradiendCard> {
                   width: double.infinity,
                   height: double.infinity,
                 ),
-                Container(
-                  width: c.maxWidth,
-                  decoration: BoxDecoration(
-                    gradient: LinearGradient(
-                        begin: Alignment.bottomCenter,
-                        end: Alignment.topCenter,
-                        colors: [
-                          Colors.black.withOpacity(0.72),
-                          Colors.black.withOpacity(0.3),
-                          Colors.transparent,
-                        ],
-                        stops: const [
-                          0.2,
-                          0.4,
-                          0.7
-                        ]),
-                  ),
-                ),
+                // Container(
+                //   width: c.maxWidth,
+                //   decoration: BoxDecoration(
+                //     gradient: LinearGradient(
+                //         begin: Alignment.bottomCenter,
+                //         end: Alignment.topCenter,
+                //         colors: [
+                //           Colors.black.withOpacity(0.72),
+                //           Colors.black.withOpacity(0.3),
+                //           Colors.transparent,
+                //         ],
+                //         stops: const [
+                //           0.2,
+                //           0.4,
+                //           0.7
+                //         ]),
+                //   ),
+                // ),
 
                 Padding(
                   padding: const EdgeInsets.all(10.0),
@@ -185,10 +185,8 @@ class _PropertyGradiendCardState extends State<PropertyGradiendCard> {
                                           children: [
                                             UiUtils.imageType(
                                                 propertie.category?.image ?? "",
-                                                color:
-                                                    Constant.adaptThemeColorSvg
-                                                        ? context
-                                                            .color.tertiaryColor
+                                                color: Constant.adaptThemeColorSvg
+                                                        ? context.color.tertiaryColor
                                                         : null,
                                                 width: 20,
                                                 height: 20),
@@ -245,10 +243,10 @@ class _PropertyGradiendCardState extends State<PropertyGradiendCard> {
                                           .setMaxLines(lines: 1)
                                           .size(context.font.larger)
                                           .color(context.color.buttonColor),
-                                      Row(
-                                        mainAxisSize: MainAxisSize.min,
-                                        children: paramterList(propertie),
-                                      )
+                                      // Row(
+                                      //   mainAxisSize: MainAxisSize.min,
+                                      //   children: paramterList(propertie),
+                                      // )
                                     ],
                                   )
                                 ],
