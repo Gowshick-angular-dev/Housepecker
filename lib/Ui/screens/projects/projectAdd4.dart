@@ -1,5 +1,6 @@
 import 'dart:io';
 
+import 'package:Housepecker/Ui/screens/projects/projectAdd6.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
@@ -133,6 +134,7 @@ class _ProjectFormFourState extends State<ProjectFormFour> {
                                           borderRadius: BorderRadius.circular(10.0),
                                           child: SvgPicture.network(
                                             widget.facilityList![index]['image'],
+                                            color: Color(0xff117af9),
                                             width: 18.0,
                                             height: 18.0,
                                             fit: BoxFit.cover,
@@ -295,7 +297,7 @@ class _ProjectFormFourState extends State<ProjectFormFour> {
               Navigator.push(
                 context,
                 MaterialPageRoute(builder: (context) =>
-                    ProjectFormFive(body: body, isEdit: widget.isEdit, data: widget.data)),
+                    ProjectFormsixth(body: body, isEdit: widget.isEdit, data: widget.data)),
               );
             },
             child: Container(

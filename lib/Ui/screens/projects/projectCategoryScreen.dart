@@ -105,12 +105,15 @@ class _ProjectFormOneState extends State<ProjectFormOne> {
                           SvgPicture.network(
                             item['image'],
                             color: context.color.textColorDark,
+                            width: 70,
+                            height: 70,
                           ),
-                          SizedBox(height: 5,),
+                          SizedBox(height: 15,),
                           Text(item['category']!,
                             style: TextStyle(
-                                fontSize: 11,
-                                color: Color(0xff646464)
+                                fontSize: 14,
+                                color: Color(0xff646464),
+                                fontWeight: FontWeight.w600,
                             ),
                             textAlign: TextAlign.center,
                           )

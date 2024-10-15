@@ -121,26 +121,26 @@ class _PropertyGradiendCardState extends State<PropertyGradiendCard> {
                           start: 0,
                           child: Row(
                             children: [
-                              Container(
-                                height: 19,
-                                decoration: BoxDecoration(
-                                    color: secondaryColorDark.withOpacity(0.9),
-                                    borderRadius: BorderRadius.circular(4)),
-                                child: Padding(
-                                  padding: const EdgeInsets.symmetric(
-                                      horizontal: 8.0),
-                                  child: Center(
-                                    child: Text(
-                                      propertie.properyType!.translate(context),
-                                    )
-                                        .color(
-                                          context.color.buttonColor,
-                                        )
-                                        .bold()
-                                        .size(context.font.smaller),
-                                  ),
-                                ),
-                              ),
+                              // Container(
+                              //   height: 19,
+                              //   decoration: BoxDecoration(
+                              //       color: secondaryColorDark.withOpacity(0.9),
+                              //       borderRadius: BorderRadius.circular(4)),
+                              //   child: Padding(
+                              //     padding: const EdgeInsets.symmetric(
+                              //         horizontal: 8.0),
+                              //     child: Center(
+                              //       child: Text(
+                              //         propertie.properyType!.translate(context),
+                              //       )
+                              //           .color(
+                              //             context.color.buttonColor,
+                              //           )
+                              //           .bold()
+                              //           .size(context.font.smaller),
+                              //     ),
+                              //   ),
+                              // ),
                               const SizedBox(
                                 width: 2,
                               ),
@@ -167,7 +167,7 @@ class _PropertyGradiendCardState extends State<PropertyGradiendCard> {
                             bottom: 0,
                             start: 0,
                             child: SizedBox(
-                              height: c.maxHeight * 0.35,
+                              height: c.maxHeight * 0.25,
                               width: c.maxWidth - 20,
                               child: Row(
                                 crossAxisAlignment: CrossAxisAlignment.start,
@@ -178,29 +178,29 @@ class _PropertyGradiendCardState extends State<PropertyGradiendCard> {
                                       crossAxisAlignment:
                                           CrossAxisAlignment.start,
                                       children: [
-                                        const Spacer(),
-                                        Row(
-                                          crossAxisAlignment:
-                                              CrossAxisAlignment.center,
-                                          children: [
-                                            UiUtils.imageType(
-                                                propertie.category?.image ?? "",
-                                                color: Constant.adaptThemeColorSvg
-                                                        ? context.color.tertiaryColor
-                                                        : null,
-                                                width: 20,
-                                                height: 20),
-                                            const SizedBox(
-                                              width: 3,
-                                            ),
-                                            Expanded(
-                                              child: Text((propertie.category?.category) ?? "")
-                                                  .setMaxLines(lines: 1)
-                                                  .color(context
-                                                      .color.buttonColor),
-                                            ),
-                                          ],
-                                        ),
+                                        // const Spacer(),
+                                        // Row(
+                                        //   crossAxisAlignment:
+                                        //       CrossAxisAlignment.center,
+                                        //   children: [
+                                        //     UiUtils.imageType(
+                                        //         propertie.category?.image ?? "",
+                                        //         color: Constant.adaptThemeColorSvg
+                                        //                 ? context.color.tertiaryColor
+                                        //                 : null,
+                                        //         width: 20,
+                                        //         height: 20),
+                                        //     const SizedBox(
+                                        //       width: 3,
+                                        //     ),
+                                        //     Expanded(
+                                        //       child: Text(propertie.properyType ?? "")
+                                        //           .setMaxLines(lines: 1)
+                                        //           .color(context
+                                        //               .color.buttonColor),
+                                        //     ),
+                                        //   ],
+                                        // ),
                                         const Spacer(),
                                         Text(((propertie.title) ?? ""))
                                             .setMaxLines(lines: 1)

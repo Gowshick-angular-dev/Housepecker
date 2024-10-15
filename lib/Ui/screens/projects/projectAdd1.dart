@@ -6,6 +6,7 @@ import 'package:flutter/widgets.dart';
 import 'package:geocoding/geocoding.dart';
 import 'package:image_cropper/image_cropper.dart';
 import 'package:image_picker/image_picker.dart';
+import 'package:intl/intl.dart';
 import 'package:latlong2/latlong.dart';
 import 'package:multi_dropdown/multiselect_dropdown.dart';
 import 'package:Housepecker/Ui/screens/projects/projectAdd2.dart';
@@ -35,7 +36,8 @@ class _ProjectFormSecondState extends State<ProjectFormSecond> {
   int? selectedPackage = 0;
   TextEditingController locationControler = TextEditingController();
   TextEditingController descriptionControler = TextEditingController();
-  TextEditingController priceControler = TextEditingController();
+  TextEditingController minPriceControler = TextEditingController();
+  TextEditingController maxPriceControler = TextEditingController();
   TextEditingController avgPriceControler = TextEditingController();
   TextEditingController nameControler = TextEditingController();
   TextEditingController offersControler = TextEditingController();
@@ -45,12 +47,12 @@ class _ProjectFormSecondState extends State<ProjectFormSecond> {
   TextEditingController AdresssController = TextEditingController();
   List packages = [];
   String projectType = 'Sell';
-  String selectedRole = 'Free Listing (2)';
+  String selectedRole = 'Free Listing';
   String brokerage = '';
   int remainFreeProPost = 0;
   List<ValueItem> brokerageWidget = [];
-  String commercialType = '';
-  List<ValueItem> commercialTypeWidget = [];
+  String propertyType = '';
+  List<ValueItem> propertyTypeWidget = [];
   String status = '';
   List<ValueItem> statusWidget = [];
   String category = '';
@@ -133,11 +135,12 @@ class _ProjectFormSecondState extends State<ProjectFormSecond> {
     nameControler.text = widget.data!['title'];
     cityControler.text = widget.data!['city'];
     projectType = widget.data!['project_type']!.toString();
-    priceControler.text = widget.data!['price'].toString();
+    minPriceControler.text = widget.data!['price'].toString();
+    maxPriceControler.text = widget.data!['price'].toString();
     offersControler.text = widget.data!['project_details'][0]['offers'] ?? '';
     avgPriceControler.text = widget.data!['project_details'][0]['avg_price'] ?? '';
     brokerage = widget.data!['project_details'][0]['brokerage'] ?? '';
-    commercialType = widget.data!['project_details'][0]['property_type'] ?? '';
+    propertyType = widget.data!['project_details'][0]['property_type'] ?? '';
     status = widget.data!['project_details'][0]['project_status'].toString();
     // category = widget.data!['category_id'].toString();
     lat = widget.data!['latitude'];
@@ -163,7 +166,7 @@ class _ProjectFormSecondState extends State<ProjectFormSecond> {
       brokerageWidget = [ValueItem(label: 'No', value: 'no')];
     }
 
-    commercialTypeWidget = [ValueItem(label: widget.data!['project_details'][0]['property_type'], value: widget.data!['project_details'][0]['property_type'])];
+    propertyTypeWidget = [ValueItem(label: widget.data!['project_details'][0]['property_type'], value: widget.data!['project_details'][0]['property_type'])];
 
     setState(() {
       loading = false;
@@ -265,6 +268,11 @@ class _ProjectFormSecondState extends State<ProjectFormSecond> {
                         ],
                       ),
                     ),
+                    if (selectedRole == 'Free Listing')
+                      Text(
+                        remainFreeProPost > 0 ? "Note: This post is valid for 10 days from the date of posting." : "Free Listing limit exceeded.",
+                        style: const TextStyle(color: Colors.red, fontSize: 12),
+                      ),
                     const SizedBox(height: 5),
                     Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
@@ -277,303 +285,132 @@ class _ProjectFormSecondState extends State<ProjectFormSecond> {
                             ),
                           )
                         else ...[
-                          if (remainFreeProPost == 0)
-                            Padding(
-                              padding: const EdgeInsets.symmetric(vertical: 10),
-                              child: Text(
-                                "NOTE : You Don't have any Active Packages",
-                                style: TextStyle(color: Colors.red),
-                              ),
-                            )
-                          else ...[
-                            Row(
-                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                              children: [
-                                Expanded(
-                                  child: Container(
-                                    height: size.height * 0.06,
-                                    decoration: BoxDecoration(
-                                      color: Colors.grey.withOpacity(0.2),
-                                      borderRadius: BorderRadius.circular(15),
-                                    ),
-                                    child: Row(
-                                      children: [
-                                        Radio<String>(
-                                          activeColor: Colors.blue,
-                                          value: 'Free Listing',
-                                          groupValue: selectedRole,
-                                          onChanged: (value) {
-                                            setState(() {
-                                              selectedRole = value!;
-                                            });
-                                          },
-                                        ),
-                                        Text(
-                                          "Free Listing (${remainFreeProPost})",
-                                          style: const TextStyle(
-                                              fontSize: 12, fontWeight: FontWeight.bold),
-                                        ),
-                                      ],
-                                    ),
+                          Row(
+                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                            children: [
+                              Expanded(
+                                child: Container(
+                                  height: size.height * 0.06,
+                                  decoration: BoxDecoration(
+                                    color: Colors.grey.withOpacity(0.2),
+                                    borderRadius: BorderRadius.circular(15),
+                                  ),
+                                  child: Row(
+                                    children: [
+                                      Radio<String>(
+                                        activeColor: Colors.blue,
+                                        value: 'Free Listing',
+                                        groupValue: selectedRole,
+                                        onChanged: (value) {
+                                          setState(() {
+                                            selectedRole = value!;
+                                          });
+                                        },
+                                      ),
+                                      Text(
+                                        "Free Listing (${remainFreeProPost})",
+                                        style: const TextStyle(
+                                            fontSize: 12, fontWeight: FontWeight.bold),
+                                      ),
+                                    ],
                                   ),
                                 ),
-                                const SizedBox(
-                                  width: 10,
+                              ),
+                              const SizedBox(
+                                width: 10,
+                              ),
+                              Expanded(
+                                child: Container(
+                                  height: size.height * 0.06,
+                                  decoration: BoxDecoration(
+                                    color: Colors.grey.withOpacity(0.2),
+                                    borderRadius: BorderRadius.circular(15),
+                                  ),
+                                  child: Row(
+                                    children: [
+                                      Radio<String>(
+                                        activeColor: Colors.blue,
+                                        value: 'Package',
+                                        groupValue: selectedRole,
+                                        onChanged: (value) {
+                                          setState(() {
+                                            selectedRole = value!;
+                                          });
+                                        },
+                                      ),
+                                      const Text(
+                                        "Package",
+                                        style: TextStyle(
+                                            fontWeight: FontWeight.bold, fontSize: 12),
+                                      ),
+                                    ],
+                                  ),
                                 ),
+                              ),
+                            ],
+                          ),
+                          const SizedBox(height: 5),
+                          if (selectedRole == 'Package') ...[
+                            const SizedBox(height: 15),
+                            RichText(
+                              text: const TextSpan(
+                                children: [
+                                  TextSpan(
+                                    text: "Package",
+                                    style: TextStyle(
+                                        color: Colors.black,
+                                        fontSize: 15,
+                                        fontWeight: FontWeight.w400),
+                                  ),
+                                  TextSpan(
+                                    text: " *",
+                                    style: TextStyle(color: Colors.red),
+                                  ),
+                                ],
+                              ),
+                            ),
+                            const SizedBox(height: 10),
+                            Row(
+                              children: [
                                 Expanded(
-                                  child: Container(
-                                    height: size.height * 0.06,
-                                    decoration: BoxDecoration(
-                                      color: Colors.grey.withOpacity(0.2),
-                                      borderRadius: BorderRadius.circular(15),
-                                    ),
-                                    child: Row(
-                                      children: [
-                                        Radio<String>(
-                                          activeColor: Colors.blue,
-                                          value: 'Package',
-                                          groupValue: selectedRole,
-                                          onChanged: (value) {
-                                            setState(() {
-                                              selectedRole = value!;
-                                            });
-                                          },
+                                  child: MultiSelectDropDown(
+                                    onOptionSelected: (List<ValueItem> selectedOptions) {
+                                      setState(() {
+                                        selectedPackage = int.parse(selectedOptions[0].value!);
+                                      });
+                                    },
+                                    options: [
+                                      for (int i = 0; i < packages.length; i++)
+                                        ValueItem(
+                                          label: '${packages[i]['package']['name']}, Listing (${packages[i]['package']['project_limit']}), Units (${packages[i]['package']['no_of_units'] ?? 0}), Valid until (${DateFormat('dd MMM yyyy').format(DateTime.parse(packages[i]['end_date']))})',
+                                          value: '${packages[i]['package']['id']}',
                                         ),
-                                        const Text(
-                                          "Package",
-                                          style: TextStyle(
-                                              fontWeight: FontWeight.bold, fontSize: 12),
-                                        ),
-                                      ],
-                                    ),
+                                    ],
+                                    selectionType: SelectionType.single,
+                                    chipConfig: const ChipConfig(wrapType: WrapType.wrap),
+                                    dropdownHeight: 300,
+                                    optionTextStyle: const TextStyle(fontSize: 16),
+                                    selectedOptionIcon: const Icon(Icons.check_circle),
                                   ),
                                 ),
                               ],
                             ),
-                            const SizedBox(height: 5),
-                            if (selectedRole == 'Free Listing')
-                              Padding(
-                                padding: const EdgeInsets.only(right: 80),
-                                child: Text(
-                                  "Note: You can post up to ${remainFreeProPost} free listings",
-                                  style: const TextStyle(color: Colors.red, fontSize: 12),
-                                ),
-                              ),
-                            if (selectedRole == 'Package') ...[
-                              const SizedBox(height: 15),
-                              RichText(
-                                text: const TextSpan(
-                                  children: [
-                                    TextSpan(
-                                      text: "Package",
-                                      style: TextStyle(
-                                          color: Colors.black,
-                                          fontSize: 15,
-                                          fontWeight: FontWeight.w400),
-                                    ),
-                                    TextSpan(
-                                      text: " *",
-                                      style: TextStyle(color: Colors.red),
-                                    ),
-                                  ],
-                                ),
-                              ),
-                              const SizedBox(height: 10),
-                              Row(
-                                children: [
-                                  Expanded(
-                                    child: MultiSelectDropDown(
-                                      onOptionSelected: (List<ValueItem> selectedOptions) {
-                                        setState(() {
-                                          selectedPackage = int.parse(selectedOptions[0].value!);
-                                        });
-                                      },
-                                      options: [
-                                        for (int i = 0; i < packages.length; i++)
-                                          ValueItem(
-                                            label: '${packages[i]['package']['name']}',
-                                            value: '${packages[i]['package']['id']}',
-                                          ),
-                                      ],
-                                      selectionType: SelectionType.single,
-                                      chipConfig: const ChipConfig(wrapType: WrapType.wrap),
-                                      dropdownHeight: 300,
-                                      optionTextStyle: const TextStyle(fontSize: 16),
-                                      selectedOptionIcon: const Icon(Icons.check_circle),
-                                    ),
-                                  ),
-                                ],
-                              ),
-                              const SizedBox(height: 10),
-                            ],
-                          ]
+                            const SizedBox(height: 10),
+                          ],
                         ]
                       ],
                     ),
-                    // Text('PROPERTY DETAILS',
-                    //   style: TextStyle(
-                    //       color: Colors.black,
-                    //       fontSize: 16,
-                    //       fontWeight: FontWeight.w700
-                    //   ),
-                    // ),
-                    // SizedBox(height: 15,),
-                    // Column(
-                    //   crossAxisAlignment: CrossAxisAlignment.start,
-                    //   children: [
-                    //     RichText(
-                    //       text: TextSpan(
-                    //         children: [
-                    //           TextSpan(text: "Project Type",
-                    //             style: TextStyle(
-                    //                 color: Colors.black,
-                    //                 fontSize: 15,
-                    //                 fontWeight: FontWeight.w600
-                    //             ),),
-                    //           TextSpan(
-                    //             text: " *",
-                    //             style: TextStyle(color: Colors.red), // Customize asterisk color
-                    //           ),
-                    //         ],
-                    //       ),
-                    //     ),
-                    //     SizedBox(height: 15,),
-                    //     Row(
-                    //       children: [
-                    //         InkWell(
-                    //           onTap: () {
-                    //             setState(() {
-                    //               projectType = 'Sell';
-                    //             });
-                    //           },
-                    //           child: Container(
-                    //             padding: EdgeInsets.only(left: 20,right: 10,top: 10,bottom: 10),
-                    //             decoration: BoxDecoration(
-                    //               color: projectType == 'Sell' ? Color(0xfffffbf3) : Color(0xfff2f2f2),
-                    //               border: Border.all(
-                    //                   color: projectType == 'Sell' ? Color(0xffffb239) : Color(0xffdcdcdc), width: 1
-                    //               ),
-                    //               borderRadius: BorderRadius.circular(30),
-                    //             ),alignment: Alignment.center,
-                    //             child: Row(
-                    //               children: [
-                    //                 Text('Sell',style: TextStyle(
-                    //                     fontSize: 12,
-                    //                     fontWeight: FontWeight.w500,
-                    //                     color: Color(0xff333333)
-                    //                 ),),
-                    //                 SizedBox(width: 10,),
-                    //                 ClipRRect(
-                    //                   borderRadius: BorderRadius.circular(10.0),
-                    //                   child: Image.asset(
-                    //                     'assets/Loans/_-113.png',
-                    //                     width: 18.0,
-                    //                     height: 18.0,
-                    //                     fit: BoxFit.cover,
-                    //                   ),
-                    //                 ),
-                    //               ],
-                    //             ),
-                    //           ),
-                    //         ),
-                    //         SizedBox(width: 10,),
-                    //         InkWell(
-                    //           onTap: () {
-                    //             setState(() {
-                    //               projectType = 'Rent';
-                    //             });
-                    //           },
-                    //           child: Container(
-                    //             padding: EdgeInsets.only(left: 20,right: 10,top: 10,bottom: 10),
-                    //             decoration: BoxDecoration(
-                    //               color: projectType == 'Rent' ? Color(0xfffffbf3) : Color(0xfff2f2f2),
-                    //               border: Border.all(
-                    //                   color: projectType == 'Rent' ? Color(0xffffb239) : Color(0xffdcdcdc), width: 1
-                    //               ),
-                    //               borderRadius: BorderRadius.circular(30),
-                    //             ),
-                    //             alignment: Alignment.center,
-                    //             child: Row(
-                    //               children: [
-                    //                 Text('Rent',style: TextStyle(
-                    //                     fontSize: 12,
-                    //                     fontWeight: FontWeight.w500,
-                    //                     color: Color(0xff333333)
-                    //                 ),),
-                    //                 SizedBox(width: 10,),
-                    //                 ClipRRect(
-                    //                   borderRadius: BorderRadius.circular(10.0),
-                    //                   child: Image.asset(
-                    //                     'assets/Loans/_-113.png',
-                    //                     width: 18.0,
-                    //                     height: 18.0,
-                    //                     fit: BoxFit.cover,
-                    //                   ),
-                    //                 ),
-                    //               ],
-                    //             ),
-                    //           ),
-                    //         ),
-                    //       ],
-                    //     ),
-                    //     SizedBox(height: 25,),
-                    //   ],
-                    // ),
-                    // Column(
-                    //   crossAxisAlignment: CrossAxisAlignment.start,
-                    //   children: [
-                    //     RichText(
-                    //       text: TextSpan(
-                    //         children: [
-                    //           TextSpan(text: "Categories",
-                    //             style: TextStyle(
-                    //                 color: Colors.black,
-                    //                 fontSize: 15,
-                    //                 fontWeight: FontWeight.w600
-                    //             ),),
-                    //           TextSpan(
-                    //             text: " *",
-                    //             style: TextStyle(color: Colors.red), // Customize asterisk color
-                    //           ),
-                    //         ],
-                    //       ),
-                    //     ),
-                    //     SizedBox(height: 10,),
-                    //     Row(
-                    //       children: [
-                    //         Expanded(
-                    //           child: MultiSelectDropDown(
-                    //             onOptionSelected: (List<ValueItem> selectedOptions) {
-                    //               setState(() {
-                    //                 category = selectedOptions[0].value!;
-                    //               });
-                    //             },
-                    //             selectedOptions: categoryWidget,
-                    //             options: categoryList.map((item) {
-                    //               return ValueItem(label: '${item['category']}', value: "${item['id']}");
-                    //             }).toList(),
-                    //             selectionType: SelectionType.single,
-                    //             chipConfig: const ChipConfig(wrapType: WrapType.wrap),
-                    //             dropdownHeight: 300,
-                    //             optionTextStyle: const TextStyle(fontSize: 16),
-                    //             selectedOptionIcon: const Icon(Icons.check_circle),
-                    //           ),
-                    //         ),
-                    //       ],
-                    //     ),
-                    //     SizedBox(height: 15,),
-                    //   ],
-                    // ),
-
-                    if (widget.body!['category_id'] == 2)
-                      Column(
+                    SizedBox(
+                      height: 10,
+                    ),
+                    Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
                         RichText(
                           text: TextSpan(
                             children: [
                               TextSpan(
-                                text: "Commercial Type",
+                                text: "Property Type",
                                 style: TextStyle(
                                     color: Colors.black,
                                     fontSize: 15,
@@ -599,23 +436,35 @@ class _ProjectFormSecondState extends State<ProjectFormSecond> {
                                     (List<ValueItem> selectedOptions) {
                                   setState(() {
                                     if(selectedOptions.length > 0) {
-                                      commercialType = selectedOptions[0].value!;
+                                      propertyType = selectedOptions[0].value!;
                                     } else {
-                                      commercialType = '';
+                                      propertyType = '';
                                     }
-                                    commercialTypeWidget = selectedOptions;
+                                    propertyTypeWidget = selectedOptions;
                                   });
                                 },
                                 selectedOptions:
-                                widget.isEdit! ? brokerageWidget : [],
-                                options: [
-                                  ValueItem(label: "Office Space", value: "Office Space"),
+                                widget.isEdit! ? propertyTypeWidget : [],
+                                options: widget.body!['category_id'] == 2 ? [
                                   ValueItem(label: "Shop", value: "Shop"),
+                                  ValueItem(label: "Office Space", value: "Office Space"),
+                                  ValueItem(label: "Showroom", value: "Showroom"),
+                                  ValueItem(label: "Bare Shell Office Space", value: "Bare Shell Office Space"),
+                                  ValueItem(label: "Ware House", value: "Ware House"),
+                                  ValueItem(label: "Godown", value: "Godown"),
                                   ValueItem(label: "Commercial Land", value: "Commercial Land"),
-                                  ValueItem(label: "Coworking Space", value: "Coworking Space"),
-                                  ValueItem(label: "Warehouse", value: "Warehouse"),
-                                  ValueItem(label: "Industrial Building", value: "Industrial Building"),
-                                  ValueItem(label: "Industrial Shed", value: "Industrial Shed")
+                                  ValueItem(label: "Cold Storage", value: "Cold Storage"),
+                                  ] : [
+                                  ValueItem(label: "Apartment", value: "Apartment"),
+                                  ValueItem(label: "Indipentant House/Villa", value: "Indipentant House/Villa"),
+                                  ValueItem(label: "Row House", value: "Row House"),
+                                  ValueItem(label: "Plot", value: "Plot"),
+                                  ValueItem(label: "Floor Villa", value: "Floor Villa"),
+                                  ValueItem(label: "1RK / Studio Apartment", value: "1RK / Studio Apartment"),
+                                  ValueItem(label: "Doublex", value: "Doublex"),
+                                  ValueItem(label: "Penthouse", value: "Penthouse"),
+                                  ValueItem(label: "Form House", value: "Form House"),
+                                  ValueItem(label: "Form Land", value: "Form Land"),
                                 ],
                                 selectionType: SelectionType.single,
                                 chipConfig:
@@ -710,6 +559,130 @@ class _ProjectFormSecondState extends State<ProjectFormSecond> {
                           text: TextSpan(
                             children: [
                               TextSpan(
+                                text: "Brokerage",
+                                style: TextStyle(
+                                    color: Colors.black,
+                                    fontSize: 15,
+                                    fontWeight: FontWeight.w600),
+                              ),
+                              TextSpan(
+                                text: " *",
+                                style: TextStyle(
+                                    color:
+                                    Colors.red), // Customize asterisk color
+                              ),
+                            ],
+                          ),
+                        ),
+                        SizedBox(
+                          height: 10,
+                        ),
+                        Row(
+                          children: [
+                            Expanded(
+                              child: MultiSelectDropDown(
+                                onOptionSelected:
+                                    (List<ValueItem> selectedOptions) {
+                                  setState(() {
+                                    if(selectedOptions.length > 0) {
+                                      brokerage = selectedOptions[0].value!;
+                                    } else {
+                                      brokerage = '';
+                                    }
+                                    brokerageWidget = selectedOptions;
+                                  });
+                                },
+                                selectedOptions:
+                                widget.isEdit! ? brokerageWidget : [],
+                                options: [
+                                  ValueItem(label: "Yes", value: "yes"),
+                                  ValueItem(label: "No", value: "no")
+                                ],
+                                selectionType: SelectionType.single,
+                                chipConfig:
+                                const ChipConfig(wrapType: WrapType.wrap),
+                                dropdownHeight: 300,
+                                optionTextStyle: const TextStyle(fontSize: 16),
+                                selectedOptionIcon:
+                                const Icon(Icons.check_circle),
+                              ),
+                            ),
+                          ],
+                        ),
+                        SizedBox(
+                          height: 15,
+                        ),
+                      ],
+                    ),
+                    Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        RichText(
+                          text: TextSpan(
+                            children: [
+                              TextSpan(
+                                text: "Status",
+                                style: TextStyle(
+                                    color: Colors.black,
+                                    fontSize: 15,
+                                    fontWeight: FontWeight.w600),
+                              ),
+                              TextSpan(
+                                text: " *",
+                                style: TextStyle(
+                                    color:
+                                    Colors.red), // Customize asterisk color
+                              ),
+                            ],
+                          ),
+                        ),
+                        SizedBox(
+                          height: 10,
+                        ),
+                        Row(
+                          children: [
+                            Expanded(
+                              child: MultiSelectDropDown(
+                                onOptionSelected:
+                                    (List<ValueItem> selectedOptions) {
+                                  setState(() {
+                                    if(selectedOptions.length > 0) {
+                                      status = selectedOptions[0].value!;
+                                    } else {
+                                      status = '';
+                                    }
+                                    statusWidget = selectedOptions;
+                                  });
+                                },
+                                selectedOptions: widget.isEdit! ? statusWidget : [],
+                                options: statusList.map((item) {
+                                  return ValueItem(
+                                      label: "${item['name']}",
+                                      value: "${item['id']}");
+                                }).toList(),
+                                selectionType: SelectionType.single,
+                                chipConfig:
+                                const ChipConfig(wrapType: WrapType.wrap),
+                                dropdownHeight: 300,
+                                optionTextStyle: const TextStyle(fontSize: 16),
+                                selectedOptionIcon:
+                                const Icon(Icons.check_circle),
+                              ),
+                            ),
+                          ],
+                        ),
+                        SizedBox(
+                          height: 15,
+                        ),
+                      ],
+                    ),
+                    Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        RichText(
+                          text: TextSpan(
+                            children: [
+                              TextSpan(
                                 text: "Price",
                                 style: TextStyle(
                                     color: Colors.black,
@@ -743,10 +716,48 @@ class _ProjectFormSecondState extends State<ProjectFormSecond> {
                                   padding: const EdgeInsets.only(
                                       left: 8.0, right: 5),
                                   child: TextFormField(
-                                    controller: priceControler,
+                                    controller: minPriceControler,
                                     keyboardType: TextInputType.number,
                                     decoration: const InputDecoration(
-                                        hintText: 'Enter Price..',
+                                        hintText: 'Enter Min Price..',
+                                        hintStyle: TextStyle(
+                                          fontFamily: 'Poppins',
+                                          fontSize: 14.0,
+                                          color: Color(0xff9c9c9c),
+                                          fontWeight: FontWeight.w500,
+                                          decoration: TextDecoration.none,
+                                        ),
+                                        enabledBorder: UnderlineInputBorder(
+                                          borderSide: BorderSide(
+                                            color: Colors.transparent,
+                                          ),
+                                        ),
+                                        focusedBorder: UnderlineInputBorder(
+                                            borderSide: BorderSide(
+                                          color: Colors.transparent,
+                                        ))),
+                                  ),
+                                ),
+                              ),
+                            ),
+                            SizedBox(width: 10),
+                            Expanded(
+                              child: Container(
+                                decoration: BoxDecoration(
+                                  border: Border.all(
+                                      width: 1, color: Color(0xffe1e1e1)),
+                                  color: Color(0xfff5f5f5),
+                                  borderRadius: BorderRadius.circular(
+                                      10.0), // Optional: Add border radius
+                                ),
+                                child: Padding(
+                                  padding: const EdgeInsets.only(
+                                      left: 8.0, right: 5),
+                                  child: TextFormField(
+                                    controller: maxPriceControler,
+                                    keyboardType: TextInputType.number,
+                                    decoration: const InputDecoration(
+                                        hintText: 'Enter Max Price..',
                                         hintStyle: TextStyle(
                                           fontFamily: 'Poppins',
                                           fontSize: 14.0,
@@ -774,78 +785,80 @@ class _ProjectFormSecondState extends State<ProjectFormSecond> {
                         ),
                       ],
                     ),
-                    if (widget.body!['category_id'] == 4)
-                      Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          RichText(
-                            text: TextSpan(
-                              children: [
-                                TextSpan(
-                                  text: "Avg Price",
-                                  style: TextStyle(
-                                      color: Colors.black,
-                                      fontSize: 15,
-                                      fontWeight: FontWeight.w600),
-                                ),
-                                TextSpan(
-                                  text: " *",
-                                  style: TextStyle(
-                                      color: Colors
-                                          .red), // Customize asterisk color
-                                ),
-                              ],
-                            ),
-                          ),
-                          SizedBox(
-                            height: 10,
-                          ),
-                          Row(
-                            children: [
-                              Expanded(
-                                child: Container(
-                                  decoration: BoxDecoration(
-                                    border: Border.all(
-                                        width: 1, color: Color(0xffe1e1e1)),
-                                    color: Color(0xfff5f5f5),
-                                    borderRadius: BorderRadius.circular(
-                                        10.0), // Optional: Add border radius
-                                  ),
-                                  child: Padding(
-                                    padding: const EdgeInsets.only(
-                                        left: 8.0, right: 5),
-                                    child: TextFormField(
-                                      controller: avgPriceControler,
-                                      keyboardType: TextInputType.number,
-                                      decoration: const InputDecoration(
-                                          hintText: 'Enter Avg Price..',
-                                          hintStyle: TextStyle(
-                                            fontFamily: 'Poppins',
-                                            fontSize: 14.0,
-                                            color: Color(0xff9c9c9c),
-                                            fontWeight: FontWeight.w500,
-                                            decoration: TextDecoration.none,
-                                          ),
-                                          enabledBorder: UnderlineInputBorder(
-                                            borderSide: BorderSide(
-                                              color: Colors.transparent,
-                                            ),
-                                          ),
-                                          focusedBorder: UnderlineInputBorder(
-                                              borderSide: BorderSide(
-                                            color: Colors.transparent,
-                                          ))),
-                                    ),
-                                  ),
-                                ),
-                              ),
-                            ],
-                          ),
-                          SizedBox(
-                            height: 25,
-                          ),
-                        ],
-                      ),
+                    // if (widget.body!['category_id'] == 4)
+                    //   Column(
+                    //     crossAxisAlignment: CrossAxisAlignment.start,
+                    //     children: [
+                    //       RichText(
+                    //         text: TextSpan(
+                    //           children: [
+                    //             TextSpan(
+                    //               text: "Avg Price",
+                    //               style: TextStyle(
+                    //                   color: Colors.black,
+                    //                   fontSize: 15,
+                    //                   fontWeight: FontWeight.w600),
+                    //             ),
+                    //             TextSpan(
+                    //               text: " *",
+                    //               style: TextStyle(
+                    //                   color: Colors
+                    //                       .red), // Customize asterisk color
+                    //             ),
+                    //           ],
+                    //         ),
+                    //       ),
+                    //       SizedBox(
+                    //         height: 10,
+                    //       ),
+                    //       Row(
+                    //         children: [
+                    //           Expanded(
+                    //             child: Container(
+                    //               decoration: BoxDecoration(
+                    //                 border: Border.all(
+                    //                     width: 1, color: Color(0xffe1e1e1)),
+                    //                 color: Color(0xfff5f5f5),
+                    //                 borderRadius: BorderRadius.circular(
+                    //                     10.0), // Optional: Add border radius
+                    //               ),
+                    //               child: Padding(
+                    //                 padding: const EdgeInsets.only(
+                    //                     left: 8.0, right: 5),
+                    //                 child: TextFormField(
+                    //                   controller: avgPriceControler,
+                    //                   keyboardType: TextInputType.number,
+                    //                   decoration: const InputDecoration(
+                    //                       hintText: 'Enter Avg Price..',
+                    //                       hintStyle: TextStyle(
+                    //                         fontFamily: 'Poppins',
+                    //                         fontSize: 14.0,
+                    //                         color: Color(0xff9c9c9c),
+                    //                         fontWeight: FontWeight.w500,
+                    //                         decoration: TextDecoration.none,
+                    //                       ),
+                    //                       enabledBorder: UnderlineInputBorder(
+                    //                         borderSide: BorderSide(
+                    //                           color: Colors.transparent,
+                    //                         ),
+                    //                       ),
+                    //                       focusedBorder: UnderlineInputBorder(
+                    //                           borderSide: BorderSide(
+                    //                         color: Colors.transparent,
+                    //                       ))),
+                    //                 ),
+                    //               ),
+                    //             ),
+                    //           ),
+                    //         ],
+                    //       ),
+                    //       SizedBox(
+                    //         height: 25,
+                    //       ),
+                    //     ],
+                    //   ),
+
+
                     Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
@@ -853,142 +866,18 @@ class _ProjectFormSecondState extends State<ProjectFormSecond> {
                           text: TextSpan(
                             children: [
                               TextSpan(
-                                text: "Brokerage",
+                                text: "Offer section",
                                 style: TextStyle(
                                     color: Colors.black,
                                     fontSize: 15,
                                     fontWeight: FontWeight.w600),
                               ),
-                              TextSpan(
-                                text: " *",
-                                style: TextStyle(
-                                    color:
-                                        Colors.red), // Customize asterisk color
-                              ),
-                            ],
-                          ),
-                        ),
-                        SizedBox(
-                          height: 10,
-                        ),
-                        Row(
-                          children: [
-                            Expanded(
-                              child: MultiSelectDropDown(
-                                onOptionSelected:
-                                    (List<ValueItem> selectedOptions) {
-                                  setState(() {
-                                    if(selectedOptions.length > 0) {
-                                      brokerage = selectedOptions[0].value!;
-                                    } else {
-                                      brokerage = '';
-                                    }
-                                    brokerageWidget = selectedOptions;
-                                  });
-                                },
-                                selectedOptions:
-                                    widget.isEdit! ? brokerageWidget : [],
-                                options: [
-                                  ValueItem(label: "Yes", value: "yes"),
-                                  ValueItem(label: "No", value: "no")
-                                ],
-                                selectionType: SelectionType.single,
-                                chipConfig:
-                                    const ChipConfig(wrapType: WrapType.wrap),
-                                dropdownHeight: 300,
-                                optionTextStyle: const TextStyle(fontSize: 16),
-                                selectedOptionIcon:
-                                    const Icon(Icons.check_circle),
-                              ),
-                            ),
-                          ],
-                        ),
-                        SizedBox(
-                          height: 15,
-                        ),
-                      ],
-                    ),
-                    Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        RichText(
-                          text: TextSpan(
-                            children: [
-                              TextSpan(
-                                text: "Status",
-                                style: TextStyle(
-                                    color: Colors.black,
-                                    fontSize: 15,
-                                    fontWeight: FontWeight.w600),
-                              ),
-                              TextSpan(
-                                text: " *",
-                                style: TextStyle(
-                                    color:
-                                        Colors.red), // Customize asterisk color
-                              ),
-                            ],
-                          ),
-                        ),
-                        SizedBox(
-                          height: 10,
-                        ),
-                        Row(
-                          children: [
-                            Expanded(
-                              child: MultiSelectDropDown(
-                                onOptionSelected:
-                                    (List<ValueItem> selectedOptions) {
-                                  setState(() {
-                                    if(selectedOptions.length > 0) {
-                                      status = selectedOptions[0].value!;
-                                    } else {
-                                      status = '';
-                                    }
-                                    statusWidget = selectedOptions;
-                                  });
-                                },
-                                selectedOptions: widget.isEdit! ? statusWidget : [],
-                                options: statusList.map((item) {
-                                  return ValueItem(
-                                      label: "${item['name']}",
-                                      value: "${item['id']}");
-                                }).toList(),
-                                selectionType: SelectionType.single,
-                                chipConfig:
-                                    const ChipConfig(wrapType: WrapType.wrap),
-                                dropdownHeight: 300,
-                                optionTextStyle: const TextStyle(fontSize: 16),
-                                selectedOptionIcon:
-                                    const Icon(Icons.check_circle),
-                              ),
-                            ),
-                          ],
-                        ),
-                        SizedBox(
-                          height: 15,
-                        ),
-                      ],
-                    ),
-                    Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        RichText(
-                          text: TextSpan(
-                            children: [
-                              TextSpan(
-                                text: "Offers",
-                                style: TextStyle(
-                                    color: Colors.black,
-                                    fontSize: 15,
-                                    fontWeight: FontWeight.w600),
-                              ),
-                              TextSpan(
-                                text: " *",
-                                style: TextStyle(
-                                    color:
-                                        Colors.red), // Customize asterisk color
-                              ),
+                              // TextSpan(
+                              //   text: " *",
+                              //   style: TextStyle(
+                              //       color:
+                              //           Colors.red), // Customize asterisk color
+                              // ),
                             ],
                           ),
                         ),
@@ -1051,7 +940,7 @@ class _ProjectFormSecondState extends State<ProjectFormSecond> {
                           text: TextSpan(
                             children: [
                               TextSpan(
-                                text: "Description",
+                                text: "About Project",
                                 style: TextStyle(
                                     color: Colors.black,
                                     fontSize: 15,
@@ -1115,409 +1004,6 @@ class _ProjectFormSecondState extends State<ProjectFormSecond> {
                         ),
                       ],
                     ),
-                    Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        RichText(
-                          text: TextSpan(
-                            children: [
-                              TextSpan(
-                                text: "City",
-                                style: TextStyle(
-                                    color: Colors.black,
-                                    fontSize: 15,
-                                    fontWeight: FontWeight.w600),
-                              ),
-                              TextSpan(
-                                text: " *",
-                                style: TextStyle(
-                                    color:
-                                        Colors.red), // Customize asterisk color
-                              ),
-                            ],
-                          ),
-                        ),
-                        SizedBox(
-                          height: 10,
-                        ),
-                        Row(
-                          children: [
-                            Expanded(
-                              child: Container(
-                                decoration: BoxDecoration(
-                                  border: Border.all(
-                                      width: 1, color: Color(0xffe1e1e1)),
-                                  color: Color(0xfff5f5f5),
-                                  borderRadius: BorderRadius.circular(
-                                      10.0), // Optional: Add border radius
-                                ),
-                                child: Padding(
-                                  padding: const EdgeInsets.only(
-                                      left: 8.0, right: 5),
-                                  child: TextFormField(
-                                    controller: cityControler,
-                                    decoration: const InputDecoration(
-                                        hintText: 'Enter City..',
-                                        hintStyle: TextStyle(
-                                          fontFamily: 'Poppins',
-                                          fontSize: 14.0,
-                                          color: Color(0xff9c9c9c),
-                                          fontWeight: FontWeight.w500,
-                                          decoration: TextDecoration.none,
-                                        ),
-                                        enabledBorder: UnderlineInputBorder(
-                                          borderSide: BorderSide(
-                                            color: Colors.transparent,
-                                          ),
-                                        ),
-                                        focusedBorder: UnderlineInputBorder(
-                                            borderSide: BorderSide(
-                                          color: Colors.transparent,
-                                        ))),
-                                  ),
-                                ),
-                              ),
-                            ),
-                          ],
-                        ),
-                        SizedBox(
-                          height: 25,
-                        ),
-                      ],
-                    ),
-                    Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        RichText(
-                          text: TextSpan(
-                            children: [
-                              TextSpan(
-                                text: "State",
-                                style: TextStyle(
-                                    color: Colors.black,
-                                    fontSize: 15,
-                                    fontWeight: FontWeight.w600),
-                              ),
-                              TextSpan(
-                                text: " *",
-                                style: TextStyle(
-                                    color:
-                                        Colors.red), // Customize asterisk color
-                              ),
-                            ],
-                          ),
-                        ),
-                        SizedBox(
-                          height: 10,
-                        ),
-                        Row(
-                          children: [
-                            Expanded(
-                              child: Container(
-                                decoration: BoxDecoration(
-                                  border: Border.all(
-                                      width: 1, color: Color(0xffe1e1e1)),
-                                  color: Color(0xfff5f5f5),
-                                  borderRadius: BorderRadius.circular(
-                                      10.0), // Optional: Add border radius
-                                ),
-                                child: Padding(
-                                  padding: const EdgeInsets.only(
-                                      left: 8.0, right: 5),
-                                  child: TextFormField(
-                                    controller: StateController,
-                                    decoration: const InputDecoration(
-                                        hintText: 'Enter State..',
-                                        hintStyle: TextStyle(
-                                          fontFamily: 'Poppins',
-                                          fontSize: 14.0,
-                                          color: Color(0xff9c9c9c),
-                                          fontWeight: FontWeight.w500,
-                                          decoration: TextDecoration.none,
-                                        ),
-                                        enabledBorder: UnderlineInputBorder(
-                                          borderSide: BorderSide(
-                                            color: Colors.transparent,
-                                          ),
-                                        ),
-                                        focusedBorder: UnderlineInputBorder(
-                                            borderSide: BorderSide(
-                                          color: Colors.transparent,
-                                        ))),
-                                  ),
-                                ),
-                              ),
-                            ),
-                          ],
-                        ),
-                        SizedBox(
-                          height: 25,
-                        ),
-                      ],
-                    ),  Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        RichText(
-                          text: TextSpan(
-                            children: [
-                              TextSpan(
-                                text: "Country",
-                                style: TextStyle(
-                                    color: Colors.black,
-                                    fontSize: 15,
-                                    fontWeight: FontWeight.w600),
-                              ),
-                              TextSpan(
-                                text: " *",
-                                style: TextStyle(
-                                    color:
-                                        Colors.red), // Customize asterisk color
-                              ),
-                            ],
-                          ),
-                        ),
-                        SizedBox(
-                          height: 10,
-                        ),
-                        Row(
-                          children: [
-                            Expanded(
-                              child: Container(
-                                decoration: BoxDecoration(
-                                  border: Border.all(
-                                      width: 1, color: Color(0xffe1e1e1)),
-                                  color: Color(0xfff5f5f5),
-                                  borderRadius: BorderRadius.circular(
-                                      10.0), // Optional: Add border radius
-                                ),
-                                child: Padding(
-                                  padding: const EdgeInsets.only(
-                                      left: 8.0, right: 5),
-                                  child: TextFormField(
-                                    controller: ContryControler,
-                                    decoration: const InputDecoration(
-                                        hintText: 'Enter Country..',
-                                        hintStyle: TextStyle(
-                                          fontFamily: 'Poppins',
-                                          fontSize: 14.0,
-                                          color: Color(0xff9c9c9c),
-                                          fontWeight: FontWeight.w500,
-                                          decoration: TextDecoration.none,
-                                        ),
-                                        enabledBorder: UnderlineInputBorder(
-                                          borderSide: BorderSide(
-                                            color: Colors.transparent,
-                                          ),
-                                        ),
-                                        focusedBorder: UnderlineInputBorder(
-                                            borderSide: BorderSide(
-                                          color: Colors.transparent,
-                                        ))),
-                                  ),
-                                ),
-                              ),
-                            ),
-                          ],
-                        ),
-                        SizedBox(
-                          height: 25,
-                        ),
-                      ],
-                    ),
-                    Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        RichText(
-                          text: TextSpan(
-                            children: [
-                              TextSpan(
-                                text: "Address",
-                                style: TextStyle(
-                                    color: Colors.black,
-                                    fontSize: 15,
-                                    fontWeight: FontWeight.w600),
-                              ),
-                              TextSpan(
-                                text: " *",
-                                style: TextStyle(
-                                    color:
-                                    Colors.red), // Customize asterisk color
-                              ),
-                            ],
-                          ),
-                        ),
-                        SizedBox(
-                          height: 10,
-                        ),
-                        Row(
-                          children: [
-                            Expanded(
-                              child: Container(
-                                decoration: BoxDecoration(
-                                  border: Border.all(
-                                      width: 1, color: Color(0xffe1e1e1)),
-                                  color: Color(0xfff5f5f5),
-                                  borderRadius: BorderRadius.circular(
-                                      10.0), // Optional: Add border radius
-                                ),
-                                child: Padding(
-                                  padding: const EdgeInsets.only(
-                                      left: 8.0, right: 5),
-                                  child: TextFormField(
-                                    controller: AdresssController,
-                                    decoration: const InputDecoration(
-                                        hintText: 'Enter Address..',
-                                        hintStyle: TextStyle(
-                                          fontFamily: 'Poppins',
-                                          fontSize: 14.0,
-                                          color: Color(0xff9c9c9c),
-                                          fontWeight: FontWeight.w500,
-                                          decoration: TextDecoration.none,
-                                        ),
-                                        enabledBorder: UnderlineInputBorder(
-                                          borderSide: BorderSide(
-                                            color: Colors.transparent,
-                                          ),
-                                        ),
-                                        focusedBorder: UnderlineInputBorder(
-                                            borderSide: BorderSide(
-                                              color: Colors.transparent,
-                                            ))),
-                                  ),
-                                ),
-                              ),
-                            ),
-                          ],
-                        ),
-                        SizedBox(
-                          height: 25,
-                        ),
-                      ],
-                    ),
-                    Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Row(
-                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                          children: [
-                            RichText(
-                              text: TextSpan(
-                                children: [
-                                  TextSpan(
-                                    text: "Project Location",
-                                    style: TextStyle(
-                                        color: Colors.black,
-                                        fontSize: 15,
-                                        fontWeight: FontWeight.w600),
-                                  ),
-                                  TextSpan(
-                                    text: " *",
-                                    style: TextStyle(
-                                        color: Colors
-                                            .red), // Customize asterisk color
-                                  ),
-                                ],
-                              ),
-                            ),
-                            InkWell(
-                              onTap: () async {
-                                FocusManager.instance.primaryFocus?.unfocus();
-                                Map? placeMark = await Navigator.pushNamed(
-                                    context, Routes.chooseLocaitonMap) as Map?;
-                                var latlng = placeMark!['latlng'];
-                                if (latlng != null) {
-                                  var address = await getAddressFromLatLng(
-                                      latlng.latitude, latlng.longitude);
-                                  setState(() {
-                                    locationControler.text = address as String;
-                                    lat = '${latlng.latitude}';
-                                    lng = '${latlng.longitude}';
-                                  });
-                                }
-                              },
-                              child: Text(
-                                'Choose on map',
-                                style: TextStyle(
-                                    color: Colors.blue,
-                                    fontSize: 12,
-                                    fontWeight: FontWeight.w600),
-                              ),
-                            )
-                          ],
-                        ),
-                        SizedBox(
-                          height: 10,
-                        ),
-                        Row(
-                          children: [
-                            Expanded(
-                              child: Container(
-                                decoration: BoxDecoration(
-                                  border: Border.all(
-                                      width: 1, color: Color(0xffe1e1e1)),
-                                  color: Color(0xfff5f5f5),
-                                  borderRadius: BorderRadius.circular(
-                                      10.0), // Optional: Add border radius
-                                ),
-                                child: Padding(
-                                  padding: const EdgeInsets.only(
-                                      left: 8.0, right: 5),
-                                  child: TextFormField(
-                                    maxLines: 4,
-                                    controller: locationControler,
-                                    readOnly: true,
-                                    onTap: () async {
-                                      FocusManager.instance.primaryFocus?.unfocus();
-                                      Map? placeMark = await Navigator.pushNamed(
-                                          context, Routes.chooseLocaitonMap) as Map?;
-                                      var latlng = placeMark!['latlng'];
-                                      if (latlng != null) {
-                                        var address = await getAddressFromLatLng(
-                                            latlng.latitude, latlng.longitude);
-                                        setState(() {
-                                          locationControler.text = address as String;
-                                          lat = '${latlng.latitude}';
-                                          lng = '${latlng.longitude}';
-                                        });
-                                      }
-                                    },
-                                    decoration: const InputDecoration(
-                                        hintText: 'location..',
-                                        hintStyle: TextStyle(
-                                          fontFamily: 'Poppins',
-                                          fontSize: 14.0,
-                                          color: Color(0xff9c9c9c),
-                                          fontWeight: FontWeight.w500,
-                                          decoration: TextDecoration.none,
-                                        ),
-                                        enabledBorder: UnderlineInputBorder(
-                                          borderSide: BorderSide(
-                                            color: Colors.transparent,
-                                          ),
-                                        ),
-                                        focusedBorder: UnderlineInputBorder(
-                                            borderSide: BorderSide(
-                                          color: Colors.transparent,
-                                        ))),
-                                    onChanged: (String? val) async {
-                                      final results =
-                                          await locationFromAddress(val!);
-                                      setState(() {
-                                        lat = '${results[0]}';
-                                        lng = '${results[1]}';
-                                      });
-                                    },
-                                  ),
-                                ),
-                              ),
-                            ),
-                          ],
-                        ),
-                        SizedBox(
-                          height: 15,
-                        ),
-                      ],
-                    ),
                     SizedBox(
                       height: 25,
                     ),
@@ -1545,38 +1031,28 @@ class _ProjectFormSecondState extends State<ProjectFormSecond> {
               ),
             ),
           if(!loading)
-              InkWell(
+            InkWell(
             onTap: () {
-              if (widget.body!['category_id'] == 4) {
-                if (projectType != '' &&
-                    nameControler.text != '' &&
-                    priceControler.text != '' &&
+                if (nameControler.text != '' &&
+                    minPriceControler.text != '' &&
+                    maxPriceControler.text != '' &&
                     brokerage != '' &&
                     status != '' &&
                     descriptionControler.text != '' &&
-                    locationControler.text != '' &&
-                    cityControler.text != '' &&
-                    StateController.text != '' &&
-                    ContryControler.text != '' &&
-                    AdresssController.text != '' &&
-                    avgPriceControler.text != '') {
+                    ((remainFreeProPost > 0 && selectedPackage == 0) ||
+                        (selectedPackage != 0 && remainFreeProPost < 1))) {
                   var body = {
-                    'project_type': 'Sell',
-                    'property_type': 'Sell',
                     'package_id': selectedPackage,
                     'title': nameControler.text,
-                    'price': priceControler.text,
+                    'min_price': minPriceControler.text,
+                    'max_price': maxPriceControler.text,
                     'avg_price': avgPriceControler.text,
+                    'property_type': propertyType,
+                    'project_status': status,
                     'brokerage': brokerage,
                     'project_status': status,
                     'offers': offersControler.text,
                     'description': descriptionControler.text,
-                    'city': cityControler.text,
-                    'state' : StateController.text,
-                    'country' : ContryControler,
-                    'address': locationControler.text,
-                    'latitude': lat,
-                    'longitude': lng,
                     ...widget.body!
                   };
                   Navigator.push(
@@ -1595,56 +1071,6 @@ class _ProjectFormSecondState extends State<ProjectFormSecond> {
                       type: MessageType.warning,
                       messageDuration: 5);
                 }
-              } else {
-                if (projectType != '' &&
-                    nameControler.text != '' &&
-                    priceControler.text != '' &&
-                    brokerage != '' &&
-                    commercialType != '' &&
-                    status != '' &&
-                    remainFreeProPost < 0 || selectedPackage != null &&
-                    offersControler.text != '' &&
-                    descriptionControler.text != '' &&
-                    locationControler.text != '' &&
-                    StateController.text != '' &&
-                    ContryControler.text != '' &&
-                    AdresssController.text != '' &&
-                    cityControler.text != '') {
-                  var body = {
-                    'project_type': 'Sell',
-                    'title': nameControler.text,
-                    'price': priceControler.text,
-                    'avg_price': avgPriceControler.text,
-                    'brokerage': brokerage,
-                    'property_type': commercialType,
-                    'project_status': status,
-                    'offers': offersControler.text,
-                    'description': descriptionControler.text,
-                    'city': cityControler.text,
-                    'state' : StateController.text,
-                    'country' : ContryControler,
-                    'address': locationControler.text,
-                    'latitude': lat,
-                    'longitude': lng,
-                    ...widget.body!
-                  };
-                  Navigator.push(
-                    context,
-                    MaterialPageRoute(
-                        builder: (context) => ProjectFormTwo(
-                            body: body,
-                            isEdit: widget.isEdit,
-                            data: widget.data)),
-                  );
-                } else {
-                  HelperUtils.showSnackBarMessage(
-                      context,
-                      UiUtils.getTranslatedLabel(
-                          context, "Please fill all the (*) marked fields!"),
-                      type: MessageType.warning,
-                      messageDuration: 5);
-                }
-              }
             },
             child: Container(
               margin: EdgeInsets.only(bottom: 10, left: 15, right: 15),

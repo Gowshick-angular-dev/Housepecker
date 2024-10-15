@@ -69,7 +69,7 @@ class _FavoritesScreenState extends State<FavoritesScreen> {
       projectLoading = true;
     });
     var staResponse = await Api.get(url: Api.favProjects);
-    if(!staResponse['error']) {
+    if (!staResponse['error']) {
       setState(() {
         favProjectsList = staResponse['data'];
         projectLoading = false;
@@ -108,26 +108,27 @@ class _FavoritesScreenState extends State<FavoritesScreen> {
                 TabBar(
                   tabs: [
                     Tab(
-                        child: Text('Properties',
-                          style: TextStyle(
-                              color: Color(0xff333333),
-                              fontSize: 15,
-                              fontWeight: FontWeight.w600
-                          ),
-                        ),
+                      child: Text(
+                        'Properties',
+                        style: TextStyle(
+                            color: Color(0xff333333),
+                            fontSize: 15,
+                            fontWeight: FontWeight.w600),
+                      ),
                     ),
                     Tab(
-                        child: Text('Projects',
-                          style: TextStyle(
-                              color: Color(0xff333333),
-                              fontSize: 15,
-                              fontWeight: FontWeight.w600
-                          ),
-                        ),
+                      child: Text(
+                        'Projects',
+                        style: TextStyle(
+                            color: Color(0xff333333),
+                            fontSize: 15,
+                            fontWeight: FontWeight.w600),
+                      ),
                     ),
                   ],
                 ),
-                Expanded( // Use Expanded for TabBarView to fill remaining space
+                Expanded(
+                  // Use Expanded for TabBarView to fill remaining space
                   child: TabBarView(
                     children: [
                       BlocBuilder<FetchFavoritesCubit, FetchFavoritesState>(
@@ -137,11 +138,14 @@ class _FavoritesScreenState extends State<FavoritesScreen> {
                           }
                           if (state is FetchFavoritesFailure) {
                             if (state.errorMessage is ApiException) {
-                              if ((state.errorMessage as ApiException).errorMessage ==
+                              if ((state.errorMessage as ApiException)
+                                      .errorMessage ==
                                   "no-internet") {
                                 return NoInternet(
                                   onRetry: () {
-                                    context.read<FetchFavoritesCubit>().fetchFavorites();
+                                    context
+                                        .read<FetchFavoritesCubit>()
+                                        .fetchFavorites();
                                   },
                                 );
                               }
@@ -153,11 +157,14 @@ class _FavoritesScreenState extends State<FavoritesScreen> {
                               return SingleChildScrollView(
                                 physics: const BouncingScrollPhysics(),
                                 child: SizedBox(
-                                  height: context.screenHeight - 100.rh(context),
+                                  height:
+                                      context.screenHeight - 100.rh(context),
                                   child: Center(
                                     child: NoDataFound(
                                       onTap: () {
-                                        context.read<FetchFavoritesCubit>().fetchFavorites();
+                                        context
+                                            .read<FetchFavoritesCubit>()
+                                            .fetchFavorites();
                                       },
                                     ),
                                   ),
@@ -173,18 +180,22 @@ class _FavoritesScreenState extends State<FavoritesScreen> {
                                     shrinkWrap: true,
                                     controller: _pageScrollController,
                                     itemCount: state.propertymodel.length,
-                                    gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+                                    gridDelegate:
+                                        SliverGridDelegateWithFixedCrossAxisCount(
                                       crossAxisCount: 2,
                                       crossAxisSpacing: 8,
                                       mainAxisSpacing: 8,
                                       childAspectRatio: 1 / 1.2,
                                     ),
-
                                     itemBuilder: (context, index) {
-                                      PropertyModel property = state.propertymodel[index];
-                                      context.read<LikedPropertiesCubit>().add(property.id);
+                                      PropertyModel property =
+                                          state.propertymodel[index];
+                                      context
+                                          .read<LikedPropertiesCubit>()
+                                          .add(property.id);
                                       return BlocProvider(
-                                        create: (context) => AddToFavoriteCubitCubit(),
+                                        create: (context) =>
+                                            AddToFavoriteCubitCubit(),
                                         child: GestureDetector(
                                           onTap: () {
                                             Navigator.pushNamed(
@@ -202,11 +213,14 @@ class _FavoritesScreenState extends State<FavoritesScreen> {
                                               if (type == FavoriteType.add) {
                                                 context
                                                     .read<FetchFavoritesCubit>()
-                                                    .add(state.propertymodel[index]);
+                                                    .add(state
+                                                        .propertymodel[index]);
                                               } else {
                                                 context
                                                     .read<FetchFavoritesCubit>()
-                                                    .remove(state.propertymodel[index].id);
+                                                    .remove(state
+                                                        .propertymodel[index]
+                                                        .id);
                                               }
                                             },
                                           ),
@@ -217,7 +231,8 @@ class _FavoritesScreenState extends State<FavoritesScreen> {
                                 ),
                                 if (state.isLoadingMore)
                                   UiUtils.progress(
-                                    normalProgressColor: context.color.tertiaryColor,
+                                    normalProgressColor:
+                                        context.color.tertiaryColor,
                                   )
                               ],
                             );
@@ -230,250 +245,387 @@ class _FavoritesScreenState extends State<FavoritesScreen> {
                         padding: const EdgeInsets.all(10),
                         child: Column(
                           children: [
-                            if(favProjectsList.length > 0)
-                            Expanded(
-                              child: GridView.builder(
-                                shrinkWrap: true,
-                                scrollDirection: Axis.vertical,
-                                itemCount: favProjectsList.length,
-                                gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
-                                  crossAxisCount: 2,
-                                  crossAxisSpacing: 8,
-                                  mainAxisSpacing: 8,
-                                  mainAxisExtent: 230,
-                                ),
-                                itemBuilder: (context, index) {
-                                  if(!projectLoading) {
-                                    return Container(
-                                      width: 230,
-                                      child: GestureDetector(
-                                          onTap: () {
-                                            Navigator.push(
-                                              context,
-                                              MaterialPageRoute(builder: (context) =>
-                                                  ProjectDetails(property: favProjectsList[index], fromMyProperty: true,
-                                                      fromCompleteEnquiry: true, fromSlider: false, fromPropertyAddSuccess: true
-                                                  )),
-                                            );
-                                          },
-                                          child: Container(
-                                            // height: addBottom == null ? 124 : (124 + (additionalHeight ?? 0)),
-                                            decoration: BoxDecoration(
-                                                color: Colors.white,
-                                                borderRadius: BorderRadius.circular(15),
-                                                border: Border.all(
-                                                    width: 1,
-                                                    color: Color(0xffe0e0e0)
-                                                )
-                                            ),
-                                            child: Stack(
-                                              fit: StackFit.expand,
-                                              children: [
-                                                Column(
-                                                  mainAxisSize: MainAxisSize.min,
-                                                  children: [
-                                                    Column(
-                                                      children: [
-                                                        ClipRRect(
-                                                          borderRadius: BorderRadius.only(
-                                                            topRight: Radius.circular(15),
-                                                            topLeft:Radius.circular(15),
-                                                          ),
-                                                          child: Stack(
-                                                            children: [
-                                                              UiUtils.getImage(
-                                                                favProjectsList[index]['image'] ?? "",
-                                                                width: double.infinity,fit: BoxFit.cover,height: 103,
-                                                              ),
-                                                              const PositionedDirectional(
-                                                                  start: 5,
-                                                                  top: 5,
-                                                                  child: PromotedCard(
-                                                                      type: PromoteCardType.icon)),
-                                                              PositionedDirectional(
-                                                                bottom: 6,
-                                                                start: 6,
-                                                                child: Container(
-                                                                  height: 19,
-                                                                  clipBehavior: Clip.antiAlias,
-                                                                  decoration: BoxDecoration(
-                                                                      color: context.color.secondaryColor
-                                                                          .withOpacity(0.7),
-                                                                      borderRadius:
-                                                                      BorderRadius.circular(4)),
-                                                                  child: BackdropFilter(
-                                                                    filter: ImageFilter.blur(
-                                                                        sigmaX: 2, sigmaY: 3),
-                                                                    child: Padding(
-                                                                      padding: const EdgeInsets.symmetric(
-                                                                          horizontal: 8.0),
-                                                                      child: Center(
-                                                                        child: Text(favProjectsList[index]['category'] != null ?
-                                                                          favProjectsList[index]['category']['category'] : '',
-                                                                        )
-                                                                            .color(
-                                                                          context.color.textColorDark,
-                                                                        )
-                                                                            .bold(weight: FontWeight.w500)
-                                                                            .size(10),
+                            if (favProjectsList.length > 0)
+                              Expanded(
+                                child: GridView.builder(
+                                  shrinkWrap: true,
+                                  scrollDirection: Axis.vertical,
+                                  itemCount: favProjectsList.length,
+                                  gridDelegate:
+                                      SliverGridDelegateWithFixedCrossAxisCount(
+                                    crossAxisCount: 2,
+                                    crossAxisSpacing: 8,
+                                    mainAxisSpacing: 8,
+                                    mainAxisExtent: 230,
+                                  ),
+                                  itemBuilder: (context, index) {
+                                    if (!projectLoading) {
+                                      return Container(
+                                        width: 230,
+                                        child: GestureDetector(
+                                            onTap: () {
+                                              Navigator.push(
+                                                context,
+                                                MaterialPageRoute(
+                                                    builder:
+                                                        (context) => ProjectDetails(
+                                                            property:
+                                                                favProjectsList[
+                                                                    index],
+                                                            fromMyProperty:
+                                                                true,
+                                                            fromCompleteEnquiry:
+                                                                true,
+                                                            fromSlider: false,
+                                                            fromPropertyAddSuccess:
+                                                                true)),
+                                              );
+                                            },
+                                            child: Container(
+                                              // height: addBottom == null ? 124 : (124 + (additionalHeight ?? 0)),
+                                              decoration: BoxDecoration(
+                                                  color: Colors.white,
+                                                  borderRadius:
+                                                      BorderRadius.circular(15),
+                                                  border: Border.all(
+                                                      width: 1,
+                                                      color:
+                                                          Color(0xffe0e0e0))),
+                                              child: Stack(
+                                                fit: StackFit.expand,
+                                                children: [
+                                                  Column(
+                                                    mainAxisSize:
+                                                        MainAxisSize.min,
+                                                    children: [
+                                                      Column(
+                                                        children: [
+                                                          ClipRRect(
+                                                            borderRadius:
+                                                                BorderRadius
+                                                                    .only(
+                                                              topRight: Radius
+                                                                  .circular(15),
+                                                              topLeft: Radius
+                                                                  .circular(15),
+                                                            ),
+                                                            child: Stack(
+                                                              children: [
+                                                                UiUtils
+                                                                    .getImage(
+                                                                  favProjectsList[
+                                                                              index]
+                                                                          [
+                                                                          'image'] ??
+                                                                      "",
+                                                                  width: double
+                                                                      .infinity,
+                                                                  fit: BoxFit
+                                                                      .cover,
+                                                                  height: 103,
+                                                                ),
+                                                                const PositionedDirectional(
+                                                                    start: 5,
+                                                                    top: 5,
+                                                                    child: PromotedCard(
+                                                                        type: PromoteCardType
+                                                                            .icon)),
+                                                                PositionedDirectional(
+                                                                  bottom: 6,
+                                                                  start: 6,
+                                                                  child:
+                                                                      Container(
+                                                                    height: 19,
+                                                                    clipBehavior:
+                                                                        Clip.antiAlias,
+                                                                    decoration: BoxDecoration(
+                                                                        color: context
+                                                                            .color
+                                                                            .secondaryColor
+                                                                            .withOpacity(
+                                                                                0.7),
+                                                                        borderRadius:
+                                                                            BorderRadius.circular(4)),
+                                                                    child:
+                                                                        BackdropFilter(
+                                                                      filter: ImageFilter.blur(
+                                                                          sigmaX:
+                                                                              2,
+                                                                          sigmaY:
+                                                                              3),
+                                                                      child:
+                                                                          Padding(
+                                                                        padding: const EdgeInsets
+                                                                            .symmetric(
+                                                                            horizontal:
+                                                                                8.0),
+                                                                        child:
+                                                                            Center(
+                                                                          child: Text(
+                                                                            favProjectsList[index]['category'] != null
+                                                                                ? favProjectsList[index]['category']['category']
+                                                                                : '',
+                                                                          )
+                                                                              .color(
+                                                                                context.color.textColorDark,
+                                                                              )
+                                                                              .bold(weight: FontWeight.w500)
+                                                                              .size(10),
+                                                                        ),
                                                                       ),
                                                                     ),
                                                                   ),
                                                                 ),
-                                                              ),
-                                                              Positioned(
-                                                                right: 8,
-                                                                top: 8,
-                                                                child: InkWell(
-                                                                  onTap: () {
-                                                                    GuestChecker.check(onNotGuest: () async {
-                                                                      var body = {
-                                                                        "type": 0,
-                                                                        "project_id": favProjectsList[index]['id']
-                                                                      };
-                                                                      var response = await Api.post(
-                                                                          url: Api.addFavProject, parameter: body);
-                                                                      if (!response['error']) {
-                                                                        favProjectsList.removeAt(index);
-                                                                        setState(() {});
-                                                                      }
-                                                                    });
-                                                                  },
-                                                                  child: Container(
-                                                                    width: 32,
-                                                                    height: 32,
-                                                                    decoration: BoxDecoration(
-                                                                      color: context.color.secondaryColor,
-                                                                      shape: BoxShape.circle,
-                                                                      boxShadow: const [
-                                                                        BoxShadow(
-                                                                          color:
-                                                                          Color.fromARGB(12, 0, 0, 0),
-                                                                          offset: Offset(0, 2),
-                                                                          blurRadius: 15,
-                                                                          spreadRadius: 0,
-                                                                        )
-                                                                      ],
-                                                                    ),
-                                                                    child: Container(
+                                                                Positioned(
+                                                                  right: 8,
+                                                                  top: 8,
+                                                                  child:
+                                                                      InkWell(
+                                                                    onTap: () {
+                                                                      GuestChecker.check(
+                                                                          onNotGuest:
+                                                                              () async {
+                                                                        var body =
+                                                                            {
+                                                                          "type":
+                                                                              0,
+                                                                          "project_id":
+                                                                              favProjectsList[index]['id']
+                                                                        };
+                                                                        var response = await Api.post(
+                                                                            url:
+                                                                                Api.addFavProject,
+                                                                            parameter: body);
+                                                                        if (!response[
+                                                                            'error']) {
+                                                                          favProjectsList
+                                                                              .removeAt(index);
+                                                                          setState(
+                                                                              () {});
+                                                                        }
+                                                                      });
+                                                                    },
+                                                                    child:
+                                                                        Container(
                                                                       width: 32,
-                                                                      height: 32,
-                                                                      decoration: BoxDecoration(
-                                                                        color: context.color.primaryColor,
-                                                                        shape: BoxShape.circle,
+                                                                      height:
+                                                                          32,
+                                                                      decoration:
+                                                                          BoxDecoration(
+                                                                        color: context
+                                                                            .color
+                                                                            .secondaryColor,
+                                                                        shape: BoxShape
+                                                                            .circle,
                                                                         boxShadow: const [
                                                                           BoxShadow(
-                                                                              color: Color.fromARGB(33, 0, 0, 0),
-                                                                              offset: Offset(0, 2),
-                                                                              blurRadius: 15,
-                                                                              spreadRadius: 0)
+                                                                            color: Color.fromARGB(
+                                                                                12,
+                                                                                0,
+                                                                                0,
+                                                                                0),
+                                                                            offset:
+                                                                                Offset(0, 2),
+                                                                            blurRadius:
+                                                                                15,
+                                                                            spreadRadius:
+                                                                                0,
+                                                                          )
                                                                         ],
                                                                       ),
-                                                                      child: Center(
-                                                                          child:
-                                                                          UiUtils.getSvg(
-                                                                            AppIcons.like_fill,
-                                                                            color: context.color.tertiaryColor,
-                                                                          )
+                                                                      child:
+                                                                          Container(
+                                                                        width:
+                                                                            32,
+                                                                        height:
+                                                                            32,
+                                                                        decoration:
+                                                                            BoxDecoration(
+                                                                          color: context
+                                                                              .color
+                                                                              .primaryColor,
+                                                                          shape:
+                                                                              BoxShape.circle,
+                                                                          boxShadow: const [
+                                                                            BoxShadow(
+                                                                                color: Color.fromARGB(33, 0, 0, 0),
+                                                                                offset: Offset(0, 2),
+                                                                                blurRadius: 15,
+                                                                                spreadRadius: 0)
+                                                                          ],
+                                                                        ),
+                                                                        child: Center(
+                                                                            child: UiUtils.getSvg(
+                                                                          AppIcons
+                                                                              .like_fill,
+                                                                          color: context
+                                                                              .color
+                                                                              .tertiaryColor,
+                                                                        )),
                                                                       ),
                                                                     ),
                                                                   ),
                                                                 ),
-                                                              ),
-                                                            ],
-                                                          ),
-                                                        ),
-                                                      ],
-                                                    ),
-                                                    Padding(
-                                                      padding: const EdgeInsets.only(left:10,right: 10),
-                                                      child: Column(
-                                                        crossAxisAlignment: CrossAxisAlignment.start,
-                                                        mainAxisAlignment:
-                                                        MainAxisAlignment.spaceEvenly,
-                                                        children: [
-                                                          SizedBox(height: 6,),
-                                                          Text(
-                                                            favProjectsList[index]['title'],
-                                                            maxLines: 1,
-                                                            overflow: TextOverflow.ellipsis,
-                                                            style: TextStyle(
-                                                                color: Color(0xff333333),
-                                                                fontSize: 12.5,
-                                                                fontWeight: FontWeight.w500
-                                                            ),
-                                                          ),
-                                                          SizedBox(height: 4,),
-                                                          if (favProjectsList[index]['address'] != "")
-                                                            Padding(
-                                                              padding: const EdgeInsets.only(bottom: 4),
-                                                              child: Row(
-                                                                children: [
-                                                                  Image.asset("assets/Home/__location.png",width:15,fit: BoxFit.cover,height: 15,),
-                                                                  SizedBox(width: 5,),
-                                                                  Expanded(
-                                                                      child: Text(
-                                                                        favProjectsList[index]['address']?.trim() ?? "",  maxLines: 1,
-                                                                        overflow: TextOverflow.ellipsis,
-                                                                        style: TextStyle(
-                                                                            color: Color(0xffa2a2a2),
-                                                                            fontSize: 9,
-                                                                            fontWeight: FontWeight.w400
-                                                                        ),)
-                                                                  )
-                                                                ],
-                                                              ),
-                                                            ),
-                                                          Text(
-                                                            '${favProjectsList[index]['project_details'].length > 0 ? favProjectsList[index]['project_details'][0]['avg_price'] : 0}'
-                                                                .toString()
-                                                                .formatAmount(
-                                                              prefix: true,
-                                                            ),
-                                                            maxLines: 1,
-                                                            overflow: TextOverflow.ellipsis,
-                                                            style: TextStyle(
-                                                                color: Color(0xff333333),
-                                                                fontSize: 9,
-                                                                fontWeight: FontWeight.w500
-                                                            ),
-                                                          ),
-                                                          SizedBox(height: 4,),
-                                                          Text("Ready To Move",
-                                                            maxLines: 1,
-                                                            overflow: TextOverflow.ellipsis,
-                                                            style: TextStyle(
-                                                                color: Color(0xffa2a2a2),
-                                                                fontSize: 9,
-                                                                fontWeight: FontWeight.w400
+                                                              ],
                                                             ),
                                                           ),
                                                         ],
                                                       ),
-                                                    ),
-                                                  ],
-                                                ),
-                                              ],
-                                            ),
-                                          )
-                                      ),
-                                    );
-                                  } else {
-                                    return ClipRRect(
-                                      clipBehavior: Clip.antiAliasWithSaveLayer,
-                                      borderRadius: BorderRadius.all(Radius.circular(15)),
-                                      child: CustomShimmer(height: 90, width: 90),
-                                    );
-                                  }
-                                },
-                              ),
-                            ),
-                            if(favProjectsList.length == 0)
-                              Center(
-                                child: NoDataFound(
-                                  onTap: () {
-                                    context.read<FetchFavoritesCubit>().fetchFavorites();
+                                                      Padding(
+                                                        padding:
+                                                            const EdgeInsets
+                                                                .only(
+                                                                left: 10,
+                                                                right: 10),
+                                                        child: Column(
+                                                          crossAxisAlignment:
+                                                              CrossAxisAlignment
+                                                                  .start,
+                                                          mainAxisAlignment:
+                                                              MainAxisAlignment
+                                                                  .spaceEvenly,
+                                                          children: [
+                                                            SizedBox(
+                                                              height: 6,
+                                                            ),
+                                                            Text(
+                                                              favProjectsList[
+                                                                      index]
+                                                                  ['title'],
+                                                              maxLines: 1,
+                                                              overflow:
+                                                                  TextOverflow
+                                                                      .ellipsis,
+                                                              style: TextStyle(
+                                                                  color: Color(
+                                                                      0xff333333),
+                                                                  fontSize:
+                                                                      12.5,
+                                                                  fontWeight:
+                                                                      FontWeight
+                                                                          .w500),
+                                                            ),
+                                                            SizedBox(
+                                                              height: 4,
+                                                            ),
+                                                            if (favProjectsList[
+                                                                        index][
+                                                                    'address'] !=
+                                                                "")
+                                                              Padding(
+                                                                padding:
+                                                                    const EdgeInsets
+                                                                        .only(
+                                                                        bottom:
+                                                                            4),
+                                                                child: Row(
+                                                                  children: [
+                                                                    Image.asset(
+                                                                      "assets/Home/__location.png",
+                                                                      width: 15,
+                                                                      fit: BoxFit
+                                                                          .cover,
+                                                                      height:
+                                                                          15,
+                                                                    ),
+                                                                    SizedBox(
+                                                                      width: 5,
+                                                                    ),
+                                                                    Expanded(
+                                                                        child:
+                                                                            Text(
+                                                                      favProjectsList[index]['address']
+                                                                              ?.trim() ??
+                                                                          "",
+                                                                      maxLines:
+                                                                          1,
+                                                                      overflow:
+                                                                          TextOverflow
+                                                                              .ellipsis,
+                                                                      style: TextStyle(
+                                                                          color: Color(
+                                                                              0xffa2a2a2),
+                                                                          fontSize:
+                                                                              9,
+                                                                          fontWeight:
+                                                                              FontWeight.w400),
+                                                                    ))
+                                                                  ],
+                                                                ),
+                                                              ),
+                                                            Text(
+                                                              '${favProjectsList[index]['project_details'].length > 0 ? favProjectsList[index]['project_details'][0]['avg_price'] : 0}'
+                                                                  .toString()
+                                                                  .formatAmount(
+                                                                    prefix:
+                                                                        true,
+                                                                  ),
+                                                              maxLines: 1,
+                                                              overflow:
+                                                                  TextOverflow
+                                                                      .ellipsis,
+                                                              style: TextStyle(
+                                                                  color: Color(
+                                                                      0xff333333),
+                                                                  fontSize: 9,
+                                                                  fontWeight:
+                                                                      FontWeight
+                                                                          .w500),
+                                                            ),
+                                                            SizedBox(
+                                                              height: 4,
+                                                            ),
+                                                            Text(
+                                                              "Ready To Move",
+                                                              maxLines: 1,
+                                                              overflow:
+                                                                  TextOverflow
+                                                                      .ellipsis,
+                                                              style: TextStyle(
+                                                                  color: Color(
+                                                                      0xffa2a2a2),
+                                                                  fontSize: 9,
+                                                                  fontWeight:
+                                                                      FontWeight
+                                                                          .w400),
+                                                            ),
+                                                          ],
+                                                        ),
+                                                      ),
+                                                    ],
+                                                  ),
+                                                ],
+                                              ),
+                                            )),
+                                      );
+                                    } else {
+                                      return ClipRRect(
+                                        clipBehavior:
+                                            Clip.antiAliasWithSaveLayer,
+                                        borderRadius: BorderRadius.all(
+                                            Radius.circular(15)),
+                                        child: CustomShimmer(
+                                            height: 90, width: 90),
+                                      );
+                                    }
                                   },
+                                ),
+                              ),
+                            if (favProjectsList.length == 0)
+                              SingleChildScrollView(
+                                physics: const BouncingScrollPhysics(),
+                                child: SizedBox(
+                                  height:
+                                      context.screenHeight - 120.rh(context),
+                                  child: Center(
+                                    child: NoDataFound(
+                                      onTap: () {
+                                        context
+                                            .read<FetchFavoritesCubit>()
+                                            .fetchFavorites();
+                                      },
+                                    ),
+                                  ),
                                 ),
                               ),
                             // if (state.isLoadingMore)
@@ -518,11 +670,7 @@ class _FavoritesScreenState extends State<FavoritesScreen> {
           decoration: BoxDecoration(
               color: Colors.white,
               borderRadius: BorderRadius.circular(15),
-              border: Border.all(
-                  width: 1,
-                  color: Color(0xffe0e0e0)
-              )
-          ),
+              border: Border.all(width: 1, color: Color(0xffe0e0e0))),
           child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: <Widget>[
@@ -530,33 +678,43 @@ class _FavoritesScreenState extends State<FavoritesScreen> {
                   clipBehavior: Clip.antiAliasWithSaveLayer,
                   borderRadius: BorderRadius.only(
                     topRight: Radius.circular(15),
-                    topLeft:Radius.circular(15),
+                    topLeft: Radius.circular(15),
                   ),
-                  child: CustomShimmer(width: double.infinity,height: 110,),
+                  child: CustomShimmer(
+                    width: double.infinity,
+                    height: 110,
+                  ),
                 ),
-                SizedBox(height: 8,),
+                SizedBox(
+                  height: 8,
+                ),
                 LayoutBuilder(builder: (context, c) {
                   return Padding(
-                    padding: const EdgeInsets.only(left:10,right: 10),
+                    padding: const EdgeInsets.only(left: 10, right: 10),
                     child: Column(
                       mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: <Widget>[
-
                         CustomShimmer(
                           height: 14,
                           width: c.maxWidth - 50,
                         ),
-                        SizedBox(height: 5,),
+                        SizedBox(
+                          height: 5,
+                        ),
                         const CustomShimmer(
                           height: 13,
                         ),
-                        SizedBox(height: 5,),
+                        SizedBox(
+                          height: 5,
+                        ),
                         CustomShimmer(
                           height: 12,
                           width: c.maxWidth / 1.2,
                         ),
-                        SizedBox(height: 8,),
+                        SizedBox(
+                          height: 8,
+                        ),
                         Align(
                           alignment: Alignment.bottomLeft,
                           child: CustomShimmer(

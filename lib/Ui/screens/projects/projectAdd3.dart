@@ -1,5 +1,6 @@
 import 'dart:io';
 
+import 'package:Housepecker/utils/Extensions/extensions.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
@@ -125,77 +126,77 @@ class _ProjectFormThreeState extends State<ProjectFormThree> {
                       ),
                     ),
                     SizedBox(height: 15,),
+                    // Column(
+                    //   crossAxisAlignment: CrossAxisAlignment.start,
+                    //   children: [
+                    //     RichText(
+                    //       text: TextSpan(
+                    //         children: [
+                    //           TextSpan(text: "Age of the Property",
+                    //             style: TextStyle(
+                    //                 color: Colors.black,
+                    //                 fontSize: 15,
+                    //                 fontWeight: FontWeight.w600
+                    //             ),),
+                    //           // TextSpan(
+                    //           //   text: " *",
+                    //           //   style: TextStyle(color: Colors.red), // Customize asterisk color
+                    //           // ),
+                    //         ],
+                    //       ),
+                    //     ),
+                    //     SizedBox(height: 10,),
+                    //     Row(
+                    //       children: [
+                    //         Expanded(
+                    //           child: Container(
+                    //             decoration: BoxDecoration(
+                    //               border: Border.all(
+                    //                   width: 1,
+                    //                   color: Color(0xffe1e1e1)
+                    //               ),
+                    //               color: Color(0xfff5f5f5),
+                    //               borderRadius: BorderRadius.circular(10.0), // Optional: Add border radius
+                    //             ),
+                    //             child: Padding(
+                    //               padding: const EdgeInsets.only(left: 8.0,right: 5),
+                    //               child: TextFormField(
+                    //                 controller: ageControler,
+                    //                 decoration: const InputDecoration(
+                    //                     hintText: 'Age of the Property..',
+                    //                     hintStyle: TextStyle(
+                    //                       fontFamily: 'Poppins',
+                    //                       fontSize: 14.0,
+                    //                       color: Color(0xff9c9c9c),
+                    //                       fontWeight: FontWeight.w500,
+                    //                       decoration: TextDecoration.none,
+                    //                     ),
+                    //                     enabledBorder: UnderlineInputBorder(
+                    //                       borderSide: BorderSide(
+                    //                         color: Colors.transparent,
+                    //                       ),
+                    //                     ),
+                    //                     focusedBorder: UnderlineInputBorder(
+                    //                         borderSide: BorderSide(
+                    //                           color: Colors.transparent,
+                    //                         ))
+                    //                 ),
+                    //               ),
+                    //             ),
+                    //           ),
+                    //         ),
+                    //       ],
+                    //     ),
+                    //     SizedBox(height: 15,),
+                    //   ],
+                    // ),
                     Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
                         RichText(
                           text: TextSpan(
                             children: [
-                              TextSpan(text: "Age of the Property",
-                                style: TextStyle(
-                                    color: Colors.black,
-                                    fontSize: 15,
-                                    fontWeight: FontWeight.w600
-                                ),),
-                              // TextSpan(
-                              //   text: " *",
-                              //   style: TextStyle(color: Colors.red), // Customize asterisk color
-                              // ),
-                            ],
-                          ),
-                        ),
-                        SizedBox(height: 10,),
-                        Row(
-                          children: [
-                            Expanded(
-                              child: Container(
-                                decoration: BoxDecoration(
-                                  border: Border.all(
-                                      width: 1,
-                                      color: Color(0xffe1e1e1)
-                                  ),
-                                  color: Color(0xfff5f5f5),
-                                  borderRadius: BorderRadius.circular(10.0), // Optional: Add border radius
-                                ),
-                                child: Padding(
-                                  padding: const EdgeInsets.only(left: 8.0,right: 5),
-                                  child: TextFormField(
-                                    controller: ageControler,
-                                    decoration: const InputDecoration(
-                                        hintText: 'Age of the Property..',
-                                        hintStyle: TextStyle(
-                                          fontFamily: 'Poppins',
-                                          fontSize: 14.0,
-                                          color: Color(0xff9c9c9c),
-                                          fontWeight: FontWeight.w500,
-                                          decoration: TextDecoration.none,
-                                        ),
-                                        enabledBorder: UnderlineInputBorder(
-                                          borderSide: BorderSide(
-                                            color: Colors.transparent,
-                                          ),
-                                        ),
-                                        focusedBorder: UnderlineInputBorder(
-                                            borderSide: BorderSide(
-                                              color: Colors.transparent,
-                                            ))
-                                    ),
-                                  ),
-                                ),
-                              ),
-                            ),
-                          ],
-                        ),
-                        SizedBox(height: 15,),
-                      ],
-                    ),
-                    Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        RichText(
-                          text: TextSpan(
-                            children: [
-                              TextSpan(text: "Home Loan Offers for",
+                              TextSpan(text: "Approved Banks",
                                 style: TextStyle(
                                     color: Colors.black,
                                     fontSize: 15,
@@ -254,6 +255,10 @@ class _ProjectFormThreeState extends State<ProjectFormThree> {
                               TextSpan(
                                 text: " *",
                                 style: TextStyle(color: Colors.red), // Customize asterisk color
+                              ),
+                              TextSpan(
+                                text: '  (Notes: Add every highlight using a comma ",")',
+                                style: TextStyle(color: Colors.red, fontSize: 11), // Customize asterisk color
                               ),
                             ],
                           ),
@@ -349,6 +354,7 @@ class _ProjectFormThreeState extends State<ProjectFormThree> {
                                           borderRadius: BorderRadius.circular(10.0),
                                           child: SvgPicture.network(
                                             amenityList![index]['image'],
+                                            color: Color(0xff117af9),
                                             width: 18.0,
                                             height: 18.0,
                                             fit: BoxFit.cover,

@@ -25,12 +25,14 @@ class _ProjectFormTwoState extends State<ProjectFormTwo> {
   TextEditingController sizeControler = TextEditingController();
   TextEditingController sqftRateControler = TextEditingController();
   TextEditingController roadWidthControler = TextEditingController();
+  TextEditingController projectCompletedControler = TextEditingController();
   TextEditingController configurationsControler = TextEditingController();
   TextEditingController reraControler = TextEditingController();
   TextEditingController totalFloorsControler = TextEditingController();
   TextEditingController approvedControler = TextEditingController();
   TextEditingController MAxsf = TextEditingController();
   TextEditingController Minsf = TextEditingController();
+  TextEditingController nearByMetroControler = TextEditingController();
   DateTime selectedDate = DateTime.now();
   DateTime possessionDate = DateTime.now();
   DateTime completionDate = DateTime.now();
@@ -104,7 +106,7 @@ class _ProjectFormTwoState extends State<ProjectFormTwo> {
     projectFacing = widget.data!['project_details'][0]['facing'].toString();
     projectFurnished = widget.data!['project_details'][0]['furniture'].toString();
     projectPlaced = widget.data!['project_details'][0]['project_placed'].toString();
-    nearByMetro = widget.data!['project_details'][0]['near_by_metro'] ?? '';
+    nearByMetroControler = widget.data!['project_details'][0]['near_by_metro'] ?? '';
     vegOnly = widget.data!['project_details'][0]['veg_only'] ?? '';
     coveredParking = widget.data!['project_details'][0]['covered_parking'] ?? '';
     openParking = widget.data!['project_details'][0]['open_parking'] ?? '';
@@ -113,7 +115,7 @@ class _ProjectFormTwoState extends State<ProjectFormTwo> {
     highRiseApartment = widget.data!['project_details'][0]['high_rise'] ?? '';
     selectedDate = DateTime.parse(widget.data!['project_details'][0]['launch_date']);
     possessionDate = widget.data!['project_details'][0]['possession_start'] != null ? DateTime.parse(widget.data!['project_details'][0]['possession_start']) : DateTime.now();
-    completionDate = widget.data!['project_details'][0]['project_completed'] != null ? DateTime.parse(widget.data!['project_details'][0]['project_completed']) : DateTime.now();
+    projectCompletedControler.text = widget.data!['project_details'][0]['project_completed'];
 
     suitableForWidget = suitableForList
         .where((element) =>
@@ -133,11 +135,11 @@ class _ProjectFormTwoState extends State<ProjectFormTwo> {
       return ValueItem(label: item['name'], value: item['id'].toString());
     }).toList();
 
-    if (widget.data!['project_details'][0]['near_by_metro'] == 'yes') {
-      nearByMetroWidget = [ValueItem(label: 'Yes', value: 'yes')];
-    } else {
-      nearByMetroWidget = [ValueItem(label: 'No', value: 'no')];
-    }
+    // if (widget.data!['project_details'][0]['near_by_metro'] == 'yes') {
+    //   nearByMetroWidget = [ValueItem(label: 'Yes', value: 'yes')];
+    // } else {
+    //   nearByMetroWidget = [ValueItem(label: 'No', value: 'no')];
+    // }
 
     if (widget.data!['project_details'][0]['veg_only'] == 'yes') {
       vegOnlyWidget = [ValueItem(label: 'Yes', value: 'yes')];
@@ -212,7 +214,7 @@ class _ProjectFormTwoState extends State<ProjectFormTwo> {
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     SizedBox(height: 15,),
-                    Text('FACILITIES',
+                    Text('Overview',
                       style: TextStyle(
                           color: Colors.black,
                           fontSize: 16,
@@ -357,16 +359,16 @@ class _ProjectFormTwoState extends State<ProjectFormTwo> {
                         RichText(
                           text: TextSpan(
                             children: [
-                              TextSpan(text: "Rate Per Sqft.",
+                              TextSpan(text: "No of Floors/Towers",
                                 style: TextStyle(
                                     color: Colors.black,
                                     fontSize: 15,
                                     fontWeight: FontWeight.w600
                                 ),),
-                              // TextSpan(
-                              //   text: " *",
-                              //   style: TextStyle(color: Colors.red), // Customize asterisk color
-                              // ),
+                              TextSpan(
+                                text: " *",
+                                style: TextStyle(color: Colors.red), // Customize asterisk color
+                              ),
                             ],
                           ),
                         ),
@@ -386,10 +388,10 @@ class _ProjectFormTwoState extends State<ProjectFormTwo> {
                                 child: Padding(
                                   padding: const EdgeInsets.only(left: 8.0,right: 5),
                                   child: TextFormField(
-                                    controller: sqftRateControler,
+                                    controller: totalFloorsControler,
                                     keyboardType: TextInputType.number,
                                     decoration: const InputDecoration(
-                                        hintText: 'Enter Rate Per Sqft..',
+                                        hintText: 'Enter location..',
                                         hintStyle: TextStyle(
                                           fontFamily: 'Poppins',
                                           fontSize: 14.0,
@@ -413,15 +415,133 @@ class _ProjectFormTwoState extends State<ProjectFormTwo> {
                             ),
                           ],
                         ),
-                        SizedBox(height: 25,),
+                        SizedBox(height: 15,),
                       ],
-                    ),Column(
+                    ),
+                    Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
                         RichText(
                           text: TextSpan(
                             children: [
-                              TextSpan(text: "Min Per Sqft.",
+                              TextSpan(text: "Launch Date",
+                                style: TextStyle(
+                                    color: Colors.black,
+                                    fontSize: 15,
+                                    fontWeight: FontWeight.w600
+                                ),),
+                              TextSpan(
+                                text: " *",
+                                style: TextStyle(color: Colors.red), // Customize asterisk color
+                              ),
+                            ],
+                          ),
+                        ),
+                        SizedBox(height: 10,),
+                        Row(
+                          children: [
+                            Expanded(
+                              child: InkWell(
+                                onTap: () async {
+                                  final DateTime? picked = await showDatePicker(
+                                    context: context,
+                                    initialDate: selectedDate, // Optional: pre-select a date
+                                    firstDate: DateTime.now(), // Optional: restrict selectable dates (start)
+                                    lastDate: DateTime(2060),  // Optional: restrict selectable dates (end)
+                                  );
+                                  if (picked != null && picked != selectedDate) {
+                                    setState(() {
+                                      selectedDate = picked;
+                                    });
+                                  }
+                                },
+                                child: Container(
+                                  decoration: BoxDecoration(
+                                    border: Border.all(
+                                        width: 1,
+                                        color: Color(0xffe1e1e1)
+                                    ),
+                                    color: Color(0xfff5f5f5),
+                                    borderRadius: BorderRadius.circular(10.0), // Optional: Add border radius
+                                  ),
+                                  child: Padding(
+                                    padding: const EdgeInsets.all(15),
+                                    child: Text('${DateFormat('MMM yyyy').format(selectedDate)}'),
+                                  ),
+                                ),
+                              ),
+                            ),
+                          ],
+                        ),
+                        SizedBox(height: 25,),
+                      ],
+                    ),
+                    if (widget.body!['category_id'] == 4)
+                      Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          RichText(
+                            text: TextSpan(
+                              children: [
+                                TextSpan(text: "Possession starts",
+                                  style: TextStyle(
+                                      color: Colors.black,
+                                      fontSize: 15,
+                                      fontWeight: FontWeight.w600
+                                  ),),
+                                TextSpan(
+                                  text: " *",
+                                  style: TextStyle(color: Colors.red), // Customize asterisk color
+                                ),
+                              ],
+                            ),
+                          ),
+                          SizedBox(height: 10,),
+                          Row(
+                            children: [
+                              Expanded(
+                                child: InkWell(
+                                  onTap: () async {
+                                    final DateTime? picked = await showDatePicker(
+                                      context: context,
+                                      initialDate: selectedDate, // Optional: pre-select a date
+                                      firstDate: DateTime.now(), // Optional: restrict selectable dates (start)
+                                      lastDate: DateTime(2050),  // Optional: restrict selectable dates (end)
+                                    );
+                                    if (picked != null && picked != possessionDate) {
+                                      setState(() {
+                                        possessionDate = picked;
+                                      });
+                                    }
+                                  },
+                                  child: Container(
+                                    decoration: BoxDecoration(
+                                      border: Border.all(
+                                          width: 1,
+                                          color: Color(0xffe1e1e1)
+                                      ),
+                                      color: Color(0xfff5f5f5),
+                                      borderRadius: BorderRadius.circular(10.0), // Optional: Add border radius
+                                    ),
+                                    child: Padding(
+                                      padding: const EdgeInsets.all(15),
+                                      child: Text('${DateFormat('MMM yyyy').format(possessionDate)}'),
+                                    ),
+                                  ),
+                                ),
+                              ),
+                            ],
+                          ),
+                          SizedBox(height: 25,),
+                        ],
+                      ),
+                    Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        RichText(
+                          text: TextSpan(
+                            children: [
+                              TextSpan(text: "Min Size (Sqft.)",
                                 style: TextStyle(
                                     color: Colors.black,
                                     fontSize: 15,
@@ -475,32 +595,7 @@ class _ProjectFormTwoState extends State<ProjectFormTwo> {
                                 ),
                               ),
                             ),
-                          ],
-                        ),
-                        SizedBox(height: 25,),
-                      ],
-                    ),Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        RichText(
-                          text: TextSpan(
-                            children: [
-                              TextSpan(text: "Max size Per Sqft.",
-                                style: TextStyle(
-                                    color: Colors.black,
-                                    fontSize: 15,
-                                    fontWeight: FontWeight.w600
-                                ),),
-                              TextSpan(
-                                text: " *",
-                                style: TextStyle(color: Colors.red), // Customize asterisk color
-                              ),
-                            ],
-                          ),
-                        ),
-                        SizedBox(height: 10,),
-                        Row(
-                          children: [
+                            SizedBox(width: 10,),
                             Expanded(
                               child: Container(
                                 decoration: BoxDecoration(
@@ -544,374 +639,6 @@ class _ProjectFormTwoState extends State<ProjectFormTwo> {
                         SizedBox(height: 25,),
                       ],
                     ),
-                    Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        RichText(
-                          text: TextSpan(
-                            children: [
-                              TextSpan(text: "RERA",
-                                style: TextStyle(
-                                    color: Colors.black,
-                                    fontSize: 15,
-                                    fontWeight: FontWeight.w600
-                                ),),
-                              // TextSpan(
-                              //   text: " *",
-                              //   style: TextStyle(color: Colors.red), // Customize asterisk color
-                              // ),
-                            ],
-                          ),
-                        ),
-                        SizedBox(height: 10,),
-                        Row(
-                          children: [
-                            Expanded(
-                              child: Container(
-                                decoration: BoxDecoration(
-                                  border: Border.all(
-                                      width: 1,
-                                      color: Color(0xffe1e1e1)
-                                  ),
-                                  color: Color(0xfff5f5f5),
-                                  borderRadius: BorderRadius.circular(10.0), // Optional: Add border radius
-                                ),
-                                child: Padding(
-                                  padding: const EdgeInsets.only(left: 8.0,right: 5),
-                                  child: TextFormField(
-                                    controller: reraControler,
-                                    keyboardType: TextInputType.text,
-                                    decoration: const InputDecoration(
-                                        hintText: 'Enter RERA..',
-                                        hintStyle: TextStyle(
-                                          fontFamily: 'Poppins',
-                                          fontSize: 14.0,
-                                          color: Color(0xff9c9c9c),
-                                          fontWeight: FontWeight.w500,
-                                          decoration: TextDecoration.none,
-                                        ),
-                                        enabledBorder: UnderlineInputBorder(
-                                          borderSide: BorderSide(
-                                            color: Colors.transparent,
-                                          ),
-                                        ),
-                                        focusedBorder: UnderlineInputBorder(
-                                            borderSide: BorderSide(
-                                              color: Colors.transparent,
-                                            ))
-                                    ),
-                                  ),
-                                ),
-                              ),
-                            ),
-                          ],
-                        ),
-                        SizedBox(height: 25,),
-                      ],
-                    ),
-                    Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        RichText(
-                          text: TextSpan(
-                            children: [
-                              TextSpan(text: "Launch Date",
-                                style: TextStyle(
-                                    color: Colors.black,
-                                    fontSize: 15,
-                                    fontWeight: FontWeight.w600
-                                ),),
-                              TextSpan(
-                                text: " *",
-                                style: TextStyle(color: Colors.red), // Customize asterisk color
-                              ),
-                            ],
-                          ),
-                        ),
-                        SizedBox(height: 10,),
-                        Row(
-                          children: [
-                            Expanded(
-                              child: InkWell(
-                                onTap: () async {
-                                  final DateTime? picked = await showDatePicker(
-                                  context: context,
-                                  initialDate: selectedDate, // Optional: pre-select a date
-                                  firstDate: DateTime.now(), // Optional: restrict selectable dates (start)
-                                  lastDate: DateTime(2050),  // Optional: restrict selectable dates (end)
-                                  );
-                                  if (picked != null && picked != selectedDate) {
-                                    setState(() {
-                                      selectedDate = picked;
-                                    });
-                                  }
-                                },
-                                child: Container(
-                                  decoration: BoxDecoration(
-                                    border: Border.all(
-                                        width: 1,
-                                        color: Color(0xffe1e1e1)
-                                    ),
-                                    color: Color(0xfff5f5f5),
-                                    borderRadius: BorderRadius.circular(10.0), // Optional: Add border radius
-                                  ),
-                                  child: Padding(
-                                    padding: const EdgeInsets.all(15),
-                                    child: Text('${DateFormat('d MMM yyyy').format(selectedDate)}'),
-                                  ),
-                                ),
-                              ),
-                            ),
-                          ],
-                        ),
-                        SizedBox(height: 25,),
-                      ],
-                    ),
-                    if (widget.body!['category_id'] == 2)
-                      Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        RichText(
-                          text: TextSpan(
-                            children: [
-                              TextSpan(text: "Possession starts",
-                                style: TextStyle(
-                                    color: Colors.black,
-                                    fontSize: 15,
-                                    fontWeight: FontWeight.w600
-                                ),),
-                              TextSpan(
-                                text: " *",
-                                style: TextStyle(color: Colors.red), // Customize asterisk color
-                              ),
-                            ],
-                          ),
-                        ),
-                        SizedBox(height: 10,),
-                        Row(
-                          children: [
-                            Expanded(
-                              child: InkWell(
-                                onTap: () async {
-                                  final DateTime? picked = await showDatePicker(
-                                  context: context,
-                                  initialDate: selectedDate, // Optional: pre-select a date
-                                  firstDate: DateTime.now(), // Optional: restrict selectable dates (start)
-                                  lastDate: DateTime(2050),  // Optional: restrict selectable dates (end)
-                                  );
-                                  if (picked != null && picked != possessionDate) {
-                                    setState(() {
-                                      possessionDate = picked;
-                                    });
-                                  }
-                                },
-                                child: Container(
-                                  decoration: BoxDecoration(
-                                    border: Border.all(
-                                        width: 1,
-                                        color: Color(0xffe1e1e1)
-                                    ),
-                                    color: Color(0xfff5f5f5),
-                                    borderRadius: BorderRadius.circular(10.0), // Optional: Add border radius
-                                  ),
-                                  child: Padding(
-                                    padding: const EdgeInsets.all(15),
-                                    child: Text('${DateFormat('d MMM yyyy').format(possessionDate)}'),
-                                  ),
-                                ),
-                              ),
-                            ),
-                          ],
-                        ),
-                        SizedBox(height: 25,),
-                      ],
-                    ),
-                    Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        RichText(
-                          text: TextSpan(
-                            children: [
-                              TextSpan(text: "Project Completed on",
-                                style: TextStyle(
-                                    color: Colors.black,
-                                    fontSize: 15,
-                                    fontWeight: FontWeight.w600
-                                ),),
-                              TextSpan(
-                                text: " *",
-                                style: TextStyle(color: Colors.red), // Customize asterisk color
-                              ),
-                            ],
-                          ),
-                        ),
-                        SizedBox(height: 10,),
-                        Row(
-                          children: [
-                            Expanded(
-                              child: InkWell(
-                                onTap: () async {
-                                  final DateTime? picked = await showDatePicker(
-                                    context: context,
-                                    initialDate: selectedDate, // Optional: pre-select a date
-                                    firstDate: DateTime(1950), // Optional: restrict selectable dates (start)
-                                    lastDate: DateTime(2050),  // Optional: restrict selectable dates (end)
-                                  );
-                                  if (picked != null && picked != completionDate) {
-                                    setState(() {
-                                      completionDate = picked;
-                                    });
-                                  }
-                                },
-                                child: Container(
-                                  decoration: BoxDecoration(
-                                    border: Border.all(
-                                        width: 1,
-                                        color: Color(0xffe1e1e1)
-                                    ),
-                                    color: Color(0xfff5f5f5),
-                                    borderRadius: BorderRadius.circular(10.0), // Optional: Add border radius
-                                  ),
-                                  child: Padding(
-                                    padding: const EdgeInsets.all(15),
-                                    child: Text('${DateFormat('d MMM yyyy').format(completionDate)}'),
-                                  ),
-                                ),
-                              ),
-                            ),
-                          ],
-                        ),
-                        SizedBox(height: 25,),
-                      ],
-                    ),
-                    Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        RichText(
-                          text: TextSpan(
-                            children: [
-                              TextSpan(text: "Size (Sq.ft)",
-                                style: TextStyle(
-                                    color: Colors.black,
-                                    fontSize: 15,
-                                    fontWeight: FontWeight.w600
-                                ),),
-                              TextSpan(
-                                text: " *",
-                                style: TextStyle(color: Colors.red), // Customize asterisk color
-                              ),
-                            ],
-                          ),
-                        ),
-                        SizedBox(height: 10,),
-                        Row(
-                          children: [
-                            Expanded(
-                              child: Container(
-                                decoration: BoxDecoration(
-                                  border: Border.all(
-                                      width: 1,
-                                      color: Color(0xffe1e1e1)
-                                  ),
-                                  color: Color(0xfff5f5f5),
-                                  borderRadius: BorderRadius.circular(10.0), // Optional: Add border radius
-                                ),
-                                child: Padding(
-                                  padding: const EdgeInsets.only(left: 8.0,right: 5),
-                                  child: TextFormField(
-                                    controller: sizeControler,
-                                    keyboardType: TextInputType.number,
-                                    decoration: const InputDecoration(
-                                        hintText: 'Offer details..',
-                                        hintStyle: TextStyle(
-                                          fontFamily: 'Poppins',
-                                          fontSize: 14.0,
-                                          color: Color(0xff9c9c9c),
-                                          fontWeight: FontWeight.w500,
-                                          decoration: TextDecoration.none,
-                                        ),
-                                        enabledBorder: UnderlineInputBorder(
-                                          borderSide: BorderSide(
-                                            color: Colors.transparent,
-                                          ),
-                                        ),
-                                        focusedBorder: UnderlineInputBorder(
-                                            borderSide: BorderSide(
-                                              color: Colors.transparent,
-                                            ))
-                                    ),
-                                  ),
-                                ),
-                              ),
-                            ),
-                          ],
-                        ),
-                        SizedBox(height: 15,),
-                      ],
-                    ),
-                    if (widget.body!['category_id'] == 2)
-                      Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          RichText(
-                            text: TextSpan(
-                              children: [
-                                TextSpan(
-                                  text: "Suitable For",
-                                  style: TextStyle(
-                                      color: Colors.black,
-                                      fontSize: 15,
-                                      fontWeight: FontWeight.w600),
-                                ),
-                                // TextSpan(
-                                //   text: " *",
-                                //   style: TextStyle(
-                                //       color:
-                                //       Colors.red), // Customize asterisk color
-                                // ),
-                              ],
-                            ),
-                          ),
-                          SizedBox(
-                            height: 10,
-                          ),
-                          Row(
-                            children: [
-                              Expanded(
-                                child: MultiSelectDropDown(
-                                  onOptionSelected:
-                                      (List<ValueItem> selectedOptions) {
-                                    setState(() {
-                                      if(selectedOptions.length > 0) {
-                                        suitableFor = selectedOptions[0].value!;
-                                      } else {
-                                        suitableFor = '';
-                                      }
-                                      suitableForWidget = selectedOptions;
-                                    });
-                                  },
-                                  selectedOptions: widget.isEdit! ? suitableForWidget : [],
-                                  options: suitableForList.map((item) {
-                                    return ValueItem(
-                                        label: "${item['name']}",
-                                        value: "${item['id']}");
-                                  }).toList(),
-                                  selectionType: SelectionType.single,
-                                  chipConfig:
-                                  const ChipConfig(wrapType: WrapType.wrap),
-                                  dropdownHeight: 300,
-                                  optionTextStyle: const TextStyle(fontSize: 16),
-                                  selectedOptionIcon:
-                                  const Icon(Icons.check_circle),
-                                ),
-                              ),
-                            ],
-                          ),
-                          SizedBox(
-                            height: 15,
-                          ),
-                        ],
-                      ),
                     Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
@@ -976,200 +703,13 @@ class _ProjectFormTwoState extends State<ProjectFormTwo> {
                         SizedBox(height: 15,),
                       ],
                     ),
-                    if (widget.body!['category_id'] == 2)
-                      Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          RichText(
-                            text: TextSpan(
-                              children: [
-                                TextSpan(
-                                  text: "Project Placed",
-                                  style: TextStyle(
-                                      color: Colors.black,
-                                      fontSize: 15,
-                                      fontWeight: FontWeight.w600),
-                                ),
-                                // TextSpan(
-                                //   text: " *",
-                                //   style: TextStyle(
-                                //       color:
-                                //       Colors.red), // Customize asterisk color
-                                // ),
-                              ],
-                            ),
-                          ),
-                          SizedBox(
-                            height: 10,
-                          ),
-                          Row(
-                            children: [
-                              Expanded(
-                                child: MultiSelectDropDown(
-                                  onOptionSelected:
-                                      (List<ValueItem> selectedOptions) {
-                                    setState(() {
-                                      if(selectedOptions.length > 0) {
-                                        projectPlaced = selectedOptions[0].value!;
-                                      } else {
-                                        projectPlaced = '';
-                                      }
-                                      projectPlacedWidget = selectedOptions;
-                                    });
-                                  },
-                                  selectedOptions: widget.isEdit! ? projectPlacedWidget : [],
-                                  options: projectPlacedList.map((item) {
-                                    return ValueItem(
-                                        label: "${item['name']}",
-                                        value: "${item['id']}");
-                                  }).toList(),
-                                  selectionType: SelectionType.single,
-                                  chipConfig:
-                                  const ChipConfig(wrapType: WrapType.wrap),
-                                  dropdownHeight: 300,
-                                  optionTextStyle: const TextStyle(fontSize: 16),
-                                  selectedOptionIcon:
-                                  const Icon(Icons.check_circle),
-                                ),
-                              ),
-                            ],
-                          ),
-                          SizedBox(
-                            height: 15,
-                          ),
-                        ],
-                      ),
                     Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
                         RichText(
                           text: TextSpan(
                             children: [
-                              TextSpan(
-                                text: "Furniture",
-                                style: TextStyle(
-                                    color: Colors.black,
-                                    fontSize: 15,
-                                    fontWeight: FontWeight.w600),
-                              ),
-                              // TextSpan(
-                              //   text: " *",
-                              //   style: TextStyle(
-                              //       color:
-                              //       Colors.red), // Customize asterisk color
-                              // ),
-                            ],
-                          ),
-                        ),
-                        SizedBox(
-                          height: 10,
-                        ),
-                        Row(
-                          children: [
-                            Expanded(
-                              child: MultiSelectDropDown(
-                                onOptionSelected:
-                                    (List<ValueItem> selectedOptions) {
-                                  print('rrrrrrrrrrrrrrrrrrrrrr: ${selectedOptions}');
-                                  setState(() {
-                                    if(selectedOptions.length > 0) {
-                                      projectFurnished = selectedOptions[0].value!;
-                                    } else {
-                                      projectFurnished = '';
-                                    }
-                                  });
-                                },
-                                selectedOptions: widget.isEdit! ? projectFurnishedWidget : [],
-                                options: [
-                                  ValueItem(label: "Furnished", value: "0"),
-                                  ValueItem(label: "Unfurnished", value: "1"),
-                                  ValueItem(label: "Semi-Furnished", value: "2"),
-                                ],
-                                selectionType: SelectionType.single,
-                                chipConfig:
-                                const ChipConfig(wrapType: WrapType.wrap),
-                                dropdownHeight: 300,
-                                optionTextStyle: const TextStyle(fontSize: 16),
-                                selectedOptionIcon:
-                                const Icon(Icons.check_circle),
-                              ),
-                            ),
-                          ],
-                        ),
-                        SizedBox(
-                          height: 15,
-                        ),
-                      ],
-                    ),
-                    Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        RichText(
-                          text: TextSpan(
-                            children: [
-                              TextSpan(
-                                text: "Project Facing",
-                                style: TextStyle(
-                                    color: Colors.black,
-                                    fontSize: 15,
-                                    fontWeight: FontWeight.w600),
-                              ),
-                              // TextSpan(
-                              //   text: " *",
-                              //   style: TextStyle(
-                              //       color:
-                              //       Colors.red), // Customize asterisk color
-                              // ),
-                            ],
-                          ),
-                        ),
-                        SizedBox(
-                          height: 10,
-                        ),
-                        Row(
-                          children: [
-                            Expanded(
-                              child: MultiSelectDropDown(
-                                onOptionSelected:
-                                    (List<ValueItem> selectedOptions) {
-                                  setState(() {
-                                    if(selectedOptions.length > 0) {
-                                      projectFacing = selectedOptions[0].value!;
-                                    } else {
-                                      projectFacing = '';
-                                    }
-                                  });
-                                },
-                                selectedOptions: widget.isEdit! ? projectFacingWidget : [],
-                                options: [
-                                  ValueItem(label: "North", value: "0"),
-                                  ValueItem(label: "East", value: "1"),
-                                  ValueItem(label: "South", value: "2"),
-                                  ValueItem(label: "West", value: "3"),
-                                ],
-                                selectionType: SelectionType.single,
-                                chipConfig:
-                                const ChipConfig(wrapType: WrapType.wrap),
-                                dropdownHeight: 300,
-                                optionTextStyle: const TextStyle(fontSize: 16),
-                                selectedOptionIcon:
-                                const Icon(Icons.check_circle),
-                              ),
-                            ),
-                          ],
-                        ),
-                        SizedBox(
-                          height: 15,
-                        ),
-                      ],
-                    ),
-                    Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        RichText(
-                          text: TextSpan(
-                            children: [
-                              TextSpan(text: "Road Width",
+                              TextSpan(text: "RERA No",
                                 style: TextStyle(
                                     color: Colors.black,
                                     fontSize: 15,
@@ -1198,10 +738,10 @@ class _ProjectFormTwoState extends State<ProjectFormTwo> {
                                 child: Padding(
                                   padding: const EdgeInsets.only(left: 8.0,right: 5),
                                   child: TextFormField(
-                                    controller: roadWidthControler,
-                                    keyboardType: TextInputType.number,
+                                    controller: reraControler,
+                                    keyboardType: TextInputType.text,
                                     decoration: const InputDecoration(
-                                        hintText: 'Enter Road Width..',
+                                        hintText: 'Enter RERA..',
                                         hintStyle: TextStyle(
                                           fontFamily: 'Poppins',
                                           fontSize: 14.0,
@@ -1225,7 +765,7 @@ class _ProjectFormTwoState extends State<ProjectFormTwo> {
                             ),
                           ],
                         ),
-                        SizedBox(height: 15,),
+                        SizedBox(height: 25,),
                       ],
                     ),
                     Column(
@@ -1234,16 +774,12 @@ class _ProjectFormTwoState extends State<ProjectFormTwo> {
                         RichText(
                           text: TextSpan(
                             children: [
-                              TextSpan(text: "Total Floors",
+                              TextSpan(text: "Rate Per Sq.ft",
                                 style: TextStyle(
                                     color: Colors.black,
                                     fontSize: 15,
                                     fontWeight: FontWeight.w600
                                 ),),
-                              TextSpan(
-                                text: " *",
-                                style: TextStyle(color: Colors.red), // Customize asterisk color
-                              ),
                             ],
                           ),
                         ),
@@ -1263,10 +799,10 @@ class _ProjectFormTwoState extends State<ProjectFormTwo> {
                                 child: Padding(
                                   padding: const EdgeInsets.only(left: 8.0,right: 5),
                                   child: TextFormField(
-                                    controller: totalFloorsControler,
+                                    controller: sqftRateControler,
                                     keyboardType: TextInputType.number,
                                     decoration: const InputDecoration(
-                                        hintText: 'Enter location..',
+                                        hintText: 'Offer details..',
                                         hintStyle: TextStyle(
                                           fontFamily: 'Poppins',
                                           fontSize: 14.0,
@@ -1357,251 +893,358 @@ class _ProjectFormTwoState extends State<ProjectFormTwo> {
                         SizedBox(height: 15,),
                       ],
                     ),
-                    if (widget.body!['category_id'] == 4)
+                    if (widget.body!['category_id'] == 2)
                       Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        RichText(
-                          text: TextSpan(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          RichText(
+                            text: TextSpan(
+                              children: [
+                                TextSpan(
+                                  text: "Suitable For",
+                                  style: TextStyle(
+                                      color: Colors.black,
+                                      fontSize: 15,
+                                      fontWeight: FontWeight.w600),
+                                ),
+                                // TextSpan(
+                                //   text: " *",
+                                //   style: TextStyle(
+                                //       color:
+                                //       Colors.red), // Customize asterisk color
+                                // ),
+                              ],
+                            ),
+                          ),
+                          SizedBox(
+                            height: 10,
+                          ),
+                          Row(
                             children: [
-                              TextSpan(
-                                text: "Gated Community",
-                                style: TextStyle(
-                                    color: Colors.black,
-                                    fontSize: 15,
-                                    fontWeight: FontWeight.w600),
+                              Expanded(
+                                child: MultiSelectDropDown(
+                                  onOptionSelected:
+                                      (List<ValueItem> selectedOptions) {
+                                    setState(() {
+                                      if(selectedOptions.length > 0) {
+                                        suitableFor = selectedOptions[0].value!;
+                                      } else {
+                                        suitableFor = '';
+                                      }
+                                      suitableForWidget = selectedOptions;
+                                    });
+                                  },
+                                  selectedOptions: widget.isEdit! ? suitableForWidget : [],
+                                  options: suitableForList.map((item) {
+                                    return ValueItem(
+                                        label: "${item['name']}",
+                                        value: "${item['id']}");
+                                  }).toList(),
+                                  selectionType: SelectionType.single,
+                                  chipConfig:
+                                  const ChipConfig(wrapType: WrapType.wrap),
+                                  dropdownHeight: 300,
+                                  optionTextStyle: const TextStyle(fontSize: 16),
+                                  selectedOptionIcon:
+                                  const Icon(Icons.check_circle),
+                                ),
                               ),
-                              // TextSpan(
-                              //   text: " *",
-                              //   style: TextStyle(
-                              //       color:
-                              //       Colors.red), // Customize asterisk color
-                              // ),
                             ],
                           ),
-                        ),
-                        SizedBox(
-                          height: 10,
-                        ),
-                        Row(
-                          children: [
-                            Expanded(
-                              child: MultiSelectDropDown(
-                                onOptionSelected:
-                                    (List<ValueItem> selectedOptions) {
-                                  setState(() {
-                                    if(selectedOptions.length > 0) {
-                                      gatedCommunity = selectedOptions[0].value!;
-                                    } else {
-                                      gatedCommunity = '';
-                                    }
-                                  });
-                                },
-                                selectedOptions:
-                                widget.isEdit! ? gatedCommunityWidget : [],
-                                options: [
-                                  ValueItem(label: "Yes", value: "yes"),
-                                  ValueItem(label: "No", value: "no")
-                                ],
-                                selectionType: SelectionType.single,
-                                chipConfig:
-                                const ChipConfig(wrapType: WrapType.wrap),
-                                dropdownHeight: 300,
-                                optionTextStyle: const TextStyle(fontSize: 16),
-                                selectedOptionIcon:
-                                const Icon(Icons.check_circle),
-                              ),
-                            ),
-                          ],
-                        ),
-                        SizedBox(
-                          height: 15,
-                        ),
-                      ],
-                    ),
-                    if (widget.body!['category_id'] == 4)
+                          SizedBox(
+                            height: 15,
+                          ),
+                        ],
+                      ),
+                    if (widget.body!['category_id'] == 2)
                       Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        RichText(
-                          text: TextSpan(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          RichText(
+                            text: TextSpan(
+                              children: [
+                                TextSpan(
+                                  text: "Project Placed",
+                                  style: TextStyle(
+                                      color: Colors.black,
+                                      fontSize: 15,
+                                      fontWeight: FontWeight.w600),
+                                ),
+                                // TextSpan(
+                                //   text: " *",
+                                //   style: TextStyle(
+                                //       color:
+                                //       Colors.red), // Customize asterisk color
+                                // ),
+                              ],
+                            ),
+                          ),
+                          SizedBox(
+                            height: 10,
+                          ),
+                          Row(
                             children: [
-                              TextSpan(
-                                text: "Lake View",
-                                style: TextStyle(
-                                    color: Colors.black,
-                                    fontSize: 15,
-                                    fontWeight: FontWeight.w600),
+                              Expanded(
+                                child: MultiSelectDropDown(
+                                  onOptionSelected:
+                                      (List<ValueItem> selectedOptions) {
+                                    setState(() {
+                                      if(selectedOptions.length > 0) {
+                                        projectPlaced = selectedOptions[0].value!;
+                                      } else {
+                                        projectPlaced = '';
+                                      }
+                                      projectPlacedWidget = selectedOptions;
+                                    });
+                                  },
+                                  selectedOptions: widget.isEdit! ? projectPlacedWidget : [],
+                                  options: projectPlacedList.map((item) {
+                                    return ValueItem(
+                                        label: "${item['name']}",
+                                        value: "${item['id']}");
+                                  }).toList(),
+                                  selectionType: SelectionType.single,
+                                  chipConfig:
+                                  const ChipConfig(wrapType: WrapType.wrap),
+                                  dropdownHeight: 300,
+                                  optionTextStyle: const TextStyle(fontSize: 16),
+                                  selectedOptionIcon:
+                                  const Icon(Icons.check_circle),
+                                ),
                               ),
-                              // TextSpan(
-                              //   text: " *",
-                              //   style: TextStyle(
-                              //       color:
-                              //       Colors.red), // Customize asterisk color
-                              // ),
                             ],
                           ),
-                        ),
-                        SizedBox(
-                          height: 10,
-                        ),
-                        Row(
-                          children: [
-                            Expanded(
-                              child: MultiSelectDropDown(
-                                onOptionSelected:
-                                    (List<ValueItem> selectedOptions) {
-                                  setState(() {
-                                    if(selectedOptions.length > 0) {
-                                      lakeView = selectedOptions[0].value!;
-                                    } else {
-                                      lakeView = '';
-                                    }
-                                  });
-                                },
-                                selectedOptions:
-                                widget.isEdit! ? lakeViewWidget : [],
-                                options: [
-                                  ValueItem(label: "Yes", value: "yes"),
-                                  ValueItem(label: "No", value: "no")
-                                ],
-                                selectionType: SelectionType.single,
-                                chipConfig:
-                                const ChipConfig(wrapType: WrapType.wrap),
-                                dropdownHeight: 300,
-                                optionTextStyle: const TextStyle(fontSize: 16),
-                                selectedOptionIcon:
-                                const Icon(Icons.check_circle),
-                              ),
+                          SizedBox(
+                            height: 15,
+                          ),
+                        ],
+                      ),
+                    Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          RichText(
+                            text: TextSpan(
+                              children: [
+                                TextSpan(
+                                  text: "Gated Community",
+                                  style: TextStyle(
+                                      color: Colors.black,
+                                      fontSize: 15,
+                                      fontWeight: FontWeight.w600),
+                                ),
+                              ],
                             ),
-                          ],
-                        ),
-                        SizedBox(
-                          height: 15,
-                        ),
-                      ],
-                    ),
-                    if (widget.body!['category_id'] == 4)
-                      Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        RichText(
-                          text: TextSpan(
+                          ),
+                          SizedBox(
+                            height: 10,
+                          ),
+                          Row(
                             children: [
-                              TextSpan(
-                                text: "High-rise Apartment",
-                                style: TextStyle(
-                                    color: Colors.black,
-                                    fontSize: 15,
-                                    fontWeight: FontWeight.w600),
+                              Expanded(
+                                child: MultiSelectDropDown(
+                                  onOptionSelected:
+                                      (List<ValueItem> selectedOptions) {
+                                    setState(() {
+                                      if(selectedOptions.length > 0) {
+                                        gatedCommunity = selectedOptions[0].value!;
+                                      } else {
+                                        gatedCommunity = '';
+                                      }
+                                    });
+                                  },
+                                  selectedOptions:
+                                  widget.isEdit! ? gatedCommunityWidget : [],
+                                  options: [
+                                    ValueItem(label: "Yes", value: "yes"),
+                                    ValueItem(label: "No", value: "no")
+                                  ],
+                                  selectionType: SelectionType.single,
+                                  chipConfig:
+                                  const ChipConfig(wrapType: WrapType.wrap),
+                                  dropdownHeight: 300,
+                                  optionTextStyle: const TextStyle(fontSize: 16),
+                                  selectedOptionIcon:
+                                  const Icon(Icons.check_circle),
+                                ),
                               ),
-                              // TextSpan(
-                              //   text: " *",
-                              //   style: TextStyle(
-                              //       color:
-                              //       Colors.red), // Customize asterisk color
-                              // ),
                             ],
                           ),
-                        ),
-                        SizedBox(
-                          height: 10,
-                        ),
-                        Row(
-                          children: [
-                            Expanded(
-                              child: MultiSelectDropDown(
-                                onOptionSelected:
-                                    (List<ValueItem> selectedOptions) {
-                                  setState(() {
-                                    if(selectedOptions.length > 0) {
-                                      highRiseApartment = selectedOptions[0].value!;
-                                    } else {
-                                      highRiseApartment = '';
-                                    }
-                                  });
-                                },
-                                selectedOptions:
-                                widget.isEdit! ? highRiseApartmentWidget : [],
-                                options: [
-                                  ValueItem(label: "Yes", value: "yes"),
-                                  ValueItem(label: "No", value: "no")
-                                ],
-                                selectionType: SelectionType.single,
-                                chipConfig:
-                                const ChipConfig(wrapType: WrapType.wrap),
-                                dropdownHeight: 300,
-                                optionTextStyle: const TextStyle(fontSize: 16),
-                                selectedOptionIcon:
-                                const Icon(Icons.check_circle),
-                              ),
+                          SizedBox(
+                            height: 15,
+                          ),
+                        ],
+                      ),
+                    if (widget.body!['category_id'] == 4)
+                      Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          RichText(
+                            text: TextSpan(
+                              children: [
+                                TextSpan(
+                                  text: "High-rise Apartment",
+                                  style: TextStyle(
+                                      color: Colors.black,
+                                      fontSize: 15,
+                                      fontWeight: FontWeight.w600),
+                                ),
+                              ],
                             ),
-                          ],
-                        ),
-                        SizedBox(
-                          height: 15,
-                        ),
-                      ],
-                    ),
+                          ),
+                          SizedBox(
+                            height: 10,
+                          ),
+                          Row(
+                            children: [
+                              Expanded(
+                                child: MultiSelectDropDown(
+                                  onOptionSelected:
+                                      (List<ValueItem> selectedOptions) {
+                                    setState(() {
+                                      if(selectedOptions.length > 0) {
+                                        highRiseApartment = selectedOptions[0].value!;
+                                      } else {
+                                        highRiseApartment = '';
+                                      }
+                                    });
+                                  },
+                                  selectedOptions:
+                                  widget.isEdit! ? highRiseApartmentWidget : [],
+                                  options: [
+                                    ValueItem(label: "Yes", value: "yes"),
+                                    ValueItem(label: "No", value: "no")
+                                  ],
+                                  selectionType: SelectionType.single,
+                                  chipConfig:
+                                  const ChipConfig(wrapType: WrapType.wrap),
+                                  dropdownHeight: 300,
+                                  optionTextStyle: const TextStyle(fontSize: 16),
+                                  selectedOptionIcon:
+                                  const Icon(Icons.check_circle),
+                                ),
+                              ),
+                            ],
+                          ),
+                          SizedBox(
+                            height: 15,
+                          ),
+                        ],
+                      ),
+                    if (widget.body!['category_id'] == 4)
+                      Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          RichText(
+                            text: TextSpan(
+                              children: [
+                                TextSpan(
+                                  text: "Lake View",
+                                  style: TextStyle(
+                                      color: Colors.black,
+                                      fontSize: 15,
+                                      fontWeight: FontWeight.w600),
+                                ),
+                              ],
+                            ),
+                          ),
+                          SizedBox(
+                            height: 10,
+                          ),
+                          Row(
+                            children: [
+                              Expanded(
+                                child: MultiSelectDropDown(
+                                  onOptionSelected:
+                                      (List<ValueItem> selectedOptions) {
+                                    setState(() {
+                                      if(selectedOptions.length > 0) {
+                                        lakeView = selectedOptions[0].value!;
+                                      } else {
+                                        lakeView = '';
+                                      }
+                                    });
+                                  },
+                                  selectedOptions:
+                                  widget.isEdit! ? lakeViewWidget : [],
+                                  options: [
+                                    ValueItem(label: "Yes", value: "yes"),
+                                    ValueItem(label: "No", value: "no")
+                                  ],
+                                  selectionType: SelectionType.single,
+                                  chipConfig:
+                                  const ChipConfig(wrapType: WrapType.wrap),
+                                  dropdownHeight: 300,
+                                  optionTextStyle: const TextStyle(fontSize: 16),
+                                  selectedOptionIcon:
+                                  const Icon(Icons.check_circle),
+                                ),
+                              ),
+                            ],
+                          ),
+                          SizedBox(
+                            height: 15,
+                          ),
+                        ],
+                      ),
                     Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
                         RichText(
                           text: TextSpan(
                             children: [
-                              TextSpan(
-                                text: "Near By Metro",
+                              TextSpan(text: "Nearby metro km",
                                 style: TextStyle(
                                     color: Colors.black,
                                     fontSize: 15,
-                                    fontWeight: FontWeight.w600),
-                              ),
-                              // TextSpan(
-                              //   text: " *",
-                              //   style: TextStyle(
-                              //       color:
-                              //       Colors.red), // Customize asterisk color
-                              // ),
+                                    fontWeight: FontWeight.w600
+                                ),),
                             ],
                           ),
                         ),
-                        SizedBox(
-                          height: 10,
-                        ),
+                        SizedBox(height: 10,),
                         Row(
                           children: [
                             Expanded(
-                              child: MultiSelectDropDown(
-                                onOptionSelected:
-                                    (List<ValueItem> selectedOptions) {
-                                  setState(() {
-                                    if(selectedOptions.length > 0) {
-                                      nearByMetro = selectedOptions[0].value!;
-                                    } else {
-                                      nearByMetro = '';
-                                    }
-                                  });
-                                },
-                                selectedOptions:
-                                widget.isEdit! ? nearByMetroWidget : [],
-                                options: [
-                                  ValueItem(label: "Yes", value: "yes"),
-                                  ValueItem(label: "No", value: "no")
-                                ],
-                                selectionType: SelectionType.single,
-                                chipConfig:
-                                const ChipConfig(wrapType: WrapType.wrap),
-                                dropdownHeight: 300,
-                                optionTextStyle: const TextStyle(fontSize: 16),
-                                selectedOptionIcon:
-                                const Icon(Icons.check_circle),
+                              child: Container(
+                                decoration: BoxDecoration(
+                                  border: Border.all(
+                                      width: 1,
+                                      color: Color(0xffe1e1e1)
+                                  ),
+                                  color: Color(0xfff5f5f5),
+                                  borderRadius: BorderRadius.circular(10.0), // Optional: Add border radius
+                                ),
+                                child: Padding(
+                                  padding: const EdgeInsets.only(left: 8.0,right: 5),
+                                  child: TextFormField(
+                                    controller: nearByMetroControler,
+                                    keyboardType: TextInputType.number,
+                                    decoration: const InputDecoration(
+                                        hintText: 'Enter metro distance..',
+                                        hintStyle: TextStyle(
+                                          fontFamily: 'Poppins',
+                                          fontSize: 14.0,
+                                          color: Color(0xff9c9c9c),
+                                          fontWeight: FontWeight.w500,
+                                          decoration: TextDecoration.none,
+                                        ),
+                                        enabledBorder: UnderlineInputBorder(
+                                          borderSide: BorderSide(
+                                            color: Colors.transparent,
+                                          ),
+                                        ),
+                                        focusedBorder: UnderlineInputBorder(
+                                            borderSide: BorderSide(
+                                              color: Colors.transparent,
+                                            ))
+                                    ),
+                                  ),
+                                ),
                               ),
                             ),
                           ],
                         ),
-                        SizedBox(
-                          height: 15,
-                        ),
+                        SizedBox(height: 15,),
                       ],
                     ),
                     Column(
@@ -1648,6 +1291,130 @@ class _ProjectFormTwoState extends State<ProjectFormTwo> {
                                 options: [
                                   ValueItem(label: "Yes", value: "yes"),
                                   ValueItem(label: "No", value: "no")
+                                ],
+                                selectionType: SelectionType.single,
+                                chipConfig:
+                                const ChipConfig(wrapType: WrapType.wrap),
+                                dropdownHeight: 300,
+                                optionTextStyle: const TextStyle(fontSize: 16),
+                                selectedOptionIcon:
+                                const Icon(Icons.check_circle),
+                              ),
+                            ),
+                          ],
+                        ),
+                        SizedBox(
+                          height: 15,
+                        ),
+                      ],
+                    ),
+                    Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        RichText(
+                          text: TextSpan(
+                            children: [
+                              TextSpan(
+                                text: "Facing",
+                                style: TextStyle(
+                                    color: Colors.black,
+                                    fontSize: 15,
+                                    fontWeight: FontWeight.w600),
+                              ),
+                              // TextSpan(
+                              //   text: " *",
+                              //   style: TextStyle(
+                              //       color:
+                              //       Colors.red), // Customize asterisk color
+                              // ),
+                            ],
+                          ),
+                        ),
+                        SizedBox(
+                          height: 10,
+                        ),
+                        Row(
+                          children: [
+                            Expanded(
+                              child: MultiSelectDropDown(
+                                onOptionSelected:
+                                    (List<ValueItem> selectedOptions) {
+                                  setState(() {
+                                    if(selectedOptions.length > 0) {
+                                      projectFacing = selectedOptions[0].value!;
+                                    } else {
+                                      projectFacing = '';
+                                    }
+                                  });
+                                },
+                                selectedOptions: widget.isEdit! ? projectFacingWidget : [],
+                                options: [
+                                  ValueItem(label: "North", value: "0"),
+                                  ValueItem(label: "East", value: "1"),
+                                  ValueItem(label: "South", value: "2"),
+                                  ValueItem(label: "West", value: "3"),
+                                ],
+                                selectionType: SelectionType.single,
+                                chipConfig:
+                                const ChipConfig(wrapType: WrapType.wrap),
+                                dropdownHeight: 300,
+                                optionTextStyle: const TextStyle(fontSize: 16),
+                                selectedOptionIcon:
+                                const Icon(Icons.check_circle),
+                              ),
+                            ),
+                          ],
+                        ),
+                        SizedBox(
+                          height: 15,
+                        ),
+                      ],
+                    ),
+                    Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        RichText(
+                          text: TextSpan(
+                            children: [
+                              TextSpan(
+                                text: "Furniture",
+                                style: TextStyle(
+                                    color: Colors.black,
+                                    fontSize: 15,
+                                    fontWeight: FontWeight.w600),
+                              ),
+                              // TextSpan(
+                              //   text: " *",
+                              //   style: TextStyle(
+                              //       color:
+                              //       Colors.red), // Customize asterisk color
+                              // ),
+                            ],
+                          ),
+                        ),
+                        SizedBox(
+                          height: 10,
+                        ),
+                        Row(
+                          children: [
+                            Expanded(
+                              child: MultiSelectDropDown(
+                                onOptionSelected:
+                                    (List<ValueItem> selectedOptions) {
+                                  print('rrrrrrrrrrrrrrrrrrrrrr: ${selectedOptions}');
+                                  setState(() {
+                                    if(selectedOptions.length > 0) {
+                                      projectFurnished = selectedOptions[0].value!;
+                                    } else {
+                                      projectFurnished = '';
+                                    }
+                                  });
+                                },
+                                selectedOptions: widget.isEdit! ? projectFurnishedWidget : [],
+                                options: [
+                                  ValueItem(label: "Furnished", value: "0"),
+                                  ValueItem(label: "Unfurnished", value: "1"),
+                                  ValueItem(label: "Semi-Furnished", value: "2"),
                                 ],
                                 selectionType: SelectionType.single,
                                 chipConfig:
@@ -1787,6 +1554,132 @@ class _ProjectFormTwoState extends State<ProjectFormTwo> {
                         ),
                       ],
                     ),
+                    Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        RichText(
+                          text: TextSpan(
+                            children: [
+                              TextSpan(text: "Road Width",
+                                style: TextStyle(
+                                    color: Colors.black,
+                                    fontSize: 15,
+                                    fontWeight: FontWeight.w600
+                                ),),
+                              // TextSpan(
+                              //   text: " *",
+                              //   style: TextStyle(color: Colors.red), // Customize asterisk color
+                              // ),
+                            ],
+                          ),
+                        ),
+                        SizedBox(height: 10,),
+                        Row(
+                          children: [
+                            Expanded(
+                              child: Container(
+                                decoration: BoxDecoration(
+                                  border: Border.all(
+                                      width: 1,
+                                      color: Color(0xffe1e1e1)
+                                  ),
+                                  color: Color(0xfff5f5f5),
+                                  borderRadius: BorderRadius.circular(10.0), // Optional: Add border radius
+                                ),
+                                child: Padding(
+                                  padding: const EdgeInsets.only(left: 8.0,right: 5),
+                                  child: TextFormField(
+                                    controller: roadWidthControler,
+                                    keyboardType: TextInputType.number,
+                                    decoration: const InputDecoration(
+                                        hintText: 'Enter Road Width..',
+                                        hintStyle: TextStyle(
+                                          fontFamily: 'Poppins',
+                                          fontSize: 14.0,
+                                          color: Color(0xff9c9c9c),
+                                          fontWeight: FontWeight.w500,
+                                          decoration: TextDecoration.none,
+                                        ),
+                                        enabledBorder: UnderlineInputBorder(
+                                          borderSide: BorderSide(
+                                            color: Colors.transparent,
+                                          ),
+                                        ),
+                                        focusedBorder: UnderlineInputBorder(
+                                            borderSide: BorderSide(
+                                              color: Colors.transparent,
+                                            ))
+                                    ),
+                                  ),
+                                ),
+                              ),
+                            ),
+                          ],
+                        ),
+                        SizedBox(height: 15,),
+                      ],
+                    ),
+                    Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        RichText(
+                          text: TextSpan(
+                            children: [
+                              TextSpan(text: "Project Completed on",
+                                style: TextStyle(
+                                    color: Colors.black,
+                                    fontSize: 15,
+                                    fontWeight: FontWeight.w600
+                                ),),
+                            ],
+                          ),
+                        ),
+                        SizedBox(height: 10,),
+                        Row(
+                          children: [
+                            Expanded(
+                              child: Container(
+                                decoration: BoxDecoration(
+                                  border: Border.all(
+                                      width: 1,
+                                      color: Color(0xffe1e1e1)
+                                  ),
+                                  color: Color(0xfff5f5f5),
+                                  borderRadius: BorderRadius.circular(10.0), // Optional: Add border radius
+                                ),
+                                child: Padding(
+                                  padding: const EdgeInsets.only(left: 8.0,right: 5),
+                                  child: TextFormField(
+                                    controller: projectCompletedControler,
+                                    keyboardType: TextInputType.text,
+                                    decoration: const InputDecoration(
+                                        hintText: 'Completed on..',
+                                        hintStyle: TextStyle(
+                                          fontFamily: 'Poppins',
+                                          fontSize: 14.0,
+                                          color: Color(0xff9c9c9c),
+                                          fontWeight: FontWeight.w500,
+                                          decoration: TextDecoration.none,
+                                        ),
+                                        enabledBorder: UnderlineInputBorder(
+                                          borderSide: BorderSide(
+                                            color: Colors.transparent,
+                                          ),
+                                        ),
+                                        focusedBorder: UnderlineInputBorder(
+                                            borderSide: BorderSide(
+                                              color: Colors.transparent,
+                                            ))
+                                    ),
+                                  ),
+                                ),
+                              ),
+                            ),
+                          ],
+                        ),
+                        SizedBox(height: 25,),
+                      ],
+                    ),
                     SizedBox(height: 25,),
                   ],
                 ),
@@ -1817,25 +1710,13 @@ class _ProjectFormTwoState extends State<ProjectFormTwo> {
             onTap: () {
               if(widget.body!['category_id'] == 4) {
                 if (totalUnitsControler.text != '' &&
-                    MAxsf.text != '' &&
-                    Minsf.text != '' &&
-                    projectAreaControler.text != ''
-                    && selectedDate != null && selectedDate != '' &&
-                    possessionDate != null
-                    && possessionDate != '' && completionDate != null
-                    && completionDate != '' && sizeControler.text != '' &&
+                    MAxsf.text != '' && Minsf.text != '' &&
+                    projectAreaControler.text != '' &&
+                    totalFloorsControler.text != '' &&
+                    selectedDate != null && selectedDate != '' &&
+                    possessionDate != null && possessionDate != '' &&
+                    approvedControler.text != '' &&
                     configurationsControler.text != ''
-                    // reraControler.text != '' &&
-                //     totalFloorsControler.text != '' &&
-                //     approvedControler.text != '' &&
-                //     roadWidthControler.text != '' &&
-                //     highRiseApartment != '' &&
-                //     lakeView != '' &&
-                //     gatedCommunity != '' &&
-                //     openParking != '' &&
-                //     coveredParking != '' &&
-                //     vegOnly != '' &&
-                //     nearByMetro != ''
                 ) {
                   var body = {
                     'total_units': totalUnitsControler.text,
@@ -1852,12 +1733,12 @@ class _ProjectFormTwoState extends State<ProjectFormTwo> {
                     'lake_view': lakeView,
                     'min_size': Minsf,
                     'man_size': MAxsf,
-
-                    'near_by_metro': nearByMetro,
+                    'near_by_metro': nearByMetroControler,
                     'veg_only': vegOnly,
                     'covered_parking': coveredParking,
                     'open_parking': openParking,
                     'road_width': roadWidthControler.text,
+                    'project_completed': projectCompletedControler.text,
                     ...widget.body!
                   };
                   Navigator.push(
@@ -1874,42 +1755,26 @@ class _ProjectFormTwoState extends State<ProjectFormTwo> {
                       type: MessageType.warning, messageDuration: 5);
                 }
               } else {
-                print('hhhhhhhhhhhhhhhhhhh');
                 if (totalUnitsControler.text != '' &&
                     projectAreaControler.text != '' &&
-                MAxsf.text != '' &&
-                Minsf.text != ''
-                    && selectedDate != null && selectedDate != '' &&
-                    completionDate != null
-                    && completionDate != '' && sizeControler.text != '' &&
-                    configurationsControler.text != '' &&
-                    // reraControler.text != ''
-                    // &&
+                    MAxsf.text != '' &&
+                    Minsf.text != '' &&
+                    selectedDate != null &&
+                    selectedDate != '' &&
                     totalFloorsControler.text != '' &&
-                    approvedControler.text != ''
-                    // sqftRateControler.text != '' &&
-                    // roadWidthControler.text != '' &&
-                    // openParking != '' &&
-                    // coveredParking != '' &&
-                    // vegOnly != '' &&
-                    // nearByMetro != '' &&
-                    // suitableFor != '' &&
-                    // projectFacing != '' &&
-                    // projectFurnished != '' &&
-                    // projectPlaced != ''
+                    approvedControler.text != '' &&
+                    configurationsControler.text != ''
                 ) {
 
                   var body = {
                     'total_units': totalUnitsControler.text,
                     'total_project': projectAreaControler.text,
                     'launch_date': selectedDate,
-                    'possession_start': possessionDate,
-                    'size': sizeControler.text,
                     'configuration': configurationsControler.text,
                     'rera_no': reraControler.text,
                     'floors': totalFloorsControler.text,
                     'min_size': Minsf,
-                    'man_size': MAxsf,
+                    'max_size': MAxsf,
                     'approved_by': approvedControler.text,
                     'rate_per_sqft': sqftRateControler.text,
                     'suitable_for': suitableFor,
