@@ -131,6 +131,8 @@ class HomeScreenState extends State<HomeScreen>
   StateMachineController? _controller;
   bool favoriteInProgress = false;
 
+  int _totalPropertyCount = 0;
+
   Map<String, dynamic> riveConfig = AppSettings.riveAnimationConfigurations;
   late var addButtonConfig = riveConfig['add_button'];
   late var artboardName = addButtonConfig['artboard_name'];
@@ -2769,7 +2771,7 @@ class HomeScreenState extends State<HomeScreen>
             child: TitleHeader(
               enableShowAll: false,
               title: "Explore Properties Types".translate(context),
-              subTitle: "Get some Inspirations from 171 skills",
+              subTitle: "Get some Inspirations from $_totalPropertyCount skills",
               onSeeAll: () {
 
               },
@@ -2791,6 +2793,7 @@ class HomeScreenState extends State<HomeScreen>
 
               if (state is FetchCategorySuccess) {
                 isCategoryEmpty = state.categories.isEmpty;
+                _totalPropertyCount = state.categories.fold(0, (sum, category) => sum + (category.propertyCount ?? 0));
                 setState(() {});
               }
             },

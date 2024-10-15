@@ -151,6 +151,7 @@ class PropertyDetailsState extends State<PropertyDetails>
   ScrollController _scrollController = ScrollController();
   PageController _pageController = PageController();
   int _currentImage = 0;
+  bool isLoading = false;
 
   @override
   void initState() {
@@ -1147,120 +1148,132 @@ class PropertyDetailsState extends State<PropertyDetails>
                               ),
                               Padding(
                                 padding: EdgeInsets.symmetric(horizontal: 15,),
-                                child: Row(children: [
-                                  // UiUtils.imageType(
-                                  //     property?.category!.image ?? "",
-                                  //     width: 18,
-                                  //     height: 18,
-                                  //     color: Constant.adaptThemeColorSvg
-                                  //         ? context.color.tertiaryColor
-                                  //         : null),
-                                  property?.parameters != null && property!.parameters!.isNotEmpty &&
-                                      property!.parameters!.any((element) => element.id == 6)?
-                                  Container(
-                                    padding: EdgeInsets.only(left: 10,right: 10,top: 5,bottom: 5),
-                                    decoration: BoxDecoration(
-                                        color: Color(0xfffff2c8),
-                                        borderRadius: BorderRadius.circular(7),
-                                    ),
-                                    child: Text(
-                                      property!.parameters != null && property!.parameters!.isNotEmpty
-                                          ? property!.parameters![0].value
-                                          : '',
-                                      style: TextStyle(
-                                        color: Color(0xff333333),
-                                        fontSize: 11,
-                                        fontWeight: FontWeight.w500,
-                                      ),
-                                    )
+                                child: SingleChildScrollView(
+                                  scrollDirection: Axis.horizontal,
+                                  child: Row(children: [
+                                    // UiUtils.imageType(
+                                    //     property?.category!.image ?? "",
+                                    //     width: 18,
+                                    //     height: 18,
+                                    //     color: Constant.adaptThemeColorSvg
+                                    //         ? context.color.tertiaryColor
+                                    //         : null),
+                                    property?.parameters != null && property!.parameters!.isNotEmpty &&
+                                        property!.parameters!.any((element) => element.id == 6)?
+                                                                 Row(
+                                   children: [
+                                     Container(
+                                       padding: EdgeInsets.only(left: 10,right: 10,top: 5,bottom: 5),
+                                       decoration: BoxDecoration(
+                                         color: Color(0xfffff2c8),
+                                         borderRadius: BorderRadius.circular(7),
+                                       ),
+                                       child: Text(
+                                         property!.parameters != null && property!.parameters!.isNotEmpty
+                                             ? property!.parameters![0].value
+                                             : '',
+                                         style: TextStyle(
+                                           color: Color(0xff333333),
+                                           fontSize: 11,
+                                           fontWeight: FontWeight.w500,
+                                         ),
+                                       )
+                                           .setMaxLines(lines: 1),
+                                     ),
 
-                                        .setMaxLines(lines: 1),
-                                  ):const SizedBox(),
+                                     const SizedBox(width: 5,),
+                                   ],
+                                                                 ):const SizedBox(),
+                                  if( property?.rera != null && property!.rera!.isNotEmpty)
+                                  Row(
+                                    children: [
+                                      Container(
+                                        padding: EdgeInsets.only(left: 10,right: 10,top: 5,bottom: 5),
+                                        decoration: BoxDecoration(
+                                          color: Color(0xffd6fffa),
+                                          borderRadius: BorderRadius.circular(7),
+                                        ),
+                                        child: Row(
+                                          children: [
+                                            Image.asset("assets/NewPropertydetailscreen/__rara.png",width: 13,height: 13,fit: BoxFit.cover,),
+                                            SizedBox(width: 2,),
+                                            Text("RERA",
+                                              style: TextStyle(
+                                                  fontSize: 11,
+                                                  fontWeight: FontWeight.w500,
+                                                  color: Color(0xff009681)
+                                              ),
+                                            ),
+                                          ],
+                                        ),
+                                      ),
+                                      SizedBox(width: 5,),
+                                    ],
+                                  ),
+                                    // SizedBox(width: 5,),
+                                    // Container(
+                                    //   width: 50,
+                                    //   decoration: BoxDecoration(
+                                    //       borderRadius:
+                                    //           BorderRadius.circular(7),
+                                    //       color: context.color.tertiaryColor),
+                                    //   child: Padding(
+                                    //     padding: const EdgeInsets.all(3.0),
+                                    //     child: Center(
+                                    //         child: Text(
+                                    //       property!.properyType
+                                    //           .toString()
+                                    //           .toLowerCase()
+                                    //           .translate(context),
+                                    //           style: TextStyle(
+                                    //             color: Colors.white,
+                                    //             fontSize: 11
+                                    //           ),
+                                    //     )),
+                                    //   ),
+                                    // ),
 
-                                  const SizedBox(width: 5,),
-                                  Container(
-                                    padding: EdgeInsets.only(left: 10,right: 10,top: 5,bottom: 5),
-                                    decoration: BoxDecoration(
-                                      color: Color(0xffd6fffa),
-                                      borderRadius: BorderRadius.circular(7),
-                                    ),
-                                    child: Row(
-                                      children: [
-                                        Image.asset("assets/NewPropertydetailscreen/__rara.png",width: 13,height: 13,fit: BoxFit.cover,),
-                                        SizedBox(width: 2,),
-                                        Text("RERA",
-                                          style: TextStyle(
-                                              fontSize: 11,
-                                              fontWeight: FontWeight.w500,
-                                              color: Color(0xff009681)
+                                    Container(
+                                      // width: 50,
+                                      decoration: BoxDecoration(
+                                          borderRadius:
+                                          BorderRadius.circular(7),
+                                          color: Color(0xff6c5555)),
+                                      child: Padding(
+                                        padding: EdgeInsets.only(left: 10,right: 10,top: 5,bottom: 5),
+                                        child: Center(
+                                          child: Text(
+                                            property!.brokerage == 'Yes' ? 'Brokerage' : 'No Brokerage'.toString().translate(context),
+                                            style: TextStyle(
+                                                color: Colors.white,
+                                                fontSize: 11
+                                            ),
                                           ),
                                         ),
-                                      ],
-                                    ),
-                                  ),
-                                  // SizedBox(width: 5,),
-                                  // Container(
-                                  //   width: 50,
-                                  //   decoration: BoxDecoration(
-                                  //       borderRadius:
-                                  //           BorderRadius.circular(7),
-                                  //       color: context.color.tertiaryColor),
-                                  //   child: Padding(
-                                  //     padding: const EdgeInsets.all(3.0),
-                                  //     child: Center(
-                                  //         child: Text(
-                                  //       property!.properyType
-                                  //           .toString()
-                                  //           .toLowerCase()
-                                  //           .translate(context),
-                                  //           style: TextStyle(
-                                  //             color: Colors.white,
-                                  //             fontSize: 11
-                                  //           ),
-                                  //     )),
-                                  //   ),
-                                  // ),
-                                  SizedBox(width: 5,),
-                                  Container(
-                                    // width: 50,
-                                    decoration: BoxDecoration(
-                                        borderRadius:
-                                        BorderRadius.circular(7),
-                                        color: Color(0xff6c5555)),
-                                    child: Padding(
-                                      padding: const EdgeInsets.only(left: 10, right: 10, top: 3, bottom: 3),
-                                      child: Center(
-                                        child: Text(
-                                          property!.brokerage == 'Yes' ? 'Brokerage' : 'No Brokerage'.toString().translate(context),
-                                          style: TextStyle(
-                                              color: Colors.white,
-                                              fontSize: 11
+                                      ),
+                                    ), SizedBox(width: 5,),
+                                    Container(
+                                      // width: 50,
+                                      decoration: BoxDecoration(
+                                          borderRadius:
+                                          BorderRadius.circular(7),
+                                          color: Color(0xffcff4fc)),
+                                      child: Padding(
+                                        padding: EdgeInsets.only(left: 10,right: 10,top: 5,bottom: 5),
+                                        child: Center(
+                                          child: Text(
+                                            property!.code.toString()
+                                                .translate(context),
+                                            style: TextStyle(
+                                                color: Colors.black,
+                                                fontSize: 11
+                                            ),
                                           ),
                                         ),
                                       ),
                                     ),
-                                  ), SizedBox(width: 5,),
-                                  Container(
-                                    // width: 50,
-                                    decoration: BoxDecoration(
-                                        borderRadius:
-                                        BorderRadius.circular(7),
-                                        color: Color(0xffcff4fc)),
-                                    child: Padding(
-                                      padding: const EdgeInsets.only(left: 10, right: 10, top: 3, bottom: 3),
-                                      child: Center(
-                                        child: Text(
-                                          property!.code.toString()
-                                              .translate(context),
-                                          style: TextStyle(
-                                              color: Colors.black,
-                                              fontSize: 11
-                                          ),
-                                        ),
-                                      ),
-                                    ),
-                                  ),
-                                ]),
+                                  ]),
+                                ),
                               ),
                               const SizedBox(
                                 height: 10,
@@ -1288,7 +1301,7 @@ class PropertyDetailsState extends State<PropertyDetails>
                                             "rent") ...[
                                           Text((rentPrice))
                                               .color(context.color.tertiaryColor)
-                                              .size(13)
+                                              .size(15)
                                               .bold(weight: FontWeight.w500),
                                         ] else ...[
                                           Text(formatAmount(int.parse(property!.price!))
@@ -1298,7 +1311,7 @@ class PropertyDetailsState extends State<PropertyDetails>
                                           //         false)
                                               .formatAmount(prefix: true))
                                               .color(context.color.tertiaryColor)
-                                              .size(13)
+                                              .size(15)
                                               .bold(weight: FontWeight.w500),
                                         ],
                                         if (Constant.isNumberWithSuffix) ...[
@@ -1311,7 +1324,7 @@ class PropertyDetailsState extends State<PropertyDetails>
                                             ),
                                             Text("(${formatAmount(int.parse(property!.price!))})")
                                                 .color(context.color.tertiaryColor)
-                                                .size(13).bold(weight: FontWeight.w500),
+                                                .size(15).bold(weight: FontWeight.w500),
                                           ]
                                         ]
                                       ],
@@ -1322,8 +1335,8 @@ class PropertyDetailsState extends State<PropertyDetails>
                                     child: Text(property?.sqft != null ? '${property?.sqft} Sq.Ft.' : '',
                                       style: TextStyle(
                                           color: Color(0xffa2a2a2),
-                                          fontSize: 11,
-                                          fontWeight: FontWeight.w400
+                                          fontSize: 12,
+                                          fontWeight: FontWeight.w600
                                       ),
                                     ),
                                   ),
@@ -1371,179 +1384,181 @@ class PropertyDetailsState extends State<PropertyDetails>
                                 height: 20,
                               ),
                               CusomterProfileWidget1(
-                                widget: widget,
+                                widget: widget, propertyID: property?.id??0,
                               ),
                               const SizedBox(
-                                height: 20,
+                                height: 10,
                               ),
-                              if(property?.parameters != null)
-                               Padding(
-                                padding: EdgeInsets.symmetric( horizontal: 15,),
-                                child: Container(
-                                  padding: EdgeInsets.all(10),
-                                  width: double.infinity,
-                                  decoration: BoxDecoration(
-                                    borderRadius: BorderRadius.circular(15.0),
-                                    color: Colors.white,
-                                    boxShadow: [
-                                      BoxShadow(
-                                        offset: Offset(0, 1),
-                                        blurRadius: 5,
-                                        color: Colors.black.withOpacity(0.1),
+                              if(property?.parameters != null&&property!.parameters!.isNotEmpty)
+                               Column(
+                                 children: [
+                                   Padding(
+                                    padding: EdgeInsets.symmetric( horizontal: 15,),
+                                    child: Container(
+                                      padding: EdgeInsets.all(10),
+                                      width: double.infinity,
+                                      decoration: BoxDecoration(
+                                        borderRadius: BorderRadius.circular(15.0),
+                                        color: Colors.white,
+                                        boxShadow: [
+                                          BoxShadow(
+                                            offset: Offset(0, 1),
+                                            blurRadius: 5,
+                                            color: Colors.black.withOpacity(0.1),
+                                          ),
+                                        ],
                                       ),
-                                    ],
-                                  ),
-                                  child: Column(
-                                    crossAxisAlignment: CrossAxisAlignment.start,
-                                    children: [
-                                      Text("Property Overview".translate(context),style: TextStyle(
-                                        fontSize: 14,
-                                        color: Color(0xff333333),
-                                        fontWeight: FontWeight.w600
-                                      ),),
-                                      SizedBox(height :10),
-                                      Wrap(
-                                        direction: Axis.horizontal,
-                                        crossAxisAlignment: WrapCrossAlignment.start,
-                                        runAlignment: WrapAlignment.start,
-                                        alignment: WrapAlignment.start,
-                                        children: List.generate(
-                                            property?.parameters?.length ?? 0,
-                                            (index) {
-                                              Parameter? parameter = property?.parameters![index];
-                                          //     bool isParameterValueEmpty =
-                                          //     (parameter?.value == "" ||
-                                          //         parameter?.value == "0" ||
-                                          //         parameter?.value == null ||
-                                          //         parameter?.value == "null");
-                                          //     print('kkkkkkkkkkkkkk: ${parameter}');
-                                          //
-                                          // ///If it has no value
-                                          // if (isParameterValueEmpty) {
-                                          //   return const SizedBox.shrink();
-                                          // }
+                                      child: Column(
+                                        crossAxisAlignment: CrossAxisAlignment.start,
+                                        children: [
+                                          Text("Property Overview".translate(context),style: TextStyle(
+                                            fontSize: 14,
+                                            color: Color(0xff333333),
+                                            fontWeight: FontWeight.w600
+                                          ),),
+                                          SizedBox(height :10),
+                                          Wrap(
+                                            direction: Axis.horizontal,
+                                            crossAxisAlignment: WrapCrossAlignment.start,
+                                            runAlignment: WrapAlignment.start,
+                                            alignment: WrapAlignment.start,
+                                            children: List.generate(
+                                                property?.parameters?.length ?? 0,
+                                                (index) {
+                                                  Parameter? parameter = property?.parameters![index];
+                                              //     bool isParameterValueEmpty =
+                                              //     (parameter?.value == "" ||
+                                              //         parameter?.value == "0" ||
+                                              //         parameter?.value == null ||
+                                              //         parameter?.value == "null");
+                                              //     print('kkkkkkkkkkkkkk: ${parameter}');
+                                              //
+                                              // ///If it has no value
+                                              // if (isParameterValueEmpty) {
+                                              //   return const SizedBox.shrink();
+                                              // }
 
-                                          return ConstrainedBox(
-                                            constraints: BoxConstraints(
-                                                minWidth:(context.screenWidth / 2) - 40),
-                                            child: Padding(
-                                              padding: const EdgeInsets.fromLTRB(
-                                                  0, 8, 8, 8),
-                                              child: SizedBox(
-                                                // height: 37,
-                                                child: Row(
-                                                    crossAxisAlignment:
-                                                        CrossAxisAlignment.start,
-                                                    mainAxisSize: MainAxisSize.min,
-                                                    children: [
-                                                      Container(
-                                                        width: 36.rw(context),
-                                                        height: 36.rh(context),
-                                                        alignment: Alignment.center,
-                                                        decoration: BoxDecoration(
-                                                            color: context
-                                                                .color.tertiaryColor
-                                                                .withOpacity(0.2),
-                                                            borderRadius:
-                                                                BorderRadius.circular(
-                                                                    10)),
-                                                        child: SizedBox(
-                                                          height: 20.rh(context),
-                                                          width: 20.rw(context),
-                                                          child: FittedBox(
-                                                            child: UiUtils.imageType(
-                                                              parameter?.image ?? "",
-                                                              fit: BoxFit.cover,
-                                                              color: Constant
-                                                                      .adaptThemeColorSvg
-                                                                  ? context.color
-                                                                      .tertiaryColor
-                                                                  : null,
-                                                            ),
-                                                          ),
-                                                        ),
-                                                      ),
-                                                      SizedBox(
-                                                        width: 10.rw(context),
-                                                      ),
-                                                      Column(
+                                              return ConstrainedBox(
+                                                constraints: BoxConstraints(
+                                                    minWidth:(context.screenWidth / 2) - 40),
+                                                child: Padding(
+                                                  padding: const EdgeInsets.fromLTRB(
+                                                      0, 8, 8, 8),
+                                                  child: SizedBox(
+                                                    // height: 37,
+                                                    child: Row(
                                                         crossAxisAlignment:
                                                             CrossAxisAlignment.start,
-                                                        mainAxisSize:
-                                                            MainAxisSize.min,
+                                                        mainAxisSize: MainAxisSize.min,
                                                         children: [
-                                                          Text(parameter?.name ?? "")
-                                                              .size(10)
-                                                              .color(Color(0xff5d5d5d)),
-                                                          if (parameter
-                                                                  ?.typeOfParameter ==
-                                                              "file") ...{
-                                                            InkWell(
-                                                              onTap: () async {
-                                                                await urllauncher.launchUrl(
-                                                                    Uri.parse(
-                                                                        parameter!
-                                                                            .value),
-                                                                    mode: LaunchMode
-                                                                        .externalApplication);
-                                                              },
-                                                              child: Text(
-                                                                UiUtils
-                                                                    .getTranslatedLabel(
-                                                                        context,
-                                                                        "viewFile"),
-                                                              ).underline().color(
-                                                                  context.color
-                                                                      .tertiaryColor),
+                                                          Container(
+                                                            width: 36.rw(context),
+                                                            height: 36.rh(context),
+                                                            alignment: Alignment.center,
+                                                            decoration: BoxDecoration(
+                                                                color: context
+                                                                    .color.tertiaryColor
+                                                                    .withOpacity(0.2),
+                                                                borderRadius:
+                                                                    BorderRadius.circular(
+                                                                        10)),
+                                                            child: SizedBox(
+                                                              height: 20.rh(context),
+                                                              width: 20.rw(context),
+                                                              child: FittedBox(
+                                                                child: UiUtils.imageType(
+                                                                  parameter?.image ?? "",
+                                                                  fit: BoxFit.cover,
+                                                                  color:context.color
+                                                                      .tertiaryColor
+                                                                ),
+                                                              ),
                                                             ),
-                                                          } else if (parameter?.value
-                                                              is List) ...{
-                                                            Text((parameter?.value
-                                                                    as List)
-                                                                .join(","))
-                                                          } else ...[
-                                                            if (parameter
-                                                                    ?.typeOfParameter ==
-                                                                "textarea") ...[
-                                                              SizedBox(
-                                                                width: MediaQuery.of(
-                                                                            context)
-                                                                        .size
-                                                                        .width *
-                                                                    0.7,
-                                                                child: Text(
-                                                                        "${parameter?.value}")
-                                                                    .size(12)
-                                                                    .bold(
-                                                                      weight:
-                                                                          FontWeight
-                                                                              .w600,
-                                                                    ),
-                                                              )
-                                                            ] else ...[
-                                                              Text("${parameter?.value}")
-                                                                  .size(12)
-                                                                  .bold(
-                                                                    weight: FontWeight
-                                                                        .w500,
+                                                          ),
+                                                          SizedBox(
+                                                            width: 10.rw(context),
+                                                          ),
+                                                          Column(
+                                                            crossAxisAlignment:
+                                                                CrossAxisAlignment.start,
+                                                            mainAxisSize:
+                                                                MainAxisSize.min,
+                                                            children: [
+                                                              Text(parameter?.name ?? "")
+                                                                  .size(10)
+                                                                  .color(Color(0xff5d5d5d)),
+                                                              if (parameter
+                                                                      ?.typeOfParameter ==
+                                                                  "file") ...{
+                                                                InkWell(
+                                                                  onTap: () async {
+                                                                    await urllauncher.launchUrl(
+                                                                        Uri.parse(
+                                                                            parameter!
+                                                                                .value),
+                                                                        mode: LaunchMode
+                                                                            .externalApplication);
+                                                                  },
+                                                                  child: Text(
+                                                                    UiUtils
+                                                                        .getTranslatedLabel(
+                                                                            context,
+                                                                            "viewFile"),
+                                                                  ).underline().color(
+                                                                      context.color
+                                                                          .tertiaryColor),
+                                                                ),
+                                                              } else if (parameter?.value
+                                                                  is List) ...{
+                                                                Text((parameter?.value
+                                                                        as List)
+                                                                    .join(","))
+                                                              } else ...[
+                                                                if (parameter
+                                                                        ?.typeOfParameter ==
+                                                                    "textarea") ...[
+                                                                  SizedBox(
+                                                                    width: MediaQuery.of(
+                                                                                context)
+                                                                            .size
+                                                                            .width *
+                                                                        0.7,
+                                                                    child: Text(
+                                                                            "${parameter?.value}")
+                                                                        .size(12)
+                                                                        .bold(
+                                                                          weight:
+                                                                              FontWeight
+                                                                                  .w600,
+                                                                        ),
                                                                   )
-                                                            ]
-                                                          ]
-                                                        ],
-                                                      )
-                                                    ]),
-                                              ),
-                                            ),
-                                          );
-                                        }),
+                                                                ] else ...[
+                                                                  Text("${parameter?.value}")
+                                                                      .size(12)
+                                                                      .bold(
+                                                                        weight: FontWeight
+                                                                            .w500,
+                                                                      )
+                                                                ]
+                                                              ]
+                                                            ],
+                                                          )
+                                                        ]),
+                                                  ),
+                                                ),
+                                              );
+                                            }),
+                                          ),
+                                        ],
                                       ),
-                                    ],
-                                  ),
-                                ),
-                              ),
-                              const SizedBox(
-                                height: 14,
-                              ),
+                                    ),
+                                                                 ),
+                                   const SizedBox(
+                                     height: 14,
+                                   ),
+                                 ],
+                               ),
+
                               // Padding(
                               //   padding: EdgeInsets.symmetric( horizontal: 15,),
                               //   child: Container(
@@ -1761,7 +1776,7 @@ class PropertyDetailsState extends State<PropertyDetails>
                               // const SizedBox(
                               //   height: 14,
                               // ),
-                              if(property!.highlight != null)
+                              if(property!.highlight != null && property!.highlight!.isNotEmpty )
                                 Padding(
                                 padding: EdgeInsets.symmetric( horizontal: 15,),
                                 child: Container(
@@ -1819,13 +1834,10 @@ class PropertyDetailsState extends State<PropertyDetails>
 
 
 
-                              Padding(
-                                padding: EdgeInsets.only( left: 15,),
-                                child: OutdoorFacilityListWidget(
-                                    outdoorFacilityList: widget.property
-                                        ?.assignedOutdoorFacility ??
-                                        []),
-                              ),
+                              OutdoorFacilityListWidget(
+                                  outdoorFacilityList: widget.property
+                                      ?.assignedOutdoorFacility ??
+                                      []),
 
                               const SizedBox(
                                 height: 15,
@@ -2067,87 +2079,93 @@ class PropertyDetailsState extends State<PropertyDetails>
                               //     ),
                               //   ),
                               // ),
-                              // const SizedBox(
-                              //   height: 15,
-                              // ),
-                              Padding(
-                                padding: EdgeInsets.only( left: 15,right: 15),
-                                child: Text(UiUtils.getTranslatedLabel(
-                                    context, "Amenities"),
-                                  style: TextStyle(
-                                      fontSize: 14,
-                                      color: Color(0xff333333),
-                                      fontWeight: FontWeight.w600
-                                  ),),
-                              ),
+
+                             if(property!.amenity!=null&& property!.amenity!.isNotEmpty)
+                           Column(
+                             crossAxisAlignment: CrossAxisAlignment.start,
+                             children: [
+                               const SizedBox(
+                                 height: 15,
+                               ),
+                               Padding(
+                                 padding: EdgeInsets.only( left: 15,right: 15),
+                                 child: Text(UiUtils.getTranslatedLabel(
+                                     context, "Amenities"),
+                                   style: TextStyle(
+                                       fontSize: 14,
+                                       color: Color(0xff333333),
+                                       fontWeight: FontWeight.w600
+                                   ),),
+                               ),
 
 
-                              GridView.builder(
-                                padding: const EdgeInsets.all(15),
-                                shrinkWrap: true,
-                                itemCount: property?.amenity!.length,
-                                physics: const NeverScrollableScrollPhysics(),
-                                gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
-                                  crossAxisCount: 3,
-                                  crossAxisSpacing: 8,
-                                  mainAxisSpacing: 8,
-                                  childAspectRatio: 1 / 0.7,
-                                ),
+                               GridView.builder(
+                                 padding: const EdgeInsets.all(15),
+                                 shrinkWrap: true,
+                                 itemCount: property?.amenity!.length,
+                                 physics: const NeverScrollableScrollPhysics(),
+                                 gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+                                   crossAxisCount: 3,
+                                   crossAxisSpacing: 8,
+                                   mainAxisSpacing: 8,
+                                   childAspectRatio: 1 / 0.7,
+                                 ),
 
-                                itemBuilder: (context, index) {
-                                  final Map<String, dynamic> griddata = property?.amenity![index];
-                                  return GestureDetector(
-                                    onTap: () {
-                                    },
-                                    child: Container(
-                                      padding: const EdgeInsets.only(left: 10,right: 10,bottom: 10),
-                                      decoration: BoxDecoration(
-                                          color: Color(0xffebf4ff),
-                                          borderRadius: BorderRadius.circular(10),
-                                      ),
-                                      child: Column(
-                                        crossAxisAlignment: CrossAxisAlignment.start,
-                                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                                        children: [
-                                          Container(
-                                            padding: const EdgeInsets.only(left: 10,right: 10,top: 6,bottom: 6),
-                                            decoration: BoxDecoration(
-                                                color: Colors.white,
-                                              borderRadius: BorderRadius.only(
-                                                bottomLeft: Radius.circular(10),
-                                                bottomRight: Radius.circular(10),
-                                              ),
-                                            ),
+                                 itemBuilder: (context, index) {
+                                   final Map<String, dynamic> griddata = property?.amenity![index];
+                                   return GestureDetector(
+                                     onTap: () {
+                                     },
+                                     child: Container(
+                                       padding: const EdgeInsets.only(left: 10,right: 10,bottom: 10),
+                                       decoration: BoxDecoration(
+                                         color: Color(0xffebf4ff),
+                                         borderRadius: BorderRadius.circular(10),
+                                       ),
+                                       child: Column(
+                                         crossAxisAlignment: CrossAxisAlignment.start,
+                                         mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                                         children: [
+                                           Container(
+                                             padding: const EdgeInsets.only(left: 10,right: 10,top: 6,bottom: 6),
+                                             decoration: BoxDecoration(
+                                               color: Colors.white,
+                                               borderRadius: BorderRadius.only(
+                                                 bottomLeft: Radius.circular(10),
+                                                 bottomRight: Radius.circular(10),
+                                               ),
+                                             ),
                                              child: Container(
                                                width: 23, height: 23,
                                                child: UiUtils.networkSvg(griddata["image"], fit: BoxFit.cover, color: Color(0xff2e8af9)),
                                              ),
-                                          ),
-                                          Text(
-                                              griddata["name"],
-                                            maxLines: 1,
-                                            overflow: TextOverflow.ellipsis,
-                                          )
-                                              .size(11)
-                                              .color(Color(0xff5d5d5d))
-                                        ],
-                                      ),
-                                    ),
-                                  );
-                                },
-                              ),
+                                           ),
+                                           Text(
+                                             griddata["name"],
+                                             maxLines: 1,
+                                             overflow: TextOverflow.ellipsis,
+                                           )
+                                               .size(11)
+                                               .color(Color(0xff5d5d5d))
+                                         ],
+                                       ),
+                                     ),
+                                   );
+                                 },
+                               ),
+                             ],
+                           ),
                               const SizedBox(
-                                height: 5,
+                                height: 10,
                               ),
                               Padding(
                                 padding: EdgeInsets.only( left: 15,right: 15),
                                 child: Text(UiUtils.getTranslatedLabel(
                                         context, "Property Location"))
-                                    .color(context.color.textColorDark)
-                                    .size(context.font.large)
+                                    .color(Color(0xff333333))
+                                    .size(14)
                                     .bold(weight: FontWeight.w600),
                               ),
-
                               const SizedBox(
                                 height: 15,
                               ),
@@ -2258,7 +2276,7 @@ class PropertyDetailsState extends State<PropertyDetails>
                                         //   width: 5.rw(context),
                                         // ),
                                         Expanded(
-                                          child: Text("${property?.address!}"),
+                                          child: Text("${property?.address!}",style: TextStyle(fontSize: 12),),
                                         )
                                       ],
                                     ),
@@ -2341,50 +2359,7 @@ class PropertyDetailsState extends State<PropertyDetails>
                                 )
                             ],
                           ),
-                        SizedBox(height: 20,),
-                        Padding(
-                          padding: const EdgeInsets.symmetric(horizontal: 15),
-                          child: Row(
-                            children: [
-                              Expanded(
-                                child: InkWell(
-                                  onTap: () async {
-                                    var response = await Api.post(url: Api.interestedUsers, parameter: {
-                                      'property_id': property!.id!,
-                                      'type': 1,
-                                    });
-                                    if(!response['error']) {
-                                      HelperUtils.showSnackBarMessage(
-                                          context, UiUtils.getTranslatedLabel(context, response['message']),
-                                          type: MessageType.success, messageDuration: 3);
-                                      HelperUtils.showSnackBarMessage(
-                                          context, UiUtils.getTranslatedLabel(context, 'Our Executive will reach you shortly!'),
-                                          type: MessageType.success, messageDuration: 5);
-                                    }
-                                  },
-                                  child: Container(
-                                    padding: EdgeInsets.only(left: 20,right: 20,top: 5,bottom: 5),
-                                    decoration: BoxDecoration(
-                                        color: Colors.white,
-                                        borderRadius: BorderRadius.circular(30),
-                                        border: Border.all(
-                                            width: 1,
-                                            color: Color(0xff2e8af9)
-                                        )
-                                    ),
-                                    child: Center(
-                                      child: Text("Request a Callback",style: TextStyle(
-                                          color: Color(0xff2e8af9),
-                                          fontSize: 12,
-                                          fontWeight: FontWeight.w500
-                                      ),),
-                                    ),
-                                  ),
-                                ),
-                              ),
-                            ],
-                          ),
-                        ),
+
                         SizedBox(height: 20,),
                         Padding(
                           padding: const EdgeInsets.only(left: 15,right: 15),
@@ -2420,7 +2395,7 @@ class PropertyDetailsState extends State<PropertyDetails>
                                         });
                                       },
                                       child: Container(
-                                      width: 230,
+                                        width: 180,
                                       margin: EdgeInsets.only(right: 10),
                                       decoration: BoxDecoration(
                                           color: Colors.white,
@@ -2442,7 +2417,7 @@ class PropertyDetailsState extends State<PropertyDetails>
                                                   // child: Image.asset("assets/propertylist/1.png",width: double.infinity,fit: BoxFit.cover,height: 150,),
                                                   child: UiUtils.getImage(
                                                     similarPropertiesList[i]['title_image'] ?? "",
-                                                    width: double.infinity,fit: BoxFit.cover,height: 150,
+                                                    width: double.infinity,fit: BoxFit.cover,height: 130,
                                                   ),
                                               ),
 
@@ -2586,7 +2561,7 @@ class PropertyDetailsState extends State<PropertyDetails>
                                           });
                                       },
                                       child: Container(
-                                        width: 230,
+                                        width: 180,
                                         margin: EdgeInsets.only(right: 10),
                                         decoration: BoxDecoration(
                                             color: Colors.white,
@@ -2608,7 +2583,7 @@ class PropertyDetailsState extends State<PropertyDetails>
                                                   // child: Image.asset("assets/propertylist/1.png",width: double.infinity,fit: BoxFit.cover,height: 150,),
                                                   child: UiUtils.getImage(
                                                     agentPropertiesList[i]['title_image'] ?? "",
-                                                    width: double.infinity,fit: BoxFit.cover,height: 150,
+                                                    width: double.infinity,fit: BoxFit.cover,height: 130,
                                                   ),
                                                 ),
 
@@ -2921,9 +2896,7 @@ class PropertyDetailsState extends State<PropertyDetails>
                           buttonTitle:
                               UiUtils.getTranslatedLabel(context, "edit")),
                     ),
-                    const SizedBox(
-                      width: 8,
-                    ),
+                    const SizedBox( width: 8,),
                     Expanded(
                       child: UiUtils.buildButton(context,
                           padding: const EdgeInsets.symmetric(horizontal: 1),
@@ -3019,9 +2992,15 @@ class PropertyDetailsState extends State<PropertyDetails>
           ],
         ) : InkWell(
           onTap:() async {
+            setState(() {
+              isLoading = true;
+            });
             var response = await Api.post(url: Api.apiViewContact, parameter: {
               'property_id': widget.property!.id,
               'project_id': ''
+            });
+            setState(() {
+              isLoading = false;
             });
             if(!response['error'] && response['message'] == 'Update Successfully') {
               setState(() {
@@ -3032,12 +3011,42 @@ class PropertyDetailsState extends State<PropertyDetails>
               // ScaffoldMessenger.of(context).showSnackBar(SnackBar(
               //   content: Text(response['message']),
               // ));
-              HelperUtils.showSnackBarMessage(
-                  context, UiUtils.getTranslatedLabel(context, response['message']),
-                  type: MessageType.success, messageDuration: 3);
+              var snackBar = ScaffoldMessenger.of(context!).showSnackBar(
+                SnackBar(
+                  content: Row(
+                    children: [
+                      Text( UiUtils.getTranslatedLabel(context, response['message'])),
+                      Spacer(),
+                      InkWell(
+                        onTap: (){
+                          ScaffoldMessenger.of(context).hideCurrentSnackBar();
+                          GuestChecker.check(onNotGuest: () {
+                            Navigator.pushNamed(
+                                context, Routes.subscriptionPackageListRoute);
+                          });
+                        },
+                        child: const Row(
+                          children: [
+                            Text("Buy"),
+                            SizedBox(width: 5,),
+                            Icon(Icons.arrow_forward,color: Colors.white,size: 17,)
+                          ],
+                        ),
+                      )
+                    ],
+                  ),
+                  duration: Duration(seconds: 5),
+                  backgroundColor: Color(0xff117af9),
+                ),
+              );
+
+
             }
           },
-          child: Center(child: Text('View Contact').size(context.font.large)
+          child: Center(child:isLoading
+              ? Text('Loading...').size(context.font.large)
+              .bold().color(Color(0xff117af9))
+              :  Text('View Contact').size(context.font.large)
               .bold().color(Color(0xff117af9)),)),
       ),
     );
@@ -3450,128 +3459,195 @@ class CusomterProfileWidget extends StatelessWidget {
 class CusomterProfileWidget1 extends StatelessWidget {
   const CusomterProfileWidget1({
     super.key,
-    required this.widget,
+    required this.widget, required this.propertyID,
   });
 
   final PropertyDetails widget;
+  final  int propertyID;
 
   @override
   Widget build(BuildContext context) {
     return Container(
-      padding: EdgeInsets.only(left: 15,right: 15,),
-      child: Row(
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(10),
+        boxShadow: [
+          BoxShadow(
+            offset: Offset(0, 1),
+            blurRadius: 5,
+            color: Colors.black.withOpacity(0.1),
+          ),
+        ],
+      ),
+      margin: const EdgeInsets.only(left: 15,right: 15,top: 10,bottom: 10),
+      padding: const EdgeInsets.all(10),
+      child: Column(
         children: [
+          Row(
+            children: [
 
-          Expanded(
-            child: Row(
-              children: [
-                GestureDetector(
-                  onTap: () {
-                    UiUtils.showFullScreenImage(context,
-                        provider:
+              Expanded(
+                child: Row(
+                  children: [
+                    GestureDetector(
+                      onTap: () {
+                        UiUtils.showFullScreenImage(context,
+                            provider:
                             NetworkImage(widget?.property?.customerProfile ?? ""));
-                  },
-            
-                  child: Container(
-                      width: 43,
-                      height: 43,
-                      clipBehavior: Clip.antiAlias,
-                      decoration: BoxDecoration(
-                          color: Colors.grey.shade200,
-                          border: Border.all(
-                            width: 1,
-                            color: Color(0xffdfdfdf)
-                          ),
-                          borderRadius: BorderRadius.circular(50)),
-                      child: ClipRRect(
-                          borderRadius: BorderRadius.circular(50),
-                        child: UiUtils.getImage(widget.property?.customerProfile ?? "",
-                            fit: BoxFit.cover),
-                      )
-            
-                      //  CachedNetworkImage(
-                      //   imageUrl: widget.propertyData?.customerProfile ?? "",
-                      //   fit: BoxFit.cover,
-                      // ),
-            
+                      },
+
+                      child: Container(
+                          width: 43,
+                          height: 43,
+                          clipBehavior: Clip.antiAlias,
+                          decoration: BoxDecoration(
+                              color: Colors.grey.shade200,
+                              border: Border.all(
+                                  width: 1,
+                                  color: Color(0xffdfdfdf)
+                              ),
+                              borderRadius: BorderRadius.circular(50)),
+                          child: ClipRRect(
+                            borderRadius: BorderRadius.circular(50),
+                            child: UiUtils.getImage(widget.property?.customerProfile ?? "",
+                                fit: BoxFit.cover),
+                          )
+
+                        //  CachedNetworkImage(
+                        //   imageUrl: widget.propertyData?.customerProfile ?? "",
+                        //   fit: BoxFit.cover,
+                        // ),
+
                       ),
-                ),
-                const SizedBox(
-                  width: 10,
-                ),
-                Expanded(
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text(widget.property?.customerName ?? "")
-                          .size(13)
-                      .color(Color(0xff4c4c4c))
-                          .bold(),
-                      SizedBox(height: 5,),
-                      Row(
+                    ),
+                    const SizedBox(
+                      width: 10,
+                    ),
+                    Expanded(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
-                          Text("${widget.property?.customerRole == 1 ? 'Owner' : widget.property?.customerRole == 2 ? 'Agent' : 'Builder'}",
-                            style: TextStyle(
-                              fontSize: 11,
-                              color: Color(0xff7d7d7d)
-                            ),
-                          ),
-                          SizedBox(width: 5,),
-                          Container(
-                            padding: EdgeInsets.only(left: 5,right: 5,top: 2,bottom: 2),
-                            decoration: BoxDecoration(
-                                color: Color(0xffd6fffa),
-                                borderRadius: BorderRadius.circular(7),
-                            ),
-                            child: Row(
-                              children: [
-                                Image.asset("assets/NewPropertydetailscreen/__rara.png",width: 13,height: 13,fit: BoxFit.cover,),
-                                SizedBox(width: 2,),
-                                Text("RERA",
-                                  style: TextStyle(
-                                    fontSize: 9,
-                                    fontWeight: FontWeight.w500,
-                                    color: Color(0xff009681)
-                                  ),
+                          Text(widget.property?.customerName ?? "")
+                              .size(13)
+                              .color(Color(0xff4c4c4c))
+                              .bold(),
+                          SizedBox(height: 5,),
+                          Row(
+                            children: [
+                              Text("${widget.property?.customerRole == 1 ? 'Owner' : widget.property?.customerRole == 2 ? 'Agent' : 'Builder'}",
+                                style: TextStyle(
+                                    fontSize: 11,
+                                    color: Color(0xff7d7d7d)
                                 ),
-                              ],
-                            ),
+                              ),
+                            ],
                           ),
                         ],
                       ),
-                    ],
+                    )
+                  ],
+                ),
+              ),
+              if(widget.property?.customerRole != 1)
+                InkWell(
+                  onTap: () {
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(builder: (context) =>
+                          UserDetailProfileScreen(id: widget.property?.addedBy)),
+                    );
+                  },
+                  child: Container(
+                    padding: EdgeInsets.only(left: 20,right: 20,top: 5,bottom: 5),
+                    decoration: BoxDecoration(
+                        color: Colors.white,
+                        borderRadius: BorderRadius.circular(30),
+                        border: Border.all(
+                            width: 1,
+                            color: Color(0xff2e8af9)
+                        )
+
+                    ),
+                    child: Text("Profile",style: TextStyle(
+                        color: Color(0xff2e8af9),
+                        fontSize: 12,
+                        fontWeight: FontWeight.w500
+                    ),),
                   ),
                 )
+            ],
+          ),
+          SizedBox(height: 20,),
+          Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 10),
+            child: Row(
+              children: [
+                Expanded(
+                  child: InkWell(
+                    onTap: () async {
+                      print("eeeeeeeeee$propertyID");
+                      var response = await Api.post(url: Api.interestedUsers, parameter: {
+                        'property_id': propertyID,
+                        'type': 1,
+                      });
+                      if(!response['error']) {
+                        showDialog(
+                          context: context,
+                          builder: (BuildContext context) {
+                            return AlertDialog(
+                              shape: RoundedRectangleBorder(
+                                borderRadius: BorderRadius.circular(16)
+                              ),
+                              title: Text(
+                                UiUtils.getTranslatedLabel(context, response['message']).toString().replaceFirstMapped(
+                                  RegExp(r'^[a-z]'),
+                                      (match) => match.group(0)!.toUpperCase(),
+                                ),
+                              ),
+                                content: Text(UiUtils.getTranslatedLabel(context, 'Our Executive will reach you shortly!')),
+                              actions: [
+                                ElevatedButton(
+                                  style: ElevatedButton.styleFrom(
+                                    foregroundColor: Colors.white, backgroundColor: Colors.blue,
+                                  ),
+                                  onPressed: () {
+                                    Navigator.of(context).pop();
+                                  },
+                                  child: Text('Done'),
+                                ),
+                              ],
+                            );
+                          },
+                        );
+                        // HelperUtils.showSnackBarMessage(
+                        //     context, UiUtils.getTranslatedLabel(context, response['message']),
+                        //     type: MessageType.success, messageDuration: 3);
+                        // HelperUtils.showSnackBarMessage(
+                        //     context, UiUtils.getTranslatedLabel(context, 'Our Executive will reach you shortly!'),
+                        //     type: MessageType.success, messageDuration: 5);
+                      }
+                    },
+                    child: Container(
+                      height: 40,
+                      padding: EdgeInsets.only(left: 0,right: 0,top: 5,bottom: 5),
+                      decoration: BoxDecoration(
+                        color: Color(0xff2e8af9),
+                        borderRadius: BorderRadius.circular(20),
+
+                      ),
+                      child: Center(
+                        child: Text("Request a Callback",style: TextStyle(
+                            color: Colors.white,
+                            fontSize: 12,
+                            fontWeight: FontWeight.w500
+                        ),),
+                      ),
+                    ),
+                  ),
+                ),
               ],
             ),
           ),
-          if(widget.property?.customerRole != 1)
-            InkWell(
-              onTap: () {
-                Navigator.push(
-                  context,
-                  MaterialPageRoute(builder: (context) =>
-                      UserDetailProfileScreen(id: widget.property?.addedBy)),
-                );
-              },
-              child: Container(
-              padding: EdgeInsets.only(left: 20,right: 20,top: 5,bottom: 5),
-              decoration: BoxDecoration(
-                  color: Colors.white,
-                  borderRadius: BorderRadius.circular(30),
-                  border: Border.all(
-                      width: 1,
-                      color: Color(0xff2e8af9)
-                  )
-
-              ),
-              child: Text("Profile",style: TextStyle(
-                color: Color(0xff2e8af9),
-                fontSize: 12,
-                fontWeight: FontWeight.w500
-              ),),
-                        ),
-            )
         ],
       ),
     );
@@ -3672,89 +3748,78 @@ class OutdoorFacilityListWidget extends StatelessWidget {
 
     return SizedBox(
       height: 60,
-      child: GridView.builder(
-        // physics: const NeverScrollableScrollPhysics(),
-        // shrinkWrap: true,
-        scrollDirection: Axis.horizontal, // Set scroll direction to horizontal
-        gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-          crossAxisCount: 1,
-          mainAxisSpacing :10,
-          mainAxisExtent: 140,
-        ),
+      child: ListView.separated(
+        separatorBuilder: (context,i)=>SizedBox(width: 10,),
+        padding: EdgeInsets.symmetric(horizontal: 15),
+        scrollDirection: Axis.horizontal,
         itemCount: outdoorFacilityList.length,
         itemBuilder: (context, index) {
           AssignedOutdoorFacility facility = outdoorFacilityList[index];
 
-          return Row(
-            children: [
-              Container(
-                width: 140,
-                padding: EdgeInsets.all(6),
-                decoration: BoxDecoration(
-                  color: Colors.white,
-                  borderRadius: BorderRadius.circular(10),
-                  border: Border.all(
-                    width: 1,
-                    color: Color(0xffe9e9e9),
+          return Container(
+            width: 140,
+            padding: EdgeInsets.all(6),
+            decoration: BoxDecoration(
+              color: Colors.white,
+              borderRadius: BorderRadius.circular(10),
+              border: Border.all(
+                width: 1,
+                color: Color(0xffe9e9e9),
+              ),
+            ),
+            child: Row(
+              children: [
+                Container(
+                  width: 46,
+                  height: 46,
+                  decoration: BoxDecoration(
+                    borderRadius: BorderRadius.circular(10),
+                    color: Color(0xfffff1db),
+                  ),
+                  child: Center(
+                    child: UiUtils.imageType(
+                      facility.image ?? "",
+                      color: Constant.adaptThemeColorSvg
+                          ? context.color.tertiaryColor
+                          : null,
+                      width: 20,
+                      height: 20,
+                    ),
                   ),
                 ),
-                child: SizedBox(
-                  width: double.infinity,
-                  child: Row(
+                const SizedBox(width: 8),
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      Container(
-                        width: 46,
-                        height: 46,
-                        decoration: BoxDecoration(
-                          borderRadius: BorderRadius.circular(10),
-                          color: Color(0xfffff1db),
+                      Text(
+                        facility.name ?? "",
+                        style: TextStyle(
+                          fontSize: 11,
+                          color: Color(0xff585858),
                         ),
-                        child: Center(
-                          child: UiUtils.imageType(
-                            facility.image ?? "",
-                            color: Constant.adaptThemeColorSvg
-                                ? context.color.tertiaryColor
-                                : null,
-                            width: 20,
-                            height: 20,
-                          ),
-                        ),
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
                       ),
-                      const SizedBox(width: 8),
-                      Expanded(
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            Text(
-                              facility.name ?? "",
-                              style: TextStyle(
-                                fontSize: 11,
-                                color: Color(0xff585858),
-                              ),
-                              maxLines: 1,
-                              overflow: TextOverflow.ellipsis,
-                            ),
-                            const SizedBox(height: 4),
-                            Text(
-                              "${facility.distance} KM",
-                              style: TextStyle(
-                                color: Color(0xff333333),
-                                fontSize: 12,
-                                fontWeight: FontWeight.w500,
-                              ),
-                            ),
-                          ],
+                      const SizedBox(height: 4),
+                      Text(
+                        "${facility.distance} KM",
+                        style: TextStyle(
+                          color: Color(0xff333333),
+                          fontSize: 12,
+                          fontWeight: FontWeight.w500,
                         ),
                       ),
                     ],
                   ),
                 ),
-              ),
-            ],
+              ],
+            ),
           );
         },
       ),
     );
+
 
 
   }
