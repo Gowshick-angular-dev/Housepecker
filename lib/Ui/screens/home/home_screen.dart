@@ -333,7 +333,8 @@ class HomeScreenState extends State<HomeScreen>
       'offset': 0,
       'limit': 10,
       'city': currentMainCity,
-      'current_user': HiveUtils.getUserId()
+      'current_user': HiveUtils.getUserId(),
+      'new_launch' : 1
     });
     if(!response['error']) {
       setState(() {

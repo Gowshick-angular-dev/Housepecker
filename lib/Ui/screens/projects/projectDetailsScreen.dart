@@ -142,14 +142,22 @@ class PropertyDetailsState extends State<ProjectDetails> {
   double progress = 0;
   bool downloading = false;
   bool downloading2 = false;
+  int _currentImage = 0;
 
   InterstitialAdManager interstitialAdManager = InterstitialAdManager();
+
+  final PageController _pageController = PageController();
 
   @override
   void initState() {
     super.initState();
     getAgentProperties();
     getSimilarProperties();
+    _pageController.addListener(() {
+      setState(() {
+        _currentImage = _pageController.page!.round();
+      });
+    });
     // loadAd();
     // interstitialAdManager.load();
     // customListenerForConstant();
@@ -659,6 +667,113 @@ class PropertyDetailsState extends State<ProjectDetails> {
                                   height: 227.rh(context),
                                   child: Stack(
                                     children: [
+                                    /*  if (gallary?.isNotEmpty ?? false) ...[
+                                      PageView.builder(
+                                      itemCount: (gallary?.length ?? 0) + 1,
+                                      controller: _pageController,
+                                      scrollDirection: Axis.horizontal,
+                                      itemBuilder: (context, index) {
+                                        if (index == 0) {
+                                          return Container(
+                                            width: MediaQuery.of(context).size.width,
+                                            decoration: BoxDecoration(
+                                              borderRadius: BorderRadius.circular(10),
+                                            ),
+                                            child: ClipRRect(
+                                              borderRadius: BorderRadius.circular(10),
+                                              child: UiUtils.getImage(
+                                                property!['image']!,
+                                                fit: BoxFit.cover,
+                                                width: double.infinity,
+                                                height: 227.rh(context),
+                                                showFullScreenImage: true,
+                                              ),
+                                            ),
+                                          );
+                                        }
+
+                                  final galleryItem = gallary![index - 1];
+
+                                  return ClipRRect(
+                                    borderRadius: BorderRadius.circular(10),
+                                    child: Stack(
+                                      children: [
+                                        GestureDetector(
+                                          onTap: () {
+                                            if (galleryItem.isVideo == true) return;
+
+                                            showGoogleMap = false;
+                                            setState(() {});
+
+                                            var images = gallary?.map((e) => e.imageUrl).toList();
+
+                                            UiUtils.imageGallaryView(
+                                              context,
+                                              images: images!,
+                                              initalIndex: index - 1,
+                                              then: () {
+                                                showGoogleMap = true;
+                                                setState(() {});
+                                              },
+                                            );
+                                          },
+                                          child: SizedBox(
+                                            width: MediaQuery.of(context).size.width,
+                                            height: 227.rh(context),
+                                            child: galleryItem.isVideo == true
+                                                ? Container(
+                                              child: UiUtils.getImage(
+                                                youtubeVideoThumbnail,
+                                                fit: BoxFit.cover,
+                                              ),
+                                            )
+                                                : UiUtils.getImage(
+                                              galleryItem.imageUrl ?? "",
+                                              fit: BoxFit.cover,
+                                            ),
+                                          ),
+                                        ),
+                                        if (galleryItem.isVideo == true)
+                                          Positioned.fill(
+                                            child: GestureDetector(
+                                              onTap: () {
+                                                Navigator.push(
+                                                  context,
+                                                  MaterialPageRoute(
+                                                    builder: (context) {
+                                                      return VideoViewScreen(
+                                                        videoUrl: galleryItem.image ?? "",
+                                                        flickManager: flickManager,
+                                                      );
+                                                    },
+                                                  ),
+                                                );
+                                              },
+                                              child: Container(
+                                                color: Colors.black.withOpacity(0.3),
+                                                child: FittedBox(
+                                                  fit: BoxFit.none,
+                                                  child: Container(
+                                                    decoration: BoxDecoration(
+                                                      shape: BoxShape.circle,
+                                                      color: context.color.tertiaryColor.withOpacity(0.8),
+                                                    ),
+                                                    width: 30,
+                                                    height: 30,
+                                                    child: Icon(
+                                                      Icons.play_arrow,
+                                                      color: Colors.white,
+                                                    ),
+                                                  ),
+                                                ),
+                                              ),
+                                            ),
+                                          ),
+                                      ],
+                                    ),
+                                  );
+                                },
+                              )],*/
                                       GestureDetector(
                                         onTap: () {
                                           // google map doesn't allow blur so we hide it:)

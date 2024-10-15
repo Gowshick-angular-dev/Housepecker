@@ -149,13 +149,19 @@ class PropertyDetailsState extends State<PropertyDetails>
 
   InterstitialAdManager interstitialAdManager = InterstitialAdManager();
   ScrollController _scrollController = ScrollController();
+  PageController _pageController = PageController();
   int _currentImage = 0;
 
   @override
   void initState() {
     super.initState();
     loadAd();
-    _scrollController.addListener(_onScroll);
+    _pageController.addListener(() {
+      setState(() {
+        _currentImage = _pageController.page!.round();
+      });
+    });
+  //  _scrollController.addListener(_onScroll);
     getSimilarProperties();
     getAgentProperties();
     interstitialAdManager.load();
@@ -300,6 +306,7 @@ class PropertyDetailsState extends State<PropertyDetails>
   void dispose() {
     flickManager?.dispose();
     _scrollController.removeListener(_onScroll);
+    _pageController.dispose();
     _scrollController.dispose();
     super.dispose();
   }
@@ -717,258 +724,396 @@ class PropertyDetailsState extends State<PropertyDetails>
                         const SizedBox(
                           height: 15,
                         ),
+                        if (!isPlayingYoutubeVideo)
                           Column(
                             crossAxisAlignment: CrossAxisAlignment.start,
                             children: <Widget>[
-                              Padding(
-                                padding: EdgeInsets.symmetric(horizontal: 13),
-                                child: SizedBox(
-                                  height: 227.rh(context),
+                              SizedBox(
+                                height: 227.rh(context),
+                                child: ClipRRect(
+                                  borderRadius: BorderRadius.circular(10),
+                                  child: Stack(
+                                    children: [
+                                      if (gallary?.isNotEmpty ?? false) ...[
+                                      PageView.builder(
+                                      itemCount: (gallary?.length ?? 0) + 1,
+                                      controller: _pageController,
+                                      scrollDirection: Axis.horizontal,
+                                      itemBuilder: (context, index) {
+                                        if (index == 0) {
+                                          return GestureDetector(
+                                            onTap: () {
+                                              showGoogleMap = false;
+                                              setState(() {});
+
+                                              var images = [property!.titleImage!]
+                                                  .followedBy(gallary!.map((e) => e.imageUrl).toList())
+                                                  .toList();
+
+                                              UiUtils.imageGallaryView(
+                                                context,
+                                                images: images,
+                                                initalIndex: index,
+                                                then: () {
+                                                  showGoogleMap = true;
+                                                  setState(() {});
+                                                },
+                                              );
+                                            },
+                                            child: Container(
+                                              padding: EdgeInsets.only(right: 13,left: 13),
+                                              width: MediaQuery.of(context).size.width,
+                                              decoration: BoxDecoration(
+                                                borderRadius: BorderRadius.circular(10),
+                                              ),
+                                              child: ClipRRect(
+                                                borderRadius: BorderRadius.circular(10),
+                                                child: UiUtils.getImage(
+                                                  property!.titleImage!,
+                                                  fit: BoxFit.cover,
+                                                  width: double.infinity,
+                                                  height: 227.rh(context),
+                                                  showFullScreenImage: false,
+                                                ),
+                                              ),
+                                            ),
+                                          );
+                                        }
+
+                                        final galleryItem = gallary![index - 1];
+
+                                        return Padding(
+                                          padding: EdgeInsets.only(right: 13,left: 13),
+                                          child: ClipRRect(
+                                            borderRadius: BorderRadius.circular(10),
+                                            child: Stack(
+                                              children: [
+                                                GestureDetector(
+                                                  onTap: () {
+                                                    if (galleryItem.isVideo == true) return;
+
+                                                    showGoogleMap = false;
+                                                    setState(() {});
+
+                                                    var images = [property!.titleImage!]
+                                                        .followedBy(gallary!.map((e) => e.imageUrl).toList())
+                                                        .toList();
+
+                                                    UiUtils.imageGallaryView(
+                                                      context,
+                                                      images: images,
+                                                      initalIndex: index - 1,
+                                                      then: () {
+                                                        showGoogleMap = true;
+                                                        setState(() {});
+                                                      },
+                                                    );
+                                                  },
+                                                  child: SizedBox(
+                                                    width: MediaQuery.of(context).size.width,
+                                                    height: 227.rh(context),
+                                                    child: galleryItem.isVideo == true
+                                                        ? Container(
+                                                      child: UiUtils.getImage(
+                                                        youtubeVideoThumbnail,
+                                                        fit: BoxFit.cover,
+                                                      ),
+                                                    )
+                                                        : UiUtils.getImage(
+                                                      galleryItem.imageUrl ?? "",
+                                                      fit: BoxFit.cover,
+                                                    ),
+                                                  ),
+                                                ),
+                                                if (galleryItem.isVideo == true)
+                                                  Positioned.fill(
+                                                    child: GestureDetector(
+                                                      onTap: () {
+                                                        Navigator.push(
+                                                          context,
+                                                          MaterialPageRoute(
+                                                            builder: (context) {
+                                                              return VideoViewScreen(
+                                                                videoUrl: galleryItem.image ?? "",
+                                                                flickManager: flickManager,
+                                                              );
+                                                            },
+                                                          ),
+                                                        );
+                                                      },
+                                                      child: Container(
+                                                        color: Colors.black.withOpacity(0.3),
+                                                        child: FittedBox(
+                                                          fit: BoxFit.none,
+                                                          child: Container(
+                                                            decoration: BoxDecoration(
+                                                              shape: BoxShape.circle,
+                                                              color: context.color.tertiaryColor.withOpacity(0.8),
+                                                            ),
+                                                            width: 30,
+                                                            height: 30,
+                                                            child: Icon(
+                                                              Icons.play_arrow,
+                                                              color: Colors.white,
+                                                            ),
+                                                          ),
+                                                        ),
+                                                      ),
+                                                    ),
+                                                  ),
+                                              ],
+                                            ),
+                                          ),
+                                        );
+                                      },
+                                                                          )
+
+                                                    /* ListView.builder(
+                                  itemCount: (gallary?.length ?? 0) + 1,
+                                  controller: _scrollController,
+                                  scrollDirection: Axis.horizontal,
+                                  itemBuilder: (context, index) {
+
+                                if (index == 0) {
+                                  return Container(
+                                    padding: const EdgeInsets.only(right: 10),
+                                    width: MediaQuery.of(context).size.width,
+                                    decoration: BoxDecoration(
+                                      borderRadius: BorderRadius.circular(10),
+                                 //     color: Colors.red,
+                                    ),
+                                    child: ClipRRect(
+                                      borderRadius: BorderRadius.circular(10),
+                                      child: UiUtils.getImage(
+                                        property!.titleImage!,
+                                        fit: BoxFit.cover,
+                                        width: double.infinity,
+                                        height: 227.rh(context),
+                                        showFullScreenImage: true,
+                                      ),
+                                    ),
+                                  );
+                                }
+
+
+                                final galleryItem = gallary![index - 1];
+
+                                return Padding(
+                                  padding: const EdgeInsets.only(right: 10),
                                   child: ClipRRect(
                                     borderRadius: BorderRadius.circular(10),
                                     child: Stack(
                                       children: [
-                                        if (gallary?.isNotEmpty ?? false) ...[
-                                          ListView.builder(
-                                            itemCount: (gallary?.length ?? 0) + 1,
-                                            controller: _scrollController,
-                                            scrollDirection: Axis.horizontal,
-                                            itemBuilder: (context, index) {
+                                        GestureDetector(
+                                          onTap: () {
+                                            if (galleryItem.isVideo == true) return;
 
-                                              if (index == gallary?.length) {
-                                                return Container(
-                                                  width: MediaQuery.of(context).size.width,
-                                                  decoration: BoxDecoration(
-                                                      borderRadius: BorderRadius.circular(10),
-                                                      color: Colors.red
-                                                  ),
-                                                  child: ClipRRect(
-                                                    borderRadius: BorderRadius.circular(10),
-                                                    child: UiUtils.getImage(
-                                                      property!.titleImage!,
-                                                      fit: BoxFit.cover,
-                                                      width: double.infinity,
-                                                      height: 227.rh(context),
-                                                      showFullScreenImage: true,
-                                                    ),
-                                                  ),
-                                                );
-                                              }
+                                            showGoogleMap = false;
+                                            setState(() {});
 
-                                              final galleryItem = gallary![index];
-                                             // print("Gallary: $gallary, Title Image: ${property?.titleImage}");
+                                            var images = gallary?.map((e) => e.imageUrl).toList();
 
-                                              return Padding(
-                                                padding: const EdgeInsets.only(right: 10),
-                                                child: ClipRRect(
-                                                  borderRadius: BorderRadius.circular(10),
-                                                  child: Stack(
-                                                    children: [
-                                                      GestureDetector(
-                                                        onTap: () {
-                                                          if (galleryItem.isVideo == true) return;
-
-                                                          showGoogleMap = false;
-                                                          setState(() {});
-
-                                                          var images = gallary?.map((e) => e.imageUrl).toList();
-
-                                                          UiUtils.imageGallaryView(
-                                                            context,
-                                                            images: images!,
-                                                            initalIndex: index,
-                                                            then: () {
-                                                              showGoogleMap = true;
-                                                              setState(() {});
-                                                            },
-                                                          );
-                                                        },
-                                                        child: SizedBox(
-                                                          width: MediaQuery.of(context).size.width,
-                                                          height: 227.rh(context),
-                                                          child:  gallary?[index].isVideo == true
-                                                              ? Container(
-                                                            child: UiUtils.getImage(
-                                                              youtubeVideoThumbnail,
-                                                              fit: BoxFit.cover,
-                                                            ),
-                                                          )
-                                                              : UiUtils.getImage(
-                                                            gallary?[index].imageUrl ?? "",
-                                                            fit: BoxFit.cover,
-                                                          ),
-
-                                                        ),
-                                                      ),
-                                                      if (gallary?[index].isVideo == true)
-                                                        Positioned.fill(
-                                                          child: GestureDetector(
-                                                            onTap: () {
-                                                              Navigator.push(
-                                                                context,
-                                                                MaterialPageRoute(
-                                                                  builder: (context) {
-                                                                    return VideoViewScreen(
-                                                                      videoUrl: galleryItem.image ?? "",
-                                                                      flickManager: flickManager,
-                                                                    );
-                                                                  },
-                                                                ),
-                                                              );
-                                                            },
-                                                            child: Container(
-                                                              color: Colors.black.withOpacity(0.3),
-                                                              child: FittedBox(
-                                                                fit: BoxFit.none,
-                                                                child: Container(
-                                                                  decoration: BoxDecoration(
-                                                                    shape: BoxShape.circle,
-                                                                    color: context.color.tertiaryColor.withOpacity(0.8),
-                                                                  ),
-                                                                  width: 30,
-                                                                  height: 30,
-                                                                  child: Icon(
-                                                                    Icons.play_arrow,
-                                                                    color: Colors.white,
-                                                                  ),
-                                                                ),
-                                                              ),
-                                                            ),
-                                                          ),
-                                                        ),
-                                                    ],
-                                                  ),
-                                                ),
-                                              );
-                                            },
-                                          ),
-                                          // SingleChildScrollView(
-                                          //   scrollDirection: Axis.horizontal,
-                                          //   controller: _scrollController,
-                                          //   child: Row(
-                                          //     children: [
-                                          //
-                                          //
-                                          //     ],
-                                          //   ),
-                                          // ),
-                                        ]else GestureDetector(
-                                             onTap: () {
-                                                  showGoogleMap = false;
-                                                  setState(() {});
-                                            UiUtils.showFullScreenImage(
-                                            context,
-                                            provider: NetworkImage(
-                                              property!.titleImage!,
-                                            ),
-                                            then: () {
-                                              showGoogleMap = true;
-                                              setState(() {});
-                                            },
-                                          );
-                                        },
-                                          child: UiUtils.getImage(
-                                            property!.titleImage!,
-                                            fit: BoxFit.cover,
-                                            width: double.infinity,
-                                            height: 227.rh(context),
-                                            showFullScreenImage: true,
-                                          ),
-                                        ),
-                                        PositionedDirectional(
-                                          top: 20,
-                                          end: 20,
-                                          child: LikeButtonWidget(
-                                            onStateChange:
-                                                (AddToFavoriteCubitState
-                                                    state) {
-                                              if (state
-                                                  is AddToFavoriteCubitInProgress) {
-                                                favoriteInProgress = true;
-                                                setState(
-                                                  () {},
-                                                );
-                                              } else {
-                                                favoriteInProgress = false;
-                                                setState(
-                                                  () {},
-                                                );
-                                              }
-                                            },
-                                            property: property!,
-                                          ),
-                                        ),
-                                        PositionedDirectional(
-                                          top: 60,
-                                          end: 20,
-                                          child: Container(
-                                            width: 32,
-                                            height: 32,
-                                            decoration: BoxDecoration(
-                                              color: context.color.primaryColor,
-                                              shape: BoxShape.circle,
-                                              boxShadow: const [
-                                                BoxShadow(
-                                                    color: Color.fromARGB(33, 0, 0, 0),
-                                                    offset: Offset(0, 2),
-                                                    blurRadius: 15,
-                                                    spreadRadius: 0)
-                                              ],
-                                            ),
-                                            child: InkWell(
-                                              onTap: () {
-                                                HelperUtils.share(
-                                                    context, property!.id!, property?.slugId ?? "");
+                                            UiUtils.imageGallaryView(
+                                              context,
+                                              images: images!,
+                                              initalIndex: index - 1,
+                                              then: () {
+                                                showGoogleMap = true;
+                                                setState(() {});
                                               },
-                                              child: Icon(
-                                                Icons.share,
-                                                color: context.color.tertiaryColor,
+                                            );
+                                          },
+                                          child: SizedBox(
+                                            width: MediaQuery.of(context).size.width,
+                                            height: 227.rh(context),
+                                            child: galleryItem.isVideo == true
+                                                ? Container(
+                                              child: UiUtils.getImage(
+                                                youtubeVideoThumbnail,
+                                                fit: BoxFit.cover,
                                               ),
+                                            )
+                                                : UiUtils.getImage(
+                                              galleryItem.imageUrl ?? "",
+                                              fit: BoxFit.cover,
                                             ),
                                           ),
                                         ),
-                                     /*   PositionedDirectional(
-                                          bottom: 5,
-                                          end: 18,
-                                          child: Visibility(
-                                            visible:
-                                                property?.threeDImage != "",
+                                        if (galleryItem.isVideo == true)
+                                          Positioned.fill(
                                             child: GestureDetector(
                                               onTap: () {
                                                 Navigator.push(
                                                   context,
-                                                  BlurredRouter(
-                                                    builder: (context) =>
-                                                        PanaromaImageScreen(
-                                                      imageUrl: property!
-                                                          .threeDImage!,
-                                                    ),
+                                                  MaterialPageRoute(
+                                                    builder: (context) {
+                                                      return VideoViewScreen(
+                                                        videoUrl: galleryItem.image ?? "",
+                                                        flickManager: flickManager,
+                                                      );
+                                                    },
                                                   ),
                                                 );
                                               },
                                               child: Container(
-                                                decoration: BoxDecoration(
-                                                  color: context
-                                                      .color.secondaryColor,
-                                                  shape: BoxShape.circle,
-                                                ),
-                                                height: 40.rh(context),
-                                                width: 40.rw(context),
-                                                child: Padding(
-                                                  padding:
-                                                      const EdgeInsets.all(5.0),
-                                                  child: UiUtils.getSvg(
-                                                      AppIcons.v360Degree,
-                                                      color: context
-                                                          .color.tertiaryColor),
+                                                color: Colors.black.withOpacity(0.3),
+                                                child: FittedBox(
+                                                  fit: BoxFit.none,
+                                                  child: Container(
+                                                    decoration: BoxDecoration(
+                                                      shape: BoxShape.circle,
+                                                      color: context.color.tertiaryColor.withOpacity(0.8),
+                                                    ),
+                                                    width: 30,
+                                                    height: 30,
+                                                    child: Icon(
+                                                      Icons.play_arrow,
+                                                      color: Colors.white,
+                                                    ),
+                                                  ),
                                                 ),
                                               ),
                                             ),
                                           ),
-                                        ),*/
-                                        // advertismentLable()
                                       ],
                                     ),
+                                  ),
+                                );
+                              },
+                                                            ),*/
+
+                                                    // SingleChildScrollView(
+                                        //   scrollDirection: Axis.horizontal,
+                                        //   controller: _scrollController,
+                                        //   child: Row(
+                                        //     children: [
+                                        //
+                                        //
+                                        //     ],
+                                        //   ),
+                                        // ),
+                                      ]else GestureDetector(
+                                           onTap: () {
+                                                showGoogleMap = false;
+                                                setState(() {});
+                                          UiUtils.showFullScreenImage(
+                                          context,
+                                          provider: NetworkImage(
+                                            property!.titleImage!,
+                                          ),
+                                          then: () {
+                                            showGoogleMap = true;
+                                            setState(() {});
+                                          },
+                                        );
+                                      },
+                                        child: Padding(
+                                          padding: const EdgeInsets.only(right: 13,left: 13),
+                                          child: ClipRRect(
+                                            borderRadius: BorderRadius.circular(10),
+                                            child: UiUtils.getImage(
+                                              property!.titleImage!,
+                                              fit: BoxFit.cover,
+                                              width: double.infinity,
+                                              height: 227.rh(context),
+                                              showFullScreenImage: true,
+                                            ),
+                                          ),
+                                        ),
+                                      ),
+                                      PositionedDirectional(
+                                        top: 20,
+                                        end: 20,
+                                        child: LikeButtonWidget(
+                                          onStateChange:
+                                              (AddToFavoriteCubitState
+                                                  state) {
+                                            if (state
+                                                is AddToFavoriteCubitInProgress) {
+                                              favoriteInProgress = true;
+                                              setState(
+                                                () {},
+                                              );
+                                            } else {
+                                              favoriteInProgress = false;
+                                              setState(
+                                                () {},
+                                              );
+                                            }
+                                          },
+                                          property: property!,
+                                        ),
+                                      ),
+                                      PositionedDirectional(
+                                        top: 60,
+                                        end: 20,
+                                        child: Container(
+                                          width: 32,
+                                          height: 32,
+                                          decoration: BoxDecoration(
+                                            color: context.color.primaryColor,
+                                            shape: BoxShape.circle,
+                                            boxShadow: const [
+                                              BoxShadow(
+                                                  color: Color.fromARGB(33, 0, 0, 0),
+                                                  offset: Offset(0, 2),
+                                                  blurRadius: 15,
+                                                  spreadRadius: 0)
+                                            ],
+                                          ),
+                                          child: InkWell(
+                                            onTap: () {
+                                              HelperUtils.share(
+                                                  context, property!.id!, property?.slugId ?? "");
+                                            },
+                                            child: Icon(
+                                              Icons.share,
+                                              color: context.color.tertiaryColor,
+                                            ),
+                                          ),
+                                        ),
+                                      ),
+                                   /*   PositionedDirectional(
+                                        bottom: 5,
+                                        end: 18,
+                                        child: Visibility(
+                                          visible:
+                                              property?.threeDImage != "",
+                                          child: GestureDetector(
+                                            onTap: () {
+                                              Navigator.push(
+                                                context,
+                                                BlurredRouter(
+                                                  builder: (context) =>
+                                                      PanaromaImageScreen(
+                                                    imageUrl: property!
+                                                        .threeDImage!,
+                                                  ),
+                                                ),
+                                              );
+                                            },
+                                            child: Container(
+                                              decoration: BoxDecoration(
+                                                color: context
+                                                    .color.secondaryColor,
+                                                shape: BoxShape.circle,
+                                              ),
+                                              height: 40.rh(context),
+                                              width: 40.rw(context),
+                                              child: Padding(
+                                                padding:
+                                                    const EdgeInsets.all(5.0),
+                                                child: UiUtils.getSvg(
+                                                    AppIcons.v360Degree,
+                                                    color: context
+                                                        .color.tertiaryColor),
+                                              ),
+                                            ),
+                                          ),
+                                        ),
+                                      ),*/
+                                      // advertismentLable()
+                                    ],
                                   ),
                                 ),
                               ),
@@ -998,7 +1143,7 @@ class PropertyDetailsState extends State<PropertyDetails>
                               ),
                             ],
                               const SizedBox(
-                                height: 15,
+                                height: 10,
                               ),
                               Padding(
                                 padding: EdgeInsets.symmetric(horizontal: 15,),
@@ -1010,42 +1155,71 @@ class PropertyDetailsState extends State<PropertyDetails>
                                   //     color: Constant.adaptThemeColorSvg
                                   //         ? context.color.tertiaryColor
                                   //         : null),
-
+                                  property?.parameters != null && property!.parameters!.isNotEmpty &&
+                                      property!.parameters!.any((element) => element.id == 6)?
                                   Container(
                                     padding: EdgeInsets.only(left: 10,right: 10,top: 5,bottom: 5),
                                     decoration: BoxDecoration(
                                         color: Color(0xfffff2c8),
                                         borderRadius: BorderRadius.circular(7),
                                     ),
-                                    child: Text(property!.category != null ? property!.category!.category! : '',style: TextStyle(
-                                      color: Color(0xff333333),
-                                      fontSize: 11,
-                                      fontWeight: FontWeight.w500
-                                    ),)
+                                    child: Text(
+                                      property!.parameters != null && property!.parameters!.isNotEmpty
+                                          ? property!.parameters![0].value
+                                          : '',
+                                      style: TextStyle(
+                                        color: Color(0xff333333),
+                                        fontSize: 11,
+                                        fontWeight: FontWeight.w500,
+                                      ),
+                                    )
+
                                         .setMaxLines(lines: 1),
-                                  ),
-                                  SizedBox(width: 5,),
+                                  ):const SizedBox(),
+
+                                  const SizedBox(width: 5,),
                                   Container(
-                                    width: 50,
+                                    padding: EdgeInsets.only(left: 10,right: 10,top: 5,bottom: 5),
                                     decoration: BoxDecoration(
-                                        borderRadius:
-                                            BorderRadius.circular(7),
-                                        color: context.color.tertiaryColor),
-                                    child: Padding(
-                                      padding: const EdgeInsets.all(3.0),
-                                      child: Center(
-                                          child: Text(
-                                        property!.properyType
-                                            .toString()
-                                            .toLowerCase()
-                                            .translate(context),
-                                            style: TextStyle(
-                                              color: Colors.white,
-                                              fontSize: 11
-                                            ),
-                                      )),
+                                      color: Color(0xffd6fffa),
+                                      borderRadius: BorderRadius.circular(7),
+                                    ),
+                                    child: Row(
+                                      children: [
+                                        Image.asset("assets/NewPropertydetailscreen/__rara.png",width: 13,height: 13,fit: BoxFit.cover,),
+                                        SizedBox(width: 2,),
+                                        Text("RERA",
+                                          style: TextStyle(
+                                              fontSize: 11,
+                                              fontWeight: FontWeight.w500,
+                                              color: Color(0xff009681)
+                                          ),
+                                        ),
+                                      ],
                                     ),
                                   ),
+                                  // SizedBox(width: 5,),
+                                  // Container(
+                                  //   width: 50,
+                                  //   decoration: BoxDecoration(
+                                  //       borderRadius:
+                                  //           BorderRadius.circular(7),
+                                  //       color: context.color.tertiaryColor),
+                                  //   child: Padding(
+                                  //     padding: const EdgeInsets.all(3.0),
+                                  //     child: Center(
+                                  //         child: Text(
+                                  //       property!.properyType
+                                  //           .toString()
+                                  //           .toLowerCase()
+                                  //           .translate(context),
+                                  //           style: TextStyle(
+                                  //             color: Colors.white,
+                                  //             fontSize: 11
+                                  //           ),
+                                  //     )),
+                                  //   ),
+                                  // ),
                                   SizedBox(width: 5,),
                                   Container(
                                     // width: 50,
@@ -1057,10 +1231,7 @@ class PropertyDetailsState extends State<PropertyDetails>
                                       padding: const EdgeInsets.only(left: 10, right: 10, top: 3, bottom: 3),
                                       child: Center(
                                         child: Text(
-                                          property!.brokerage == 'yes' ? 'Brokerage' : 'No Brokerage'
-                                              .toString()
-                                              .toLowerCase()
-                                              .translate(context),
+                                          property!.brokerage == 'Yes' ? 'Brokerage' : 'No Brokerage'.toString().translate(context),
                                           style: TextStyle(
                                               color: Colors.white,
                                               fontSize: 11
@@ -1079,9 +1250,7 @@ class PropertyDetailsState extends State<PropertyDetails>
                                       padding: const EdgeInsets.only(left: 10, right: 10, top: 3, bottom: 3),
                                       child: Center(
                                         child: Text(
-
                                           property!.code.toString()
-                                              .toLowerCase()
                                               .translate(context),
                                           style: TextStyle(
                                               color: Colors.black,
