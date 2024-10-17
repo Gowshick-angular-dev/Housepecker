@@ -37,6 +37,7 @@ class ProjectFormFive extends StatefulWidget {
 class _ProjectFormFiveState extends State<ProjectFormFive> {
 
   List<File> gallary = [];
+  Map? reqBody;
   List gallaryEdit = [];
   List gallaryImages = [];
   bool loading = false;
@@ -238,6 +239,345 @@ class _ProjectFormFiveState extends State<ProjectFormFive> {
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       SizedBox(height: 10,),
+                      Text('SEO DETAILS',
+                        style: TextStyle(
+                            color: Colors.black,
+                            fontSize: 16,
+                            fontWeight: FontWeight.w700
+                        ),
+                      ),
+                      SizedBox(height: 15,),
+                      Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          RichText(
+                            text: TextSpan(
+                              children: [
+                                TextSpan(text: "Meta Title",
+                                  style: TextStyle(
+                                      color: Colors.black,
+                                      fontSize: 15,
+                                      fontWeight: FontWeight.w600
+                                  ),),
+                                // TextSpan(
+                                //   text: " *",
+                                //   style: TextStyle(color: Colors.red), // Customize asterisk color
+                                // ),
+                              ],
+                            ),
+                          ),
+                          SizedBox(height: 10,),
+                          Row(
+                            children: [
+                              Expanded(
+                                child: Container(
+                                  decoration: BoxDecoration(
+                                    border: Border.all(
+                                        width: 1,
+                                        color: Color(0xffe1e1e1)
+                                    ),
+                                    color: Color(0xfff5f5f5),
+                                    borderRadius: BorderRadius.circular(10.0), // Optional: Add border radius
+                                  ),
+                                  child: Padding(
+                                    padding: const EdgeInsets.only(left: 8.0,right: 5),
+                                    child: TextFormField(
+                                      controller: metaTitleControler,
+                                      decoration: const InputDecoration(
+                                          hintText: 'Enter Meta Title..',
+                                          hintStyle: TextStyle(
+                                            fontFamily: 'Poppins',
+                                            fontSize: 14.0,
+                                            color: Color(0xff9c9c9c),
+                                            fontWeight: FontWeight.w500,
+                                            decoration: TextDecoration.none,
+                                          ),
+                                          enabledBorder: UnderlineInputBorder(
+                                            borderSide: BorderSide(
+                                              color: Colors.transparent,
+                                            ),
+                                          ),
+                                          focusedBorder: UnderlineInputBorder(
+                                              borderSide: BorderSide(
+                                                color: Colors.transparent,
+                                              ))
+                                      ),
+                                    ),
+                                  ),
+                                ),
+                              ),
+                            ],
+                          ),
+                          SizedBox(height: 5,),
+                          Text('Note:  Meta Title length should not exceed 60 characters.',
+                              style: TextStyle(
+                                fontSize: 11,
+                                color: Colors.red,
+
+                              )
+                          ),
+                          SizedBox(height: 25,),
+                        ],
+                      ),
+                      Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          RichText(
+                            text: TextSpan(
+                              children: [
+                                TextSpan(text: "Meta Image",
+                                  style: TextStyle(
+                                      color: Colors.black,
+                                      fontSize: 15,
+                                      fontWeight: FontWeight.w600
+                                  ),),
+                              ],
+                            ),
+                          ),
+                          SizedBox(height: 10,),
+                          Row(
+                            children: [
+                              InkWell(
+                                onTap: () {
+                                  metaFromGallery();
+                                },
+                                child: Container(
+                                  height: 100,
+                                  width: 100,
+                                  decoration: BoxDecoration(
+                                    border: Border.all(
+                                        width: 1,
+                                        color: Color(0xffe1e1e1)
+                                    ),
+                                    color: Color(0xfff5f5f5),
+                                    borderRadius: BorderRadius.circular(15.0), // Optional: Add border radius
+                                  ),
+                                  child: Center(
+                                    child: metaImage != null ? Stack(
+                                      children: [
+                                        GestureDetector(
+                                          child: Container(
+                                            width: double.infinity,
+                                            height: 100,
+                                            decoration: BoxDecoration(
+                                              border: Border.all(
+                                                  width: 1,
+                                                  color: Color(0xffe1e1e1)
+                                              ),
+                                              color: Color(0xfff5f5f5),
+                                              borderRadius: BorderRadius.circular(15.0), // Optional: Add border radius
+                                            ),
+                                            child: ClipRRect(
+                                              borderRadius: BorderRadius.all(Radius.circular(15)),
+                                              child: Image.file(metaImage!),
+                                            ),
+                                          ),
+                                        ),
+                                        Positioned(
+                                          top: 0,
+                                          right: 0,
+                                          child: InkWell(
+                                            onTap: () {
+                                              setState(() {
+                                                metaImage = null;
+                                              });
+                                            },
+                                            child: Icon(
+                                              Icons.delete,
+                                              color: Colors.red,
+                                            ),
+                                          ),
+                                        ),
+                                      ],
+                                    ) : widget.isEdit! && widget.data!['meta_image'] != null ? Container(
+                                      width: double.infinity,
+                                      height: 100,
+                                      decoration: BoxDecoration(
+                                        border: Border.all(
+                                            width: 1,
+                                            color: Color(0xffe1e1e1)
+                                        ),
+                                        color: Color(0xfff5f5f5),
+                                        borderRadius: BorderRadius.circular(15.0), // Optional: Add border radius
+                                      ),
+                                      child: ClipRRect(
+                                        borderRadius: BorderRadius.all(Radius.circular(15)),
+                                        child: Image.network(widget.data!['meta_image']),
+                                      ),
+                                    ) :  Text('+',
+                                      style: TextStyle(
+                                          color: Colors.black26,
+                                          fontSize: 70,
+                                          fontWeight: FontWeight.w100
+                                      ),
+                                    ),
+                                  ),
+                                ),
+                              ),
+                              SizedBox(width: 15,),
+                              RichText(
+                                text: TextSpan(
+                                  children: [
+                                    TextSpan(text: "(Upload image size below 2 mb)",
+                                      style: TextStyle(
+                                          color: Colors.red,
+                                          fontSize: 10,
+                                          fontWeight: FontWeight.w400
+                                      ),),
+                                  ],
+                                ),
+                              ),
+                            ],
+                          ),
+                          SizedBox(height: 20,),
+                        ],
+                      ),
+                      Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          RichText(
+                            text: TextSpan(
+                              children: [
+                                TextSpan(text: "Meta Keywords",
+                                  style: TextStyle(
+                                      color: Colors.black,
+                                      fontSize: 15,
+                                      fontWeight: FontWeight.w600
+                                  ),),
+                                // TextSpan(
+                                //   text: " *",
+                                //   style: TextStyle(color: Colors.red), // Customize asterisk color
+                                // ),
+                              ],
+                            ),
+                          ),
+                          SizedBox(height: 10,),
+                          Row(
+                            children: [
+                              Expanded(
+                                child: Container(
+                                  decoration: BoxDecoration(
+                                    border: Border.all(
+                                        width: 1,
+                                        color: Color(0xffe1e1e1)
+                                    ),
+                                    color: Color(0xfff5f5f5),
+                                    borderRadius: BorderRadius.circular(10.0), // Optional: Add border radius
+                                  ),
+                                  child: Padding(
+                                    padding: const EdgeInsets.only(left: 8.0,right: 5),
+                                    child: TextFormField(
+                                      maxLines: 4,
+                                      controller: metaKeywordControler,
+                                      decoration: const InputDecoration(
+                                          hintText: 'Meta Keywords..',
+                                          hintStyle: TextStyle(
+                                            fontFamily: 'Poppins',
+                                            fontSize: 14.0,
+                                            color: Color(0xff9c9c9c),
+                                            fontWeight: FontWeight.w500,
+                                            decoration: TextDecoration.none,
+                                          ),
+                                          enabledBorder: UnderlineInputBorder(
+                                            borderSide: BorderSide(
+                                              color: Colors.transparent,
+                                            ),
+                                          ),
+                                          focusedBorder: UnderlineInputBorder(
+                                              borderSide: BorderSide(
+                                                color: Colors.transparent,
+                                              ))
+                                      ),
+                                    ),
+                                  ),
+                                ),
+                              ),
+                            ],
+                          ),
+                          SizedBox(height: 5,),
+                          Text('Note:  The meta keywords should consist of no more than 10 keyword phrases and should be separated by commas ",".',
+                              style: TextStyle(
+                                fontSize: 11,
+                                color: Colors.red,
+                              )
+                          ),
+                          SizedBox(height: 25,),
+                        ],
+                      ),
+                      Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          RichText(
+                            text: TextSpan(
+                              children: [
+                                TextSpan(text: "Meta Description",
+                                  style: TextStyle(
+                                      color: Colors.black,
+                                      fontSize: 15,
+                                      fontWeight: FontWeight.w600
+                                  ),),
+                                // TextSpan(
+                                //   text: " *",
+                                //   style: TextStyle(color: Colors.red), // Customize asterisk color
+                                // ),
+                              ],
+                            ),
+                          ),
+                          SizedBox(height: 10,),
+                          Row(
+                            children: [
+                              Expanded(
+                                child: Container(
+                                  decoration: BoxDecoration(
+                                    border: Border.all(
+                                        width: 1,
+                                        color: Color(0xffe1e1e1)
+                                    ),
+                                    color: Color(0xfff5f5f5),
+                                    borderRadius: BorderRadius.circular(10.0), // Optional: Add border radius
+                                  ),
+                                  child: Padding(
+                                    padding: const EdgeInsets.only(left: 8.0,right: 5),
+                                    child: TextFormField(
+                                      maxLines: 4,
+                                      controller: metaDescControler,
+                                      decoration: const InputDecoration(
+                                        hintText: 'Meta Description..',
+                                        hintStyle: TextStyle(
+                                          fontFamily: 'Poppins',
+                                          fontSize: 14.0,
+                                          color: Color(0xff9c9c9c),
+                                          fontWeight: FontWeight.w500,
+                                          decoration: TextDecoration.none,
+                                        ),
+                                        enabledBorder: UnderlineInputBorder(
+                                          borderSide: BorderSide(
+                                            color: Colors.transparent,
+                                          ),
+                                        ),
+                                        focusedBorder: UnderlineInputBorder(
+                                          borderSide: BorderSide(
+                                            color: Colors.transparent,
+                                          ),
+                                        ),
+                                      ),
+                                    ),
+                                  ),
+                                ),
+                              ),
+                            ],
+                          ),
+                          SizedBox(height: 5,),
+                          Text('Note:  Meta Description length should between 50 to 160 characters.',
+                              style: TextStyle(
+                                fontSize: 11,
+                                color: Colors.red,
+                              )
+                          ),
+                          SizedBox(height: 25,),
+                        ],
+                      ),
+                      SizedBox(height: 25),
                       Text('IMAGES, VIDEOS & DOCUMENTS',
                         style: TextStyle(
                             color: Colors.black,
@@ -559,64 +899,64 @@ class _ProjectFormFiveState extends State<ProjectFormFive> {
                         },
                       ),
                       if(widget.isEdit!)
-                      SizedBox(height: 10,),
+                        SizedBox(height: 10,),
                       if(widget.isEdit!)
-                      GridView.builder(
-                        shrinkWrap: true,
-                        padding: const EdgeInsets.symmetric(
-                          horizontal: 5,
-                        ),
-                        physics: const NeverScrollableScrollPhysics(),
-                        gridDelegate:
-                        const SliverGridDelegateWithFixedCrossAxisCountAndFixedHeight(
-                            mainAxisSpacing: 10, crossAxisCount: 3, height: 100, crossAxisSpacing: 10),
-                        itemCount: gallaryEdit.length,
-                        itemBuilder: (context, index) {
-                          return Stack(
-                            children: [
-                              GestureDetector(
-                                child: Container(
-                                  width: double.infinity,
-                                  height: 100,
-                                  decoration: BoxDecoration(
-                                    border: Border.all(
-                                        width: 1,
-                                        color: Color(0xffe1e1e1)
+                        GridView.builder(
+                          shrinkWrap: true,
+                          padding: const EdgeInsets.symmetric(
+                            horizontal: 5,
+                          ),
+                          physics: const NeverScrollableScrollPhysics(),
+                          gridDelegate:
+                          const SliverGridDelegateWithFixedCrossAxisCountAndFixedHeight(
+                              mainAxisSpacing: 10, crossAxisCount: 3, height: 100, crossAxisSpacing: 10),
+                          itemCount: gallaryEdit.length,
+                          itemBuilder: (context, index) {
+                            return Stack(
+                              children: [
+                                GestureDetector(
+                                  child: Container(
+                                    width: double.infinity,
+                                    height: 100,
+                                    decoration: BoxDecoration(
+                                      border: Border.all(
+                                          width: 1,
+                                          color: Color(0xffe1e1e1)
+                                      ),
+                                      color: Color(0xfff5f5f5),
+                                      borderRadius: BorderRadius.circular(15.0), // Optional: Add border radius
                                     ),
-                                    color: Color(0xfff5f5f5),
-                                    borderRadius: BorderRadius.circular(15.0), // Optional: Add border radius
-                                  ),
-                                  child: ClipRRect(
-                                    borderRadius: BorderRadius.all(Radius.circular(15)),
-                                    child: Image.network(gallaryEdit[index]['name']),
+                                    child: ClipRRect(
+                                      borderRadius: BorderRadius.all(Radius.circular(15)),
+                                      child: Image.network(gallaryEdit[index]['name']),
+                                    ),
                                   ),
                                 ),
-                              ),
-                              Positioned(
-                                top: 0,
-                                right: 0,
-                                child: InkWell(
-                                  onTap: () async {
-                                    var responseAgent = await Api.get(
-                                        url: Api.getProject, queryParameters: {
-                                      'remove_gallery_images': gallaryEdit[index]['id'],
-                                    });
-                                    if (!responseAgent['error']) {
-                                      setState(() {
-                                        gallaryEdit.removeAt(index);
+                                Positioned(
+                                  top: 0,
+                                  right: 0,
+                                  child: InkWell(
+                                    onTap: () async {
+                                      var responseAgent = await Api.get(
+                                          url: Api.getProject, queryParameters: {
+                                        'remove_gallery_images': gallaryEdit[index]['id'],
                                       });
-                                    }
-                                  },
-                                  child: Icon(
-                                    Icons.delete,
-                                    color: Colors.red,
+                                      if (!responseAgent['error']) {
+                                        setState(() {
+                                          gallaryEdit.removeAt(index);
+                                        });
+                                      }
+                                    },
+                                    child: Icon(
+                                      Icons.delete,
+                                      color: Colors.red,
+                                    ),
                                   ),
                                 ),
-                              ),
-                            ],
-                          );
-                        },
-                      ),
+                              ],
+                            );
+                          },
+                        ),
                       SizedBox(height: 15,),
                       Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
@@ -967,349 +1307,13 @@ class _ProjectFormFiveState extends State<ProjectFormFive> {
                         ],
                       ),
                       SizedBox(height: 25,),
-                      Text('SEO DETAILS',
-                        style: TextStyle(
-                            color: Colors.black,
-                            fontSize: 16,
-                            fontWeight: FontWeight.w700
-                        ),
-                      ),
-                      SizedBox(height: 15,),
-                      Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          RichText(
-                            text: TextSpan(
-                              children: [
-                                TextSpan(text: "Meta Title",
-                                  style: TextStyle(
-                                      color: Colors.black,
-                                      fontSize: 15,
-                                      fontWeight: FontWeight.w600
-                                  ),),
-                                // TextSpan(
-                                //   text: " *",
-                                //   style: TextStyle(color: Colors.red), // Customize asterisk color
-                                // ),
-                              ],
-                            ),
-                          ),
-                          SizedBox(height: 10,),
-                          Row(
-                            children: [
-                              Expanded(
-                                child: Container(
-                                  decoration: BoxDecoration(
-                                    border: Border.all(
-                                        width: 1,
-                                        color: Color(0xffe1e1e1)
-                                    ),
-                                    color: Color(0xfff5f5f5),
-                                    borderRadius: BorderRadius.circular(10.0), // Optional: Add border radius
-                                  ),
-                                  child: Padding(
-                                    padding: const EdgeInsets.only(left: 8.0,right: 5),
-                                    child: TextFormField(
-                                      controller: metaTitleControler,
-                                      decoration: const InputDecoration(
-                                          hintText: 'Enter Meta Title..',
-                                          hintStyle: TextStyle(
-                                            fontFamily: 'Poppins',
-                                            fontSize: 14.0,
-                                            color: Color(0xff9c9c9c),
-                                            fontWeight: FontWeight.w500,
-                                            decoration: TextDecoration.none,
-                                          ),
-                                          enabledBorder: UnderlineInputBorder(
-                                            borderSide: BorderSide(
-                                              color: Colors.transparent,
-                                            ),
-                                          ),
-                                          focusedBorder: UnderlineInputBorder(
-                                              borderSide: BorderSide(
-                                                color: Colors.transparent,
-                                              ))
-                                      ),
-                                    ),
-                                  ),
-                                ),
-                              ),
-                            ],
-                          ),
-                          SizedBox(height: 5,),
-                          Text('Note:  Meta Title length should not exceed 60 characters.',
-                              style: TextStyle(
-                                fontSize: 11,
-                                color: Colors.red,
-
-                              )
-                          ),
-                          SizedBox(height: 25,),
-                        ],
-                      ),
-                      Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          RichText(
-                            text: TextSpan(
-                              children: [
-                                TextSpan(text: "Meta Image",
-                                  style: TextStyle(
-                                      color: Colors.black,
-                                      fontSize: 15,
-                                      fontWeight: FontWeight.w600
-                                  ),),
-                              ],
-                            ),
-                          ),
-                          SizedBox(height: 10,),
-                          Row(
-                            children: [
-                              InkWell(
-                                onTap: () {
-                                  metaFromGallery();
-                                },
-                                child: Container(
-                                  height: 100,
-                                  width: 100,
-                                  decoration: BoxDecoration(
-                                    border: Border.all(
-                                        width: 1,
-                                        color: Color(0xffe1e1e1)
-                                    ),
-                                    color: Color(0xfff5f5f5),
-                                    borderRadius: BorderRadius.circular(15.0), // Optional: Add border radius
-                                  ),
-                                  child: Center(
-                                    child: metaImage != null ? Stack(
-                                      children: [
-                                        GestureDetector(
-                                          child: Container(
-                                            width: double.infinity,
-                                            height: 100,
-                                            decoration: BoxDecoration(
-                                              border: Border.all(
-                                                  width: 1,
-                                                  color: Color(0xffe1e1e1)
-                                              ),
-                                              color: Color(0xfff5f5f5),
-                                              borderRadius: BorderRadius.circular(15.0), // Optional: Add border radius
-                                            ),
-                                            child: ClipRRect(
-                                              borderRadius: BorderRadius.all(Radius.circular(15)),
-                                              child: Image.file(metaImage!),
-                                            ),
-                                          ),
-                                        ),
-                                        Positioned(
-                                          top: 0,
-                                          right: 0,
-                                          child: InkWell(
-                                            onTap: () {
-                                              setState(() {
-                                                metaImage = null;
-                                              });
-                                            },
-                                            child: Icon(
-                                              Icons.delete,
-                                              color: Colors.red,
-                                            ),
-                                          ),
-                                        ),
-                                      ],
-                                    ) : widget.isEdit! && widget.data!['meta_image'] != null ? Container(
-                                      width: double.infinity,
-                                      height: 100,
-                                      decoration: BoxDecoration(
-                                        border: Border.all(
-                                            width: 1,
-                                            color: Color(0xffe1e1e1)
-                                        ),
-                                        color: Color(0xfff5f5f5),
-                                        borderRadius: BorderRadius.circular(15.0), // Optional: Add border radius
-                                      ),
-                                      child: ClipRRect(
-                                        borderRadius: BorderRadius.all(Radius.circular(15)),
-                                        child: Image.network(widget.data!['meta_image']),
-                                      ),
-                                    ) :  Text('+',
-                                      style: TextStyle(
-                                          color: Colors.black26,
-                                          fontSize: 70,
-                                          fontWeight: FontWeight.w100
-                                      ),
-                                    ),
-                                  ),
-                                ),
-                              ),
-                              SizedBox(width: 15,),
-                              RichText(
-                                text: TextSpan(
-                                  children: [
-                                    TextSpan(text: "(Upload image size below 2 mb)",
-                                      style: TextStyle(
-                                          color: Colors.red,
-                                          fontSize: 10,
-                                          fontWeight: FontWeight.w400
-                                      ),),
-                                  ],
-                                ),
-                              ),
-                            ],
-                          ),
-                          SizedBox(height: 20,),
-                        ],
-                      ),
-                      Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          RichText(
-                            text: TextSpan(
-                              children: [
-                                TextSpan(text: "Meta Keywords",
-                                  style: TextStyle(
-                                      color: Colors.black,
-                                      fontSize: 15,
-                                      fontWeight: FontWeight.w600
-                                  ),),
-                                // TextSpan(
-                                //   text: " *",
-                                //   style: TextStyle(color: Colors.red), // Customize asterisk color
-                                // ),
-                              ],
-                            ),
-                          ),
-                          SizedBox(height: 10,),
-                          Row(
-                            children: [
-                              Expanded(
-                                child: Container(
-                                  decoration: BoxDecoration(
-                                    border: Border.all(
-                                        width: 1,
-                                        color: Color(0xffe1e1e1)
-                                    ),
-                                    color: Color(0xfff5f5f5),
-                                    borderRadius: BorderRadius.circular(10.0), // Optional: Add border radius
-                                  ),
-                                  child: Padding(
-                                    padding: const EdgeInsets.only(left: 8.0,right: 5),
-                                    child: TextFormField(
-                                      maxLines: 4,
-                                      controller: metaKeywordControler,
-                                      decoration: const InputDecoration(
-                                          hintText: 'Meta Keywords..',
-                                          hintStyle: TextStyle(
-                                            fontFamily: 'Poppins',
-                                            fontSize: 14.0,
-                                            color: Color(0xff9c9c9c),
-                                            fontWeight: FontWeight.w500,
-                                            decoration: TextDecoration.none,
-                                          ),
-                                          enabledBorder: UnderlineInputBorder(
-                                            borderSide: BorderSide(
-                                              color: Colors.transparent,
-                                            ),
-                                          ),
-                                          focusedBorder: UnderlineInputBorder(
-                                              borderSide: BorderSide(
-                                                color: Colors.transparent,
-                                              ))
-                                      ),
-                                    ),
-                                  ),
-                                ),
-                              ),
-                            ],
-                          ),
-                          SizedBox(height: 5,),
-                          Text('Note:  The meta keywords should consist of no more than 10 keyword phrases and should be separated by commas ",".',
-                              style: TextStyle(
-                                fontSize: 11,
-                                color: Colors.red,
-                              )
-                          ),
-                          SizedBox(height: 25,),
-                        ],
-                      ),
-                      Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          RichText(
-                            text: TextSpan(
-                              children: [
-                                TextSpan(text: "Meta Description",
-                                  style: TextStyle(
-                                      color: Colors.black,
-                                      fontSize: 15,
-                                      fontWeight: FontWeight.w600
-                                  ),),
-                                // TextSpan(
-                                //   text: " *",
-                                //   style: TextStyle(color: Colors.red), // Customize asterisk color
-                                // ),
-                              ],
-                            ),
-                          ),
-                          SizedBox(height: 10,),
-                          Row(
-                            children: [
-                              Expanded(
-                                child: Container(
-                                  decoration: BoxDecoration(
-                                    border: Border.all(
-                                        width: 1,
-                                        color: Color(0xffe1e1e1)
-                                    ),
-                                    color: Color(0xfff5f5f5),
-                                    borderRadius: BorderRadius.circular(10.0), // Optional: Add border radius
-                                  ),
-                                  child: Padding(
-                                    padding: const EdgeInsets.only(left: 8.0,right: 5),
-                                    child: TextFormField(
-                                      maxLines: 4,
-                                      controller: metaDescControler,
-                                      decoration: const InputDecoration(
-                                        hintText: 'Meta Description..',
-                                        hintStyle: TextStyle(
-                                          fontFamily: 'Poppins',
-                                          fontSize: 14.0,
-                                          color: Color(0xff9c9c9c),
-                                          fontWeight: FontWeight.w500,
-                                          decoration: TextDecoration.none,
-                                        ),
-                                        enabledBorder: UnderlineInputBorder(
-                                          borderSide: BorderSide(
-                                            color: Colors.transparent,
-                                          ),
-                                        ),
-                                        focusedBorder: UnderlineInputBorder(
-                                          borderSide: BorderSide(
-                                            color: Colors.transparent,
-                                          ),
-                                        ),
-                                      ),
-                                    ),
-                                  ),
-                                ),
-                              ),
-                            ],
-                          ),
-                          SizedBox(height: 5,),
-                          Text('Note:  Meta Description length should between 50 to 160 characters.',
-                              style: TextStyle(
-                                fontSize: 11,
-                                color: Colors.red,
-                              )
-                          ),
-                          SizedBox(height: 25,),
-                        ],
-                      ),
+                      // Text('$reqBody'),
                     ],
                   ),
                 ),
               ),
             ),
+
             InkWell(
               onTap: () async {
                 if (!loading) {
@@ -1360,6 +1364,12 @@ class _ProjectFormFiveState extends State<ProjectFormFive> {
                     'meta_image': metaImage != null ? await MultipartFile.fromFile(metaImage!.path) : null,
                     ...widget.body!,
                   };
+
+                  setState(() {
+                    reqBody = body;
+                  });
+
+                  print('REQUEST BODY: ${body}');
 
                   try {
                     if (!widget.isEdit!) {

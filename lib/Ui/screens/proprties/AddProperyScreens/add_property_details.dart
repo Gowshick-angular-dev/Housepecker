@@ -982,8 +982,8 @@ class _AddPropertyDetailsState extends State<AddPropertyDetails> {
                                 });
                               },
                               options: [
-                                const ValueItem(label: "Yes", value: "yes"),
-                                const ValueItem(label: "No", value: "no"),
+                                const ValueItem(label: "Yes", value: "Yes"),
+                                const ValueItem(label: "No", value: "No"),
                               ],
                               selectionType: SelectionType.single,
                               chipConfig:

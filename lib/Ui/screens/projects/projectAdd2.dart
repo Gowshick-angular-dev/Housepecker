@@ -1055,8 +1055,8 @@ class _ProjectFormTwoState extends State<ProjectFormTwo> {
                                   selectedOptions:
                                   widget.isEdit! ? gatedCommunityWidget : [],
                                   options: [
-                                    ValueItem(label: "Yes", value: "yes"),
-                                    ValueItem(label: "No", value: "no")
+                                    ValueItem(label: "Yes", value: "Yes"),
+                                    ValueItem(label: "No", value: "No")
                                   ],
                                   selectionType: SelectionType.single,
                                   chipConfig:
@@ -1111,8 +1111,8 @@ class _ProjectFormTwoState extends State<ProjectFormTwo> {
                                   selectedOptions:
                                   widget.isEdit! ? highRiseApartmentWidget : [],
                                   options: [
-                                    ValueItem(label: "Yes", value: "yes"),
-                                    ValueItem(label: "No", value: "no")
+                                    ValueItem(label: "Yes", value: "Yes"),
+                                    ValueItem(label: "No", value: "No")
                                   ],
                                   selectionType: SelectionType.single,
                                   chipConfig:
@@ -1167,8 +1167,8 @@ class _ProjectFormTwoState extends State<ProjectFormTwo> {
                                   selectedOptions:
                                   widget.isEdit! ? lakeViewWidget : [],
                                   options: [
-                                    ValueItem(label: "Yes", value: "yes"),
-                                    ValueItem(label: "No", value: "no")
+                                    ValueItem(label: "Yes", value: "Yes"),
+                                    ValueItem(label: "No", value: "No")
                                   ],
                                   selectionType: SelectionType.single,
                                   chipConfig:
@@ -1289,8 +1289,8 @@ class _ProjectFormTwoState extends State<ProjectFormTwo> {
                                 selectedOptions:
                                 widget.isEdit! ? vegOnlyWidget : [],
                                 options: [
-                                  ValueItem(label: "Yes", value: "yes"),
-                                  ValueItem(label: "No", value: "no")
+                                  ValueItem(label: "Yes", value: "Yes"),
+                                  ValueItem(label: "No", value: "No")
                                 ],
                                 selectionType: SelectionType.single,
                                 chipConfig:
@@ -1474,8 +1474,8 @@ class _ProjectFormTwoState extends State<ProjectFormTwo> {
                                 selectedOptions:
                                 widget.isEdit! ? coveredParkingWidget : [],
                                 options: [
-                                  ValueItem(label: "Yes", value: "yes"),
-                                  ValueItem(label: "No", value: "no")
+                                  ValueItem(label: "Yes", value: "Yes"),
+                                  ValueItem(label: "No", value: "No")
                                 ],
                                 selectionType: SelectionType.single,
                                 chipConfig:
@@ -1535,8 +1535,8 @@ class _ProjectFormTwoState extends State<ProjectFormTwo> {
                                 selectedOptions:
                                 widget.isEdit! ? openParkingWidget : [],
                                 options: [
-                                  ValueItem(label: "Yes", value: "yes"),
-                                  ValueItem(label: "No", value: "no")
+                                  ValueItem(label: "Yes", value: "Yes"),
+                                  ValueItem(label: "No", value: "No")
                                 ],
                                 selectionType: SelectionType.single,
                                 chipConfig:
@@ -1733,7 +1733,7 @@ class _ProjectFormTwoState extends State<ProjectFormTwo> {
                     'lake_view': lakeView,
                     'min_size': Minsf.text,
                     'max_size': MAxsf.text,
-                    'near_by_metro': nearByMetroControler,
+                    'near_by_metro': nearByMetroControler.text,
                     'veg_only': vegOnly,
                     'covered_parking': coveredParking,
                     'open_parking': openParking,
@@ -1781,11 +1781,12 @@ class _ProjectFormTwoState extends State<ProjectFormTwo> {
                     'furniture': projectFurnished,
                     'facing': projectFacing,
                     'project_placed': projectPlaced,
-                    'near_by_metro': nearByMetro,
+                    'near_by_metro': nearByMetroControler.text,
                     'veg_only': vegOnly,
                     'covered_parking': coveredParking,
                     'open_parking': openParking,
                     'road_width': roadWidthControler.text,
+                    'project_completed': projectCompletedControler.text,
                     ...widget.body!
                   };
                   Navigator.push(

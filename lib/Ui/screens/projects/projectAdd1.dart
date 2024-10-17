@@ -1,8 +1,10 @@
 import 'dart:io';
 
+import 'package:Housepecker/utils/Extensions/extensions.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
+import 'package:flutter_svg/svg.dart';
 import 'package:geocoding/geocoding.dart';
 import 'package:image_cropper/image_cropper.dart';
 import 'package:image_picker/image_picker.dart';
@@ -15,6 +17,7 @@ import '../../../app/routes.dart';
 import '../../../data/Repositories/system_repository.dart';
 import '../../../data/helper/designs.dart';
 import '../../../utils/api.dart';
+import '../../../utils/guestChecker.dart';
 import '../../../utils/helper_utils.dart';
 import '../../../utils/sliver_grid_delegate_with_fixed_cross_axis_count_and_fixed_height.dart';
 import '../../../utils/ui_utils.dart';
@@ -50,6 +53,7 @@ class _ProjectFormSecondState extends State<ProjectFormSecond> {
   String selectedRole = 'Free Listing';
   String brokerage = '';
   int remainFreeProPost = 0;
+  int freeDuration = 0;
   List<ValueItem> brokerageWidget = [];
   String propertyType = '';
   List<ValueItem> propertyTypeWidget = [];
@@ -91,6 +95,7 @@ class _ProjectFormSecondState extends State<ProjectFormSecond> {
         setState(() {
           remainFreeProPost = freepackage['project_limit'] -
               freepackage['used_project_limit'];
+          freeDuration = freepackage['duration'] ?? 0;
         });
       }
 
@@ -250,158 +255,357 @@ class _ProjectFormSecondState extends State<ProjectFormSecond> {
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    RichText(
-                      text: const TextSpan(
-                        children: [
-                          TextSpan(
-                            text: "Continue With",
-                            style: TextStyle(
-                                color: Colors.black,
-                                fontSize: 15,
-                                fontWeight: FontWeight.w400),
-                          ),
-                          TextSpan(
-                            text: " *",
-                            style: TextStyle(
-                                color: Colors.red), // Customize asterisk color
-                          ),
-                        ],
-                      ),
-                    ),
-                    if (selectedRole == 'Free Listing')
-                      Text(
-                        remainFreeProPost > 0 ? "Note: This post is valid for 10 days from the date of posting." : "Free Listing limit exceeded.",
-                        style: const TextStyle(color: Colors.red, fontSize: 12),
-                      ),
-                    const SizedBox(height: 5),
                     Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        // Display loader if data is being fetched
-                        if (loading) // Assuming 'isLoading' is a boolean to track the loading state
-                          Center(
-                            child: const CupertinoActivityIndicator(
-                              radius: 8, // You can adjust the size of the loader here
-                            ),
-                          )
-                        else ...[
-                          Row(
-                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                        RichText(
+                          text: const TextSpan(
                             children: [
-                              Expanded(
-                                child: Container(
-                                  height: size.height * 0.06,
-                                  decoration: BoxDecoration(
-                                    color: Colors.grey.withOpacity(0.2),
-                                    borderRadius: BorderRadius.circular(15),
-                                  ),
-                                  child: Row(
-                                    children: [
-                                      Radio<String>(
-                                        activeColor: Colors.blue,
-                                        value: 'Free Listing',
-                                        groupValue: selectedRole,
-                                        onChanged: (value) {
-                                          setState(() {
-                                            selectedRole = value!;
-                                          });
-                                        },
-                                      ),
-                                      Text(
-                                        "Free Listing (${remainFreeProPost})",
-                                        style: const TextStyle(
-                                            fontSize: 12, fontWeight: FontWeight.bold),
-                                      ),
-                                    ],
-                                  ),
-                                ),
+                              TextSpan(
+                                text: "Continue With",
+                                style: TextStyle(
+                                    color: Colors.black,
+                                    fontSize: 15,
+                                    fontWeight: FontWeight.w600),
                               ),
-                              const SizedBox(
-                                width: 10,
-                              ),
-                              Expanded(
-                                child: Container(
-                                  height: size.height * 0.06,
-                                  decoration: BoxDecoration(
-                                    color: Colors.grey.withOpacity(0.2),
-                                    borderRadius: BorderRadius.circular(15),
-                                  ),
-                                  child: Row(
-                                    children: [
-                                      Radio<String>(
-                                        activeColor: Colors.blue,
-                                        value: 'Package',
-                                        groupValue: selectedRole,
-                                        onChanged: (value) {
-                                          setState(() {
-                                            selectedRole = value!;
-                                          });
-                                        },
-                                      ),
-                                      const Text(
-                                        "Package",
-                                        style: TextStyle(
-                                            fontWeight: FontWeight.bold, fontSize: 12),
-                                      ),
-                                    ],
-                                  ),
-                                ),
+                              TextSpan(
+                                text: " *",
+                                style: TextStyle(
+                                    color: Colors.red), // Customize asterisk color
                               ),
                             ],
                           ),
-                          const SizedBox(height: 5),
-                          if (selectedRole == 'Package') ...[
-                            const SizedBox(height: 15),
-                            RichText(
-                              text: const TextSpan(
+                        ),
+                        if (selectedRole == 'Free Listing' && !loading)
+                          Text(
+                            remainFreeProPost > 0 ? "Note: This post is valid for $freeDuration days from the date of posting." : "Free Listing limit exceeded.",
+                            style: const TextStyle(color: Colors.red, fontSize: 12),
+                          ),
+                        const SizedBox(height: 5),
+                        Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            // Display loader if data is being fetched
+                            if (loading) // Assuming 'isLoading' is a boolean to track the loading state
+                              Center(
+                                child: const CupertinoActivityIndicator(
+                                  radius: 8, // You can adjust the size of the loader here
+                                ),
+                              )
+                            else ...[
+                              Row(
+                                mainAxisAlignment: MainAxisAlignment.spaceBetween,
                                 children: [
-                                  TextSpan(
-                                    text: "Package",
-                                    style: TextStyle(
-                                        color: Colors.black,
-                                        fontSize: 15,
-                                        fontWeight: FontWeight.w400),
+                                  Expanded(
+                                    child: Container(
+                                      height: size.height * 0.06,
+                                      decoration: BoxDecoration(
+                                        color: Colors.grey.withOpacity(0.2),
+                                        borderRadius: BorderRadius.circular(15),
+                                      ),
+                                      child: Row(
+                                        children: [
+                                          Radio<String>(
+                                            activeColor: Colors.blue,
+                                            value: 'Free Listing',
+                                            groupValue: selectedRole,
+                                            onChanged: (value) {
+                                              setState(() {
+                                                selectedRole = value!;
+                                                selectedPackage = 0;
+                                              });
+                                            },
+                                          ),
+                                          Text(
+                                            "Free Listing (${remainFreeProPost})",
+                                            style: const TextStyle(
+                                                fontSize: 12, fontWeight: FontWeight.bold),
+                                          ),
+                                        ],
+                                      ),
+                                    ),
                                   ),
-                                  TextSpan(
-                                    text: " *",
-                                    style: TextStyle(color: Colors.red),
+                                  const SizedBox(
+                                    width: 10,
+                                  ),
+                                  Expanded(
+                                    child: Container(
+                                      height: size.height * 0.06,
+                                      decoration: BoxDecoration(
+                                        color: Colors.grey.withOpacity(0.2),
+                                        borderRadius: BorderRadius.circular(15),
+                                      ),
+                                      child: Row(
+                                        children: [
+                                          Radio<String>(
+                                            activeColor: Colors.blue,
+                                            value: 'Package',
+                                            groupValue: selectedRole,
+                                            onChanged: (value) {
+                                              setState(() {
+                                                selectedRole = value!;
+                                              });
+                                            },
+                                          ),
+                                          const Text(
+                                            "Package",
+                                            style: TextStyle(
+                                                fontWeight: FontWeight.bold, fontSize: 12),
+                                          ),
+                                        ],
+                                      ),
+                                    ),
                                   ),
                                 ],
                               ),
-                            ),
-                            const SizedBox(height: 10),
-                            Row(
-                              children: [
-                                Expanded(
-                                  child: MultiSelectDropDown(
-                                    onOptionSelected: (List<ValueItem> selectedOptions) {
-                                      setState(() {
-                                        selectedPackage = int.parse(selectedOptions[0].value!);
-                                      });
-                                    },
-                                    options: [
-                                      for (int i = 0; i < packages.length; i++)
-                                        ValueItem(
-                                          label: '${packages[i]['package']['name']}, Listing (${packages[i]['package']['project_limit']}), Units (${packages[i]['package']['no_of_units'] ?? 0}), Valid until (${DateFormat('dd MMM yyyy').format(DateTime.parse(packages[i]['end_date']))})',
-                                          value: '${packages[i]['package']['id']}',
-                                        ),
+                              const SizedBox(height: 5),
+                              if (selectedRole == 'Package') ...[
+                                const SizedBox(height: 15),
+                                RichText(
+                                  text: const TextSpan(
+                                    children: [
+                                      TextSpan(
+                                        text: "Package",
+                                        style: TextStyle(
+                                            color: Colors.black,
+                                            fontSize: 15,
+                                            fontWeight: FontWeight.w600),
+                                      ),
+                                      TextSpan(
+                                        text: " *",
+                                        style: TextStyle(color: Colors.red),
+                                      ),
                                     ],
-                                    selectionType: SelectionType.single,
-                                    chipConfig: const ChipConfig(wrapType: WrapType.wrap),
-                                    dropdownHeight: 300,
-                                    optionTextStyle: const TextStyle(fontSize: 16),
-                                    selectedOptionIcon: const Icon(Icons.check_circle),
                                   ),
                                 ),
+                                const SizedBox(height: 10),
+                                if(packages.isNotEmpty)
+                                  Container(
+                                    padding: EdgeInsets.all(10),
+                                    decoration: BoxDecoration(
+                                      border: Border.all(
+                                          color: Color(0xffe5e5e5),
+                                          width: 1
+                                      ),
+                                      borderRadius: BorderRadius.circular(15),
+                                    ),
+                                    child: Column(
+                                      children: [
+                                        // Expanded(
+                                        //   child: MultiSelectDropDown(
+                                        //     onOptionSelected: (List<ValueItem> selectedOptions) {
+                                        //       setState(() {
+                                        //         selectedPackage = int.parse(selectedOptions[0].value!);
+                                        //       });
+                                        //     },
+                                        //     options: [
+                                        //       for (int i = 0; i < packages.length; i++)
+                                        //         ValueItem(
+                                        //           label: '${packages[i]['package']['name']}, Listing (${packages[i]['package']['project_limit']}), Units (${packages[i]['package']['no_of_units'] ?? 0}), Valid until (${DateFormat('dd MMM yyyy').format(DateTime.parse(packages[i]['end_date']))})',
+                                        //           value: '${packages[i]['package']['id']}',
+                                        //         ),
+                                        //     ],
+                                        //     selectionType: SelectionType.single,
+                                        //     chipConfig: const ChipConfig(wrapType: WrapType.wrap),
+                                        //     dropdownHeight: 300,
+                                        //     optionTextStyle: const TextStyle(fontSize: 16),
+                                        //     selectedOptionIcon: const Icon(Icons.check_circle),
+                                        //   ),
+                                        // ),
+                                        for (int i = 0; i < packages.length; i++)
+                                        InkWell(
+                                          onTap: () {
+                                            setState(() {
+                                              selectedPackage = packages[i]['package']['id'];
+                                            });
+                                          },
+                                          child: Container(
+                                            width: double.infinity,
+                                            padding: EdgeInsets.all(10),
+                                            decoration: BoxDecoration(
+                                              color: selectedPackage != packages[i]['package']['id'] ? Color(0xfff9f9f9) : Color(0xfffffbf3),
+                                              border: Border.all(
+                                                  color: selectedPackage != packages[i]['package']['id'] ? Color(0xffe5e5e5) : Color(0xffffa920),
+                                                  width: 1
+                                              ),
+                                              borderRadius: BorderRadius.circular(15),
+                                            ),
+                                            // alignment: Alignment.center,
+                                            child: Column(
+                                              crossAxisAlignment: CrossAxisAlignment.start,
+                                              children: [
+                                                Row(
+                                                  children: [
+                                                    Container(
+                                                      height: 20,
+                                                      width: 20,
+                                                      decoration: BoxDecoration(
+                                                        border: Border.all(
+                                                            color: Color(0xffe5e5e5),
+                                                            width: 1
+                                                        ),
+                                                        borderRadius: BorderRadius.circular(15),
+                                                      ),
+                                                      child: selectedPackage == packages[i]['package']['id'] ? Container(
+                                                        height: 10,
+                                                        width: 10,
+                                                        decoration: BoxDecoration(
+                                                          color: Color(0xffffa920),
+                                                          border: Border.all(
+                                                              color: Color(0xffffffff),
+                                                              width: 3
+                                                          ),
+                                                          borderRadius: BorderRadius.circular(15),
+                                                        ),
+                                                      ) : Container(),
+                                                    ),
+                                                    SizedBox(width: 10,),
+                                                    Text(packages[i]['package']['name'],
+                                                      style: TextStyle(
+                                                        fontSize: 14,
+                                                        color: Color(0xff646464),
+                                                        fontWeight: FontWeight.w600,
+                                                      ),
+                                                    ),
+                                                  ],
+                                                ),
+                                                SizedBox(height: 10,),
+                                                Row(
+                                                  children: [
+                                                    Expanded(
+                                                      child: Text('Total Listings',
+                                                        style: TextStyle(
+                                                          fontSize: 11,
+                                                          color: Color(0xff646464),
+                                                          fontWeight: FontWeight.w600,
+                                                        ),
+                                                      ),
+                                                    ),
+                                                    Expanded(
+                                                      child: Text(':  ${packages[i]['package']['project_limit']}',
+                                                        style: TextStyle(
+                                                          fontSize: 11,
+                                                          color: Color(0xff646464),
+                                                          fontWeight: FontWeight.w400,
+                                                        ),
+                                                      ),
+                                                    ),
+                                                  ],
+                                                ),
+                                                Row(
+                                                  children: [
+                                                    const Expanded(
+                                                      child: Text('Available Listings',
+                                                        style: TextStyle(
+                                                          fontSize: 11,
+                                                          color: Color(0xff646464),
+                                                          fontWeight: FontWeight.w600,
+                                                        ),
+                                                      ),
+                                                    ),
+                                                    Expanded(
+                                                      child: Text(':  ${packages[i]['package']['project_limit'] - packages[i]['used_limit_for_project']}',
+                                                        style: const TextStyle(
+                                                          fontSize: 11,
+                                                          color: Color(0xff646464),
+                                                          fontWeight: FontWeight.w400,
+                                                        ),
+                                                      ),
+                                                    ),
+                                                  ],
+                                                ),
+                                                Row(
+                                                  children: [
+                                                    Expanded(
+                                                      child: Text('Total Units',
+                                                        style: TextStyle(
+                                                          fontSize: 11,
+                                                          color: Color(0xff646464),
+                                                          fontWeight: FontWeight.w600,
+                                                        ),
+                                                      ),
+                                                    ),
+                                                    Expanded(
+                                                      child: Text(':  ${packages[i]['package']['no_of_units'] ?? "Unlimited"}',
+                                                        style: TextStyle(
+                                                          fontSize: 11,
+                                                          color: Color(0xff646464),
+                                                          fontWeight: FontWeight.w400,
+                                                        ),
+                                                      ),
+                                                    ),
+                                                  ],
+                                                ),
+                                                Row(
+                                                  children: [
+                                                    Expanded(
+                                                      child: Text('Valid until',
+                                                        style: TextStyle(
+                                                          fontSize: 11,
+                                                          color: Color(0xff646464),
+                                                          fontWeight: FontWeight.w600,
+                                                        ),
+                                                      ),
+                                                    ),
+                                                    Expanded(
+                                                      child: Text(':  ${DateFormat('dd MMM yyyy').format(DateTime.parse(packages[i]['end_date']))}',
+                                                        style: TextStyle(
+                                                          fontSize: 11,
+                                                          color: Color(0xff646464),
+                                                          fontWeight: FontWeight.w400,
+                                                        ),
+                                                      ),
+                                                    ),
+                                                  ],
+                                                ),
+                                              ],
+                                            ),
+                                          ),
+                                        )
+                                      ],
+                                    ),
+                                  ),
+                                if(packages.isEmpty)
+                                  Column(
+                                    children: [
+                                      Text('You dont have any active packages for post a project. If you want to buy click here!',
+                                        style: const TextStyle(color: Colors.red, fontSize: 12),),
+                                      SizedBox(height: 10,),
+                                      InkWell(
+                                        onTap: () {
+                                          GuestChecker.check(onNotGuest: () {
+                                            Navigator.pushNamed(
+                                                context, Routes.subscriptionPackageListRoute);
+                                          });
+                                        },
+                                        child: Container(
+                                          margin: EdgeInsets.only(bottom: 10, left: 15, right: 15),
+                                          width: double.infinity,
+                                          height: 40,
+                                          alignment: Alignment.center,
+                                          decoration: BoxDecoration(
+                                            borderRadius: BorderRadius.circular(12),
+                                            color: Color(0xff117af9),
+                                          ),
+                                          child: Text('Buy Subscription Plan',
+                                            style: TextStyle(
+                                                color: Colors.white,
+                                                fontSize: 14,
+                                                fontWeight: FontWeight.w500),
+                                          ),
+                                        ),
+                                      ),
+                                    ],
+                                  ),
+                                const SizedBox(height: 10),
                               ],
-                            ),
-                            const SizedBox(height: 10),
+                            ]
                           ],
-                        ]
+                        ),
+                        SizedBox(
+                          height: 10,
+                        ),
                       ],
-                    ),
-                    SizedBox(
-                      height: 10,
                     ),
                     Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
@@ -601,8 +805,8 @@ class _ProjectFormSecondState extends State<ProjectFormSecond> {
                                 selectedOptions:
                                 widget.isEdit! ? brokerageWidget : [],
                                 options: [
-                                  ValueItem(label: "Yes", value: "yes"),
-                                  ValueItem(label: "No", value: "no")
+                                  ValueItem(label: "Yes", value: "Yes"),
+                                  ValueItem(label: "No", value: "No")
                                 ],
                                 selectionType: SelectionType.single,
                                 chipConfig:
@@ -1039,14 +1243,15 @@ class _ProjectFormSecondState extends State<ProjectFormSecond> {
           if(!loading)
             InkWell(
             onTap: () {
+              print('eeeeeeeeeeeeeeeeeeeeeeeeeeee: ${selectedPackage}');
                 if (nameControler.text != '' &&
                     minPriceControler.text != '' &&
                     maxPriceControler.text != '' &&
                     brokerage != '' &&
                     status != '' &&
+                    propertyType != '' &&
                     descriptionControler.text != '' &&
-                    ((remainFreeProPost > 0 && selectedPackage == 0) ||
-                        (selectedPackage != 0 && remainFreeProPost < 1))) {
+                    ((remainFreeProPost > 0 && selectedPackage == 0 && selectedRole == 'Free Listing') || selectedPackage != 0)) {
                   var body = {
                     'package_id': selectedPackage,
                     'title': nameControler.text,

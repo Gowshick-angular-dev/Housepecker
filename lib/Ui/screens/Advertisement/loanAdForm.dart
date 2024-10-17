@@ -7,8 +7,12 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter/widgets.dart';
+import 'package:google_places_flutter/google_places_flutter.dart';
+import 'package:google_places_flutter/model/place_type.dart';
+import 'package:google_places_flutter/model/prediction.dart';
 import 'package:image_cropper/image_cropper.dart';
 import 'package:image_picker/image_picker.dart';
+import 'package:intl/intl.dart';
 import 'package:multi_dropdown/multiselect_dropdown.dart';
 import 'package:Housepecker/utils/Extensions/extensions.dart';
 
@@ -17,6 +21,7 @@ import '../../../data/Repositories/system_repository.dart';
 import '../../../data/helper/designs.dart';
 import '../../../data/helper/widgets.dart';
 import '../../../utils/api.dart';
+import '../../../utils/guestChecker.dart';
 import '../../../utils/helper_utils.dart';
 import '../../../utils/sliver_grid_delegate_with_fixed_cross_axis_count_and_fixed_height.dart';
 import '../../../utils/ui_utils.dart';
@@ -37,8 +42,7 @@ class LoanAdForm extends StatefulWidget {
 }
 
 class _LoanHomeState extends State<LoanAdForm> {
-  String selectedRole = 'Free Listing (2)';
-  String? selectedPackage; // For the dropdown
+
   bool loading = false;
   List packages = [];
   dynamic freepackage = [];
@@ -62,8 +66,14 @@ class _LoanHomeState extends State<LoanAdForm> {
   TextEditingController priceControler = TextEditingController();
   TextEditingController urlControler = TextEditingController();
 
+  int remainFreeProPost = 0;
+  String selectedRole = 'Free Listing';
+  int? selectedPackage = 0;
+  int freeDuration = 0;
+
   List bankList = [];
   List loanList = [];
+  List roleList = [];
   List ventureCategoryList = [];
   List propertyList = [];
   List serviceList = [];
@@ -74,11 +84,14 @@ class _LoanHomeState extends State<LoanAdForm> {
   String selectedBank = '';
   String brokerage = '';
   String constRole = '';
+  String myRole = '';
   List loanType = [];
   List<ValueItem> loanTypeWidget = [];
   String selectedVenture = '';
   List serviceType = [];
   List<ValueItem> serviceTypeWidget = [];
+  String mainService = '';
+  List<ValueItem> mainServiceWidget = [];
   List propertyType = [];
   List<ValueItem> propertyTypeWidget = [];
   File? fileUserimg;
@@ -97,12 +110,14 @@ class _LoanHomeState extends State<LoanAdForm> {
   List<ValueItem> selectedVentureWidget = [];
   List<ValueItem> brokerageWidget = [];
   List<ValueItem> constRoleWidget = [];
+  List<ValueItem> myRoleWidget = [];
 
   @override
   void initState() {
     if (widget.cat!['id'] == 4) {
       getBanks();
       getLoanTypes();
+      getRoles();
     } else if (widget.cat!['id'] == 2) {
       getPropertyTypes();
     } else if (widget.cat!['id'] == 3) {
@@ -119,6 +134,60 @@ class _LoanHomeState extends State<LoanAdForm> {
     getPackages();
 
     super.initState();
+  }
+
+  Future<void> getPackages() async {
+    try {
+      setState(() {
+        loading = true;
+      });
+
+      final SystemRepository _systemRepository = SystemRepository();
+      Map settings = await _systemRepository.fetchSystemSettings(isAnonymouse: false);
+
+      List allPacks = settings['data']['package']['user_purchased_package'];
+      Map freepackage = settings['data']['free_package'];
+
+      if (freepackage != null) {
+        setState(() {
+          remainFreeProPost = freepackage['advertisement_limit'] - freepackage['used_advertisement_limit'];
+          freeDuration = freepackage['duration'] ?? 0;
+        });
+      }
+
+      List temp = [];
+      if (settings['data']['package'] != null && allPacks != null) {
+        for (int i = 0; i < allPacks.length; i++) {
+          print('hhhhhhhhhhhhhhhhhhhhhhhhhhh2: ${allPacks[i]['used_limit_for_advertisement']}, ${allPacks[i]['package']['advertisement_limit']}');
+
+          if (((allPacks[i]['package']['advertisement_limit'] ?? 0) -
+              (allPacks[i]['used_limit_for_advertisement'] ?? 0)) >
+              0) {
+            temp.add(allPacks[i]);
+          }
+        }
+      }
+      setState(() {
+        packages = temp;
+        print('fjbsdjfbdn${packages}');
+      });
+      // Update state with the filtered packages
+      // setState(() {
+      //   packages = temp;
+      // });
+
+    } catch (e, stacktrace) {
+      // Handle any error that occurs in the try block
+      print('An error occurred: $e');
+      print('Stacktrace: $stacktrace');
+
+      // Optionally, you can show an error message to the user using a Snackbar or AlertDialog
+    } finally {
+      // Stop loading, whether an error occurred or not
+      setState(() {
+        loading = false;
+      });
+    }
   }
 
   Future<void> getBanks() async {
@@ -284,6 +353,15 @@ class _LoanHomeState extends State<LoanAdForm> {
     }
   }
 
+  Future<void> getRoles() async {
+    var response = await Api.get(url: Api.roles);
+    if (!response['error']) {
+      setState(() {
+        roleList = response['data'];
+      });
+    }
+  }
+
   Future<void> getVentureCategories() async {
     var response = await Api.get(url: Api.ventureCategories);
     if (!response['error']) {
@@ -387,55 +465,6 @@ class _LoanHomeState extends State<LoanAdForm> {
     }
   }
 
-  Future<void> getPackages() async {
-    try {
-      // Start loading
-      setState(() {
-        loading = true;
-      });
-
-      final SystemRepository _systemRepository = SystemRepository();
-      Map settings =
-          await _systemRepository.fetchSystemSettings(isAnonymouse: false);
-
-      print('hhhhhhhhhhhhhhhhhhhhhhhhhhh: ${settings['data']}');
-
-      List allPacks = settings['data']['package']['user_purchased_package'];
-      List freepackage = settings['data']['free_package'];
-
-      print('dflksndlsdgkdsg${allPacks}');
-
-      List temp = [];
-
-      for (int i = 0; i < allPacks.length; i++) {
-        print(
-            'hhhhhhhhhhhhhhhhhhhhhhhhhhh2: ${allPacks[i]['used_limit_for_project']}, ${allPacks[i]['package']['project_limit']}');
-
-        if (((allPacks[i]['package']['project_limit'] ?? 0) -
-                (allPacks[i]['used_limit_for_project'] ?? 0)) >
-            0) {
-          temp.add(allPacks[i]);
-        }
-      }
-
-      // Update state with the filtered packages
-      setState(() {
-        packages = temp;
-      });
-    } catch (e, stacktrace) {
-      // Handle any error that occurs in the try block
-      print('An error occurred: $e');
-      print('Stacktrace: $stacktrace');
-
-      // Optionally, you can show an error message to the user using a Snackbar or AlertDialog
-    } finally {
-      // Stop loading, whether an error occurred or not
-      setState(() {
-        loading = false;
-      });
-    }
-  }
-
   @override
   Widget build(BuildContext context) {
     Size size = MediaQuery.sizeOf(context);
@@ -457,151 +486,336 @@ class _LoanHomeState extends State<LoanAdForm> {
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    RichText(
-                      text: TextSpan(
-                        children: [
-                          TextSpan(
-                            text: "Continue With",
-                            style: TextStyle(
-                                color: Colors.black,
-                                fontSize: 15,
-                                fontWeight: FontWeight.w600),
-                          ),
-                          TextSpan(
-                            text: " *",
-                            style: TextStyle(
-                                color: Colors.red), // Customize asterisk color
-                          ),
-                        ],
-                      ),
-                    ),
-                    SizedBox(height: 10),
-                    Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        Container(
-                          height: size.height * 0.06,
-                          width: size.width * 0.45,
-                          padding: const EdgeInsets.symmetric(horizontal: 10),
-                          decoration: BoxDecoration(
-                            color: Colors.grey.withOpacity(0.2),
-                            borderRadius: BorderRadius.circular(15),
-                          ),
-                          child: Row(
+                        RichText(
+                          text: const TextSpan(
                             children: [
-                              Radio<String>(
-                                activeColor: Colors.blue,
-                                value: 'Free Listing (${0})',
-                                groupValue: selectedRole,
-                                onChanged: (value) {
-                                  setState(() {
-                                    selectedRole = value!;
-                                  });
-                                },
+                              TextSpan(
+                                text: "Continue With",
+                                style: TextStyle(
+                                    color: Colors.black,
+                                    fontSize: 15,
+                                    fontWeight: FontWeight.w600),
                               ),
-                              Text("Free Listing",
-                                  style: TextStyle(
-                                      fontSize: 12,
-                                      fontWeight: FontWeight.bold)),
+                              TextSpan(
+                                text: " *",
+                                style: TextStyle(
+                                    color: Colors.red), // Customize asterisk color
+                              ),
                             ],
                           ),
                         ),
-                        Container(
-                          height: size.height * 0.06,
-                          width: size.width * 0.45,
-                          padding: const EdgeInsets.symmetric(horizontal: 10),
-                          decoration: BoxDecoration(
-                            color: Colors.grey.withOpacity(0.2),
-                            borderRadius: BorderRadius.circular(15),
+                        if (selectedRole == 'Free Listing' && !loading)
+                          Text(
+                            remainFreeProPost > 0 ? "Note: This post is valid for $freeDuration days from the date of posting." : "Free Listing limit exceeded.",
+                            style: const TextStyle(color: Colors.red, fontSize: 12),
                           ),
-                          child: Row(
-                            children: [
-                              Radio<String>(
-                                activeColor: Colors.blue,
-                                value: 'Package',
-                                groupValue: selectedRole,
-                                onChanged: (value) {
-                                  setState(() {
-                                    selectedRole = value!;
-                                    getPackages();
-                                  });
-                                },
-                              ),
-                              Text("Package",
-                                  style: TextStyle(
-                                      fontWeight: FontWeight.bold,
-                                      fontSize: 12)),
-                            ],
-                          ),
-                        ),
-                      ],
-                    ),
-
-                    if (selectedRole == 'Free Listing (2)')
-                      SizedBox(
-                        height: 5,
-                      ),
-                    Text(
-                      "Note: You can post up to 2 free listings",
-                      style: TextStyle(color: Colors.red, fontSize: 12),
-                    ),
-                    // Conditionally display Package dropdown
-                    if (selectedRole == 'Package') ...[
-                      SizedBox(height: 15),
-                      RichText(
-                        text: TextSpan(
+                        const SizedBox(height: 5),
+                        Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
-                            TextSpan(
-                              text: "Package",
-                              style: TextStyle(
-                                  color: Colors.black,
-                                  fontSize: 15,
-                                  fontWeight: FontWeight.w600),
-                            ),
-                            TextSpan(
-                              text: " *",
-                              style: TextStyle(
-                                  color:
-                                      Colors.red), // Customize asterisk color
-                            ),
+                            // Display loader if data is being fetched
+                            if (loading) // Assuming 'isLoading' is a boolean to track the loading state
+                              Center(
+                                child: const CupertinoActivityIndicator(
+                                  radius: 8, // You can adjust the size of the loader here
+                                ),
+                              )
+                            else ...[
+                              Row(
+                                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                                children: [
+                                  Expanded(
+                                    child: Container(
+                                      height: size.height * 0.06,
+                                      decoration: BoxDecoration(
+                                        color: Colors.grey.withOpacity(0.2),
+                                        borderRadius: BorderRadius.circular(15),
+                                      ),
+                                      child: Row(
+                                        children: [
+                                          Radio<String>(
+                                            activeColor: Colors.blue,
+                                            value: 'Free Listing',
+                                            groupValue: selectedRole,
+                                            onChanged: (value) {
+                                              setState(() {
+                                                selectedRole = value!;
+                                                selectedPackage = 0;
+                                              });
+                                            },
+                                          ),
+                                          Text(
+                                            "Free Listing (${remainFreeProPost})",
+                                            style: const TextStyle(
+                                                fontSize: 12, fontWeight: FontWeight.bold),
+                                          ),
+                                        ],
+                                      ),
+                                    ),
+                                  ),
+                                  const SizedBox(
+                                    width: 10,
+                                  ),
+                                  Expanded(
+                                    child: Container(
+                                      height: size.height * 0.06,
+                                      decoration: BoxDecoration(
+                                        color: Colors.grey.withOpacity(0.2),
+                                        borderRadius: BorderRadius.circular(15),
+                                      ),
+                                      child: Row(
+                                        children: [
+                                          Radio<String>(
+                                            activeColor: Colors.blue,
+                                            value: 'Package',
+                                            groupValue: selectedRole,
+                                            onChanged: (value) {
+                                              setState(() {
+                                                selectedRole = value!;
+                                              });
+                                            },
+                                          ),
+                                          const Text(
+                                            "Package",
+                                            style: TextStyle(
+                                                fontWeight: FontWeight.bold, fontSize: 12),
+                                          ),
+                                        ],
+                                      ),
+                                    ),
+                                  ),
+                                ],
+                              ),
+                              const SizedBox(height: 5),
+                              if (selectedRole == 'Package') ...[
+                                const SizedBox(height: 15),
+                                RichText(
+                                  text: const TextSpan(
+                                    children: [
+                                      TextSpan(
+                                        text: "Package",
+                                        style: TextStyle(
+                                            color: Colors.black,
+                                            fontSize: 15,
+                                            fontWeight: FontWeight.w600),
+                                      ),
+                                      TextSpan(
+                                        text: " *",
+                                        style: TextStyle(color: Colors.red),
+                                      ),
+                                    ],
+                                  ),
+                                ),
+                                const SizedBox(height: 10),
+                                if(packages.isNotEmpty)
+                                  Container(
+                                    padding: EdgeInsets.all(10),
+                                    decoration: BoxDecoration(
+                                      border: Border.all(
+                                          color: Color(0xffe5e5e5),
+                                          width: 1
+                                      ),
+                                      borderRadius: BorderRadius.circular(15),
+                                    ),
+                                    child: Column(
+                                      children: [
+                                        // Expanded(
+                                        //   child: MultiSelectDropDown(
+                                        //     onOptionSelected: (List<ValueItem> selectedOptions) {
+                                        //       setState(() {
+                                        //         selectedPackage = int.parse(selectedOptions[0].value!);
+                                        //       });
+                                        //     },
+                                        //     options: [
+                                        //       for (int i = 0; i < packages.length; i++)
+                                        //         ValueItem(
+                                        //           label: '${packages[i]['package']['name']}, Listing (${packages[i]['package']['project_limit']}), Units (${packages[i]['package']['no_of_units'] ?? 0}), Valid until (${DateFormat('dd MMM yyyy').format(DateTime.parse(packages[i]['end_date']))})',
+                                        //           value: '${packages[i]['package']['id']}',
+                                        //         ),
+                                        //     ],
+                                        //     selectionType: SelectionType.single,
+                                        //     chipConfig: const ChipConfig(wrapType: WrapType.wrap),
+                                        //     dropdownHeight: 300,
+                                        //     optionTextStyle: const TextStyle(fontSize: 16),
+                                        //     selectedOptionIcon: const Icon(Icons.check_circle),
+                                        //   ),
+                                        // ),
+                                        for (int i = 0; i < packages.length; i++)
+                                          InkWell(
+                                            onTap: () {
+                                              setState(() {
+                                                selectedPackage = packages[i]['package']['id'];
+                                              });
+                                            },
+                                            child: Container(
+                                              width: double.infinity,
+                                              padding: EdgeInsets.all(10),
+                                              decoration: BoxDecoration(
+                                                color: selectedPackage != packages[i]['package']['id'] ? Color(0xfff9f9f9) : Color(0xfffffbf3),
+                                                border: Border.all(
+                                                    color: selectedPackage != packages[i]['package']['id'] ? Color(0xffe5e5e5) : Color(0xffffa920),
+                                                    width: 1
+                                                ),
+                                                borderRadius: BorderRadius.circular(15),
+                                              ),
+                                              // alignment: Alignment.center,
+                                              child: Column(
+                                                crossAxisAlignment: CrossAxisAlignment.start,
+                                                children: [
+                                                  Row(
+                                                    children: [
+                                                      Container(
+                                                        height: 20,
+                                                        width: 20,
+                                                        decoration: BoxDecoration(
+                                                          border: Border.all(
+                                                              color: Color(0xffe5e5e5),
+                                                              width: 1
+                                                          ),
+                                                          borderRadius: BorderRadius.circular(15),
+                                                        ),
+                                                        child: selectedPackage == packages[i]['package']['id'] ? Container(
+                                                          height: 10,
+                                                          width: 10,
+                                                          decoration: BoxDecoration(
+                                                            color: Color(0xffffa920),
+                                                            border: Border.all(
+                                                                color: Color(0xffffffff),
+                                                                width: 3
+                                                            ),
+                                                            borderRadius: BorderRadius.circular(15),
+                                                          ),
+                                                        ) : Container(),
+                                                      ),
+                                                      SizedBox(width: 10,),
+                                                      Text(packages[i]['package']['name'],
+                                                        style: TextStyle(
+                                                          fontSize: 14,
+                                                          color: Color(0xff646464),
+                                                          fontWeight: FontWeight.w600,
+                                                        ),
+                                                      ),
+                                                    ],
+                                                  ),
+                                                  SizedBox(height: 10,),
+                                                  Row(
+                                                    children: [
+                                                      const Expanded(
+                                                        child: Text('Total Listings',
+                                                          style: TextStyle(
+                                                            fontSize: 11,
+                                                            color: Color(0xff646464),
+                                                            fontWeight: FontWeight.w600,
+                                                          ),
+                                                        ),
+                                                      ),
+                                                      Expanded(
+                                                        child: Text(':  ${packages[i]['package']['advertisement_limit']}',
+                                                          style: const TextStyle(
+                                                            fontSize: 11,
+                                                            color: Color(0xff646464),
+                                                            fontWeight: FontWeight.w400,
+                                                          ),
+                                                        ),
+                                                      ),
+                                                    ],
+                                                  ),
+                                                  Row(
+                                                    children: [
+                                                      const Expanded(
+                                                        child: Text('Available Listings',
+                                                          style: TextStyle(
+                                                            fontSize: 11,
+                                                            color: Color(0xff646464),
+                                                            fontWeight: FontWeight.w600,
+                                                          ),
+                                                        ),
+                                                      ),
+                                                      Expanded(
+                                                        child: Text(':  ${packages[i]['package']['advertisement_limit'] - packages[i]['used_limit_for_advertisement']}',
+                                                          style: const TextStyle(
+                                                            fontSize: 11,
+                                                            color: Color(0xff646464),
+                                                            fontWeight: FontWeight.w400,
+                                                          ),
+                                                        ),
+                                                      ),
+                                                    ],
+                                                  ),
+                                                  Row(
+                                                    children: [
+                                                      const Expanded(
+                                                        child: Text('Valid until',
+                                                          style: TextStyle(
+                                                            fontSize: 11,
+                                                            color: Color(0xff646464),
+                                                            fontWeight: FontWeight.w600,
+                                                          ),
+                                                        ),
+                                                      ),
+                                                      Expanded(
+                                                        child: Text(':  ${DateFormat('dd MMM yyyy').format(DateTime.parse(packages[i]['end_date']))}',
+                                                          style: const TextStyle(
+                                                            fontSize: 11,
+                                                            color: Color(0xff646464),
+                                                            fontWeight: FontWeight.w400,
+                                                          ),
+                                                        ),
+                                                      ),
+                                                    ],
+                                                  ),
+                                                ],
+                                              ),
+                                            ),
+                                          )
+                                      ],
+                                    ),
+                                  ),
+                                if(packages.isEmpty)
+                                  Column(
+                                    children: [
+                                      Text('You dont have any active packages for post a project. If you want to buy click here!',
+                                        style: const TextStyle(color: Colors.red, fontSize: 12),),
+                                      SizedBox(height: 10,),
+                                      InkWell(
+                                        onTap: () {
+                                          GuestChecker.check(onNotGuest: () {
+                                            Navigator.pushNamed(
+                                                context, Routes.subscriptionPackageListRoute);
+                                          });
+                                        },
+                                        child: Container(
+                                          margin: EdgeInsets.only(bottom: 10, left: 15, right: 15),
+                                          width: double.infinity,
+                                          height: 40,
+                                          alignment: Alignment.center,
+                                          decoration: BoxDecoration(
+                                            borderRadius: BorderRadius.circular(12),
+                                            color: Color(0xff117af9),
+                                          ),
+                                          child: Text('Buy Subscription Plan',
+                                            style: TextStyle(
+                                                color: Colors.white,
+                                                fontSize: 14,
+                                                fontWeight: FontWeight.w500),
+                                          ),
+                                        ),
+                                      ),
+                                    ],
+                                  ),
+                                if(packages.isEmpty)
+                                  const SizedBox(height: 10),
+                              ],
+                            ]
                           ],
                         ),
-                      ),
-                      SizedBox(height: 10),
-                      Row(
-                        children: [
-                          Expanded(
-                            child: MultiSelectDropDown(
-                              onOptionSelected:
-                                  (List<ValueItem> selectedOptions) {
-                                setState(() {
-                                  constRole = selectedOptions[0].value!;
-                                  constRoleWidget = selectedOptions;
-                                });
-                              },
-                              selectedOptions:
-                                  widget.isEdit ? constRoleWidget : [],
-                              options: [
-                                ValueItem(label: "Engineer", value: "1"),
-                                ValueItem(label: "Constructor", value: "2"),
-                                ValueItem(label: "Builder", value: "3"),
-                                ValueItem(label: "Supplier", value: "4"),
-                              ],
-                              selectionType: SelectionType.single,
-                              chipConfig:
-                                  const ChipConfig(wrapType: WrapType.wrap),
-                              dropdownHeight: 300,
-                              optionTextStyle: const TextStyle(fontSize: 16),
-                              selectedOptionIcon:
-                                  const Icon(Icons.check_circle),
-                            ),
-                          ),
-                        ],
-                      ),
-                    ],
-
-                    SizedBox(
-                      height: 10,
+                        const SizedBox(
+                          height: 10,
+                        ),
+                      ],
                     ),
                     if (widget.cat!['id'] == 2)
                       Column(
@@ -641,7 +855,7 @@ class _LoanHomeState extends State<LoanAdForm> {
                                     });
                                   },
                                   selectedOptions:
-                                      widget.isEdit ? constRoleWidget : [],
+                                  widget.isEdit ? constRoleWidget : [],
                                   options: [
                                     ValueItem(label: "Engineer", value: "1"),
                                     ValueItem(label: "Constructor", value: "2"),
@@ -650,12 +864,12 @@ class _LoanHomeState extends State<LoanAdForm> {
                                   ],
                                   selectionType: SelectionType.single,
                                   chipConfig:
-                                      const ChipConfig(wrapType: WrapType.wrap),
+                                  const ChipConfig(wrapType: WrapType.wrap),
                                   dropdownHeight: 300,
                                   optionTextStyle:
-                                      const TextStyle(fontSize: 16),
+                                  const TextStyle(fontSize: 16),
                                   selectedOptionIcon:
-                                      const Icon(Icons.check_circle),
+                                  const Icon(Icons.check_circle),
                                 ),
                               ),
                             ],
@@ -673,7 +887,7 @@ class _LoanHomeState extends State<LoanAdForm> {
                             text: TextSpan(
                               children: [
                                 TextSpan(
-                                  text: "Service Type",
+                                  text: "Select Service type deal in",
                                   style: TextStyle(
                                       color: Colors.black,
                                       fontSize: 15,
@@ -700,12 +914,12 @@ class _LoanHomeState extends State<LoanAdForm> {
                                     setState(() {
                                       propertyType =
                                           selectedOptions.map((item) {
-                                        return item.value;
-                                      }).toList();
+                                            return item.value;
+                                          }).toList();
                                     });
                                   },
                                   selectedOptions:
-                                      widget.isEdit ? propertyTypeWidget : [],
+                                  widget.isEdit ? propertyTypeWidget : [],
                                   options: propertyList.map((items) {
                                     return ValueItem(
                                         label: items['name'],
@@ -713,74 +927,12 @@ class _LoanHomeState extends State<LoanAdForm> {
                                   }).toList(),
                                   selectionType: SelectionType.multi,
                                   chipConfig:
-                                      const ChipConfig(wrapType: WrapType.wrap),
+                                  const ChipConfig(wrapType: WrapType.wrap),
                                   dropdownHeight: 300,
                                   optionTextStyle:
-                                      const TextStyle(fontSize: 16),
+                                  const TextStyle(fontSize: 16),
                                   selectedOptionIcon:
-                                      const Icon(Icons.check_circle),
-                                ),
-                              ),
-                            ],
-                          ),
-                          SizedBox(
-                            height: 15,
-                          ),
-                        ],
-                      ),
-                    if (widget.cat!['id'] == 3)
-                      Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          RichText(
-                            text: TextSpan(
-                              children: [
-                                TextSpan(
-                                  text: "Service Type",
-                                  style: TextStyle(
-                                      color: Colors.black,
-                                      fontSize: 15,
-                                      fontWeight: FontWeight.w600),
-                                ),
-                                TextSpan(
-                                  text: " *",
-                                  style: TextStyle(
-                                      color: Colors
-                                          .red), // Customize asterisk color
-                                ),
-                              ],
-                            ),
-                          ),
-                          SizedBox(
-                            height: 10,
-                          ),
-                          Row(
-                            children: [
-                              Expanded(
-                                child: MultiSelectDropDown(
-                                  onOptionSelected:
-                                      (List<ValueItem> selectedOptions) {
-                                    setState(() {
-                                      serviceType = selectedOptions.map((item) {
-                                        return item.value;
-                                      }).toList();
-                                    });
-                                  },
-                                  selectedOptions:
-                                      widget.isEdit ? serviceTypeWidget : [],
-                                  options: serviceList.map((items) {
-                                    return ValueItem(
-                                        label: items['name'],
-                                        value: items['id'].toString());
-                                  }).toList(),
-                                  selectionType: SelectionType.multi,
-                                  chipConfig:
-                                      const ChipConfig(wrapType: WrapType.wrap),
-                                  dropdownHeight: 300,
-                                  optionTextStyle:
-                                      const TextStyle(fontSize: 16),
-                                  selectedOptionIcon:
-                                      const Icon(Icons.check_circle),
+                                  const Icon(Icons.check_circle),
                                 ),
                               ),
                             ],
@@ -798,7 +950,7 @@ class _LoanHomeState extends State<LoanAdForm> {
                             text: TextSpan(
                               children: [
                                 TextSpan(
-                                  text: "Loan Type",
+                                  text: "Select Loan Type Deals In",
                                   style: TextStyle(
                                       color: Colors.black,
                                       fontSize: 15,
@@ -829,7 +981,7 @@ class _LoanHomeState extends State<LoanAdForm> {
                                     });
                                   },
                                   selectedOptions:
-                                      widget.isEdit ? loanTypeWidget : [],
+                                  widget.isEdit ? loanTypeWidget : [],
                                   options: loanList.map((items) {
                                     return ValueItem(
                                         label: items['name'],
@@ -837,12 +989,12 @@ class _LoanHomeState extends State<LoanAdForm> {
                                   }).toList(),
                                   selectionType: SelectionType.multi,
                                   chipConfig:
-                                      const ChipConfig(wrapType: WrapType.wrap),
+                                  const ChipConfig(wrapType: WrapType.wrap),
                                   dropdownHeight: 300,
                                   optionTextStyle:
-                                      const TextStyle(fontSize: 16),
+                                  const TextStyle(fontSize: 16),
                                   selectedOptionIcon:
-                                      const Icon(Icons.check_circle),
+                                  const Icon(Icons.check_circle),
                                 ),
                               ),
                             ],
@@ -852,80 +1004,7 @@ class _LoanHomeState extends State<LoanAdForm> {
                           ),
                         ],
                       ),
-                    Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        RichText(
-                          text: TextSpan(
-                            children: [
-                              TextSpan(
-                                text: "Location",
-                                style: TextStyle(
-                                    color: Colors.black,
-                                    fontSize: 15,
-                                    fontWeight: FontWeight.w600),
-                              ),
-                              TextSpan(
-                                text: " *",
-                                style: TextStyle(
-                                    color:
-                                        Colors.red), // Customize asterisk color
-                              ),
-                            ],
-                          ),
-                        ),
-                        SizedBox(
-                          height: 10,
-                        ),
-                        Row(
-                          children: [
-                            Expanded(
-                              child: Container(
-                                decoration: BoxDecoration(
-                                  border: Border.all(
-                                      width: 1, color: Color(0xffe1e1e1)),
-                                  color: Color(0xfff5f5f5),
-                                  borderRadius: BorderRadius.circular(
-                                      10.0), // Optional: Add border radius
-                                ),
-                                child: Padding(
-                                  padding: const EdgeInsets.only(
-                                      left: 8.0, right: 5),
-                                  child: TextFormField(
-                                    controller: locationControler,
-                                    // onChanged: (String? val) {
-                                    //   getBanks(loanType, searchControler.text, val!, branchControler.text);
-                                    // },
-                                    decoration: const InputDecoration(
-                                        hintText: 'Enter Location..',
-                                        hintStyle: TextStyle(
-                                          fontFamily: 'Poppins',
-                                          fontSize: 14.0,
-                                          color: Color(0xff9c9c9c),
-                                          fontWeight: FontWeight.w500,
-                                          decoration: TextDecoration.none,
-                                        ),
-                                        enabledBorder: UnderlineInputBorder(
-                                          borderSide: BorderSide(
-                                            color: Colors.transparent,
-                                          ),
-                                        ),
-                                        focusedBorder: UnderlineInputBorder(
-                                            borderSide: BorderSide(
-                                          color: Colors.transparent,
-                                        ))),
-                                  ),
-                                ),
-                              ),
-                            ),
-                          ],
-                        ),
-                        SizedBox(
-                          height: 15,
-                        ),
-                      ],
-                    ),
-                    if (widget.cat!['id'] == 4)
+                    if (widget.cat!['id'] == 3)
                       Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
@@ -933,81 +1012,7 @@ class _LoanHomeState extends State<LoanAdForm> {
                             text: TextSpan(
                               children: [
                                 TextSpan(
-                                  text: "Branch",
-                                  style: TextStyle(
-                                      color: Colors.black,
-                                      fontSize: 15,
-                                      fontWeight: FontWeight.w600),
-                                ),
-                                TextSpan(
-                                  text: " *",
-                                  style: TextStyle(
-                                      color: Colors
-                                          .red), // Customize asterisk color
-                                ),
-                              ],
-                            ),
-                          ),
-                          SizedBox(
-                            height: 10,
-                          ),
-                          Row(
-                            children: [
-                              Expanded(
-                                child: Container(
-                                  decoration: BoxDecoration(
-                                    border: Border.all(
-                                        width: 1, color: Color(0xffe1e1e1)),
-                                    color: Color(0xfff5f5f5),
-                                    borderRadius: BorderRadius.circular(
-                                        10.0), // Optional: Add border radius
-                                  ),
-                                  child: Padding(
-                                    padding: const EdgeInsets.only(
-                                        left: 8.0, right: 5),
-                                    child: TextFormField(
-                                      controller: branchControler,
-                                      // onChanged: (String? val) {
-                                      //   getBanks(loanType, searchControler.text, locationControler.text, val!);
-                                      // },
-                                      decoration: const InputDecoration(
-                                          hintText: 'Enter Branch..',
-                                          hintStyle: TextStyle(
-                                            fontFamily: 'Poppins',
-                                            fontSize: 14.0,
-                                            color: Color(0xff9c9c9c),
-                                            fontWeight: FontWeight.w500,
-                                            decoration: TextDecoration.none,
-                                          ),
-                                          enabledBorder: UnderlineInputBorder(
-                                            borderSide: BorderSide(
-                                              color: Colors.transparent,
-                                            ),
-                                          ),
-                                          focusedBorder: UnderlineInputBorder(
-                                              borderSide: BorderSide(
-                                            color: Colors.transparent,
-                                          ))),
-                                    ),
-                                  ),
-                                ),
-                              ),
-                            ],
-                          ),
-                          SizedBox(
-                            height: 15,
-                          ),
-                        ],
-                      ),
-                    if (widget.cat!['id'] == 1)
-                      Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          RichText(
-                            text: TextSpan(
-                              children: [
-                                TextSpan(
-                                  text: "Venture Category",
+                                  text: "Service",
                                   style: TextStyle(
                                       color: Colors.black,
                                       fontSize: 15,
@@ -1032,27 +1037,81 @@ class _LoanHomeState extends State<LoanAdForm> {
                                   onOptionSelected:
                                       (List<ValueItem> selectedOptions) {
                                     setState(() {
-                                      selectedVentureWidget = selectedOptions;
-                                      selectedVenture =
-                                          selectedOptions[0].value!;
+                                      mainService = selectedOptions[0].value!;
+                                      mainServiceWidget = selectedOptions;
                                     });
                                   },
-                                  selectedOptions: widget.isEdit
-                                      ? selectedVentureWidget
-                                      : [],
-                                  options: ventureCategoryList.map((item) {
+                                  selectedOptions:
+                                  widget.isEdit ? mainServiceWidget : [],
+                                  options: serviceList.map((items) {
                                     return ValueItem(
-                                        label: item['name'],
-                                        value: item['id'].toString());
+                                        label: items['name'],
+                                        value: items['id'].toString());
                                   }).toList(),
                                   selectionType: SelectionType.single,
                                   chipConfig:
-                                      const ChipConfig(wrapType: WrapType.wrap),
+                                  const ChipConfig(wrapType: WrapType.wrap),
                                   dropdownHeight: 300,
                                   optionTextStyle:
-                                      const TextStyle(fontSize: 16),
+                                  const TextStyle(fontSize: 16),
                                   selectedOptionIcon:
-                                      const Icon(Icons.check_circle),
+                                  const Icon(Icons.check_circle),
+                                ),
+                              ),
+                            ],
+                          ),
+                          SizedBox(
+                            height: 15,
+                          ),
+                        ],
+                      ),
+                    if (widget.cat!['id'] == 3)
+                      Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          RichText(
+                            text: TextSpan(
+                              children: [
+                                TextSpan(
+                                  text: "Select Service Type Deals In (Other Service)",
+                                  style: TextStyle(
+                                      color: Colors.black,
+                                      fontSize: 15,
+                                      fontWeight: FontWeight.w600),
+                                ),
+                              ],
+                            ),
+                          ),
+                          SizedBox(
+                            height: 10,
+                          ),
+                          Row(
+                            children: [
+                              Expanded(
+                                child: MultiSelectDropDown(
+                                  onOptionSelected:
+                                      (List<ValueItem> selectedOptions) {
+                                    setState(() {
+                                      serviceType = selectedOptions.map((item) {
+                                        return item.value;
+                                      }).toList();
+                                    });
+                                  },
+                                  selectedOptions:
+                                  widget.isEdit ? serviceTypeWidget : [],
+                                  options: serviceList.map((items) {
+                                    return ValueItem(
+                                        label: items['name'],
+                                        value: items['id'].toString());
+                                  }).toList(),
+                                  selectionType: SelectionType.multi,
+                                  chipConfig:
+                                  const ChipConfig(wrapType: WrapType.wrap),
+                                  dropdownHeight: 300,
+                                  optionTextStyle:
+                                  const TextStyle(fontSize: 16),
+                                  selectedOptionIcon:
+                                  const Icon(Icons.check_circle),
                                 ),
                               ),
                             ],
@@ -1069,7 +1128,7 @@ class _LoanHomeState extends State<LoanAdForm> {
                           text: TextSpan(
                             children: [
                               TextSpan(
-                                text: "Brokerage",
+                                text: "Title",
                                 style: TextStyle(
                                     color: Colors.black,
                                     fontSize: 15,
@@ -1079,7 +1138,7 @@ class _LoanHomeState extends State<LoanAdForm> {
                                 text: " *",
                                 style: TextStyle(
                                     color:
-                                        Colors.red), // Customize asterisk color
+                                    Colors.red), // Customize asterisk color
                               ),
                             ],
                           ),
@@ -1090,36 +1149,119 @@ class _LoanHomeState extends State<LoanAdForm> {
                         Row(
                           children: [
                             Expanded(
-                              child: MultiSelectDropDown(
-                                onOptionSelected:
-                                    (List<ValueItem> selectedOptions) {
-                                  setState(() {
-                                    brokerage = selectedOptions[0].value!;
-                                    brokerageWidget = selectedOptions;
-                                  });
-                                },
-                                selectedOptions:
-                                    widget.isEdit ? brokerageWidget : [],
-                                options: [
-                                  ValueItem(label: "Yes", value: "yes"),
-                                  ValueItem(label: "No", value: "no")
-                                ],
-                                selectionType: SelectionType.single,
-                                chipConfig:
-                                    const ChipConfig(wrapType: WrapType.wrap),
-                                dropdownHeight: 300,
-                                optionTextStyle: const TextStyle(fontSize: 16),
-                                selectedOptionIcon:
-                                    const Icon(Icons.check_circle),
+                              child: Container(
+                                decoration: BoxDecoration(
+                                  border: Border.all(
+                                      width: 1, color: Color(0xffe1e1e1)),
+                                  color: Color(0xfff5f5f5),
+                                  borderRadius: BorderRadius.circular(
+                                      10.0), // Optional: Add border radius
+                                ),
+                                child: Padding(
+                                  padding: const EdgeInsets.only(
+                                      left: 8.0, right: 5),
+                                  child: TextFormField(
+                                    controller: nameControler,
+                                    decoration: const InputDecoration(
+                                        hintText: 'Enter Title..',
+                                        hintStyle: TextStyle(
+                                          fontFamily: 'Poppins',
+                                          fontSize: 14.0,
+                                          color: Color(0xff9c9c9c),
+                                          fontWeight: FontWeight.w500,
+                                          decoration: TextDecoration.none,
+                                        ),
+                                        enabledBorder: UnderlineInputBorder(
+                                          borderSide: BorderSide(
+                                            color: Colors.transparent,
+                                          ),
+                                        ),
+                                        focusedBorder: UnderlineInputBorder(
+                                            borderSide: BorderSide(
+                                              color: Colors.transparent,
+                                            ))),
+                                  ),
+                                ),
                               ),
                             ),
                           ],
                         ),
                         SizedBox(
-                          height: 15,
+                          height: 25,
                         ),
                       ],
                     ),
+                    if (widget.cat!['id'] == 4 ||
+                        widget.cat!['id'] == 2 ||
+                        widget.cat!['id'] == 3)
+                      Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          RichText(
+                            text: TextSpan(
+                              children: [
+                                TextSpan(
+                                  text: "Timings",
+                                  style: TextStyle(
+                                      color: Colors.black,
+                                      fontSize: 15,
+                                      fontWeight: FontWeight.w600),
+                                ),
+                                // TextSpan(
+                                //   text: " *",
+                                //   style: TextStyle(color: Colors.red), // Customize asterisk color
+                                // ),
+                              ],
+                            ),
+                          ),
+                          SizedBox(
+                            height: 10,
+                          ),
+                          Row(
+                            children: [
+                              Expanded(
+                                child: Container(
+                                  decoration: BoxDecoration(
+                                    border: Border.all(
+                                        width: 1, color: Color(0xffe1e1e1)),
+                                    color: Color(0xfff5f5f5),
+                                    borderRadius: BorderRadius.circular(
+                                        10.0), // Optional: Add border radius
+                                  ),
+                                  child: Padding(
+                                    padding: const EdgeInsets.only(
+                                        left: 8.0, right: 5),
+                                    child: TextFormField(
+                                      controller: timingControler,
+                                      decoration: const InputDecoration(
+                                          hintText: 'Enter Timing..',
+                                          hintStyle: TextStyle(
+                                            fontFamily: 'Poppins',
+                                            fontSize: 14.0,
+                                            color: Color(0xff9c9c9c),
+                                            fontWeight: FontWeight.w500,
+                                            decoration: TextDecoration.none,
+                                          ),
+                                          enabledBorder: UnderlineInputBorder(
+                                            borderSide: BorderSide(
+                                              color: Colors.transparent,
+                                            ),
+                                          ),
+                                          focusedBorder: UnderlineInputBorder(
+                                              borderSide: BorderSide(
+                                                color: Colors.transparent,
+                                              ))),
+                                    ),
+                                  ),
+                                ),
+                              ),
+                            ],
+                          ),
+                          SizedBox(
+                            height: 25,
+                          ),
+                        ],
+                      ),
                     if (widget.cat!['id'] == 4)
                       Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
@@ -1151,7 +1293,7 @@ class _LoanHomeState extends State<LoanAdForm> {
                               shrinkWrap: true,
                               physics: NeverScrollableScrollPhysics(),
                               gridDelegate:
-                                  SliverGridDelegateWithFixedCrossAxisCount(
+                              SliverGridDelegateWithFixedCrossAxisCount(
                                 crossAxisCount: 3,
                                 childAspectRatio: 2 / 1.3,
                                 crossAxisSpacing: 10.0,
@@ -1170,23 +1312,20 @@ class _LoanHomeState extends State<LoanAdForm> {
                                     decoration: BoxDecoration(
                                       border: Border.all(
                                           color: item['id'].toString() ==
-                                                  selectedBank
+                                              selectedBank
                                               ? Color(0xffffb239)
                                               : Color(0xffe5e5e5),
                                           width: item['id'].toString() ==
-                                                  selectedBank
+                                              selectedBank
                                               ? 3
                                               : 1),
                                       borderRadius: BorderRadius.circular(15),
                                     ),
                                     alignment: Alignment.center,
                                     child: Center(
-                                      child: ClipRRect(
-                                        borderRadius: BorderRadius.circular(15),
-                                        child: Image.network(
-                                          item['image']!,
-                                          fit: BoxFit.cover,
-                                        ),
+                                      child: Image.network(
+                                        item['image']!,
+                                        fit: BoxFit.cover,
                                       ),
                                     ),
                                   ),
@@ -1201,7 +1340,7 @@ class _LoanHomeState extends State<LoanAdForm> {
                                     Expanded(
                                       child: ClipRRect(
                                         clipBehavior:
-                                            Clip.antiAliasWithSaveLayer,
+                                        Clip.antiAliasWithSaveLayer,
                                         borderRadius: BorderRadius.all(
                                             Radius.circular(15)),
                                         child: CustomShimmer(
@@ -1214,7 +1353,7 @@ class _LoanHomeState extends State<LoanAdForm> {
                                     Expanded(
                                       child: ClipRRect(
                                         clipBehavior:
-                                            Clip.antiAliasWithSaveLayer,
+                                        Clip.antiAliasWithSaveLayer,
                                         borderRadius: BorderRadius.all(
                                             Radius.circular(15)),
                                         child: CustomShimmer(
@@ -1227,7 +1366,7 @@ class _LoanHomeState extends State<LoanAdForm> {
                                     Expanded(
                                       child: ClipRRect(
                                         clipBehavior:
-                                            Clip.antiAliasWithSaveLayer,
+                                        Clip.antiAliasWithSaveLayer,
                                         borderRadius: BorderRadius.all(
                                             Radius.circular(15)),
                                         child: CustomShimmer(
@@ -1244,7 +1383,7 @@ class _LoanHomeState extends State<LoanAdForm> {
                                     Expanded(
                                       child: ClipRRect(
                                         clipBehavior:
-                                            Clip.antiAliasWithSaveLayer,
+                                        Clip.antiAliasWithSaveLayer,
                                         borderRadius: BorderRadius.all(
                                             Radius.circular(15)),
                                         child: CustomShimmer(
@@ -1257,7 +1396,7 @@ class _LoanHomeState extends State<LoanAdForm> {
                                     Expanded(
                                       child: ClipRRect(
                                         clipBehavior:
-                                            Clip.antiAliasWithSaveLayer,
+                                        Clip.antiAliasWithSaveLayer,
                                         borderRadius: BorderRadius.all(
                                             Radius.circular(15)),
                                         child: CustomShimmer(
@@ -1270,7 +1409,7 @@ class _LoanHomeState extends State<LoanAdForm> {
                                     Expanded(
                                       child: ClipRRect(
                                         clipBehavior:
-                                            Clip.antiAliasWithSaveLayer,
+                                        Clip.antiAliasWithSaveLayer,
                                         borderRadius: BorderRadius.all(
                                             Radius.circular(15)),
                                         child: CustomShimmer(
@@ -1349,7 +1488,7 @@ class _LoanHomeState extends State<LoanAdForm> {
                                       ),
                                       ClipRRect(
                                         borderRadius:
-                                            BorderRadius.circular(10.0),
+                                        BorderRadius.circular(10.0),
                                         child: Image.asset(
                                           'assets/Loans/_-113.png',
                                           width: 18.0,
@@ -1399,7 +1538,7 @@ class _LoanHomeState extends State<LoanAdForm> {
                                       ),
                                       ClipRRect(
                                         borderRadius:
-                                            BorderRadius.circular(10.0),
+                                        BorderRadius.circular(10.0),
                                         child: Image.asset(
                                           'assets/Loans/_-113.png',
                                           width: 18.0,
@@ -1443,14 +1582,223 @@ class _LoanHomeState extends State<LoanAdForm> {
                           ),
                         ],
                       ),
-                    Column(
+                    if (widget.cat!['id'] == 4)
+                      Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          RichText(
+                            text: TextSpan(
+                              children: [
+                                TextSpan(
+                                  text: "Branch",
+                                  style: TextStyle(
+                                      color: Colors.black,
+                                      fontSize: 15,
+                                      fontWeight: FontWeight.w600),
+                                ),
+                                TextSpan(
+                                  text: " *",
+                                  style: TextStyle(
+                                      color: Colors
+                                          .red), // Customize asterisk color
+                                ),
+                              ],
+                            ),
+                          ),
+                          SizedBox(
+                            height: 10,
+                          ),
+                          Row(
+                            children: [
+                              Expanded(
+                                child: Container(
+                                  decoration: BoxDecoration(
+                                    border: Border.all(
+                                        width: 1, color: Color(0xffe1e1e1)),
+                                    color: Color(0xfff5f5f5),
+                                    borderRadius: BorderRadius.circular(
+                                        10.0), // Optional: Add border radius
+                                  ),
+                                  child: Padding(
+                                    padding: const EdgeInsets.only(
+                                        left: 8.0, right: 5),
+                                    child: TextFormField(
+                                      controller: branchControler,
+                                      // onChanged: (String? val) {
+                                      //   getBanks(loanType, searchControler.text, locationControler.text, val!);
+                                      // },
+                                      decoration: const InputDecoration(
+                                          hintText: 'Enter Branch..',
+                                          hintStyle: TextStyle(
+                                            fontFamily: 'Poppins',
+                                            fontSize: 14.0,
+                                            color: Color(0xff9c9c9c),
+                                            fontWeight: FontWeight.w500,
+                                            decoration: TextDecoration.none,
+                                          ),
+                                          enabledBorder: UnderlineInputBorder(
+                                            borderSide: BorderSide(
+                                              color: Colors.transparent,
+                                            ),
+                                          ),
+                                          focusedBorder: UnderlineInputBorder(
+                                              borderSide: BorderSide(
+                                                color: Colors.transparent,
+                                              ))),
+                                    ),
+                                  ),
+                                ),
+                              ),
+                            ],
+                          ),
+                          SizedBox(
+                            height: 15,
+                          ),
+                        ],
+                      ),
+                    if (widget.cat!['id'] == 1)
+                      Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          RichText(
+                            text: TextSpan(
+                              children: [
+                                TextSpan(
+                                  text: "Select Post type",
+                                  style: TextStyle(
+                                      color: Colors.black,
+                                      fontSize: 15,
+                                      fontWeight: FontWeight.w600),
+                                ),
+                                TextSpan(
+                                  text: " *",
+                                  style: TextStyle(
+                                      color: Colors
+                                          .red), // Customize asterisk color
+                                ),
+                              ],
+                            ),
+                          ),
+                          SizedBox(
+                            height: 10,
+                          ),
+                          Row(
+                            children: [
+                              Expanded(
+                                child: MultiSelectDropDown(
+                                  onOptionSelected:
+                                      (List<ValueItem> selectedOptions) {
+                                    setState(() {
+                                      selectedVentureWidget = selectedOptions;
+                                      selectedVenture =
+                                      selectedOptions[0].value!;
+                                    });
+                                  },
+                                  selectedOptions: widget.isEdit
+                                      ? selectedVentureWidget
+                                      : [],
+                                  options: ventureCategoryList.map((item) {
+                                    return ValueItem(
+                                        label: item['name'],
+                                        value: item['id'].toString());
+                                  }).toList(),
+                                  selectionType: SelectionType.single,
+                                  chipConfig:
+                                  const ChipConfig(wrapType: WrapType.wrap),
+                                  dropdownHeight: 300,
+                                  optionTextStyle:
+                                  const TextStyle(fontSize: 16),
+                                  selectedOptionIcon:
+                                  const Icon(Icons.check_circle),
+                                ),
+                              ),
+                            ],
+                          ),
+                          SizedBox(
+                            height: 15,
+                          ),
+                        ],
+                      ),
+                    if (widget.cat!['id'] == 1)
+                      Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          RichText(
+                            text: TextSpan(
+                              children: [
+                                TextSpan(
+                                  text: "Land Size",
+                                  style: TextStyle(
+                                      color: Colors.black,
+                                      fontSize: 15,
+                                      fontWeight: FontWeight.w600),
+                                ),
+                                TextSpan(
+                                  text: " *",
+                                  style: TextStyle(
+                                      color: Colors
+                                          .red), // Customize asterisk color
+                                ),
+                              ],
+                            ),
+                          ),
+                          SizedBox(
+                            height: 10,
+                          ),
+                          Row(
+                            children: [
+                              Expanded(
+                                child: Container(
+                                  decoration: BoxDecoration(
+                                    border: Border.all(
+                                        width: 1, color: Color(0xffe1e1e1)),
+                                    color: Color(0xfff5f5f5),
+                                    borderRadius: BorderRadius.circular(
+                                        10.0), // Optional: Add border radius
+                                  ),
+                                  child: Padding(
+                                    padding: const EdgeInsets.only(
+                                        left: 8.0, right: 5),
+                                    child: TextFormField(
+                                      controller: landSizeControler,
+                                      decoration: const InputDecoration(
+                                          hintText: 'Enter Land Size..',
+                                          hintStyle: TextStyle(
+                                            fontFamily: 'Poppins',
+                                            fontSize: 14.0,
+                                            color: Color(0xff9c9c9c),
+                                            fontWeight: FontWeight.w500,
+                                            decoration: TextDecoration.none,
+                                          ),
+                                          enabledBorder: UnderlineInputBorder(
+                                            borderSide: BorderSide(
+                                              color: Colors.transparent,
+                                            ),
+                                          ),
+                                          focusedBorder: UnderlineInputBorder(
+                                              borderSide: BorderSide(
+                                                color: Colors.transparent,
+                                              ))),
+                                    ),
+                                  ),
+                                ),
+                              ),
+                            ],
+                          ),
+                          SizedBox(
+                            height: 25,
+                          ),
+                        ],
+                      ),
+                    if (widget.cat!['id'] != 2 && widget.cat!['id'] != 3)
+                      Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
                         RichText(
                           text: TextSpan(
                             children: [
                               TextSpan(
-                                text: "Title",
+                                text: "Brokerage",
                                 style: TextStyle(
                                     color: Colors.black,
                                     fontSize: 15,
@@ -1460,7 +1808,7 @@ class _LoanHomeState extends State<LoanAdForm> {
                                 text: " *",
                                 style: TextStyle(
                                     color:
-                                        Colors.red), // Customize asterisk color
+                                    Colors.red), // Customize asterisk color
                               ),
                             ],
                           ),
@@ -1471,56 +1819,45 @@ class _LoanHomeState extends State<LoanAdForm> {
                         Row(
                           children: [
                             Expanded(
-                              child: Container(
-                                decoration: BoxDecoration(
-                                  border: Border.all(
-                                      width: 1, color: Color(0xffe1e1e1)),
-                                  color: Color(0xfff5f5f5),
-                                  borderRadius: BorderRadius.circular(
-                                      10.0), // Optional: Add border radius
-                                ),
-                                child: Padding(
-                                  padding: const EdgeInsets.only(
-                                      left: 8.0, right: 5),
-                                  child: TextFormField(
-                                    controller: nameControler,
-                                    decoration: const InputDecoration(
-                                        hintText: 'Enter Title..',
-                                        hintStyle: TextStyle(
-                                          fontFamily: 'Poppins',
-                                          fontSize: 14.0,
-                                          color: Color(0xff9c9c9c),
-                                          fontWeight: FontWeight.w500,
-                                          decoration: TextDecoration.none,
-                                        ),
-                                        enabledBorder: UnderlineInputBorder(
-                                          borderSide: BorderSide(
-                                            color: Colors.transparent,
-                                          ),
-                                        ),
-                                        focusedBorder: UnderlineInputBorder(
-                                            borderSide: BorderSide(
-                                          color: Colors.transparent,
-                                        ))),
-                                  ),
-                                ),
+                              child: MultiSelectDropDown(
+                                onOptionSelected:
+                                    (List<ValueItem> selectedOptions) {
+                                  setState(() {
+                                    brokerage = selectedOptions[0].value!;
+                                    brokerageWidget = selectedOptions;
+                                  });
+                                },
+                                selectedOptions:
+                                widget.isEdit ? brokerageWidget : [],
+                                options: [
+                                  ValueItem(label: "Yes", value: "Yes"),
+                                  ValueItem(label: "No", value: "No")
+                                ],
+                                selectionType: SelectionType.single,
+                                chipConfig:
+                                const ChipConfig(wrapType: WrapType.wrap),
+                                dropdownHeight: 300,
+                                optionTextStyle: const TextStyle(fontSize: 16),
+                                selectedOptionIcon:
+                                const Icon(Icons.check_circle),
                               ),
                             ),
                           ],
                         ),
                         SizedBox(
-                          height: 25,
+                          height: 15,
                         ),
                       ],
                     ),
-                    Column(
+                    if (widget.cat!['id'] == 1)
+                      Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
                         RichText(
                           text: TextSpan(
                             children: [
                               TextSpan(
-                                text: "Phone",
+                                text: "I am",
                                 style: TextStyle(
                                     color: Colors.black,
                                     fontSize: 15,
@@ -1530,7 +1867,210 @@ class _LoanHomeState extends State<LoanAdForm> {
                                 text: " *",
                                 style: TextStyle(
                                     color:
-                                        Colors.red), // Customize asterisk color
+                                    Colors.red), // Customize asterisk color
+                              ),
+                            ],
+                          ),
+                        ),
+                        SizedBox(
+                          height: 10,
+                        ),
+                        Row(
+                          children: [
+                            Expanded(
+                              child: MultiSelectDropDown(
+                                onOptionSelected:
+                                    (List<ValueItem> selectedOptions) {
+                                  setState(() {
+                                    myRole = selectedOptions[0].value!;
+                                    myRoleWidget = selectedOptions;
+                                  });
+                                },
+                                selectedOptions:
+                                widget.isEdit ? myRoleWidget : [],
+                                options: [
+                                  for(int i = 0; i < roleList.length; i++)
+                                    ValueItem(label: "${roleList[i]['name']}", value: "${roleList[i]['id']}"),
+                                ],
+                                selectionType: SelectionType.single,
+                                chipConfig:
+                                const ChipConfig(wrapType: WrapType.wrap),
+                                dropdownHeight: 300,
+                                optionTextStyle: const TextStyle(fontSize: 16),
+                                selectedOptionIcon:
+                                const Icon(Icons.check_circle),
+                              ),
+                            ),
+                          ],
+                        ),
+                        SizedBox(
+                          height: 15,
+                        ),
+                      ],
+                    ),
+                    if (widget.cat!['id'] == 1 ||
+                        widget.cat!['id'] == 2 ||
+                        widget.cat!['id'] == 3)
+                      Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          RichText(
+                            text: TextSpan(
+                              children: [
+                                TextSpan(
+                                  text: "Your Name/Company Name",
+                                  style: TextStyle(
+                                      color: Colors.black,
+                                      fontSize: 15,
+                                      fontWeight: FontWeight.w600),
+                                ),
+                                TextSpan(
+                                  text: " *",
+                                  style: TextStyle(
+                                      color: Colors
+                                          .red), // Customize asterisk color
+                                ),
+                              ],
+                            ),
+                          ),
+                          SizedBox(
+                            height: 10,
+                          ),
+                          Row(
+                            children: [
+                              Expanded(
+                                child: Container(
+                                  decoration: BoxDecoration(
+                                    border: Border.all(
+                                        width: 1, color: Color(0xffe1e1e1)),
+                                    color: Color(0xfff5f5f5),
+                                    borderRadius: BorderRadius.circular(
+                                        10.0), // Optional: Add border radius
+                                  ),
+                                  child: Padding(
+                                    padding: const EdgeInsets.only(
+                                        left: 8.0, right: 5),
+                                    child: TextFormField(
+                                      controller: companyControler,
+                                      decoration: const InputDecoration(
+                                          hintText: 'Enter Company Name..',
+                                          hintStyle: TextStyle(
+                                            fontFamily: 'Poppins',
+                                            fontSize: 14.0,
+                                            color: Color(0xff9c9c9c),
+                                            fontWeight: FontWeight.w500,
+                                            decoration: TextDecoration.none,
+                                          ),
+                                          enabledBorder: UnderlineInputBorder(
+                                            borderSide: BorderSide(
+                                              color: Colors.transparent,
+                                            ),
+                                          ),
+                                          focusedBorder: UnderlineInputBorder(
+                                              borderSide: BorderSide(
+                                                color: Colors.transparent,
+                                              ))),
+                                    ),
+                                  ),
+                                ),
+                              ),
+                            ],
+                          ),
+                          SizedBox(
+                            height: 25,
+                          ),
+                        ],
+                      ),
+                    if (widget.cat!['id'] == 3)
+                      Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          RichText(
+                            text: TextSpan(
+                              children: [
+                                TextSpan(
+                                  text: "Min Service Charge",
+                                  style: TextStyle(
+                                      color: Colors.black,
+                                      fontSize: 15,
+                                      fontWeight: FontWeight.w600),
+                                ),
+                                TextSpan(
+                                  text: " *",
+                                  style: TextStyle(
+                                      color: Colors
+                                          .red), // Customize asterisk color
+                                ),
+                              ],
+                            ),
+                          ),
+                          SizedBox(
+                            height: 10,
+                          ),
+                          Row(
+                            children: [
+                              Expanded(
+                                child: Container(
+                                  decoration: BoxDecoration(
+                                    border: Border.all(
+                                        width: 1, color: Color(0xffe1e1e1)),
+                                    color: Color(0xfff5f5f5),
+                                    borderRadius: BorderRadius.circular(
+                                        10.0), // Optional: Add border radius
+                                  ),
+                                  child: Padding(
+                                    padding: const EdgeInsets.only(
+                                        left: 8.0, right: 5),
+                                    child: TextFormField(
+                                      controller: priceControler,
+                                      decoration: const InputDecoration(
+                                          hintText:
+                                          'Enter Min Service Charge..',
+                                          hintStyle: TextStyle(
+                                            fontFamily: 'Poppins',
+                                            fontSize: 14.0,
+                                            color: Color(0xff9c9c9c),
+                                            fontWeight: FontWeight.w500,
+                                            decoration: TextDecoration.none,
+                                          ),
+                                          enabledBorder: UnderlineInputBorder(
+                                            borderSide: BorderSide(
+                                              color: Colors.transparent,
+                                            ),
+                                          ),
+                                          focusedBorder: UnderlineInputBorder(
+                                              borderSide: BorderSide(
+                                                color: Colors.transparent,
+                                              ))),
+                                    ),
+                                  ),
+                                ),
+                              ),
+                            ],
+                          ),
+                          SizedBox(
+                            height: 25,
+                          ),
+                        ],
+                      ),
+                    Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        RichText(
+                          text: TextSpan(
+                            children: [
+                              TextSpan(
+                                text: "Phone Number",
+                                style: TextStyle(
+                                    color: Colors.black,
+                                    fontSize: 15,
+                                    fontWeight: FontWeight.w600),
+                              ),
+                              TextSpan(
+                                text: " *",
+                                style: TextStyle(
+                                    color:
+                                    Colors.red), // Customize asterisk color
                               ),
                             ],
                           ),
@@ -1574,20 +2114,90 @@ class _LoanHomeState extends State<LoanAdForm> {
                                                 decoration: TextDecoration.none,
                                               ),
                                               enabledBorder:
-                                                  UnderlineInputBorder(
+                                              UnderlineInputBorder(
                                                 borderSide: BorderSide(
                                                   color: Colors.transparent,
                                                 ),
                                               ),
                                               focusedBorder:
-                                                  UnderlineInputBorder(
-                                                      borderSide: BorderSide(
-                                                color: Colors.transparent,
-                                              ))),
+                                              UnderlineInputBorder(
+                                                  borderSide: BorderSide(
+                                                    color: Colors.transparent,
+                                                  ))),
                                         ),
                                       ),
                                     ),
                                   ],
+                                ),
+                              ),
+                            ),
+                          ],
+                        ),
+                        SizedBox(
+                          height: 25,
+                        ),
+                      ],
+                    ),
+                    Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        RichText(
+                          text: TextSpan(
+                            children: [
+                              TextSpan(
+                                text: "Email Address",
+                                style: TextStyle(
+                                    color: Colors.black,
+                                    fontSize: 15,
+                                    fontWeight: FontWeight.w600),
+                              ),
+                              TextSpan(
+                                text: " *",
+                                style: TextStyle(
+                                    color:
+                                    Colors.red), // Customize asterisk color
+                              ),
+                            ],
+                          ),
+                        ),
+                        SizedBox(
+                          height: 10,
+                        ),
+                        Row(
+                          children: [
+                            Expanded(
+                              child: Container(
+                                decoration: BoxDecoration(
+                                  border: Border.all(
+                                      width: 1, color: Color(0xffe1e1e1)),
+                                  color: Color(0xfff5f5f5),
+                                  borderRadius: BorderRadius.circular(
+                                      10.0), // Optional: Add border radius
+                                ),
+                                child: Padding(
+                                  padding: const EdgeInsets.only(
+                                      left: 8.0, right: 5),
+                                  child: TextFormField(
+                                    controller: emailControler,
+                                    decoration: const InputDecoration(
+                                        hintText: 'Enter Email..',
+                                        hintStyle: TextStyle(
+                                          fontFamily: 'Poppins',
+                                          fontSize: 14.0,
+                                          color: Color(0xff9c9c9c),
+                                          fontWeight: FontWeight.w500,
+                                          decoration: TextDecoration.none,
+                                        ),
+                                        enabledBorder: UnderlineInputBorder(
+                                          borderSide: BorderSide(
+                                            color: Colors.transparent,
+                                          ),
+                                        ),
+                                        focusedBorder: UnderlineInputBorder(
+                                            borderSide: BorderSide(
+                                              color: Colors.transparent,
+                                            ))),
+                                  ),
                                 ),
                               ),
                             ),
@@ -1648,7 +2258,7 @@ class _LoanHomeState extends State<LoanAdForm> {
                                           keyboardType: TextInputType.number,
                                           decoration: const InputDecoration(
                                               hintText:
-                                                  'Enter Whatsapp Number..',
+                                              'Enter Whatsapp Number..',
                                               counterText: "",
                                               hintStyle: TextStyle(
                                                 fontFamily: 'Poppins',
@@ -1658,16 +2268,16 @@ class _LoanHomeState extends State<LoanAdForm> {
                                                 decoration: TextDecoration.none,
                                               ),
                                               enabledBorder:
-                                                  UnderlineInputBorder(
+                                              UnderlineInputBorder(
                                                 borderSide: BorderSide(
                                                   color: Colors.transparent,
                                                 ),
                                               ),
                                               focusedBorder:
-                                                  UnderlineInputBorder(
-                                                      borderSide: BorderSide(
-                                                color: Colors.transparent,
-                                              ))),
+                                              UnderlineInputBorder(
+                                                  borderSide: BorderSide(
+                                                    color: Colors.transparent,
+                                                  ))),
                                         ),
                                       ),
                                     ),
@@ -1683,94 +2293,17 @@ class _LoanHomeState extends State<LoanAdForm> {
                       ],
                     ),
                     Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        RichText(
-                          text: TextSpan(
-                            children: [
-                              TextSpan(
-                                text: "Email",
-                                style: TextStyle(
-                                    color: Colors.black,
-                                    fontSize: 15,
-                                    fontWeight: FontWeight.w600),
-                              ),
-                              TextSpan(
-                                text: " *",
-                                style: TextStyle(
-                                    color:
-                                        Colors.red), // Customize asterisk color
-                              ),
-                            ],
-                          ),
-                        ),
-                        SizedBox(
-                          height: 10,
-                        ),
-                        Row(
-                          children: [
-                            Expanded(
-                              child: Container(
-                                decoration: BoxDecoration(
-                                  border: Border.all(
-                                      width: 1, color: Color(0xffe1e1e1)),
-                                  color: Color(0xfff5f5f5),
-                                  borderRadius: BorderRadius.circular(
-                                      10.0), // Optional: Add border radius
-                                ),
-                                child: Padding(
-                                  padding: const EdgeInsets.only(
-                                      left: 8.0, right: 5),
-                                  child: TextFormField(
-                                    controller: emailControler,
-                                    decoration: const InputDecoration(
-                                        hintText: 'Enter Email..',
-                                        hintStyle: TextStyle(
-                                          fontFamily: 'Poppins',
-                                          fontSize: 14.0,
-                                          color: Color(0xff9c9c9c),
-                                          fontWeight: FontWeight.w500,
-                                          decoration: TextDecoration.none,
-                                        ),
-                                        enabledBorder: UnderlineInputBorder(
-                                          borderSide: BorderSide(
-                                            color: Colors.transparent,
-                                          ),
-                                        ),
-                                        focusedBorder: UnderlineInputBorder(
-                                            borderSide: BorderSide(
-                                          color: Colors.transparent,
-                                        ))),
-                                  ),
-                                ),
-                              ),
-                            ),
-                          ],
-                        ),
-                        SizedBox(
-                          height: 25,
-                        ),
-                      ],
-                    ),
-                    if (widget.cat!['id'] == 1)
-                      Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
                           RichText(
                             text: TextSpan(
                               children: [
                                 TextSpan(
-                                  text: "Land Size",
+                                  text: "Since",
                                   style: TextStyle(
                                       color: Colors.black,
                                       fontSize: 15,
                                       fontWeight: FontWeight.w600),
-                                ),
-                                TextSpan(
-                                  text: " *",
-                                  style: TextStyle(
-                                      color: Colors
-                                          .red), // Customize asterisk color
                                 ),
                               ],
                             ),
@@ -1793,9 +2326,9 @@ class _LoanHomeState extends State<LoanAdForm> {
                                     padding: const EdgeInsets.only(
                                         left: 8.0, right: 5),
                                     child: TextFormField(
-                                      controller: landSizeControler,
+                                      controller: experienceControler,
                                       decoration: const InputDecoration(
-                                          hintText: 'Enter Land Size..',
+                                          hintText: 'Ex 2011',
                                           hintStyle: TextStyle(
                                             fontFamily: 'Poppins',
                                             fontSize: 14.0,
@@ -1810,8 +2343,8 @@ class _LoanHomeState extends State<LoanAdForm> {
                                           ),
                                           focusedBorder: UnderlineInputBorder(
                                               borderSide: BorderSide(
-                                            color: Colors.transparent,
-                                          ))),
+                                                color: Colors.transparent,
+                                              ))),
                                     ),
                                   ),
                                 ),
@@ -1823,9 +2356,7 @@ class _LoanHomeState extends State<LoanAdForm> {
                           ),
                         ],
                       ),
-                    if (widget.cat!['id'] == 1 ||
-                        widget.cat!['id'] == 2 ||
-                        widget.cat!['id'] == 3)
+                    if (widget.cat!['id'] == 2)
                       Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
@@ -1833,17 +2364,11 @@ class _LoanHomeState extends State<LoanAdForm> {
                             text: TextSpan(
                               children: [
                                 TextSpan(
-                                  text: "Company Name",
+                                  text: "No of Projects Completed",
                                   style: TextStyle(
                                       color: Colors.black,
                                       fontSize: 15,
                                       fontWeight: FontWeight.w600),
-                                ),
-                                TextSpan(
-                                  text: " *",
-                                  style: TextStyle(
-                                      color: Colors
-                                          .red), // Customize asterisk color
                                 ),
                               ],
                             ),
@@ -1866,9 +2391,9 @@ class _LoanHomeState extends State<LoanAdForm> {
                                     padding: const EdgeInsets.only(
                                         left: 8.0, right: 5),
                                     child: TextFormField(
-                                      controller: companyControler,
+                                      controller: projectControler,
                                       decoration: const InputDecoration(
-                                          hintText: 'Enter Company Name..',
+                                          hintText: 'Enter Projects..',
                                           hintStyle: TextStyle(
                                             fontFamily: 'Poppins',
                                             fontSize: 14.0,
@@ -1883,8 +2408,8 @@ class _LoanHomeState extends State<LoanAdForm> {
                                           ),
                                           focusedBorder: UnderlineInputBorder(
                                               borderSide: BorderSide(
-                                            color: Colors.transparent,
-                                          ))),
+                                                color: Colors.transparent,
+                                              ))),
                                     ),
                                   ),
                                 ),
@@ -1896,17 +2421,14 @@ class _LoanHomeState extends State<LoanAdForm> {
                           ),
                         ],
                       ),
-                    if (widget.cat!['id'] == 1 ||
-                        widget.cat!['id'] == 2 ||
-                        widget.cat!['id'] == 3)
-                      Column(
+                    Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
                           RichText(
                             text: TextSpan(
                               children: [
                                 TextSpan(
-                                  text: "Company Website",
+                                  text: "Web site",
                                   style: TextStyle(
                                       color: Colors.black,
                                       fontSize: 15,
@@ -1954,293 +2476,8 @@ class _LoanHomeState extends State<LoanAdForm> {
                                           ),
                                           focusedBorder: UnderlineInputBorder(
                                               borderSide: BorderSide(
-                                            color: Colors.transparent,
-                                          ))),
-                                    ),
-                                  ),
-                                ),
-                              ),
-                            ],
-                          ),
-                          SizedBox(
-                            height: 25,
-                          ),
-                        ],
-                      ),
-                    if (widget.cat!['id'] == 3)
-                      Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          RichText(
-                            text: TextSpan(
-                              children: [
-                                TextSpan(
-                                  text: "Min Service Charge",
-                                  style: TextStyle(
-                                      color: Colors.black,
-                                      fontSize: 15,
-                                      fontWeight: FontWeight.w600),
-                                ),
-                                TextSpan(
-                                  text: " *",
-                                  style: TextStyle(
-                                      color: Colors
-                                          .red), // Customize asterisk color
-                                ),
-                              ],
-                            ),
-                          ),
-                          SizedBox(
-                            height: 10,
-                          ),
-                          Row(
-                            children: [
-                              Expanded(
-                                child: Container(
-                                  decoration: BoxDecoration(
-                                    border: Border.all(
-                                        width: 1, color: Color(0xffe1e1e1)),
-                                    color: Color(0xfff5f5f5),
-                                    borderRadius: BorderRadius.circular(
-                                        10.0), // Optional: Add border radius
-                                  ),
-                                  child: Padding(
-                                    padding: const EdgeInsets.only(
-                                        left: 8.0, right: 5),
-                                    child: TextFormField(
-                                      controller: priceControler,
-                                      decoration: const InputDecoration(
-                                          hintText:
-                                              'Enter Min Service Charge..',
-                                          hintStyle: TextStyle(
-                                            fontFamily: 'Poppins',
-                                            fontSize: 14.0,
-                                            color: Color(0xff9c9c9c),
-                                            fontWeight: FontWeight.w500,
-                                            decoration: TextDecoration.none,
-                                          ),
-                                          enabledBorder: UnderlineInputBorder(
-                                            borderSide: BorderSide(
-                                              color: Colors.transparent,
-                                            ),
-                                          ),
-                                          focusedBorder: UnderlineInputBorder(
-                                              borderSide: BorderSide(
-                                            color: Colors.transparent,
-                                          ))),
-                                    ),
-                                  ),
-                                ),
-                              ),
-                            ],
-                          ),
-                          SizedBox(
-                            height: 25,
-                          ),
-                        ],
-                      ),
-                    if (widget.cat!['id'] == 2)
-                      Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          RichText(
-                            text: TextSpan(
-                              children: [
-                                TextSpan(
-                                  text: "Since",
-                                  style: TextStyle(
-                                      color: Colors.black,
-                                      fontSize: 15,
-                                      fontWeight: FontWeight.w600),
-                                ),
-                                TextSpan(
-                                  text: " *",
-                                  style: TextStyle(
-                                      color: Colors
-                                          .red), // Customize asterisk color
-                                ),
-                              ],
-                            ),
-                          ),
-                          SizedBox(
-                            height: 10,
-                          ),
-                          Row(
-                            children: [
-                              Expanded(
-                                child: Container(
-                                  decoration: BoxDecoration(
-                                    border: Border.all(
-                                        width: 1, color: Color(0xffe1e1e1)),
-                                    color: Color(0xfff5f5f5),
-                                    borderRadius: BorderRadius.circular(
-                                        10.0), // Optional: Add border radius
-                                  ),
-                                  child: Padding(
-                                    padding: const EdgeInsets.only(
-                                        left: 8.0, right: 5),
-                                    child: TextFormField(
-                                      controller: experienceControler,
-                                      decoration: const InputDecoration(
-                                          hintText: 'Enter Experience..',
-                                          hintStyle: TextStyle(
-                                            fontFamily: 'Poppins',
-                                            fontSize: 14.0,
-                                            color: Color(0xff9c9c9c),
-                                            fontWeight: FontWeight.w500,
-                                            decoration: TextDecoration.none,
-                                          ),
-                                          enabledBorder: UnderlineInputBorder(
-                                            borderSide: BorderSide(
-                                              color: Colors.transparent,
-                                            ),
-                                          ),
-                                          focusedBorder: UnderlineInputBorder(
-                                              borderSide: BorderSide(
-                                            color: Colors.transparent,
-                                          ))),
-                                    ),
-                                  ),
-                                ),
-                              ),
-                            ],
-                          ),
-                          SizedBox(
-                            height: 25,
-                          ),
-                        ],
-                      ),
-                    if (widget.cat!['id'] == 2)
-                      Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          RichText(
-                            text: TextSpan(
-                              children: [
-                                TextSpan(
-                                  text: "Projects",
-                                  style: TextStyle(
-                                      color: Colors.black,
-                                      fontSize: 15,
-                                      fontWeight: FontWeight.w600),
-                                ),
-                                TextSpan(
-                                  text: " *",
-                                  style: TextStyle(
-                                      color: Colors
-                                          .red), // Customize asterisk color
-                                ),
-                              ],
-                            ),
-                          ),
-                          SizedBox(
-                            height: 10,
-                          ),
-                          Row(
-                            children: [
-                              Expanded(
-                                child: Container(
-                                  decoration: BoxDecoration(
-                                    border: Border.all(
-                                        width: 1, color: Color(0xffe1e1e1)),
-                                    color: Color(0xfff5f5f5),
-                                    borderRadius: BorderRadius.circular(
-                                        10.0), // Optional: Add border radius
-                                  ),
-                                  child: Padding(
-                                    padding: const EdgeInsets.only(
-                                        left: 8.0, right: 5),
-                                    child: TextFormField(
-                                      controller: projectControler,
-                                      decoration: const InputDecoration(
-                                          hintText: 'Enter Projects..',
-                                          hintStyle: TextStyle(
-                                            fontFamily: 'Poppins',
-                                            fontSize: 14.0,
-                                            color: Color(0xff9c9c9c),
-                                            fontWeight: FontWeight.w500,
-                                            decoration: TextDecoration.none,
-                                          ),
-                                          enabledBorder: UnderlineInputBorder(
-                                            borderSide: BorderSide(
-                                              color: Colors.transparent,
-                                            ),
-                                          ),
-                                          focusedBorder: UnderlineInputBorder(
-                                              borderSide: BorderSide(
-                                            color: Colors.transparent,
-                                          ))),
-                                    ),
-                                  ),
-                                ),
-                              ),
-                            ],
-                          ),
-                          SizedBox(
-                            height: 25,
-                          ),
-                        ],
-                      ),
-                    if (widget.cat!['id'] == 4 ||
-                        widget.cat!['id'] == 2 ||
-                        widget.cat!['id'] == 3)
-                      Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          RichText(
-                            text: TextSpan(
-                              children: [
-                                TextSpan(
-                                  text: "Timing",
-                                  style: TextStyle(
-                                      color: Colors.black,
-                                      fontSize: 15,
-                                      fontWeight: FontWeight.w600),
-                                ),
-                                // TextSpan(
-                                //   text: " *",
-                                //   style: TextStyle(color: Colors.red), // Customize asterisk color
-                                // ),
-                              ],
-                            ),
-                          ),
-                          SizedBox(
-                            height: 10,
-                          ),
-                          Row(
-                            children: [
-                              Expanded(
-                                child: Container(
-                                  decoration: BoxDecoration(
-                                    border: Border.all(
-                                        width: 1, color: Color(0xffe1e1e1)),
-                                    color: Color(0xfff5f5f5),
-                                    borderRadius: BorderRadius.circular(
-                                        10.0), // Optional: Add border radius
-                                  ),
-                                  child: Padding(
-                                    padding: const EdgeInsets.only(
-                                        left: 8.0, right: 5),
-                                    child: TextFormField(
-                                      controller: timingControler,
-                                      decoration: const InputDecoration(
-                                          hintText: 'Enter Timing..',
-                                          hintStyle: TextStyle(
-                                            fontFamily: 'Poppins',
-                                            fontSize: 14.0,
-                                            color: Color(0xff9c9c9c),
-                                            fontWeight: FontWeight.w500,
-                                            decoration: TextDecoration.none,
-                                          ),
-                                          enabledBorder: UnderlineInputBorder(
-                                            borderSide: BorderSide(
-                                              color: Colors.transparent,
-                                            ),
-                                          ),
-                                          focusedBorder: UnderlineInputBorder(
-                                              borderSide: BorderSide(
-                                            color: Colors.transparent,
-                                          ))),
+                                                color: Colors.transparent,
+                                              ))),
                                     ),
                                   ),
                                 ),
@@ -2269,7 +2506,7 @@ class _LoanHomeState extends State<LoanAdForm> {
                                 text: " *",
                                 style: TextStyle(
                                     color:
-                                        Colors.red), // Customize asterisk color
+                                    Colors.red), // Customize asterisk color
                               ),
                             ],
                           ),
@@ -2309,8 +2546,8 @@ class _LoanHomeState extends State<LoanAdForm> {
                                         ),
                                         focusedBorder: UnderlineInputBorder(
                                             borderSide: BorderSide(
-                                          color: Colors.transparent,
-                                        ))),
+                                              color: Colors.transparent,
+                                            ))),
                                   ),
                                 ),
                               ),
@@ -2319,6 +2556,110 @@ class _LoanHomeState extends State<LoanAdForm> {
                         ),
                         SizedBox(
                           height: 25,
+                        ),
+                      ],
+                    ),
+                    Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        RichText(
+                          text: TextSpan(
+                            children: [
+                              TextSpan(
+                                text: "Location",
+                                style: TextStyle(
+                                    color: Colors.black,
+                                    fontSize: 15,
+                                    fontWeight: FontWeight.w600),
+                              ),
+                              TextSpan(
+                                text: " *",
+                                style: TextStyle(
+                                    color:
+                                    Colors.red), // Customize asterisk color
+                              ),
+                            ],
+                          ),
+                        ),
+                        SizedBox(
+                          height: 10,
+                        ),
+                        Row(
+                          children: [
+                            Expanded(
+                              child: Container(
+                                decoration: BoxDecoration(
+                                  border: Border.all(
+                                      width: 1, color: Color(0xffe1e1e1)),
+                                  color: Color(0xfff5f5f5),
+                                  borderRadius: BorderRadius.circular(
+                                      10.0), // Optional: Add border radius
+                                ),
+                                child: GooglePlaceAutoCompleteTextField(
+                                  textEditingController: locationControler,
+                                  inputDecoration: const InputDecoration(
+                                      hintText: 'Enter location..',
+                                      hintStyle: TextStyle(
+                                        fontFamily: 'Poppins',
+                                        fontSize: 14.0,
+                                        color: Color(0xff9c9c9c),
+                                        fontWeight: FontWeight.w500,
+                                        decoration: TextDecoration.none,
+                                      ),
+                                      enabledBorder: UnderlineInputBorder(
+                                        borderSide: BorderSide(
+                                          color: Colors.transparent,
+                                        ),
+                                      ),
+                                      focusedBorder: UnderlineInputBorder(
+                                          borderSide: BorderSide(
+                                            color: Colors.transparent,
+                                          )
+                                      )
+                                  ),
+                                  googleAPIKey: "AIzaSyDDJ17OjVJ0TS2qYt7GMOnrMjAu1CYZFg8",
+                                  debounceTime: 800,
+                                  countries: ["in"],
+                                  isLatLngRequired: true,
+                                  getPlaceDetailWithLatLng: (Prediction prediction) {
+                                    print("placeDetails" + prediction.lng.toString());
+                                    // lat = prediction.lat.toString();
+                                    // lng = prediction.lng.toString();
+                                    setState(() { });
+                                  },
+                                  itemClick: (Prediction prediction) {
+                                    locationControler.text = prediction.description!;
+                                    locationControler.selection =
+                                        TextSelection.fromPosition(TextPosition(
+                                            offset: prediction.description!.length));
+                                  },
+                                  itemBuilder: (context, index, Prediction prediction) {
+                                    return Container(
+                                      padding: EdgeInsets.all(10),
+                                      child: Row(
+                                        children: [
+                                          Icon(Icons.location_on),
+                                          SizedBox(
+                                            width: 7,
+                                          ),
+                                          Expanded(
+                                              child:
+                                              Text("${prediction.description ?? ""}"))
+                                        ],
+                                      ),
+                                    );
+                                  },
+                                  seperatedBuilder: Divider(),
+                                  isCrossBtnShown: true,
+                                  containerHorizontalPadding: 10,
+                                  placeType: PlaceType.geocode,
+                                ),
+                              ),
+                            ),
+                          ],
+                        ),
+                        SizedBox(
+                          height: 15,
                         ),
                       ],
                     ),
@@ -2398,76 +2739,7 @@ class _LoanHomeState extends State<LoanAdForm> {
                           text: TextSpan(
                             children: [
                               TextSpan(
-                                text: "Description",
-                                style: TextStyle(
-                                    color: Colors.black,
-                                    fontSize: 15,
-                                    fontWeight: FontWeight.w600),
-                              ),
-                              // TextSpan(
-                              //   text: " *",
-                              //   style: TextStyle(color: Colors.red), // Customize asterisk color
-                              // ),
-                            ],
-                          ),
-                        ),
-                        SizedBox(
-                          height: 10,
-                        ),
-                        Row(
-                          children: [
-                            Expanded(
-                              child: Container(
-                                decoration: BoxDecoration(
-                                  border: Border.all(
-                                      width: 1, color: Color(0xffe1e1e1)),
-                                  color: Color(0xfff5f5f5),
-                                  borderRadius: BorderRadius.circular(
-                                      10.0), // Optional: Add border radius
-                                ),
-                                child: Padding(
-                                  padding: const EdgeInsets.only(
-                                      left: 8.0, right: 5),
-                                  child: TextFormField(
-                                    maxLines: 4,
-                                    controller: descriptionControler,
-                                    decoration: const InputDecoration(
-                                        hintText: 'Enter Description..',
-                                        hintStyle: TextStyle(
-                                          fontFamily: 'Poppins',
-                                          fontSize: 14.0,
-                                          color: Color(0xff9c9c9c),
-                                          fontWeight: FontWeight.w500,
-                                          decoration: TextDecoration.none,
-                                        ),
-                                        enabledBorder: UnderlineInputBorder(
-                                          borderSide: BorderSide(
-                                            color: Colors.transparent,
-                                          ),
-                                        ),
-                                        focusedBorder: UnderlineInputBorder(
-                                            borderSide: BorderSide(
-                                          color: Colors.transparent,
-                                        ))),
-                                  ),
-                                ),
-                              ),
-                            ),
-                          ],
-                        ),
-                        SizedBox(
-                          height: 25,
-                        ),
-                      ],
-                    ),
-                    Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        RichText(
-                          text: TextSpan(
-                            children: [
-                              TextSpan(
-                                text: "Image",
+                                text: "Title Image",
                                 style: TextStyle(
                                     color: Colors.black,
                                     fontSize: 15,
@@ -2500,14 +2772,14 @@ class _LoanHomeState extends State<LoanAdForm> {
                                     child: photo != null
                                         ? Image.file(photo!)
                                         : Center(
-                                            child: Text(
-                                              '+',
-                                              style: TextStyle(
-                                                  color: Colors.black26,
-                                                  fontSize: 70,
-                                                  fontWeight: FontWeight.w100),
-                                            ),
-                                          ),
+                                      child: Text(
+                                        '+',
+                                        style: TextStyle(
+                                            color: Colors.black26,
+                                            fontSize: 70,
+                                            fontWeight: FontWeight.w100),
+                                      ),
+                                    ),
                                   ),
                                   if (photo != null)
                                     Positioned(
@@ -2633,6 +2905,418 @@ class _LoanHomeState extends State<LoanAdForm> {
                         ),
                       ],
                     ),
+                    if (widget.cat!['id'] == 4 ||
+                        widget.cat!['id'] == 2 ||
+                        widget.cat!['id'] == 3)
+                      Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          RichText(
+                            text: TextSpan(
+                              children: [
+                                TextSpan(
+                                  text: "For Verified Tag",
+                                  style: TextStyle(
+                                      color: Colors.black,
+                                      fontSize: 15,
+                                      fontWeight: FontWeight.w600),
+                                ),
+                              ],
+                            ),
+                          ),
+                          SizedBox(
+                            height: 10,
+                          ),
+                          Row(
+                            children: [
+                              InkWell(
+                                onTap: () {
+                                  _pickFiles();
+                                },
+                                child: Container(
+                                  height: 100,
+                                  width: 100,
+                                  decoration: BoxDecoration(
+                                    border: Border.all(
+                                        width: 1, color: Color(0xffe1e1e1)),
+                                    color: Color(0xfff5f5f5),
+                                    borderRadius: BorderRadius.circular(
+                                        15.0), // Optional: Add border radius
+                                  ),
+                                  child: Center(
+                                    child: Text(
+                                      '+',
+                                      style: TextStyle(
+                                          color: Colors.black26,
+                                          fontSize: 70,
+                                          fontWeight: FontWeight.w100),
+                                    ),
+                                  ),
+                                ),
+                              ),
+                              SizedBox(
+                                width: 15,
+                              ),
+                              Expanded(
+                                child: Column(
+                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                  children: [
+                                    RichText(
+                                      text: TextSpan(
+                                        children: [
+                                          TextSpan(
+                                            text:
+                                            "(Upload each file size below 2 mb)",
+                                            style: TextStyle(
+                                                color: Colors.black,
+                                                fontSize: 10,
+                                                fontWeight: FontWeight.w400),
+                                          ),
+                                          TextSpan(
+                                            text: " *",
+                                            style: TextStyle(
+                                                color: Colors
+                                                    .red), // Customize asterisk color
+                                          ),
+                                        ],
+                                      ),
+                                    ),
+                                    Text(
+                                      '(Note:  GST Copy, Company Registation copy)',
+                                      style: TextStyle(
+                                          color: Colors.red,
+                                          fontSize: 10,
+                                          fontWeight: FontWeight.w400),
+                                    ),
+                                  ],
+                                ),
+                              ),
+                            ],
+                          ),
+                          SizedBox(
+                            height: 20,
+                          ),
+                          GridView.builder(
+                            shrinkWrap: true,
+                            padding: const EdgeInsets.symmetric(
+                              horizontal: 5,
+                            ),
+                            physics: const NeverScrollableScrollPhysics(),
+                            gridDelegate:
+                            const SliverGridDelegateWithFixedCrossAxisCountAndFixedHeight(
+                                mainAxisSpacing: 10,
+                                crossAxisCount: 4,
+                                height: 110,
+                                crossAxisSpacing: 10),
+                            itemCount: documents.length,
+                            itemBuilder: (context, index) {
+                              return Stack(
+                                children: [
+                                  GestureDetector(
+                                    child: Container(
+                                      width: double.infinity,
+                                      height: 130,
+                                      decoration: BoxDecoration(
+                                        border: Border.all(
+                                            width: 1, color: Color(0xffe1e1e1)),
+                                        color: Color(0xfff5f5f5),
+                                        borderRadius: BorderRadius.circular(
+                                            15.0), // Optional: Add border radius
+                                      ),
+                                      child: Column(
+                                        children: [
+                                          Expanded(
+                                            child: ClipRRect(
+                                              borderRadius: BorderRadius.all(
+                                                  Radius.circular(15)),
+                                              child: documents[index]
+                                                  .path
+                                                  .split('/')
+                                                  .last
+                                                  .split('.')
+                                                  .last ==
+                                                  'pdf'
+                                                  ? Image.asset("assets/pdf.png")
+                                                  : documents[index]
+                                                  .path
+                                                  .split('/')
+                                                  .last
+                                                  .split('.')
+                                                  .last ==
+                                                  'doc'
+                                                  ? Image.asset(
+                                                  "assets/doc.png")
+                                                  : documents[index]
+                                                  .path
+                                                  .split('/')
+                                                  .last
+                                                  .split('.')
+                                                  .last ==
+                                                  'docx'
+                                                  ? Image.asset(
+                                                  "assets/docx.png")
+                                                  : documents[index]
+                                                  .path
+                                                  .split('/')
+                                                  .last
+                                                  .split('.')
+                                                  .last ==
+                                                  'csv'
+                                                  ? Image.asset(
+                                                  "assets/csv.png")
+                                                  : documents[index]
+                                                  .path
+                                                  .split(
+                                                  '/')
+                                                  .last
+                                                  .split(
+                                                  '.')
+                                                  .last ==
+                                                  'xls'
+                                                  ? Image.asset(
+                                                  "assets/xls.png")
+                                                  : documents[index]
+                                                  .path
+                                                  .split(
+                                                  '/')
+                                                  .last
+                                                  .split('.')
+                                                  .last ==
+                                                  'xlsx'
+                                                  ? Image.asset("assets/xlsx.png")
+                                                  : Image.file(documents[index]),
+                                            ),
+                                          ),
+                                          Padding(
+                                            padding: const EdgeInsets.only(bottom: 8, right: 8, left: 8),
+                                            child: Text(
+                                              '${documents[index].path.split('/').last}',
+                                              maxLines: 2,
+                                              overflow: TextOverflow.ellipsis,
+                                              style: TextStyle(
+                                                  color: Colors.black,
+                                                  fontSize: 7,
+                                                  fontWeight: FontWeight.w400),
+                                            ),
+                                          ),
+                                        ],
+                                      ),
+                                    ),
+                                  ),
+                                  Positioned(
+                                    top: 0,
+                                    right: 0,
+                                    child: InkWell(
+                                      onTap: () {
+                                        setState(() {
+                                          documents.removeAt(index);
+                                        });
+                                      },
+                                      child: Icon(
+                                        Icons.delete,
+                                        color: Colors.red,
+                                      ),
+                                    ),
+                                  ),
+                                ],
+                              );
+                            },
+                          ),
+                          SizedBox(
+                            height: 10,
+                          ),
+                          GridView.builder(
+                            shrinkWrap: true,
+                            padding: const EdgeInsets.symmetric(
+                              horizontal: 5,
+                            ),
+                            physics: const NeverScrollableScrollPhysics(),
+                            gridDelegate:
+                            const SliverGridDelegateWithFixedCrossAxisCountAndFixedHeight(
+                                mainAxisSpacing: 10,
+                                crossAxisCount: 3,
+                                height: 110,
+                                crossAxisSpacing: 10),
+                            itemCount: documentEdit.length,
+                            itemBuilder: (context, index) {
+                              return Stack(
+                                children: [
+                                  GestureDetector(
+                                    child: Container(
+                                      width: double.infinity,
+                                      height: 130,
+                                      decoration: BoxDecoration(
+                                        border: Border.all(
+                                            width: 1, color: Color(0xffe1e1e1)),
+                                        color: Color(0xfff5f5f5),
+                                        borderRadius: BorderRadius.circular(
+                                            15.0), // Optional: Add border radius
+                                      ),
+                                      child: Column(
+                                        children: [
+                                          Expanded(
+                                            child: ClipRRect(
+                                              borderRadius: BorderRadius.all(
+                                                  Radius.circular(15)),
+                                              child: documentEdit[index]
+                                                  .split('/')
+                                                  .last
+                                                  .split('.')
+                                                  .last ==
+                                                  'pdf'
+                                                  ? Image.asset("assets/pdf.png")
+                                                  : documentEdit[index]
+                                                  .split('/')
+                                                  .last
+                                                  .split('.')
+                                                  .last ==
+                                                  'doc'
+                                                  ? Image.asset(
+                                                  "assets/doc.png")
+                                                  : documentEdit[index]
+                                                  .split('/')
+                                                  .last
+                                                  .split('.')
+                                                  .last ==
+                                                  'docx'
+                                                  ? Image.asset(
+                                                  "assets/docx.png")
+                                                  : documentEdit[index]
+                                                  .split('/')
+                                                  .last
+                                                  .split('.')
+                                                  .last ==
+                                                  'csv'
+                                                  ? Image.asset(
+                                                  "assets/csv.png")
+                                                  : documentEdit[index]
+                                                  .split(
+                                                  '/')
+                                                  .last
+                                                  .split(
+                                                  '.')
+                                                  .last ==
+                                                  'xls'
+                                                  ? Image.asset(
+                                                  "assets/xls.png")
+                                                  : documentEdit[index]
+                                                  .split(
+                                                  '/')
+                                                  .last
+                                                  .split('.')
+                                                  .last ==
+                                                  'xlsx'
+                                                  ? Image.asset("assets/xlsx.png")
+                                                  : Image.network(documentEdit[index]),
+                                            ),
+                                          ),
+                                          Padding(
+                                            padding: const EdgeInsets.only(bottom: 8, right: 8, left: 8),
+                                            child: Text(
+                                              '${documentEdit[index].split('/').last}',
+                                              maxLines: 2,
+                                              overflow: TextOverflow.ellipsis,
+                                              style: TextStyle(
+                                                  color: Colors.black,
+                                                  fontSize: 7,
+                                                  fontWeight: FontWeight.w400),
+                                            ),
+                                          ),
+                                        ],
+                                      ),
+                                    ),
+                                  ),
+                                  Positioned(
+                                    top: 0,
+                                    right: 0,
+                                    child: InkWell(
+                                      onTap: () {
+                                        setState(() {
+                                          documents.removeAt(index);
+                                        });
+                                      },
+                                      child: Icon(
+                                        Icons.delete,
+                                        color: Colors.red,
+                                      ),
+                                    ),
+                                  ),
+                                ],
+                              );
+                            },
+                          ),
+                        ],
+                      ),
+                    Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        RichText(
+                          text: TextSpan(
+                            children: [
+                              TextSpan(
+                                text: "Description",
+                                style: TextStyle(
+                                    color: Colors.black,
+                                    fontSize: 15,
+                                    fontWeight: FontWeight.w600),
+                              ),
+                              // TextSpan(
+                              //   text: " *",
+                              //   style: TextStyle(color: Colors.red), // Customize asterisk color
+                              // ),
+                            ],
+                          ),
+                        ),
+                        SizedBox(
+                          height: 10,
+                        ),
+                        Row(
+                          children: [
+                            Expanded(
+                              child: Container(
+                                decoration: BoxDecoration(
+                                  border: Border.all(
+                                      width: 1, color: Color(0xffe1e1e1)),
+                                  color: Color(0xfff5f5f5),
+                                  borderRadius: BorderRadius.circular(
+                                      10.0), // Optional: Add border radius
+                                ),
+                                child: Padding(
+                                  padding: const EdgeInsets.only(
+                                      left: 8.0, right: 5),
+                                  child: TextFormField(
+                                    maxLines: 4,
+                                    controller: descriptionControler,
+                                    decoration: const InputDecoration(
+                                        hintText: 'Enter Description..',
+                                        hintStyle: TextStyle(
+                                          fontFamily: 'Poppins',
+                                          fontSize: 14.0,
+                                          color: Color(0xff9c9c9c),
+                                          fontWeight: FontWeight.w500,
+                                          decoration: TextDecoration.none,
+                                        ),
+                                        enabledBorder: UnderlineInputBorder(
+                                          borderSide: BorderSide(
+                                            color: Colors.transparent,
+                                          ),
+                                        ),
+                                        focusedBorder: UnderlineInputBorder(
+                                            borderSide: BorderSide(
+                                          color: Colors.transparent,
+                                        ))),
+                                  ),
+                                ),
+                              ),
+                            ),
+                          ],
+                        ),
+                        SizedBox(
+                          height: 25,
+                        ),
+                      ],
+                    ),
+
                     GridView.builder(
                       shrinkWrap: true,
                       padding: const EdgeInsets.symmetric(
@@ -2778,360 +3462,6 @@ class _LoanHomeState extends State<LoanAdForm> {
                         );
                       },
                     ),
-                    if (widget.cat!['id'] == 4 ||
-                        widget.cat!['id'] == 2 ||
-                        widget.cat!['id'] == 3)
-                      SizedBox(
-                        height: 10,
-                      ),
-                    if (widget.cat!['id'] == 4 ||
-                        widget.cat!['id'] == 2 ||
-                        widget.cat!['id'] == 3)
-                      Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          RichText(
-                            text: TextSpan(
-                              children: [
-                                TextSpan(
-                                  text: "For Verified Tag",
-                                  style: TextStyle(
-                                      color: Colors.black,
-                                      fontSize: 15,
-                                      fontWeight: FontWeight.w600),
-                                ),
-                              ],
-                            ),
-                          ),
-                          SizedBox(
-                            height: 10,
-                          ),
-                          Row(
-                            children: [
-                              InkWell(
-                                onTap: () {
-                                  _pickFiles();
-                                },
-                                child: Container(
-                                  height: 100,
-                                  width: 100,
-                                  decoration: BoxDecoration(
-                                    border: Border.all(
-                                        width: 1, color: Color(0xffe1e1e1)),
-                                    color: Color(0xfff5f5f5),
-                                    borderRadius: BorderRadius.circular(
-                                        15.0), // Optional: Add border radius
-                                  ),
-                                  child: Center(
-                                    child: Text(
-                                      '+',
-                                      style: TextStyle(
-                                          color: Colors.black26,
-                                          fontSize: 70,
-                                          fontWeight: FontWeight.w100),
-                                    ),
-                                  ),
-                                ),
-                              ),
-                              SizedBox(
-                                width: 15,
-                              ),
-                              Column(
-                                children: [
-                                  RichText(
-                                    text: TextSpan(
-                                      children: [
-                                        TextSpan(
-                                          text:
-                                              "(Upload each file size below 2 mb)",
-                                          style: TextStyle(
-                                              color: Colors.black,
-                                              fontSize: 10,
-                                              fontWeight: FontWeight.w400),
-                                        ),
-                                        TextSpan(
-                                          text: " *",
-                                          style: TextStyle(
-                                              color: Colors
-                                                  .red), // Customize asterisk color
-                                        ),
-                                      ],
-                                    ),
-                                  ),
-                                  Text(
-                                    '(Note: GST, PAN, Aadhar, Company Registation copy)',
-                                    style: TextStyle(
-                                        color: Colors.red,
-                                        fontSize: 10,
-                                        fontWeight: FontWeight.w400),
-                                  ),
-                                ],
-                              ),
-                            ],
-                          ),
-                          SizedBox(
-                            height: 20,
-                          ),
-                        ],
-                      ),
-                    if (widget.cat!['id'] == 4 ||
-                        widget.cat!['id'] == 2 ||
-                        widget.cat!['id'] == 3)
-                      GridView.builder(
-                        shrinkWrap: true,
-                        padding: const EdgeInsets.symmetric(
-                          horizontal: 5,
-                        ),
-                        physics: const NeverScrollableScrollPhysics(),
-                        gridDelegate:
-                            const SliverGridDelegateWithFixedCrossAxisCountAndFixedHeight(
-                                mainAxisSpacing: 10,
-                                crossAxisCount: 3,
-                                height: 130,
-                                crossAxisSpacing: 10),
-                        itemCount: documents.length,
-                        itemBuilder: (context, index) {
-                          return Stack(
-                            children: [
-                              GestureDetector(
-                                child: Container(
-                                  width: double.infinity,
-                                  height: 130,
-                                  decoration: BoxDecoration(
-                                    border: Border.all(
-                                        width: 1, color: Color(0xffe1e1e1)),
-                                    color: Color(0xfff5f5f5),
-                                    borderRadius: BorderRadius.circular(
-                                        15.0), // Optional: Add border radius
-                                  ),
-                                  child: Column(
-                                    children: [
-                                      Expanded(
-                                        child: ClipRRect(
-                                          borderRadius: BorderRadius.all(
-                                              Radius.circular(15)),
-                                          child: documents[index]
-                                                      .path
-                                                      .split('/')
-                                                      .last
-                                                      .split('.')
-                                                      .last ==
-                                                  'pdf'
-                                              ? Image.asset("assets/pdf.png")
-                                              : documents[index]
-                                                          .path
-                                                          .split('/')
-                                                          .last
-                                                          .split('.')
-                                                          .last ==
-                                                      'doc'
-                                                  ? Image.asset(
-                                                      "assets/doc.png")
-                                                  : documents[index]
-                                                              .path
-                                                              .split('/')
-                                                              .last
-                                                              .split('.')
-                                                              .last ==
-                                                          'docx'
-                                                      ? Image.asset(
-                                                          "assets/docx.png")
-                                                      : documents[index]
-                                                                  .path
-                                                                  .split('/')
-                                                                  .last
-                                                                  .split('.')
-                                                                  .last ==
-                                                              'csv'
-                                                          ? Image.asset(
-                                                              "assets/csv.png")
-                                                          : documents[index]
-                                                                      .path
-                                                                      .split(
-                                                                          '/')
-                                                                      .last
-                                                                      .split(
-                                                                          '.')
-                                                                      .last ==
-                                                                  'xls'
-                                                              ? Image.asset(
-                                                                  "assets/xls.png")
-                                                              : documents[index]
-                                                                          .path
-                                                                          .split(
-                                                                              '/')
-                                                                          .last
-                                                                          .split('.')
-                                                                          .last ==
-                                                                      'xlsx'
-                                                                  ? Image.asset("assets/xlsx.png")
-                                                                  : Image.file(documents[index]),
-                                        ),
-                                      ),
-                                      Padding(
-                                        padding: const EdgeInsets.all(8.0),
-                                        child: Text(
-                                          '${documents[index].path.split('/').last}',
-                                          maxLines: 1,
-                                          overflow: TextOverflow.ellipsis,
-                                          style: TextStyle(
-                                              color: Colors.black,
-                                              fontSize: 7,
-                                              fontWeight: FontWeight.w400),
-                                        ),
-                                      ),
-                                    ],
-                                  ),
-                                ),
-                              ),
-                              Positioned(
-                                top: 0,
-                                right: 0,
-                                child: InkWell(
-                                  onTap: () {
-                                    setState(() {
-                                      documents.removeAt(index);
-                                    });
-                                  },
-                                  child: Icon(
-                                    Icons.delete,
-                                    color: Colors.red,
-                                  ),
-                                ),
-                              ),
-                            ],
-                          );
-                        },
-                      ),
-                    if (widget.cat!['id'] == 4 ||
-                        widget.cat!['id'] == 2 ||
-                        widget.cat!['id'] == 3)
-                      SizedBox(
-                        height: 10,
-                      ),
-                    if (widget.cat!['id'] == 4 ||
-                        widget.cat!['id'] == 2 ||
-                        widget.cat!['id'] == 3)
-                      GridView.builder(
-                        shrinkWrap: true,
-                        padding: const EdgeInsets.symmetric(
-                          horizontal: 5,
-                        ),
-                        physics: const NeverScrollableScrollPhysics(),
-                        gridDelegate:
-                            const SliverGridDelegateWithFixedCrossAxisCountAndFixedHeight(
-                                mainAxisSpacing: 10,
-                                crossAxisCount: 3,
-                                height: 130,
-                                crossAxisSpacing: 10),
-                        itemCount: documentEdit.length,
-                        itemBuilder: (context, index) {
-                          return Stack(
-                            children: [
-                              GestureDetector(
-                                child: Container(
-                                  width: double.infinity,
-                                  height: 130,
-                                  decoration: BoxDecoration(
-                                    border: Border.all(
-                                        width: 1, color: Color(0xffe1e1e1)),
-                                    color: Color(0xfff5f5f5),
-                                    borderRadius: BorderRadius.circular(
-                                        15.0), // Optional: Add border radius
-                                  ),
-                                  child: Column(
-                                    children: [
-                                      Expanded(
-                                        child: ClipRRect(
-                                          borderRadius: BorderRadius.all(
-                                              Radius.circular(15)),
-                                          child: documentEdit[index]
-                                                      .split('/')
-                                                      .last
-                                                      .split('.')
-                                                      .last ==
-                                                  'pdf'
-                                              ? Image.asset("assets/pdf.png")
-                                              : documentEdit[index]
-                                                          .split('/')
-                                                          .last
-                                                          .split('.')
-                                                          .last ==
-                                                      'doc'
-                                                  ? Image.asset(
-                                                      "assets/doc.png")
-                                                  : documentEdit[index]
-                                                              .split('/')
-                                                              .last
-                                                              .split('.')
-                                                              .last ==
-                                                          'docx'
-                                                      ? Image.asset(
-                                                          "assets/docx.png")
-                                                      : documentEdit[index]
-                                                                  .split('/')
-                                                                  .last
-                                                                  .split('.')
-                                                                  .last ==
-                                                              'csv'
-                                                          ? Image.asset(
-                                                              "assets/csv.png")
-                                                          : documentEdit[index]
-                                                                      .split(
-                                                                          '/')
-                                                                      .last
-                                                                      .split(
-                                                                          '.')
-                                                                      .last ==
-                                                                  'xls'
-                                                              ? Image.asset(
-                                                                  "assets/xls.png")
-                                                              : documentEdit[index]
-                                                                          .split(
-                                                                              '/')
-                                                                          .last
-                                                                          .split('.')
-                                                                          .last ==
-                                                                      'xlsx'
-                                                                  ? Image.asset("assets/xlsx.png")
-                                                                  : Image.network(documentEdit[index]),
-                                        ),
-                                      ),
-                                      Padding(
-                                        padding: const EdgeInsets.all(8.0),
-                                        child: Text(
-                                          '${documentEdit[index].split('/').last}',
-                                          maxLines: 1,
-                                          overflow: TextOverflow.ellipsis,
-                                          style: TextStyle(
-                                              color: Colors.black,
-                                              fontSize: 7,
-                                              fontWeight: FontWeight.w400),
-                                        ),
-                                      ),
-                                    ],
-                                  ),
-                                ),
-                              ),
-                              Positioned(
-                                top: 0,
-                                right: 0,
-                                child: InkWell(
-                                  onTap: () {
-                                    setState(() {
-                                      documents.removeAt(index);
-                                    });
-                                  },
-                                  child: Icon(
-                                    Icons.delete,
-                                    color: Colors.red,
-                                  ),
-                                ),
-                              ),
-                            ],
-                          );
-                        },
-                      ),
                     SizedBox(
                       height: 25,
                     ),

@@ -1,6 +1,7 @@
 import 'dart:io';
 
 import 'package:Housepecker/Ui/screens/projects/projectAdd6.dart';
+import 'package:Housepecker/Ui/screens/projects/projectAdd7.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
@@ -297,7 +298,7 @@ class _ProjectFormFourState extends State<ProjectFormFour> {
               Navigator.push(
                 context,
                 MaterialPageRoute(builder: (context) =>
-                    ProjectFormsixth(body: body, isEdit: widget.isEdit, data: widget.data)),
+                    ProjectFormSeven(body: body, isEdit: widget.isEdit, data: widget.data)),
               );
             },
             child: Container(
