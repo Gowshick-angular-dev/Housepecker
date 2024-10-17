@@ -539,332 +539,329 @@ class PropertyVerticalCard extends StatelessWidget {
         onLongPress: () {
           HelperUtils.share(context, property.id!, property.slugId ?? "");
         },
-        child: Padding(
-          padding: const EdgeInsets.all(8.0),
-          child: Container(
-            width: 180,
-            decoration: BoxDecoration(
-              color: Colors.white,
-              borderRadius: BorderRadius.circular(15),
-              border: Border.all(width: 1, color: Color(0xffe0e0e0)),
-            ),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                ClipRRect(
-                  borderRadius: BorderRadius.only(
-                    topRight: Radius.circular(15),
-                    topLeft: Radius.circular(15),
-                  ),
-                  child: Stack(
-                    children: [
-                      UiUtils.getImage(
-                        property.titleImage ?? "",
-                        width: double.infinity,
-                        fit: BoxFit.cover,
-                        height: 130,
-                      ),
-                      // Positioned(
-                      //   left: 8,
-                      //   top: 8,
-                      //   child: Container(
-                      //     padding: EdgeInsets.symmetric(horizontal: 5),
-                      //     height: 19,
-                      //     clipBehavior: Clip.antiAlias,
-                      //     decoration: BoxDecoration(
-                      //       color: context.color.secondaryColor.withOpacity(0.7),
-                      //       borderRadius: BorderRadius.circular(4),
-                      //     ),
-                      //     child: Row(
-                      //       children: [
-                      //         Image.asset(
-                      //           "assets/Home/Offers.png",
-                      //           width: 12,
-                      //           height: 12,
-                      //           color: Colors.blue,
-                      //         ),
-                      //         SizedBox(width: 3),
-                      //         Text('Offer').size(10),
-                      //       ],
-                      //     ),
-                      //   ),
-                      // ),
-                      if(property.isPremium == 1)
-                        Positioned(
-                          top: 10,
-                          left: 10,
-                          child: Container(
-                            width: 30,
-                            height: 30,
-                            decoration: BoxDecoration(
-                              color: Colors.black.withOpacity(0.5),
-                              borderRadius: BorderRadius.circular(10),
-                            ),
-                            child: Center(child: Image.asset("assets/Home/__Premium.png",width: 18,height: 18,)),
-                          )
-                        ),
-                      if(property.isDeal == 1)
-                        Positioned(
-                            top: 10,
-                            left: -5,
-                            child: Container(
-                              child: Stack(
-                                children: [
-                                  Image.asset("assets/Home/offer.png", height: 20,),
-                                  Positioned(
-                                    top: 2,
-                                    left: 15,
-                                    child: Text('Offer',
-                                      style: TextStyle(
-                                        fontSize: 10,
-                                        color: Color(0xffffffff),
-                                      ),
-                                    ),
-                                  )
-                                ],
-                              ),
-                            )
-                        ),
-                      if (showLikeButton ?? true)
-                        Positioned(
-                          right: 8,
-                          top: 8,
-                          child: Container(
-                            width: 32,
-                            height: 32,
-                            decoration: BoxDecoration(
-                              color: context.color.secondaryColor,
-                              shape: BoxShape.circle,
-                              boxShadow: const [
-                                BoxShadow(
-                                  color: Color.fromARGB(12, 0, 0, 0),
-                                  offset: Offset(0, 2),
-                                  blurRadius: 15,
-                                  spreadRadius: 0,
-                                )
-                              ],
-                            ),
-                            child: LikeButtonWidget(
-                              property: property,
-                              onLikeChanged: onLikeChange,
-                            ),
-                          ),
-                        ),
-                      if(property.gallery != null)
-                        Positioned(
-                        right: 48,
-                        top: 8,
-                        child: InkWell(
-                          onTap: () {
-                            Navigator.push(context,
-                                BlurredRouter(
-                                  builder: (context) {
-                                    return AllGallaryImages(
-                                        images: property
-                                            ?.gallery ??
-                                            []);
-                                  },
-                                ));
-                          },
-                          child: Container(
-                            width: 35,
-                            height: 25,
-                            decoration: BoxDecoration(
-                              color: Color(0xff000000).withOpacity(0.35),
-                              borderRadius: BorderRadius.circular(8),
-                              border: Border.all(width: 1, color: Color(0xffe0e0e0)),
-                              boxShadow: const [
-                                BoxShadow(
-                                  color: Color.fromARGB(12, 0, 0, 0),
-                                  offset: Offset(0, 2),
-                                  blurRadius: 15,
-                                  spreadRadius: 0,
-                                )
-                              ],
-                            ),
-                            child: Row(
-                              mainAxisAlignment: MainAxisAlignment.center,
-                              children: [
-                                Icon(
-                                  Icons.image,
-                                  color: Color(0xffe0e0e0),
-                                  size: 15
-                                ),
-                                SizedBox(width: 3,),
-                                Text('${property.gallery!.length}',
-                                style: TextStyle(
-                                  color: Color(0xffe0e0e0),
-                                  fontSize: 10
-                                ),),
-                              ],
-                            ),
-                          ),
-                        ),
-                      ),
-                      if (property.promoted ?? false)
-                        const PositionedDirectional(
-                          start: 5,
-                          top: 5,
-                          child: PromotedCard(type: PromoteCardType.icon),
-                        ),
-                      // PositionedDirectional(
-                      //   bottom: 6,
-                      //   start: 6,
-                      //   child: Container(
-                      //     height: 19,
-                      //     clipBehavior: Clip.antiAlias,
-                      //     decoration: BoxDecoration(
-                      //       color: context.color.secondaryColor.withOpacity(0.7),
-                      //       borderRadius: BorderRadius.circular(4),
-                      //     ),
-                      //     child: BackdropFilter(
-                      //       filter: ImageFilter.blur(sigmaX: 2, sigmaY: 3),
-                      //       child: Padding(
-                      //         padding: const EdgeInsets.symmetric(horizontal: 8.0),
-                      //         child: Center(
-                      //           child: Text(
-                      //             property.properyType!.translate(context),
-                      //           )
-                      //               .color(context.color.textColorDark)
-                      //               .bold(weight: FontWeight.w500)
-                      //               .size(10),
-                      //         ),
-                      //       ),
-                      //     ),
-                      //   ),
-                      // ),
-                    ],
-                  ),
+        child: Container(
+          width: 180,
+          decoration: BoxDecoration(
+            color: Colors.white,
+            borderRadius: BorderRadius.circular(15),
+            border: Border.all(width: 1, color: Color(0xffe0e0e0)),
+          ),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              ClipRRect(
+                borderRadius: BorderRadius.only(
+                  topRight: Radius.circular(15),
+                  topLeft: Radius.circular(15),
                 ),
-                if (statusButton != null)
-                  Padding(
-                    padding: const EdgeInsets.symmetric(vertical: 3.0, horizontal: 3.0),
-                    child: Container(
-                      decoration: BoxDecoration(
-                        color: statusButton!.color,
-                        borderRadius: BorderRadius.circular(4),
-                      ),
-                      child: Center(
-                        child: Text(statusButton!.lable)
-                            .size(11)
-                            .bold(weight: FontWeight.w500)
-                            .color(statusButton?.textColor ?? Colors.black),
-                      ),
+                child: Stack(
+                  children: [
+                    UiUtils.getImage(
+                      property.titleImage ?? "",
+                      width: double.infinity,
+                      fit: BoxFit.cover,
+                      height: 130,
                     ),
-                  ),
-                Padding(
-                  padding: const EdgeInsets.only(left: 10, right: 10, top: 8),
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text(
-                        property.title!.firstUpperCase(),
-                        maxLines: 1,
-                        overflow: TextOverflow.ellipsis,
-                        style: TextStyle(
-                          color: Color(0xff333333),
-                          fontSize: 14,
-                          fontWeight: FontWeight.w500,
+                    // Positioned(
+                    //   left: 8,
+                    //   top: 8,
+                    //   child: Container(
+                    //     padding: EdgeInsets.symmetric(horizontal: 5),
+                    //     height: 19,
+                    //     clipBehavior: Clip.antiAlias,
+                    //     decoration: BoxDecoration(
+                    //       color: context.color.secondaryColor.withOpacity(0.7),
+                    //       borderRadius: BorderRadius.circular(4),
+                    //     ),
+                    //     child: Row(
+                    //       children: [
+                    //         Image.asset(
+                    //           "assets/Home/Offers.png",
+                    //           width: 12,
+                    //           height: 12,
+                    //           color: Colors.blue,
+                    //         ),
+                    //         SizedBox(width: 3),
+                    //         Text('Offer').size(10),
+                    //       ],
+                    //     ),
+                    //   ),
+                    // ),
+                    if(property.isPremium == 1)
+                      Positioned(
+                        top: 10,
+                        left: 10,
+                        child: Container(
+                          width: 30,
+                          height: 30,
+                          decoration: BoxDecoration(
+                            color: Colors.black.withOpacity(0.5),
+                            borderRadius: BorderRadius.circular(10),
+                          ),
+                          child: Center(child: Image.asset("assets/Home/__Premium.png",width: 18,height: 18,)),
+                        )
+                      ),
+                    if(property.isDeal == 1)
+                      Positioned(
+                          top: 10,
+                          left: -5,
+                          child: Container(
+                            child: Stack(
+                              children: [
+                                Image.asset("assets/Home/offer.png", height: 20,),
+                                Positioned(
+                                  top: 2,
+                                  left: 15,
+                                  child: Text('Offer',
+                                    style: TextStyle(
+                                      fontSize: 10,
+                                      color: Color(0xffffffff),
+                                    ),
+                                  ),
+                                )
+                              ],
+                            ),
+                          )
+                      ),
+                    if (showLikeButton ?? true)
+                      Positioned(
+                        right: 8,
+                        top: 8,
+                        child: Container(
+                          width: 32,
+                          height: 32,
+                          decoration: BoxDecoration(
+                            color: context.color.secondaryColor,
+                            shape: BoxShape.circle,
+                            boxShadow: const [
+                              BoxShadow(
+                                color: Color.fromARGB(12, 0, 0, 0),
+                                offset: Offset(0, 2),
+                                blurRadius: 15,
+                                spreadRadius: 0,
+                              )
+                            ],
+                          ),
+                          child: LikeButtonWidget(
+                            property: property,
+                            onLikeChanged: onLikeChange,
+                          ),
                         ),
                       ),
-                      SizedBox(height: 4),
-                      Row(
-                        children: [
-                          if (property.properyType.toString().toLowerCase() == "rent") ...[
-                            Text(
-                              '₹${rentPrice}',
-                              maxLines: 1,
-                              overflow: TextOverflow.ellipsis,
-                              style: TextStyle(
-                                color: Color(0xff333333),
-                                fontSize: 12,
-                                fontFamily: 'Roboto',
-                                fontWeight: FontWeight.w500,
-                              ),
-                            ),
-                          ] else ...[
-                            Text(
-                              '₹${formatAmount(int.parse(property.price!))}',
-                              maxLines: 1,
-                              overflow: TextOverflow.ellipsis,
-                              style: TextStyle(
-                                color: Color(0xff333333),
-                                fontSize: 12,
-                                fontFamily: 'Roboto',
-                                fontWeight: FontWeight.w500,
-                              ),
-                            ),
-                          ],
-                          Padding(
-                            padding: const EdgeInsets.symmetric(horizontal: 4),
-                            child: Container(
-                              height: 12,
-                              width: 2,
-                              color: Colors.black54,
-                            ),
+                    if(property.gallery != null)
+                      Positioned(
+                      right: 48,
+                      top: 8,
+                      child: InkWell(
+                        onTap: () {
+                          Navigator.push(context,
+                              BlurredRouter(
+                                builder: (context) {
+                                  return AllGallaryImages(
+                                      images: property
+                                          ?.gallery ??
+                                          []);
+                                },
+                              ));
+                        },
+                        child: Container(
+                          width: 35,
+                          height: 25,
+                          decoration: BoxDecoration(
+                            color: Color(0xff000000).withOpacity(0.35),
+                            borderRadius: BorderRadius.circular(8),
+                            border: Border.all(width: 1, color: Color(0xffe0e0e0)),
+                            boxShadow: const [
+                              BoxShadow(
+                                color: Color.fromARGB(12, 0, 0, 0),
+                                offset: Offset(0, 2),
+                                blurRadius: 15,
+                                spreadRadius: 0,
+                              )
+                            ],
                           ),
-                          Text(
-                            "${property.sqft} Sq.ft",
-                            maxLines: 1,
-                            overflow: TextOverflow.ellipsis,
-                            style: TextStyle(
-                              color: Color(0xff494949),
-                              fontSize: 10,
-                              fontWeight: FontWeight.w400,
-                            ),
-                          ),
-                        ],
-                      ),
-                      SizedBox(height: 4),
-                      if (property.city != "")
-                        Padding(
-                          padding: const EdgeInsets.only(bottom: 4),
                           child: Row(
+                            mainAxisAlignment: MainAxisAlignment.center,
                             children: [
-                              Image.asset(
-                                "assets/Home/__location.png",
-                                width: 15,
-                                fit: BoxFit.cover,
-                                height: 15,
+                              Icon(
+                                Icons.image,
+                                color: Color(0xffe0e0e0),
+                                size: 15
                               ),
-                              SizedBox(width: 5),
-                              Expanded(
-                                child: Text(
-                                  property.address?.trim() ?? "",
-                                  maxLines: 1,
-                                  overflow: TextOverflow.ellipsis,
-                                  style: TextStyle(
-                                    color: Color(0xffa2a2a2),
-                                    fontSize: 10,
-                                    fontWeight: FontWeight.w400,
-                                  ),
-                                ),
-                              ),
+                              SizedBox(width: 3,),
+                              Text('${property.gallery!.length}',
+                              style: TextStyle(
+                                color: Color(0xffe0e0e0),
+                                fontSize: 10
+                              ),),
                             ],
                           ),
                         ),
-
-                      SizedBox(height: 5),
-                      Row(
-                        mainAxisAlignment: MainAxisAlignment.end,
-                        children: [
+                      ),
+                    ),
+                    if (property.promoted ?? false)
+                      const PositionedDirectional(
+                        start: 5,
+                        top: 5,
+                        child: PromotedCard(type: PromoteCardType.icon),
+                      ),
+                    // PositionedDirectional(
+                    //   bottom: 6,
+                    //   start: 6,
+                    //   child: Container(
+                    //     height: 19,
+                    //     clipBehavior: Clip.antiAlias,
+                    //     decoration: BoxDecoration(
+                    //       color: context.color.secondaryColor.withOpacity(0.7),
+                    //       borderRadius: BorderRadius.circular(4),
+                    //     ),
+                    //     child: BackdropFilter(
+                    //       filter: ImageFilter.blur(sigmaX: 2, sigmaY: 3),
+                    //       child: Padding(
+                    //         padding: const EdgeInsets.symmetric(horizontal: 8.0),
+                    //         child: Center(
+                    //           child: Text(
+                    //             property.properyType!.translate(context),
+                    //           )
+                    //               .color(context.color.textColorDark)
+                    //               .bold(weight: FontWeight.w500)
+                    //               .size(10),
+                    //         ),
+                    //       ),
+                    //     ),
+                    //   ),
+                    // ),
+                  ],
+                ),
+              ),
+              if (statusButton != null)
+                Padding(
+                  padding: const EdgeInsets.symmetric(vertical: 3.0, horizontal: 3.0),
+                  child: Container(
+                    decoration: BoxDecoration(
+                      color: statusButton!.color,
+                      borderRadius: BorderRadius.circular(4),
+                    ),
+                    child: Center(
+                      child: Text(statusButton!.lable)
+                          .size(11)
+                          .bold(weight: FontWeight.w500)
+                          .color(statusButton?.textColor ?? Colors.black),
+                    ),
+                  ),
+                ),
+              Padding(
+                padding: const EdgeInsets.only(left: 10, right: 10, top: 8),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      property.title!.firstUpperCase(),
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                      style: TextStyle(
+                        color: Color(0xff333333),
+                        fontSize: 14,
+                        fontWeight: FontWeight.w500,
+                      ),
+                    ),
+                    SizedBox(height: 4),
+                    Row(
+                      children: [
+                        if (property.properyType.toString().toLowerCase() == "rent") ...[
                           Text(
-                            "Posted By ${property.customerRole == 1 ? 'Owner' : property.customerRole == 2 ? 'Agent' : property.customerRole == 3 ? 'Builder' : 'Housepecker'}",
+                            '₹${rentPrice}',
                             maxLines: 1,
                             overflow: TextOverflow.ellipsis,
                             style: TextStyle(
-                              color: Color(0xffa2a2a2),
-                              fontSize: 8,
-                              fontWeight: FontWeight.w400,
+                              color: Color(0xff333333),
+                              fontSize: 12,
+                              fontFamily: 'Roboto',
+                              fontWeight: FontWeight.w500,
+                            ),
+                          ),
+                        ] else ...[
+                          Text(
+                            '₹${formatAmount(int.parse(property.price!))}',
+                            maxLines: 1,
+                            overflow: TextOverflow.ellipsis,
+                            style: TextStyle(
+                              color: Color(0xff333333),
+                              fontSize: 12,
+                              fontFamily: 'Roboto',
+                              fontWeight: FontWeight.w500,
                             ),
                           ),
                         ],
+                        Padding(
+                          padding: const EdgeInsets.symmetric(horizontal: 4),
+                          child: Container(
+                            height: 12,
+                            width: 2,
+                            color: Colors.black54,
+                          ),
+                        ),
+                        Text(
+                          "${property.sqft} Sq.ft",
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
+                          style: TextStyle(
+                            color: Color(0xff494949),
+                            fontSize: 10,
+                            fontWeight: FontWeight.w400,
+                          ),
+                        ),
+                      ],
+                    ),
+                    SizedBox(height: 4),
+                    if (property.city != "")
+                      Padding(
+                        padding: const EdgeInsets.only(bottom: 4),
+                        child: Row(
+                          children: [
+                            Image.asset(
+                              "assets/Home/__location.png",
+                              width: 15,
+                              fit: BoxFit.cover,
+                              height: 15,
+                            ),
+                            SizedBox(width: 5),
+                            Expanded(
+                              child: Text(
+                                property.address?.trim() ?? "",
+                                maxLines: 1,
+                                overflow: TextOverflow.ellipsis,
+                                style: TextStyle(
+                                  color: Color(0xffa2a2a2),
+                                  fontSize: 10,
+                                  fontWeight: FontWeight.w400,
+                                ),
+                              ),
+                            ),
+                          ],
+                        ),
                       ),
-                    ],
-                  ),
+
+                    SizedBox(height: 5),
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.end,
+                      children: [
+                        Text(
+                          "Posted By ${property.customerRole == 1 ? 'Owner' : property.customerRole == 2 ? 'Agent' : property.customerRole == 3 ? 'Builder' : 'Housepecker'}",
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
+                          style: TextStyle(
+                            color: Color(0xffa2a2a2),
+                            fontSize: 8,
+                            fontWeight: FontWeight.w400,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ],
                 ),
-              ],
-            ),
+              ),
+            ],
           ),
         ),
       ),

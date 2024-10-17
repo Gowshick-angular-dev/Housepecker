@@ -1363,41 +1363,55 @@ class _ProjectFormFiveState extends State<ProjectFormFive> {
 
                   try {
                     if (!widget.isEdit!) {
+                      print('parameter_body: $body');
                       var response = await Api.post(url: Api.postProject, parameter: body);
-                      HelperUtils.showSnackBarMessage(
-                        context,
-                        UiUtils.getTranslatedLabel(context, "${response['message']}"),
-                        type: MessageType.success,
-                        messageDuration: 3,
-                      );
                       setState(() {
                         loading = false;
                       });
-                      Future.delayed(Duration.zero, () {
-                        Navigator.of(context)
-                            .pushReplacementNamed(Routes.main, arguments: {'from': "main"});
-                      });
+                      HelperUtils.showSnackBarMessage(
+                        context,
+                        UiUtils.getTranslatedLabel(
+                            context, "${response['message']}"),
+                        type: MessageType.success,
+                        messageDuration: 3,
+                      );
+                      if(!response['error']) {
+                        Future.delayed(Duration.zero, () {
+                          Navigator.of(context)
+                              .pushReplacementNamed(Routes.main, arguments: {'from': "main"});
+                        });
+                      }
                     } else {
                       var response = await Api.post(
                           url: Api.postProject + '?id=${widget.data!['id']}', parameter: body);
-                      HelperUtils.showSnackBarMessage(
-                        context,
-                        UiUtils.getTranslatedLabel(context, "${response['message']}"),
-                        type: MessageType.success,
-                        messageDuration: 3,
-                      );
                       setState(() {
                         loading = false;
                       });
-                      Future.delayed(Duration.zero, () {
-                        Navigator.of(context)
-                            .pushReplacementNamed(Routes.main, arguments: {'from': "main"});
-                      });
+                      HelperUtils.showSnackBarMessage(
+                        context,
+                        UiUtils.getTranslatedLabel(
+                            context, "${response['message']}"),
+                        type: MessageType.success,
+                        messageDuration: 3,
+                      );
+                      if(!response['error']) {
+                        Future.delayed(Duration.zero, () {
+                          Navigator.of(context)
+                              .pushReplacementNamed(Routes.main, arguments: {'from': "main"});
+                        });
+                      }
                     }
                   } catch (err) {
                     setState(() {
                       loading = false;
                     });
+                    HelperUtils.showSnackBarMessage(
+                      context,
+                      UiUtils.getTranslatedLabel(
+                          context, 'Exception: ${err}'),
+                      type: MessageType.success,
+                      messageDuration: 3,
+                    );
                   }
                 }
               },

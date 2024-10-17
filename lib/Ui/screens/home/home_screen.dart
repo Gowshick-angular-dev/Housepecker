@@ -82,9 +82,11 @@ import '../projects/projectDetailsScreen.dart';
 import '../projects/projectsListScreen.dart';
 import '../proprties/widgets/propertyListWidget.dart';
 import '../userprofile/userProfileScreen.dart';
+import '../widgets/AnimatedRoutes/blur_page_route.dart';
 import '../widgets/Erros/no_data_found.dart';
 import '../widgets/Erros/no_internet.dart';
 import '../widgets/Erros/something_went_wrong.dart';
+import '../widgets/all_gallary_image.dart';
 import '../widgets/like_button_widget.dart';
 import '../widgets/promoted_widget.dart';
 import '../widgets/shimmerLoadingContainer.dart';
@@ -2324,7 +2326,7 @@ class HomeScreenState extends State<HomeScreen>
             ],
           ),
         ),
-        // SizedBox(height: 20,),
+        SizedBox(height: 20,),
         if(propertyLoading)
           Padding(
             padding: const EdgeInsets.symmetric(horizontal: 15),
@@ -2332,7 +2334,7 @@ class HomeScreenState extends State<HomeScreen>
           ),
         if(!propertyLoading)
           Container(
-            height: 240,
+            height: 230,
             child: ListView.builder(
               itemCount: premiumPropertiesList.length,
               scrollDirection: Axis.horizontal,
@@ -2347,7 +2349,10 @@ class HomeScreenState extends State<HomeScreen>
                           premiumPropertiesList[index]),
                     });
                   },
-                  child: PropertyVerticalCard(property: PropertyModel.fromMap(premiumPropertiesList[index])),
+                  child: Padding(
+                    padding: EdgeInsets.only(left: index == 0 ? 10 : 0, right: 10),
+                    child: PropertyVerticalCard(property: PropertyModel.fromMap(premiumPropertiesList[index])),
+                  ),
                 );
               }
             ),
@@ -2481,7 +2486,7 @@ class HomeScreenState extends State<HomeScreen>
             ],
           ),
         ),
-        // SizedBox(height: 20,),
+        SizedBox(height: 20,),
         if(propertyLoading)
           Padding(
             padding: const EdgeInsets.symmetric(horizontal: 15),
@@ -2489,7 +2494,7 @@ class HomeScreenState extends State<HomeScreen>
           ),
         if(!propertyLoading)
           Container(
-            height: 240,
+            height: 230,
             child: ListView.builder(
                 itemCount: recentPropertiesList.length,
                 scrollDirection: Axis.horizontal,
@@ -2504,7 +2509,10 @@ class HomeScreenState extends State<HomeScreen>
                             recentPropertiesList[index]),
                       });
                     },
-                    child: PropertyVerticalCard(property: PropertyModel.fromMap(recentPropertiesList[index])),
+                    child: Padding(
+                      padding: EdgeInsets.only(left: index == 0 ? 10 : 0, right: 10),
+                      child: PropertyVerticalCard(property: PropertyModel.fromMap(recentPropertiesList[index])),
+                    ),
                   );
                 }
             ),
@@ -3013,11 +3021,11 @@ class _RecentPropertiesSectionWidgetState
   String formatAmount(number) {
     String result = '';
     if(number >= 10000000) {
-      result = '${number/10000000} Cr';
+      result = '${(number/10000000).toStringAsFixed(2)} Cr';
     } else if(number >= 100000) {
-      result = '${number/100000} Laks';
+      result = '${(number/100000).toStringAsFixed(2)} Laks';
     } else {
-      result = '$number';
+      result = number.toStringAsFixed(2);
     }
     return result;
   }
@@ -3052,7 +3060,7 @@ class _RecentPropertiesSectionWidgetState
         ),
         LayoutBuilder(builder: (context, c) {
           return SizedBox(
-            height: 200,
+            height: 190,
             child: GridView.builder(
               shrinkWrap: true,
               scrollDirection: Axis.horizontal,
@@ -3069,7 +3077,7 @@ class _RecentPropertiesSectionWidgetState
                   return Padding(
                     padding: EdgeInsets.only(left: (index == 0 ? 10 : 0), right: (widget.projectLoading! ? 10 : widget.projectList!.length) == (index + 1) ? 10 : 0),
                     child: Container(
-                      width: 230,
+                      width: 200,
                       child: GestureDetector(
                           onTap: () {
                             Navigator.push(
@@ -3109,42 +3117,6 @@ class _RecentPropertiesSectionWidgetState
                                                 widget.projectList![index]['image'] ?? "",
                                                 width: double.infinity,fit: BoxFit.cover,height: 103,
                                               ),
-                                              // const PositionedDirectional(
-                                              //     start: 5,
-                                              //     top: 5,
-                                              //     child: PromotedCard(
-                                              //         type: PromoteCardType.icon)),
-                                              // PositionedDirectional(
-                                              //   bottom: 6,
-                                              //   start: 6,
-                                              //   child: Container(
-                                              //     height: 19,
-                                              //     clipBehavior: Clip.antiAlias,
-                                              //     decoration: BoxDecoration(
-                                              //         color: context.color.secondaryColor
-                                              //             .withOpacity(0.7),
-                                              //         borderRadius:
-                                              //         BorderRadius.circular(4)),
-                                              //     child: BackdropFilter(
-                                              //       filter: ImageFilter.blur(
-                                              //           sigmaX: 2, sigmaY: 3),
-                                              //       child: Padding(
-                                              //         padding: const EdgeInsets.symmetric(
-                                              //             horizontal: 8.0),
-                                              //         child: Center(
-                                              //           child: Text(widget.projectList![index]['category'] != null ?
-                                              //             widget.projectList![index]['category']!['category'] : '',
-                                              //           )
-                                              //               .color(
-                                              //             context.color.textColorDark,
-                                              //           )
-                                              //               .bold(weight: FontWeight.w500)
-                                              //               .size(10),
-                                              //         ),
-                                              //       ),
-                                              //     ),
-                                              //   ),
-                                              // ),
                                               Positioned(
                                                 right: 8,
                                                 top: 8,
@@ -3216,6 +3188,56 @@ class _RecentPropertiesSectionWidgetState
                                                   ),
                                                 ),
                                               ),
+                                              if(widget.projectList![index]['gallary_images'] != null)
+                                                Positioned(
+                                                  right: 48,
+                                                  top: 8,
+                                                  child: InkWell(
+                                                    onTap: () {
+                                                      Navigator.push(context,
+                                                          BlurredRouter(
+                                                            builder: (context) {
+                                                              return AllGallaryImages(
+                                                                  images: widget.projectList![index]['gallary_images'] ?? [],
+                                                                  isProject: true);
+                                                            },
+                                                          ));
+                                                    },
+                                                    child: Container(
+                                                      width: 35,
+                                                      height: 25,
+                                                      decoration: BoxDecoration(
+                                                        color: Color(0xff000000).withOpacity(0.35),
+                                                        borderRadius: BorderRadius.circular(8),
+                                                        border: Border.all(width: 1, color: Color(0xffe0e0e0)),
+                                                        boxShadow: const [
+                                                          BoxShadow(
+                                                            color: Color.fromARGB(12, 0, 0, 0),
+                                                            offset: Offset(0, 2),
+                                                            blurRadius: 15,
+                                                            spreadRadius: 0,
+                                                          )
+                                                        ],
+                                                      ),
+                                                      child: Row(
+                                                        mainAxisAlignment: MainAxisAlignment.center,
+                                                        children: [
+                                                          Icon(
+                                                              Icons.image,
+                                                              color: Color(0xffe0e0e0),
+                                                              size: 15
+                                                          ),
+                                                          SizedBox(width: 3,),
+                                                          Text('${widget.projectList![index]['gallary_images']!.length}',
+                                                            style: TextStyle(
+                                                                color: Color(0xffe0e0e0),
+                                                                fontSize: 10
+                                                            ),),
+                                                        ],
+                                                      ),
+                                                    ),
+                                                  ),
+                                                ),
                                             ],
                                           ),
                                         ),
@@ -3240,20 +3262,18 @@ class _RecentPropertiesSectionWidgetState
                                             ),
                                           ),
                                           SizedBox(height: 4,),
-
+                                        if(widget.projectList![index]['min_price'] == null)
                                           Row(
                                             children: [
                                               Text(
-                                                '${widget.projectList![index]['project_details'].length > 0 ? formatAmount(widget.projectList![index]['project_details'][0]['avg_price'] ?? 0) : 0}'
-                                                    .toString()
-                                                    .formatAmount(
-                                                  prefix: true,
-                                                ),
+                                                '₹${widget.projectList![index]['project_details'].length > 0 ? formatAmount(widget.projectList![index]['project_details'][0]['avg_price'] ?? 0) : 0}'
+                                                    .toString(),
                                                 maxLines: 1,
                                                 overflow: TextOverflow.ellipsis,
                                                 style: TextStyle(
                                                     color: Color(0xff333333),
                                                     fontSize: 12,
+                                                    fontFamily: 'Robato',
                                                     fontWeight: FontWeight.w500
                                                 ),
                                               ),
@@ -3278,6 +3298,39 @@ class _RecentPropertiesSectionWidgetState
                                               ),
                                             ],
                                           ),
+                                        if(widget.projectList![index]['min_price'] != null)
+                                          Row(
+                                            children: [
+                                              Text(
+                                                '₹${formatAmount(widget.projectList![index]['min_price'] ?? 0)} - ${formatAmount(widget.projectList![index]['max_price'] ?? 0)}'
+                                                    .toString(),
+                                                maxLines: 1,
+                                                overflow: TextOverflow.ellipsis,
+                                                style: TextStyle(
+                                                    color: Color(0xff333333),
+                                                    fontSize: 12,
+                                                    fontFamily: 'Robato',
+                                                    fontWeight: FontWeight.w500
+                                                ),
+                                              ),
+                                            ],
+                                          ),
+                                        if(widget.projectList![index]['min_price'] != null)
+                                          Row(
+                                              children: [
+                                                Text(
+                                                  '${widget.projectList![index]['min_size']} - ${widget.projectList![index]['max_size']} Sq.ft'
+                                                      .toString(),
+                                                  maxLines: 1,
+                                                  overflow: TextOverflow.ellipsis,
+                                                  style: TextStyle(
+                                                      color: Color(0xffa2a2a2),
+                                                      fontSize: 10,
+                                                      fontWeight: FontWeight.w500
+                                                  ),
+                                                ),
+                                              ],
+                                            ),
                                           SizedBox(height: 4,),
                                           if (widget.projectList![index]['address'] != "")
                                             Padding(
