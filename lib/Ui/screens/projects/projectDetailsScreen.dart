@@ -233,11 +233,11 @@ class PropertyDetailsState extends State<ProjectDetails> {
   String formatAmount(number) {
     String result = '';
     if(number >= 10000000) {
-      result = '${number/10000000} Cr';
+      result = '${(number/10000000).toStringAsFixed(2)} Cr';
     } else if(number >= 100000) {
-      result = '${number/100000} Laks';
+      result = '${(number/100000).toStringAsFixed(2)} Laks';
     } else {
-      result = '$number';
+      result = number.toStringAsFixed(2);
     }
     return result;
   }
