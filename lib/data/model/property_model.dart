@@ -658,6 +658,33 @@ class Gallery {
   int get hashCode => id.hashCode ^ image.hashCode ^ imageUrl.hashCode;
 }
 
+class ProjectDocument {
+  final int id;
+  final String image;
+  final String imageUrl;
+  final bool? isVideo;
+
+
+  ProjectDocument({
+    required this.id,
+    required this.image,
+    required this.imageUrl,
+     this.isVideo
+  });
+
+  // Factory method to create a ProjectDocument from a JSON map
+  factory ProjectDocument.fromJson(Map<String, dynamic> json) {
+    return ProjectDocument(
+      id: json['id'],
+      image: json['name'],
+      imageUrl: json['name'],
+
+    );
+  }
+
+}
+
+
 class AssignedOutdoorFacility {
   int? id;
   int? propertyId;

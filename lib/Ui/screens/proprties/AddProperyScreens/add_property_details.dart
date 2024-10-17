@@ -66,7 +66,7 @@ class _AddPropertyDetailsState extends State<AddPropertyDetails> {
   late final TextEditingController _FLoorController =
       TextEditingController(text: widget.propertyDetails?['']);
   late final TextEditingController _sqftController =
-      TextEditingController(text: widget.propertyDetails?['sqft']);
+      TextEditingController(text: widget.propertyDetails?['sqft'].toString());
   late final TextEditingController _highlightController =
       TextEditingController(text: widget.propertyDetails?['highlight']);
   late final TextEditingController _brokerageControler =
@@ -124,6 +124,7 @@ class _AddPropertyDetailsState extends State<AddPropertyDetails> {
 
   @override
   void initState() {
+    print("dddddddd${widget.propertyDetails}");
     getAmenityList();
     getPackages();
     print ('THe selected Property Details ................................................${widget.propertyDetails?['id']}');

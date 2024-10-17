@@ -67,438 +67,6 @@ class _MyProjectScreenState extends State<MyProjectScreen> {
       ),
       body: Column(
         children: [
-          if(!loading)
-            Expanded(
-              child: GridView.builder(
-                padding: const EdgeInsets.all(15),
-                shrinkWrap: true,
-                controller: _pageScrollController,
-                itemCount: myProjectList.length,
-                gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
-                  crossAxisCount: 1,
-                  crossAxisSpacing: 10,
-                  mainAxisSpacing: 10,
-                  childAspectRatio: 1 / 0.4,
-                ),
-
-                itemBuilder: (context, index) {
-                  var item = myProjectList[index];
-                  return GestureDetector(
-                    onTap: () {
-                      // HelperUtils.share(context, property.id!, property?.slugId ?? "");
-                      Navigator.push(
-                        context,
-                        MaterialPageRoute(builder: (context) =>
-                            ProjectDetails(property: item, fromMyProperty: true,
-                                fromCompleteEnquiry: true, fromSlider: false, fromPropertyAddSuccess: true
-                            )),
-                      );
-                    },
-                    child: Container(
-                      padding: EdgeInsets.all(10),
-                      decoration: BoxDecoration(
-                          color: Colors.white,
-                          borderRadius: BorderRadius.circular(15),
-                          border: MatBorder.Border.all(
-                              width: 1,
-                              color: Color(0xffe0e0e0)
-                          )
-                      ),
-                      child: Row(
-                        children: [
-                          ClipRRect(
-                            borderRadius: BorderRadius.all(Radius.circular(15)),
-                            child: Container(
-                              height: double.infinity,
-                              width: 130,
-                              child: UiUtils.getImage(
-                                item['image'] ?? "",
-                                width: double.infinity,fit: BoxFit.cover,height: 103,
-                              ),
-                            ),
-                          ),
-                          SizedBox(width: 10,),
-                          Expanded(
-                            child: Column(
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                              children: [
-                                Text('${item['title']}',
-                                  maxLines: 2,overflow:TextOverflow.ellipsis,
-                                  style: TextStyle(
-                                      fontSize: 13,
-                                      color: Color(0xff333333),
-                                      fontWeight: FontWeight.w600),
-                                ),
-                                Row(
-                                  children: [
-                                    Image.asset("assets/Home/__location.png",width:12,fit: BoxFit.cover,height: 12,),
-                                    SizedBox(width: 2,),
-                                    Expanded(
-                                      child: Text('${item['address']}',
-                                        maxLines: 2,overflow:TextOverflow.ellipsis,
-                                        style: TextStyle(
-                                          fontSize: 9,
-                                          color: Color(0xff333333),
-                                          fontWeight: FontWeight.w500),
-                                      ),
-                                    )
-                                  ],
-                                ),
-                                Row(
-                                  children: [
-                                    Text('Brokerage :   ${item['project_details'].length > 0 ? item['project_details'][0]['brokerage'] : 'No'}',style: TextStyle(
-                                        fontSize: 9,
-                                        color: Color(0xff333333),
-                                        fontWeight: FontWeight.w500),
-                                    )
-                                  ],
-                                ),
-                          /*      Row(
-                                  mainAxisAlignment: MainAxisAlignment.start,
-                                  children: [
-                                    InkWell(
-                                      onTap: () {
-                                        Navigator.push(
-                                          context,
-                                          MaterialPageRoute(builder: (context) => ProjectFormOne(data: item, isEdit: true)),
-                                        );
-                                      },
-                                      child: Container(
-                                        padding: EdgeInsets.all(5),
-                                        decoration: BoxDecoration(
-                                          color: Colors.green,
-                                          borderRadius: BorderRadius.circular(15),
-                                        ),
-                                        child: Row(
-                                          children: [
-                                            // Text('Edit',style: TextStyle(
-                                            //     fontSize: 11,
-                                            //     color: Colors.white,
-                                            //     fontWeight: FontWeight.w500),
-                                            // ),
-                                            // SizedBox(width: 3,),
-                                            Icon(Icons.edit,color:Colors.white,size: 15,),
-                                          ],
-                                        ),
-                                      ),
-                                    ),
-                                    SizedBox(width: 5),
-                                    InkWell(
-                                      onTap: () {
-                                        showDialog(
-                                          context: context,
-                                          barrierDismissible: false,
-                                          builder: (BuildContext context) {
-                                            // return object of type Dialog
-                                            return Dialog(
-                                              elevation: 0.0,
-                                              shape:
-                                              RoundedRectangleBorder(borderRadius: BorderRadius.circular(20.0)),
-                                              child: Wrap(
-                                                children: [
-                                                  Container(
-                                                    padding: EdgeInsets.all(20.0),
-                                                    child: Column(
-                                                      mainAxisAlignment: MainAxisAlignment.center,
-                                                      crossAxisAlignment: CrossAxisAlignment.center,
-                                                      children: <Widget>[
-                                                        Text('Are You Sure',
-                                                          style: TextStyle(
-                                                              fontSize: 15,
-                                                              color: Color(0xff333333),
-                                                              fontWeight: FontWeight.w600
-                                                          ),
-                                                        ),
-                                                        SizedBox(height: 15,),
-                                                        Text('Do you want to delete this ?'),
-                                                        SizedBox(height: 15,),
-                                                        Row(
-                                                          mainAxisAlignment: MainAxisAlignment.end,
-                                                          children: [
-                                                            InkWell(
-                                                              onTap: () {
-                                                                Navigator.pop(context);
-                                                              },
-                                                              child: Container(
-                                                                padding: EdgeInsets.only(left: 10, right: 10, top: 5, bottom: 5),
-                                                                decoration: BoxDecoration(
-                                                                  color: Colors.green,
-                                                                  borderRadius: BorderRadius.circular(15),
-                                                                ),
-                                                                child: Row(
-                                                                  children: [
-                                                                    Text('Cancel',style: TextStyle(
-                                                                        fontSize: 13,
-                                                                        color: Colors.white,
-                                                                        fontWeight: FontWeight.w500),
-                                                                    ),
-                                                                  ],
-                                                                ),
-                                                              ),
-                                                            ),
-                                                            SizedBox(width: 10),
-                                                            InkWell(
-                                                              onTap: () async {
-                                                                var response = await Api.post(url: Api.deleteProject, parameter: {
-                                                                  "id": item['id']
-                                                                });
-                                                                if(!response['error']) {
-                                                                  HelperUtils.showSnackBarMessage(
-                                                                      context, UiUtils.getTranslatedLabel(context, "${response['message']}"),
-                                                                      type: MessageType.warning, messageDuration: 3);
-                                                                  Navigator.pop(context);
-                                                                  getMyprojects();
-                                                                }
-                                                              },
-                                                              child: Container(
-                                                                padding: EdgeInsets.only(left: 10, right: 10, top: 5, bottom: 5),
-                                                                decoration: BoxDecoration(
-                                                                  color: Colors.red,
-                                                                  borderRadius: BorderRadius.circular(15),
-                                                                ),
-                                                                child: Row(
-                                                                  children: [
-                                                                    Text('Delete',style: TextStyle(
-                                                                        fontSize: 13,
-                                                                        color: Colors.white,
-                                                                        fontWeight: FontWeight.w500),
-                                                                    ),
-                                                                  ],
-                                                                ),
-                                                              ),
-                                                            ),
-                                                          ],
-                                                        ),
-                                                      ],
-                                                    ),
-                                                  ),
-                                                ],
-                                              ),
-                                            );
-                                          },
-                                        );
-                                      },
-                                      child: Container(
-                                        padding: EdgeInsets.all(5),
-                                        decoration: BoxDecoration(
-                                          color: Colors.red,
-                                          borderRadius: BorderRadius.circular(15),
-                                        ),
-                                        child: Row(
-                                          children: [
-                                            // Text('Delete',style: TextStyle(
-                                            //     fontSize: 11,
-                                            //     color: Colors.white,
-                                            //     fontWeight: FontWeight.w500),
-                                            // ),
-                                            // SizedBox(width: 3,),
-                                            Icon(Icons.delete, color:Colors.white, size: 15,),
-                                          ],
-                                        ),
-                                      ),
-                                    ),
-                                    SizedBox(width: 5),
-
-                                  ],
-                                ),*/
-                                Row(
-                                  mainAxisAlignment: MainAxisAlignment.start,
-                                  children: [
-                                    GestureDetector(
-                                      onTap: (){
-                                        Navigator.push(
-                                          context,
-                                          MaterialPageRoute(
-                                            builder: (context) => ProjectInterestedUsersDetails(projectId:item['id']??0, ),
-                                          ),
-                                        );
-                                      },
-                                      child: Container(
-                                        height: 25,
-                                        padding: EdgeInsets.symmetric(horizontal: 10),
-                                        decoration: BoxDecoration(
-                                            borderRadius: BorderRadius.circular(6),
-                                            border: Border.all(color: Color(0xff117af9))
-                                        ),child: Row(
-                                        mainAxisAlignment: MainAxisAlignment.center,
-                                        children: [
-                                          Image.asset("assets/assets/Images/eye-icon.png",height: 15,),
-                                          SizedBox(width: 5,),
-                                          Text(item['total_interested_users']?.toString()??"0",style: TextStyle(fontSize: 12,color:  Color(0xff117af9)),)
-                                        ],
-                                      ),
-                                      ),
-                                    ),
-                                    SizedBox(width: 15,),
-                                    Container(
-                                      height: 28,
-                                      padding: EdgeInsets.symmetric(horizontal: 15),
-                                      decoration: BoxDecoration(
-                                          borderRadius: BorderRadius.circular(6),
-                                          color:item['status'] == 0?Color(0xfffff1f1):Color(0xffd9efcf),
-                                          border: Border.all(color:  item['status'] == 0?Colors.red:Colors.green)
-                                      ),child: Row(
-                                      mainAxisAlignment: MainAxisAlignment.center,
-                                      children: [
-                                        Text( item['status'] == 0? "InActive" : "Active",style: TextStyle(fontSize: 12,color:item['status'] == 0?Colors.red: Colors.green),)
-                                      ],
-                                    ),
-                                    ),
-                                    // InkWell(
-                                    //   onTap: () {
-                                    //     Navigator.push(
-                                    //       context,
-                                    //       MaterialPageRoute(builder: (context) => ProjectFormOne(data: item, isEdit: true)),
-                                    //     );
-                                    //   },
-                                    //   child: Container(
-                                    //     padding: EdgeInsets.all(5),
-                                    //     decoration: BoxDecoration(
-                                    //       color: Colors.green,
-                                    //       borderRadius: BorderRadius.circular(15),
-                                    //     ),
-                                    //     child: Row(
-                                    //       children: [
-                                    //         // Text('Edit',style: TextStyle(
-                                    //         //     fontSize: 11,
-                                    //         //     color: Colors.white,
-                                    //         //     fontWeight: FontWeight.w500),
-                                    //         // ),
-                                    //         // SizedBox(width: 3,),
-                                    //         Icon(Icons.edit,color:Colors.white,size: 15,),
-                                    //       ],
-                                    //     ),
-                                    //   ),
-                                    // ),
-                                    // InkWell(
-                                    //   onTap: () {
-                                    //     showDialog(
-                                    //       context: context,
-                                    //       barrierDismissible: false,
-                                    //       builder: (BuildContext context) {
-                                    //         // return object of type Dialog
-                                    //         return Dialog(
-                                    //           elevation: 0.0,
-                                    //           shape:
-                                    //           RoundedRectangleBorder(borderRadius: BorderRadius.circular(20.0)),
-                                    //           child: Wrap(
-                                    //             children: [
-                                    //               Container(
-                                    //                 padding: EdgeInsets.all(20.0),
-                                    //                 child: Column(
-                                    //                   mainAxisAlignment: MainAxisAlignment.center,
-                                    //                   crossAxisAlignment: CrossAxisAlignment.center,
-                                    //                   children: <Widget>[
-                                    //                     Text('Are You Sure',
-                                    //                       style: TextStyle(
-                                    //                           fontSize: 15,
-                                    //                           color: Color(0xff333333),
-                                    //                           fontWeight: FontWeight.w600
-                                    //                       ),
-                                    //                     ),
-                                    //                     SizedBox(height: 15,),
-                                    //                     Text('Do you want to delete this ?'),
-                                    //                     SizedBox(height: 15,),
-                                    //                     Row(
-                                    //                       mainAxisAlignment: MainAxisAlignment.end,
-                                    //                       children: [
-                                    //                         InkWell(
-                                    //                           onTap: () {
-                                    //                             Navigator.pop(context);
-                                    //                           },
-                                    //                           child: Container(
-                                    //                             padding: EdgeInsets.only(left: 10, right: 10, top: 5, bottom: 5),
-                                    //                             decoration: BoxDecoration(
-                                    //                               color: Colors.green,
-                                    //                               borderRadius: BorderRadius.circular(15),
-                                    //                             ),
-                                    //                             child: Row(
-                                    //                               children: [
-                                    //                                 Text('Cancel',style: TextStyle(
-                                    //                                     fontSize: 13,
-                                    //                                     color: Colors.white,
-                                    //                                     fontWeight: FontWeight.w500),
-                                    //                                 ),
-                                    //                               ],
-                                    //                             ),
-                                    //                           ),
-                                    //                         ),
-                                    //                         SizedBox(width: 10),
-                                    //                         InkWell(
-                                    //                           onTap: () async {
-                                    //                             var response = await Api.post(url: Api.deleteProject, parameter: {
-                                    //                               "id": item['id']
-                                    //                             });
-                                    //                             if(!response['error']) {
-                                    //                               HelperUtils.showSnackBarMessage(
-                                    //                                   context, UiUtils.getTranslatedLabel(context, "${response['message']}"),
-                                    //                                   type: MessageType.warning, messageDuration: 3);
-                                    //                               Navigator.pop(context);
-                                    //                               getMyprojects();
-                                    //                             }
-                                    //                           },
-                                    //                           child: Container(
-                                    //                             padding: EdgeInsets.only(left: 10, right: 10, top: 5, bottom: 5),
-                                    //                             decoration: BoxDecoration(
-                                    //                               color: Colors.red,
-                                    //                               borderRadius: BorderRadius.circular(15),
-                                    //                             ),
-                                    //                             child: Row(
-                                    //                               children: [
-                                    //                                 Text('Delete',style: TextStyle(
-                                    //                                     fontSize: 13,
-                                    //                                     color: Colors.white,
-                                    //                                     fontWeight: FontWeight.w500),
-                                    //                                 ),
-                                    //                               ],
-                                    //                             ),
-                                    //                           ),
-                                    //                         ),
-                                    //                       ],
-                                    //                     ),
-                                    //                   ],
-                                    //                 ),
-                                    //               ),
-                                    //             ],
-                                    //           ),
-                                    //         );
-                                    //       },
-                                    //     );
-                                    //   },
-                                    //   child: Container(
-                                    //     padding: EdgeInsets.all(5),
-                                    //     decoration: BoxDecoration(
-                                    //       color: Colors.red,
-                                    //       borderRadius: BorderRadius.circular(15),
-                                    //     ),
-                                    //     child: Row(
-                                    //       children: [
-                                    //         // Text('Delete',style: TextStyle(
-                                    //         //     fontSize: 11,
-                                    //         //     color: Colors.white,
-                                    //         //     fontWeight: FontWeight.w500),
-                                    //         // ),
-                                    //         // SizedBox(width: 3,),
-                                    //         Icon(Icons.delete, color:Colors.white, size: 15,),
-                                    //       ],
-                                    //     ),
-                                    //   ),
-                                    // ),
-                                    // SizedBox()
-
-                                  ],
-                                )
-                              ],
-                            ),
-                          ),
-                        ],
-                      ),
-                    ),
-                  );
-                },
-              ),
-            ),
           if(loading)
             Expanded(
               child: SingleChildScrollView(
@@ -562,7 +130,639 @@ class _MyProjectScreenState extends State<MyProjectScreen> {
                   ],
                 ),
               ),
-            ),
+            )
+          else if (myProjectList != null && myProjectList.isNotEmpty)
+            Expanded(
+              child: GridView.builder(
+                padding: const EdgeInsets.all(15),
+                shrinkWrap: true,
+                controller: _pageScrollController,
+                itemCount: myProjectList.length,
+                gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+                  crossAxisCount: 1,
+                  crossAxisSpacing: 10,
+                  mainAxisSpacing: 10,
+                  childAspectRatio: 1 / 0.4,
+                ),
+
+                itemBuilder: (context, index) {
+                  var item = myProjectList[index];
+                  return Stack(
+                    children: [
+                      GestureDetector(
+                        onTap: () {
+                          Navigator.push(
+                            context,
+                            MaterialPageRoute(builder: (context) =>
+                                ProjectDetails(property: item, fromMyProperty: true,
+                                    fromCompleteEnquiry: true, fromSlider: false, fromPropertyAddSuccess: true
+                                )),
+                          );
+                        },
+                        child: Container(
+                          padding: EdgeInsets.all(10),
+                          decoration: BoxDecoration(
+                              color: Colors.white,
+                              borderRadius: BorderRadius.circular(15),
+                              border: MatBorder.Border.all(
+                                  width: 1,
+                                  color: Color(0xffe0e0e0)
+                              )
+                          ),
+                          child: Row(
+                            children: [
+                              Stack(
+                                children: [
+                                  ClipRRect(
+                                    borderRadius: BorderRadius.all(Radius.circular(15)),
+                                    child: Container(
+                                      height: double.infinity,
+                                      width: 130,
+                                      child: UiUtils.getImage(
+                                        item['image'] ?? "",
+                                        width: double.infinity,fit: BoxFit.cover,height: 103,
+                                      ),
+                                    ),
+                                  ),
+                                  Positioned(
+                                    top: 10,
+                                    left: 0,
+                                    child: Container(
+                                      padding: EdgeInsets.symmetric(horizontal: 5,),
+                                      height: 20,
+                                      decoration: const BoxDecoration(
+                                        color: Colors.black54,
+                                        borderRadius: BorderRadius.only(
+                                          topRight: Radius.circular(20),
+                                          bottomRight: Radius.circular(20),
+                                        ),
+                                      ),
+                                      alignment: Alignment.centerLeft,
+                                      child: Text(
+                                        item['category']?['category'] ?? "",
+                                        style: const TextStyle(
+                                          color: Colors.white,
+                                          fontSize: 10,
+                                          fontWeight: FontWeight.w500,
+                                        ),
+                                      ),
+                                    ),
+                                  ),
+                                ],
+                              ),
+                              SizedBox(width: 10,),
+                              Expanded(
+                                child: Column(
+                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                  mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                                  children: [
+                                    Text('${item['title']}',
+                                      maxLines: 2,overflow:TextOverflow.ellipsis,
+                                      style: TextStyle(
+                                          fontSize: 13,
+                                          color: Color(0xff333333),
+                                          fontWeight: FontWeight.w600),
+                                    ),
+                                    Row(
+                                      children: [
+                                        Image.asset("assets/Home/__location.png",width:12,fit: BoxFit.cover,height: 12,),
+                                        SizedBox(width: 2,),
+                                        Expanded(
+                                          child: Text('${item['address']}',
+                                            maxLines: 2,overflow:TextOverflow.ellipsis,
+                                            style: TextStyle(
+                                              fontSize: 9,
+                                              color: Color(0xff333333),
+                                              fontWeight: FontWeight.w500),
+                                          ),
+                                        )
+                                      ],
+                                    ),
+                                    Text(
+                                      item['project_details'] != null && item['project_details'].isNotEmpty
+                                          ? item['project_details'][0]['project_status_name'] ?? ''
+                                          : '',
+                                      maxLines: 2,
+                                      overflow: TextOverflow.ellipsis,
+                                      style: TextStyle(
+                                        fontSize: 9,
+                                        color: Color(0xff333333),
+                                        fontWeight: FontWeight.w500,
+                                      ),
+                                    ),
+                                    Row(
+                                      children: [
+                                        Text('${item['total_click']} Views',
+                                          maxLines: 2,overflow:TextOverflow.ellipsis,
+                                          style: TextStyle(
+                                              fontSize: 9,
+                                              color: Color(0xff333333),
+                                              fontWeight: FontWeight.w500),
+                                        ),
+                                        SizedBox(width: 5,),
+                                        Text("|",     style: TextStyle(
+                                            fontSize: 9,
+                                            color: Color(0xff333333),
+                                            fontWeight: FontWeight.w500),),
+                                        SizedBox(width: 5,),
+                                        Text('Posted On : ${item['post_created']}',
+                                          maxLines: 2,overflow:TextOverflow.ellipsis,
+                                          style: TextStyle(
+                                              fontSize: 9,
+                                              color: Color(0xff333333),
+                                              fontWeight: FontWeight.w500),
+                                        ),
+
+                                      ],
+                                    ),
+
+                                    /*      Row(
+                                      mainAxisAlignment: MainAxisAlignment.start,
+                                      children: [
+                                        InkWell(
+                                          onTap: () {
+                                            Navigator.push(
+                                              context,
+                                              MaterialPageRoute(builder: (context) => ProjectFormOne(data: item, isEdit: true)),
+                                            );
+                                          },
+                                          child: Container(
+                                            padding: EdgeInsets.all(5),
+                                            decoration: BoxDecoration(
+                                              color: Colors.green,
+                                              borderRadius: BorderRadius.circular(15),
+                                            ),
+                                            child: Row(
+                                              children: [
+                                                // Text('Edit',style: TextStyle(
+                                                //     fontSize: 11,
+                                                //     color: Colors.white,
+                                                //     fontWeight: FontWeight.w500),
+                                                // ),
+                                                // SizedBox(width: 3,),
+                                                Icon(Icons.edit,color:Colors.white,size: 15,),
+                                              ],
+                                            ),
+                                          ),
+                                        ),
+                                        SizedBox(width: 5),
+                                        InkWell(
+                                          onTap: () {
+                                            showDialog(
+                                              context: context,
+                                              barrierDismissible: false,
+                                              builder: (BuildContext context) {
+                                                // return object of type Dialog
+                                                return Dialog(
+                                                  elevation: 0.0,
+                                                  shape:
+                                                  RoundedRectangleBorder(borderRadius: BorderRadius.circular(20.0)),
+                                                  child: Wrap(
+                                                    children: [
+                                                      Container(
+                                                        padding: EdgeInsets.all(20.0),
+                                                        child: Column(
+                                                          mainAxisAlignment: MainAxisAlignment.center,
+                                                          crossAxisAlignment: CrossAxisAlignment.center,
+                                                          children: <Widget>[
+                                                            Text('Are You Sure',
+                                                              style: TextStyle(
+                                                                  fontSize: 15,
+                                                                  color: Color(0xff333333),
+                                                                  fontWeight: FontWeight.w600
+                                                              ),
+                                                            ),
+                                                            SizedBox(height: 15,),
+                                                            Text('Do you want to delete this ?'),
+                                                            SizedBox(height: 15,),
+                                                            Row(
+                                                              mainAxisAlignment: MainAxisAlignment.end,
+                                                              children: [
+                                                                InkWell(
+                                                                  onTap: () {
+                                                                    Navigator.pop(context);
+                                                                  },
+                                                                  child: Container(
+                                                                    padding: EdgeInsets.only(left: 10, right: 10, top: 5, bottom: 5),
+                                                                    decoration: BoxDecoration(
+                                                                      color: Colors.green,
+                                                                      borderRadius: BorderRadius.circular(15),
+                                                                    ),
+                                                                    child: Row(
+                                                                      children: [
+                                                                        Text('Cancel',style: TextStyle(
+                                                                            fontSize: 13,
+                                                                            color: Colors.white,
+                                                                            fontWeight: FontWeight.w500),
+                                                                        ),
+                                                                      ],
+                                                                    ),
+                                                                  ),
+                                                                ),
+                                                                SizedBox(width: 10),
+                                                                InkWell(
+                                                                  onTap: () async {
+                                                                    var response = await Api.post(url: Api.deleteProject, parameter: {
+                                                                      "id": item['id']
+                                                                    });
+                                                                    if(!response['error']) {
+                                                                      HelperUtils.showSnackBarMessage(
+                                                                          context, UiUtils.getTranslatedLabel(context, "${response['message']}"),
+                                                                          type: MessageType.warning, messageDuration: 3);
+                                                                      Navigator.pop(context);
+                                                                      getMyprojects();
+                                                                    }
+                                                                  },
+                                                                  child: Container(
+                                                                    padding: EdgeInsets.only(left: 10, right: 10, top: 5, bottom: 5),
+                                                                    decoration: BoxDecoration(
+                                                                      color: Colors.red,
+                                                                      borderRadius: BorderRadius.circular(15),
+                                                                    ),
+                                                                    child: Row(
+                                                                      children: [
+                                                                        Text('Delete',style: TextStyle(
+                                                                            fontSize: 13,
+                                                                            color: Colors.white,
+                                                                            fontWeight: FontWeight.w500),
+                                                                        ),
+                                                                      ],
+                                                                    ),
+                                                                  ),
+                                                                ),
+                                                              ],
+                                                            ),
+                                                          ],
+                                                        ),
+                                                      ),
+                                                    ],
+                                                  ),
+                                                );
+                                              },
+                                            );
+                                          },
+                                          child: Container(
+                                            padding: EdgeInsets.all(5),
+                                            decoration: BoxDecoration(
+                                              color: Colors.red,
+                                              borderRadius: BorderRadius.circular(15),
+                                            ),
+                                            child: Row(
+                                              children: [
+                                                // Text('Delete',style: TextStyle(
+                                                //     fontSize: 11,
+                                                //     color: Colors.white,
+                                                //     fontWeight: FontWeight.w500),
+                                                // ),
+                                                // SizedBox(width: 3,),
+                                                Icon(Icons.delete, color:Colors.white, size: 15,),
+                                              ],
+                                            ),
+                                          ),
+                                        ),
+                                        SizedBox(width: 5),
+
+                                      ],
+                                    ),*/
+                                    Row(
+                                      mainAxisAlignment: MainAxisAlignment.start,
+                                      children: [
+                                        GestureDetector(
+                                          onTap: (){
+                                            Navigator.push(
+                                              context,
+                                              MaterialPageRoute(
+                                                builder: (context) => ProjectInterestedUsersDetails(projectId:item['id']??0, ),
+                                              ),
+                                            );
+                                          },
+                                          child: Container(
+                                            height: 25,
+                                            padding: EdgeInsets.symmetric(horizontal: 10),
+                                            decoration: BoxDecoration(
+                                                borderRadius: BorderRadius.circular(6),
+                                                border: Border.all(color: Color(0xff117af9))
+                                            ),child: Row(
+                                            mainAxisAlignment: MainAxisAlignment.center,
+                                            children: [
+                                              Image.asset("assets/assets/Images/eye-icon.png",height: 15,),
+                                              SizedBox(width: 5,),
+                                              Text(item['total_interested_users']?.toString()??"0",style: TextStyle(fontSize: 12,color:  Color(0xff117af9)),)
+                                            ],
+                                          ),
+                                          ),
+                                        ),
+                                        SizedBox(width: 15,),
+                                        Container(
+                                          height: 28,
+                                          padding: EdgeInsets.symmetric(horizontal: 15),
+                                          decoration: BoxDecoration(
+                                              borderRadius: BorderRadius.circular(6),
+                                              color:item['status'] == 0?Color(0xfffff1f1):Color(0xffd9efcf),
+                                              border: Border.all(color:  item['status'] == 0?Colors.red:Colors.green)
+                                          ),child: Row(
+                                          mainAxisAlignment: MainAxisAlignment.center,
+                                          children: [
+                                            Text( item['status'] == 0? "InActive" : "Active",style: TextStyle(fontSize: 12,color:item['status'] == 0?Colors.red: Colors.green),)
+                                          ],
+                                        ),
+                                        ),
+                                        // InkWell(
+                                        //   onTap: () {
+                                        //     Navigator.push(
+                                        //       context,
+                                        //       MaterialPageRoute(builder: (context) => ProjectFormOne(data: item, isEdit: true)),
+                                        //     );
+                                        //   },
+                                        //   child: Container(
+                                        //     padding: EdgeInsets.all(5),
+                                        //     decoration: BoxDecoration(
+                                        //       color: Colors.green,
+                                        //       borderRadius: BorderRadius.circular(15),
+                                        //     ),
+                                        //     child: Row(
+                                        //       children: [
+                                        //         // Text('Edit',style: TextStyle(
+                                        //         //     fontSize: 11,
+                                        //         //     color: Colors.white,
+                                        //         //     fontWeight: FontWeight.w500),
+                                        //         // ),
+                                        //         // SizedBox(width: 3,),
+                                        //         Icon(Icons.edit,color:Colors.white,size: 15,),
+                                        //       ],
+                                        //     ),
+                                        //   ),
+                                        // ),
+                                        // InkWell(
+                                        //   onTap: () {
+                                        //     showDialog(
+                                        //       context: context,
+                                        //       barrierDismissible: false,
+                                        //       builder: (BuildContext context) {
+                                        //         // return object of type Dialog
+                                        //         return Dialog(
+                                        //           elevation: 0.0,
+                                        //           shape:
+                                        //           RoundedRectangleBorder(borderRadius: BorderRadius.circular(20.0)),
+                                        //           child: Wrap(
+                                        //             children: [
+                                        //               Container(
+                                        //                 padding: EdgeInsets.all(20.0),
+                                        //                 child: Column(
+                                        //                   mainAxisAlignment: MainAxisAlignment.center,
+                                        //                   crossAxisAlignment: CrossAxisAlignment.center,
+                                        //                   children: <Widget>[
+                                        //                     Text('Are You Sure',
+                                        //                       style: TextStyle(
+                                        //                           fontSize: 15,
+                                        //                           color: Color(0xff333333),
+                                        //                           fontWeight: FontWeight.w600
+                                        //                       ),
+                                        //                     ),
+                                        //                     SizedBox(height: 15,),
+                                        //                     Text('Do you want to delete this ?'),
+                                        //                     SizedBox(height: 15,),
+                                        //                     Row(
+                                        //                       mainAxisAlignment: MainAxisAlignment.end,
+                                        //                       children: [
+                                        //                         InkWell(
+                                        //                           onTap: () {
+                                        //                             Navigator.pop(context);
+                                        //                           },
+                                        //                           child: Container(
+                                        //                             padding: EdgeInsets.only(left: 10, right: 10, top: 5, bottom: 5),
+                                        //                             decoration: BoxDecoration(
+                                        //                               color: Colors.green,
+                                        //                               borderRadius: BorderRadius.circular(15),
+                                        //                             ),
+                                        //                             child: Row(
+                                        //                               children: [
+                                        //                                 Text('Cancel',style: TextStyle(
+                                        //                                     fontSize: 13,
+                                        //                                     color: Colors.white,
+                                        //                                     fontWeight: FontWeight.w500),
+                                        //                                 ),
+                                        //                               ],
+                                        //                             ),
+                                        //                           ),
+                                        //                         ),
+                                        //                         SizedBox(width: 10),
+                                        //                         InkWell(
+                                        //                           onTap: () async {
+                                        //                             var response = await Api.post(url: Api.deleteProject, parameter: {
+                                        //                               "id": item['id']
+                                        //                             });
+                                        //                             if(!response['error']) {
+                                        //                               HelperUtils.showSnackBarMessage(
+                                        //                                   context, UiUtils.getTranslatedLabel(context, "${response['message']}"),
+                                        //                                   type: MessageType.warning, messageDuration: 3);
+                                        //                               Navigator.pop(context);
+                                        //                               getMyprojects();
+                                        //                             }
+                                        //                           },
+                                        //                           child: Container(
+                                        //                             padding: EdgeInsets.only(left: 10, right: 10, top: 5, bottom: 5),
+                                        //                             decoration: BoxDecoration(
+                                        //                               color: Colors.red,
+                                        //                               borderRadius: BorderRadius.circular(15),
+                                        //                             ),
+                                        //                             child: Row(
+                                        //                               children: [
+                                        //                                 Text('Delete',style: TextStyle(
+                                        //                                     fontSize: 13,
+                                        //                                     color: Colors.white,
+                                        //                                     fontWeight: FontWeight.w500),
+                                        //                                 ),
+                                        //                               ],
+                                        //                             ),
+                                        //                           ),
+                                        //                         ),
+                                        //                       ],
+                                        //                     ),
+                                        //                   ],
+                                        //                 ),
+                                        //               ),
+                                        //             ],
+                                        //           ),
+                                        //         );
+                                        //       },
+                                        //     );
+                                        //   },
+                                        //   child: Container(
+                                        //     padding: EdgeInsets.all(5),
+                                        //     decoration: BoxDecoration(
+                                        //       color: Colors.red,
+                                        //       borderRadius: BorderRadius.circular(15),
+                                        //     ),
+                                        //     child: Row(
+                                        //       children: [
+                                        //         // Text('Delete',style: TextStyle(
+                                        //         //     fontSize: 11,
+                                        //         //     color: Colors.white,
+                                        //         //     fontWeight: FontWeight.w500),
+                                        //         // ),
+                                        //         // SizedBox(width: 3,),
+                                        //         Icon(Icons.delete, color:Colors.white, size: 15,),
+                                        //       ],
+                                        //     ),
+                                        //   ),
+                                        // ),
+                                        // SizedBox()
+
+                                      ],
+                                    )
+                                  ],
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
+                      ),
+                      Positioned(
+                          top: 0,
+                          right: 0,
+                          child:  PopupMenuButton<int>(
+                            icon: const Icon(
+                              Icons.more_vert,
+                              size: 20,
+                              color: Colors.black,
+                            ),
+                            itemBuilder: (context) => [
+                              PopupMenuItem<int>(
+                                onTap: () async {
+                                      Navigator.push(
+                                        context,
+                                        MaterialPageRoute(builder: (context) => ProjectFormOne(data: item, isEdit: true)),
+                                      );
+                                },
+                                value: 1,
+                                child:  const Row(
+                                  children: [
+                                    Icon(Icons.edit,color:Color(0xff117af9),size: 17,),
+                                    SizedBox(width: 8,),
+                                    Text("Edit", style: TextStyle(color: Colors.black, fontWeight: FontWeight.w500,fontSize: 12),),
+
+
+                                  ],
+                                ),
+                              ),
+                              PopupMenuItem<int>(
+                                onTap: () async {
+                                      showDialog(
+                                        context: context,
+                                        barrierDismissible: false,
+                                        builder: (BuildContext context) {
+                                          // return object of type Dialog
+                                          return Dialog(
+                                            elevation: 0.0,
+                                            shape:
+                                            RoundedRectangleBorder(borderRadius: BorderRadius.circular(20.0)),
+                                            child: Wrap(
+                                              children: [
+                                                Container(
+                                                  padding: EdgeInsets.all(20.0),
+                                                  child: Column(
+                                                    mainAxisAlignment: MainAxisAlignment.center,
+                                                    crossAxisAlignment: CrossAxisAlignment.center,
+                                                    children: <Widget>[
+                                                      Text('Are You Sure',
+                                                        style: TextStyle(
+                                                            fontSize: 15,
+                                                            color: Color(0xff333333),
+                                                            fontWeight: FontWeight.w600
+                                                        ),
+                                                      ),
+                                                      SizedBox(height: 15,),
+                                                      Text('Do you want to delete this ?'),
+                                                      SizedBox(height: 15,),
+                                                      Row(
+                                                        mainAxisAlignment: MainAxisAlignment.end,
+                                                        children: [
+                                                          InkWell(
+                                                            onTap: () {
+                                                              Navigator.pop(context);
+                                                            },
+                                                            child: Container(
+                                                              padding: EdgeInsets.only(left: 10, right: 10, top: 5, bottom: 5),
+                                                              decoration: BoxDecoration(
+                                                                color: Colors.green,
+                                                                borderRadius: BorderRadius.circular(6),
+                                                              ),
+                                                              child: Row(
+                                                                children: [
+                                                                  Text('Cancel',style: TextStyle(
+                                                                      fontSize: 13,
+                                                                      color: Colors.white,
+                                                                      fontWeight: FontWeight.w500),
+                                                                  ),
+                                                                ],
+                                                              ),
+                                                            ),
+                                                          ),
+                                                          SizedBox(width: 10),
+                                                          InkWell(
+                                                            onTap: () async {
+                                                              var response = await Api.post(url: Api.deleteProject, parameter: {
+                                                                "id": item['id']
+                                                              });
+                                                              if(!response['error']) {
+                                                                HelperUtils.showSnackBarMessage(
+                                                                    context, UiUtils.getTranslatedLabel(context, "${response['message']}"),
+                                                                    type: MessageType.warning, messageDuration: 3);
+                                                                Navigator.pop(context);
+                                                                getMyprojects();
+                                                              }
+                                                            },
+                                                            child: Container(
+                                                              padding: EdgeInsets.only(left: 10, right: 10, top: 5, bottom: 5),
+                                                              decoration: BoxDecoration(
+                                                                color: Colors.red,
+                                                                borderRadius: BorderRadius.circular(6),
+                                                              ),
+                                                              child: Row(
+                                                                children: [
+                                                                  Text('Delete',style: TextStyle(
+                                                                      fontSize: 13,
+                                                                      color: Colors.white,
+                                                                      fontWeight: FontWeight.w500),
+                                                                  ),
+                                                                ],
+                                                              ),
+                                                            ),
+                                                          ),
+                                                        ],
+                                                      ),
+                                                    ],
+                                                  ),
+                                                ),
+                                              ],
+                                            ),
+                                          );
+                                        },
+                                      );
+                                },
+                                value: 2,
+                                child: const Row(
+                                  children: [
+
+                                        Icon(Icons.delete, color:Colors.red, size: 17,),
+                                      SizedBox(width: 8,),
+                                    Text("Delete", style: TextStyle(color: Colors.black, fontWeight: FontWeight.w500,fontSize: 12),),
+
+                                  ],
+                                ),
+                              ),
+                            ],
+
+                            color: Color(0xFFFFFFFF),
+                          )
+                      )
+                    ],
+                  );
+                },
+              ),
+            )else const Expanded(child: Center(child: Text("Projects not available"),)),
+
         ],
       ),
     );

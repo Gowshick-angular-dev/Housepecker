@@ -3060,7 +3060,7 @@ class _RecentPropertiesSectionWidgetState
         ),
         LayoutBuilder(builder: (context, c) {
           return SizedBox(
-            height: 190,
+            height: 200,
             child: GridView.builder(
               shrinkWrap: true,
               scrollDirection: Axis.horizontal,
@@ -3299,24 +3299,29 @@ class _RecentPropertiesSectionWidgetState
                                             ],
                                           ),
                                         if(widget.projectList![index]['min_price'] != null)
-                                          Row(
-                                            children: [
-                                              Text(
-                                                '₹${formatAmount(widget.projectList![index]['min_price'] ?? 0)} - ${formatAmount(widget.projectList![index]['max_price'] ?? 0)}'
-                                                    .toString(),
-                                                maxLines: 1,
-                                                overflow: TextOverflow.ellipsis,
-                                                style: TextStyle(
-                                                    color: Color(0xff333333),
-                                                    fontSize: 12,
-                                                    fontFamily: 'Robato',
-                                                    fontWeight: FontWeight.w500
+                                          ...[
+                                            SizedBox(height: 5,),
+                                            Row(
+                                              children: [
+                                                Text(
+                                                  '₹${formatAmount(widget.projectList![index]['min_price'] ?? 0)} - ${formatAmount(widget.projectList![index]['max_price'] ?? 0)}'
+                                                      .toString(),
+                                                  maxLines: 1,
+                                                  overflow: TextOverflow.ellipsis,
+                                                  style: TextStyle(
+                                                      color: Color(0xff333333),
+                                                      fontSize: 12,
+                                                      fontFamily: 'Robato',
+                                                      fontWeight: FontWeight.w500
+                                                  ),
                                                 ),
-                                              ),
-                                            ],
-                                          ),
+                                              ],
+                                            ),
+                                          ],
                                         if(widget.projectList![index]['min_price'] != null)
-                                          Row(
+                                          ...[
+                                            SizedBox(height: 5,),
+                                            Row(
                                               children: [
                                                 Text(
                                                   '${widget.projectList![index]['min_size']} - ${widget.projectList![index]['max_size']} Sq.ft'
@@ -3331,6 +3336,7 @@ class _RecentPropertiesSectionWidgetState
                                                 ),
                                               ],
                                             ),
+                                          ],
                                           SizedBox(height: 4,),
                                           if (widget.projectList![index]['address'] != "")
                                             Padding(

@@ -775,7 +775,7 @@ class PropertyDetailsState extends State<PropertyDetails>
                               SizedBox(
                                 height: 227.rh(context),
                                 child: ClipRRect(
-                                  borderRadius: BorderRadius.circular(10),
+                                  borderRadius: BorderRadius.circular(15),
                                   child: Stack(
                                     children: [
                                       if (gallary?.isNotEmpty ?? false) ...[
@@ -808,10 +808,10 @@ class PropertyDetailsState extends State<PropertyDetails>
                                               padding: const EdgeInsets.only(right: 13,left: 13),
                                               width: MediaQuery.of(context).size.width,
                                               decoration: BoxDecoration(
-                                                borderRadius: BorderRadius.circular(10),
+                                                borderRadius: BorderRadius.circular(15),
                                               ),
                                               child: ClipRRect(
-                                                borderRadius: BorderRadius.circular(10),
+                                                borderRadius: BorderRadius.circular(15),
                                                 child: UiUtils.getImage(
                                                   property!.titleImage!,
                                                   fit: BoxFit.cover,
@@ -829,7 +829,7 @@ class PropertyDetailsState extends State<PropertyDetails>
                                         return Padding(
                                           padding: const EdgeInsets.only(right: 13,left: 13),
                                           child: ClipRRect(
-                                            borderRadius: BorderRadius.circular(10),
+                                            borderRadius: BorderRadius.circular(15),
                                             child: Stack(
                                               children: [
                                                 GestureDetector(
@@ -912,130 +912,6 @@ class PropertyDetailsState extends State<PropertyDetails>
                                       },
                                                                           )
 
-                                                    /* ListView.builder(
-                                  itemCount: (gallary?.length ?? 0) + 1,
-                                  controller: _scrollController,
-                                  scrollDirection: Axis.horizontal,
-                                  itemBuilder: (context, index) {
-
-                                if (index == 0) {
-                                  return Container(
-                                    padding: const EdgeInsets.only(right: 10),
-                                    width: MediaQuery.of(context).size.width,
-                                    decoration: BoxDecoration(
-                                      borderRadius: BorderRadius.circular(10),
-                                 //     color: Colors.red,
-                                    ),
-                                    child: ClipRRect(
-                                      borderRadius: BorderRadius.circular(10),
-                                      child: UiUtils.getImage(
-                                        property!.titleImage!,
-                                        fit: BoxFit.cover,
-                                        width: double.infinity,
-                                        height: 227.rh(context),
-                                        showFullScreenImage: true,
-                                      ),
-                                    ),
-                                  );
-                                }
-
-
-                                final galleryItem = gallary![index - 1];
-
-                                return Padding(
-                                  padding: const EdgeInsets.only(right: 10),
-                                  child: ClipRRect(
-                                    borderRadius: BorderRadius.circular(10),
-                                    child: Stack(
-                                      children: [
-                                        GestureDetector(
-                                          onTap: () {
-                                            if (galleryItem.isVideo == true) return;
-
-                                            showGoogleMap = false;
-                                            setState(() {});
-
-                                            var images = gallary?.map((e) => e.imageUrl).toList();
-
-                                            UiUtils.imageGallaryView(
-                                              context,
-                                              images: images!,
-                                              initalIndex: index - 1,
-                                              then: () {
-                                                showGoogleMap = true;
-                                                setState(() {});
-                                              },
-                                            );
-                                          },
-                                          child: SizedBox(
-                                            width: MediaQuery.of(context).size.width,
-                                            height: 227.rh(context),
-                                            child: galleryItem.isVideo == true
-                                                ? Container(
-                                              child: UiUtils.getImage(
-                                                youtubeVideoThumbnail,
-                                                fit: BoxFit.cover,
-                                              ),
-                                            )
-                                                : UiUtils.getImage(
-                                              galleryItem.imageUrl ?? "",
-                                              fit: BoxFit.cover,
-                                            ),
-                                          ),
-                                        ),
-                                        if (galleryItem.isVideo == true)
-                                          Positioned.fill(
-                                            child: GestureDetector(
-                                              onTap: () {
-                                                Navigator.push(
-                                                  context,
-                                                  MaterialPageRoute(
-                                                    builder: (context) {
-                                                      return VideoViewScreen(
-                                                        videoUrl: galleryItem.image ?? "",
-                                                        flickManager: flickManager,
-                                                      );
-                                                    },
-                                                  ),
-                                                );
-                                              },
-                                              child: Container(
-                                                color: Colors.black.withOpacity(0.3),
-                                                child: FittedBox(
-                                                  fit: BoxFit.none,
-                                                  child: Container(
-                                                    decoration: BoxDecoration(
-                                                      shape: BoxShape.circle,
-                                                      color: context.color.tertiaryColor.withOpacity(0.8),
-                                                    ),
-                                                    width: 30,
-                                                    height: 30,
-                                                    child: Icon(
-                                                      Icons.play_arrow,
-                                                      color: Colors.white,
-                                                    ),
-                                                  ),
-                                                ),
-                                              ),
-                                            ),
-                                          ),
-                                      ],
-                                    ),
-                                  ),
-                                );
-                              },
-                                                            ),*/
-
-                                                    // SingleChildScrollView(
-                                        //   scrollDirection: Axis.horizontal,
-                                        //   controller: _scrollController,
-                                        //   child: Row(
-                                        //     children: [
-                                        //
-                                        //
-                                        //     ],
-                                        //   ),
-                                        // ),
                                       ]else GestureDetector(
                                            onTap: () {
                                                 showGoogleMap = false;
@@ -1054,7 +930,7 @@ class PropertyDetailsState extends State<PropertyDetails>
                                         child: Padding(
                                           padding: const EdgeInsets.only(right: 13,left: 13),
                                           child: ClipRRect(
-                                            borderRadius: BorderRadius.circular(10),
+                                            borderRadius: BorderRadius.circular(15),
                                             child: UiUtils.getImage(
                                               property!.titleImage!,
                                               fit: BoxFit.cover,
@@ -2496,8 +2372,9 @@ class PropertyDetailsState extends State<PropertyDetails>
                         else if (similarPropertiesList.isNotEmpty)
                         Container(
                           height: 240,
-                          child: ListView.builder(
-                              padding: const EdgeInsets.symmetric(horizontal: 10),
+                          child: ListView.separated(
+                            separatorBuilder: (context,i)=>SizedBox(width: 10,),
+                              padding: const EdgeInsets.only(left: 15,right: 15,top: 10),
                               itemCount:  similarPropertiesList.length.clamp(0, 10),
                               scrollDirection: Axis.horizontal,
                               // shrinkWrap: true,
@@ -2561,8 +2438,9 @@ class PropertyDetailsState extends State<PropertyDetails>
                               else if (agentPropertiesList.isNotEmpty)
                           Container(
                           height: 240,
-                          child: ListView.builder(
-                            padding: const EdgeInsets.symmetric(horizontal: 10),
+                          child: ListView.separated(
+                            separatorBuilder: (context,i)=>SizedBox(width: 10,),
+                            padding: const EdgeInsets.only(left: 15,right: 15,top: 10),
                             itemCount: agentPropertiesList.length.clamp(0, 10),
                             scrollDirection: Axis.horizontal,
                             itemBuilder: (context, index) {

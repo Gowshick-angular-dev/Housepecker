@@ -136,7 +136,7 @@ class PropertyDetailsState extends State<ProjectDetails> {
 
   final Completer<GoogleMapController> _controller =
   Completer<GoogleMapController>();
-  List<Gallery>? gallary;
+  List<ProjectDocument> gallary=[];
   String youtubeVideoThumbnail = "";
   bool? _isLoaded;
   double progress = 0;
@@ -171,13 +171,34 @@ class PropertyDetailsState extends State<ProjectDetails> {
     //     if (mounted) setState(() {});
     //   },
     // );
-    // WidgetsBinding.instance.addPostFrameCallback((timeStamp) {
-    //   gallary = List.from(widget.property!.gallery!);
-    //   if (widget.property?.video != "") {
-    //     injectVideoInGallary();
-    //     setState(() {});
-    //   }
-    // });
+
+
+    WidgetsBinding.instance.addPostFrameCallback((timeStamp) {
+
+      final images = widget.property?['gallary_images'];
+
+      if (images != null) {
+        for (var i = 0; i < images.length; i++) {
+          print("${images.length} ssssssss");
+          gallary.add(ProjectDocument(
+            id: 9999999,
+            isVideo: false,
+            image: "",
+            imageUrl: images[i]['name'] ?? "",
+          ));
+        }
+        print("${gallary.length} ssssssss");
+        setState(() {});
+      } else {
+        print("No images available");
+      }
+
+
+      if (property?['video_link'] != null&&widget.property?['video_link']!= "") {
+        injectVideoInGallary();
+        setState(() {});
+      }
+    });
 
     if (widget.fromSlider) {
       getProperty();
@@ -480,18 +501,17 @@ class PropertyDetailsState extends State<ProjectDetails> {
     ///This will inject video in image list just like another platforms
     if ((gallary?.length ?? 0) < 2) {
       if (widget.property?['video'] != null) {
-        gallary?.add(Gallery(
+        gallary?.add(ProjectDocument(
             id: 99999999999,
-            image: property!['video'] ?? "",
-            imageUrl: "",
-            isVideo: true));
+            isVideo: true, image: widget.property?['video_link'], imageUrl: '')
+        );
       }
     } else {
       gallary?.insert(
           0,
-          Gallery(
+          ProjectDocument(
               id: 99999999999,
-              image: property!['video']!,
+              image: widget.property?['video_link'],
               imageUrl: "",
               isVideo: true));
     }
@@ -659,246 +679,404 @@ class PropertyDetailsState extends State<ProjectDetails> {
                         Column(
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: <Widget>[
-                            Padding(
-                              padding: EdgeInsets.symmetric( horizontal: 15,),
+                            SizedBox(
+                              height: 227.rh(context),
                               child: ClipRRect(
-                                borderRadius: BorderRadius.circular(20),
-                                child: SizedBox(
-                                  height: 227.rh(context),
-                                  child: Stack(
-                                    children: [
-                                    /*  if (gallary?.isNotEmpty ?? false) ...[
+                                borderRadius: BorderRadius.circular(15),
+                                child: Stack(
+                                  children: [
+                                    if (gallary?.isNotEmpty ?? false) ...[
                                       PageView.builder(
-                                      itemCount: (gallary?.length ?? 0) + 1,
-                                      controller: _pageController,
-                                      scrollDirection: Axis.horizontal,
-                                      itemBuilder: (context, index) {
-                                        if (index == 0) {
-                                          return Container(
-                                            width: MediaQuery.of(context).size.width,
-                                            decoration: BoxDecoration(
-                                              borderRadius: BorderRadius.circular(10),
-                                            ),
-                                            child: ClipRRect(
-                                              borderRadius: BorderRadius.circular(10),
-                                              child: UiUtils.getImage(
-                                                property!['image']!,
-                                                fit: BoxFit.cover,
-                                                width: double.infinity,
-                                                height: 227.rh(context),
-                                                showFullScreenImage: true,
-                                              ),
-                                            ),
-                                          );
-                                        }
+                                        itemCount: (gallary?.length ?? 0) + 1,
+                                        controller: _pageController,
+                                        scrollDirection: Axis.horizontal,
+                                        itemBuilder: (context, index) {
 
-                                  final galleryItem = gallary![index - 1];
-
-                                  return ClipRRect(
-                                    borderRadius: BorderRadius.circular(10),
-                                    child: Stack(
-                                      children: [
-                                        GestureDetector(
-                                          onTap: () {
-                                            if (galleryItem.isVideo == true) return;
-
-                                            showGoogleMap = false;
-                                            setState(() {});
-
-                                            var images = gallary?.map((e) => e.imageUrl).toList();
-
-                                            UiUtils.imageGallaryView(
-                                              context,
-                                              images: images!,
-                                              initalIndex: index - 1,
-                                              then: () {
-                                                showGoogleMap = true;
-                                                setState(() {});
-                                              },
-                                            );
-                                          },
-                                          child: SizedBox(
-                                            width: MediaQuery.of(context).size.width,
-                                            height: 227.rh(context),
-                                            child: galleryItem.isVideo == true
-                                                ? Container(
-                                              child: UiUtils.getImage(
-                                                youtubeVideoThumbnail,
-                                                fit: BoxFit.cover,
-                                              ),
-                                            )
-                                                : UiUtils.getImage(
-                                              galleryItem.imageUrl ?? "",
-                                              fit: BoxFit.cover,
-                                            ),
-                                          ),
-                                        ),
-                                        if (galleryItem.isVideo == true)
-                                          Positioned.fill(
-                                            child: GestureDetector(
+                                          if (index == 0) {
+                                            return GestureDetector(
                                               onTap: () {
-                                                Navigator.push(
+                                                showGoogleMap = false;
+                                                setState(() {});
+
+                                                var images = [property!['image']!]
+                                                    .followedBy(gallary!.map((e) => e.imageUrl).toList())
+                                                    .toList();
+
+                                                UiUtils.imageGallaryView(
                                                   context,
-                                                  MaterialPageRoute(
-                                                    builder: (context) {
-                                                      return VideoViewScreen(
-                                                        videoUrl: galleryItem.image ?? "",
-                                                        flickManager: flickManager,
-                                                      );
-                                                    },
-                                                  ),
+                                                  images: images,
+                                                  initalIndex: index,
+                                                  then: () {
+                                                    showGoogleMap = true;
+                                                    setState(() {});
+                                                  },
                                                 );
                                               },
                                               child: Container(
-                                                color: Colors.black.withOpacity(0.3),
-                                                child: FittedBox(
-                                                  fit: BoxFit.none,
-                                                  child: Container(
-                                                    decoration: BoxDecoration(
-                                                      shape: BoxShape.circle,
-                                                      color: context.color.tertiaryColor.withOpacity(0.8),
-                                                    ),
-                                                    width: 30,
-                                                    height: 30,
-                                                    child: Icon(
-                                                      Icons.play_arrow,
-                                                      color: Colors.white,
-                                                    ),
+                                                padding: const EdgeInsets.only(right: 13,left: 13),
+                                                width: MediaQuery.of(context).size.width,
+                                                decoration: BoxDecoration(
+                                                  borderRadius: BorderRadius.circular(15),
+                                                ),
+                                                child: ClipRRect(
+                                                  borderRadius: BorderRadius.circular(15),
+                                                  child: UiUtils.getImage(
+                                                    property!['image']!,
+                                                    fit: BoxFit.cover,
+                                                    width: double.infinity,
+                                                    height: 227.rh(context),
+                                                    showFullScreenImage: false,
                                                   ),
                                                 ),
                                               ),
-                                            ),
-                                          ),
-                                      ],
-                                    ),
-                                  );
-                                },
-                              )],*/
-                                      GestureDetector(
-                                        onTap: () {
-                                          // google map doesn't allow blur so we hide it:)
-                                          showGoogleMap = false;
-                                          setState(() {});
-                                          UiUtils.showFullScreenImage(
-                                            context,
-                                            provider: NetworkImage(
-                                              property!['image']!,
-                                            ),
-                                            then: () {
-                                              showGoogleMap = true;
-                                              setState(() {});
-                                            },
-                                          );
-                                        },
-                                        child: UiUtils.getImage(
-                                          property!['image'],
-                                          fit: BoxFit.cover,
-                                          width: double.infinity,
-                                          height: 227.rh(context),
-                                          showFullScreenImage: true,
-                                        ),
-                                      ),
-                                      // PositionedDirectional(
-                                      //   top: 20,
-                                      //   end: 20,
-                                      //   child: LikeButtonWidget(
-                                      //     onStateChange:
-                                      //         (AddToFavoriteCubitState
-                                      //     state) {
-                                      //       if (state
-                                      //       is AddToFavoriteCubitInProgress) {
-                                      //         favoriteInProgress = true;
-                                      //         setState(
-                                      //               () {},
-                                      //         );
-                                      //       } else {
-                                      //         favoriteInProgress = false;
-                                      //         setState(
-                                      //               () {},
-                                      //         );
-                                      //       }
-                                      //     },
-                                      //     property: property!,
-                                      //   ),
-                                      // ),
-                                      Positioned(
-                                        right: 8,
-                                        top: 8,
-                                        child: InkWell(
-                                          onTap: () {
-                                            GuestChecker.check(onNotGuest: () async {
-                                              setState(() {
-                                                likeLoading = true;
-                                              });
-                                              var body = {
-                                                "type": property!['is_favourite'] == 1 ? 0 : 1,
-                                                "project_id": property!['id']
-                                              };
-                                              var response = await Api.post(
-                                                  url: Api.addFavProject, parameter: body);
-                                              if (!response['error']) {
-                                                property!['is_favourite'] = (property!['is_favourite'] == 1 ? 0 : 1);
-                                                setState(() {
-                                                  likeLoading = false;
-                                                });
+                                            );
+                                          }
 
-                                              }
-                                            });
-                                          },
-                                          child: Container(
-                                            width: 32,
-                                            height: 32,
-                                            decoration: BoxDecoration(
-                                              color: context.color.secondaryColor,
-                                              shape: BoxShape.circle,
-                                              boxShadow: const [
-                                                BoxShadow(
-                                                  color:
-                                                  Color.fromARGB(12, 0, 0, 0),
-                                                  offset: Offset(0, 2),
-                                                  blurRadius: 15,
-                                                  spreadRadius: 0,
-                                                )
-                                              ],
-                                            ),
-                                            child: Container(
-                                              width: 32,
-                                              height: 32,
-                                              decoration: BoxDecoration(
-                                                color: context.color.primaryColor,
-                                                shape: BoxShape.circle,
-                                                boxShadow: const [
-                                                  BoxShadow(
-                                                      color: Color.fromARGB(33, 0, 0, 0),
-                                                      offset: Offset(0, 2),
-                                                      blurRadius: 15,
-                                                      spreadRadius: 0)
+                                          final galleryItem = gallary![index - 1];
+
+                                          return Padding(
+                                            padding: const EdgeInsets.only(right: 13,left: 13),
+                                            child: ClipRRect(
+                                              borderRadius: BorderRadius.circular(15),
+                                              child: Stack(
+                                                children: [
+                                                  GestureDetector(
+                                                    onTap: () {
+                                                      if (galleryItem.isVideo == true) return;
+
+                                                      showGoogleMap = false;
+                                                      setState(() {});
+
+                                                      var images = [property!['image']!]
+                                                          .followedBy(gallary!.map((e) => e.imageUrl).toList())
+                                                          .toList();
+
+                                                      UiUtils.imageGallaryView(
+                                                        context,
+                                                        images: images,
+                                                        initalIndex: index - 1,
+                                                        then: () {
+                                                          showGoogleMap = true;
+                                                          setState(() {});
+                                                        },
+                                                      );
+                                                    },
+                                                    child: SizedBox(
+                                                      width: MediaQuery.of(context).size.width,
+                                                      height: 227.rh(context),
+                                                      child: galleryItem.isVideo == true
+                                                          ? Container(
+                                                        child: UiUtils.getImage(
+                                                          youtubeVideoThumbnail,
+                                                          fit: BoxFit.cover,
+                                                        ),
+                                                      )
+                                                          : UiUtils.getImage(
+                                                        galleryItem.imageUrl ?? "",
+                                                        fit: BoxFit.cover,
+                                                      ),
+                                                    ),
+                                                  ),
+                                                  if (galleryItem.isVideo == true)
+                                                    Positioned.fill(
+                                                      child: GestureDetector(
+                                                        onTap: () {
+                                                          Navigator.push(
+                                                            context,
+                                                            MaterialPageRoute(
+                                                              builder: (context) {
+                                                                return VideoViewScreen(
+                                                                  videoUrl: galleryItem.image ?? "",
+                                                                  flickManager: flickManager,
+                                                                );
+                                                              },
+                                                            ),
+                                                          );
+                                                        },
+                                                        child: Container(
+                                                          color: Colors.black.withOpacity(0.3),
+                                                          child: FittedBox(
+                                                            fit: BoxFit.none,
+                                                            child: Container(
+                                                              decoration: BoxDecoration(
+                                                                shape: BoxShape.circle,
+                                                                color: context.color.tertiaryColor.withOpacity(0.8),
+                                                              ),
+                                                              width: 30,
+                                                              height: 30,
+                                                              child: const Icon(
+                                                                Icons.play_arrow,
+                                                                color: Colors.white,
+                                                              ),
+                                                            ),
+                                                          ),
+                                                        ),
+                                                      ),
+                                                    ),
                                                 ],
                                               ),
-                                              child: Center(
-                                                  child:
-                                                  (likeLoading)
-                                                      ? UiUtils.progress(width: 20, height: 20)
-                                                      : property!['is_favourite'] == 1
-                                                      ?
-                                                  UiUtils.getSvg(
-                                                    AppIcons.like_fill,
-                                                    color: context.color.tertiaryColor,
-                                                  )
-                                                      : UiUtils.getSvg(AppIcons.like,
-                                                      color: context.color.tertiaryColor)
-                                              ),
                                             ),
+                                          );
+                                        },
+                                      )
+
+                                    ]else GestureDetector(
+                                      onTap: () {
+                                        showGoogleMap = false;
+                                        setState(() {});
+                                        UiUtils.showFullScreenImage(
+                                          context,
+                                          provider: NetworkImage(
+                                            property!['image']!,
+                                          ),
+                                          then: () {
+                                            showGoogleMap = true;
+                                            setState(() {});
+                                          },
+                                        );
+                                      },
+                                      child: Padding(
+                                        padding: const EdgeInsets.only(right: 13,left: 13),
+                                        child: ClipRRect(
+                                          borderRadius: BorderRadius.circular(15),
+                                          child: UiUtils.getImage(
+                                            property!['image']!,
+                                            fit: BoxFit.cover,
+                                            width: double.infinity,
+                                            height: 227.rh(context),
+                                            showFullScreenImage: true,
                                           ),
                                         ),
                                       ),
-                                      Positioned(
-                                        right: 8,
-                                        top: 50,
-                                        child: InkWell(
-                                          onTap: () {
-                                            share(property!['slug_id'] ?? "");
-                                          },
+                                    ),
+                                //     if (property?['gallary_images']?.isNotEmpty ?? false) ...[
+                                //     PageView.builder(
+                                //     itemCount: (property?['gallary_images']?.length ?? 0) + 1,
+                                //     controller: _pageController,
+                                //     scrollDirection: Axis.horizontal,
+                                //     itemBuilder: (context, index) {
+                                //       if (index == 0) {
+                                //         return GestureDetector(
+                                //           onTap: (){
+                                //             showGoogleMap = false;
+                                //             setState(() {});
+                                //
+                                //             var images = [property!['image']!]
+                                //                 .followedBy(property?['gallary_images']!.map((e) => e['name']).toList())
+                                //                 .toList();
+                                //
+                                //             UiUtils.imageGallaryView(
+                                //               context,
+                                //               images: images,
+                                //               initalIndex: index,
+                                //               then: () {
+                                //                 showGoogleMap = true;
+                                //                 setState(() {});
+                                //               },
+                                //             );
+                                //           },
+                                //           child: Container(
+                                //             padding: const EdgeInsets.only(right: 13,left: 13),
+                                //             width: MediaQuery.of(context).size.width,
+                                //             decoration: BoxDecoration(
+                                //               borderRadius: BorderRadius.circular(15),
+                                //             ),
+                                //             child: ClipRRect(
+                                //               borderRadius: BorderRadius.circular(15),
+                                //               child: UiUtils.getImage(
+                                //                 property!['image']!,
+                                //                 fit: BoxFit.cover,
+                                //                 width: double.infinity,
+                                //                 height: 227.rh(context),
+                                //                 showFullScreenImage: false,
+                                //               ),
+                                //             ),
+                                //           ),
+                                //         );
+                                //       }
+                                //
+                                // final galleryItem = property?['gallary_images']![index - 1];
+                                //
+                                // return Padding(
+                                //   padding: const EdgeInsets.only(right: 13,left: 13),
+                                //   child: ClipRRect(
+                                //     borderRadius: BorderRadius.circular(10),
+                                //     child: Stack(
+                                //       children: [
+                                //         GestureDetector(
+                                //           onTap: () {
+                                //
+                                //             // if (property?['gallary_images']?[index].isVideo ==
+                                //             //     true) return;
+                                //             //
+                                //             // showGoogleMap = false;
+                                //             // setState(() {});
+                                //             //
+                                //             // var images = property?['gallary_images']
+                                //             //     ?.map((e) => e.imageUrl)
+                                //             //     .toList();
+                                //             //
+                                //             // UiUtils.imageGallaryView(
+                                //             //   context,
+                                //             //   images: images!,
+                                //             //   initalIndex: index - 1,
+                                //             //   then: () {
+                                //             //     showGoogleMap = true;
+                                //             //     setState(() {});
+                                //             //   },
+                                //             // );
+                                //           },
+                                //           child: SizedBox(
+                                //             width: MediaQuery.of(context).size.width,
+                                //             height: 227.rh(context),
+                                //             child: galleryItem['isVideo'] == true
+                                //                 ? Container(
+                                //               child: UiUtils.getImage(
+                                //
+                                //                 youtubeVideoThumbnail,
+                                //                 fit: BoxFit.cover,
+                                //               ),
+                                //             )
+                                //                 : UiUtils.getImage(
+                                //               galleryItem['name'] ?? "",
+                                //               fit: BoxFit.cover,
+                                //             ),
+                                //           ),
+                                //         ),
+                                //         // if (galleryItem.isVideo == true)
+                                //         //   Positioned.fill(
+                                //         //     child: GestureDetector(
+                                //         //       onTap: () {
+                                //         //         Navigator.push(
+                                //         //           context,
+                                //         //           MaterialPageRoute(
+                                //         //             builder: (context) {
+                                //         //               return VideoViewScreen(
+                                //         //                 videoUrl: galleryItem.image ?? "",
+                                //         //                 flickManager: flickManager,
+                                //         //               );
+                                //         //             },
+                                //         //           ),
+                                //         //         );
+                                //         //       },
+                                //         //       child: Container(
+                                //         //         color: Colors.black.withOpacity(0.3),
+                                //         //         child: FittedBox(
+                                //         //           fit: BoxFit.none,
+                                //         //           child: Container(
+                                //         //             decoration: BoxDecoration(
+                                //         //               shape: BoxShape.circle,
+                                //         //               color: context.color.tertiaryColor.withOpacity(0.8),
+                                //         //             ),
+                                //         //             width: 30,
+                                //         //             height: 30,
+                                //         //             child: Icon(
+                                //         //               Icons.play_arrow,
+                                //         //               color: Colors.white,
+                                //         //             ),
+                                //         //           ),
+                                //         //         ),
+                                //         //       ),
+                                //         //     ),
+                                //         //   ),
+                                //       ],
+                                //     ),
+                                //   ),
+                                // );
+                                //                             },
+                                //                           )]else
+                                //     GestureDetector(
+                                //       onTap: () {
+                                //         showGoogleMap = false;
+                                //         setState(() {});
+                                //         UiUtils.showFullScreenImage(
+                                //           context,
+                                //           provider: NetworkImage(
+                                //             property!['image']!,
+                                //           ),
+                                //           then: () {
+                                //             showGoogleMap = true;
+                                //             setState(() {});
+                                //           },
+                                //         );
+                                //       },
+                                //       child:Padding(
+                                //         padding: const EdgeInsets.only(right: 13,left: 13),
+                                //         child: ClipRRect(
+                                //           borderRadius: BorderRadius.circular(15),
+                                //           child: UiUtils.getImage(
+                                //               property!['image'],
+                                //             fit: BoxFit.cover,
+                                //             width: double.infinity,
+                                //             height: 227.rh(context),
+                                //             showFullScreenImage: true,
+                                //           ),
+                                //         ),
+                                //       ),
+                                //     ),
+                                    // PositionedDirectional(
+                                    //   top: 20,
+                                    //   end: 20,
+                                    //   child: LikeButtonWidget(
+                                    //     onStateChange:
+                                    //         (AddToFavoriteCubitState
+                                    //     state) {
+                                    //       if (state
+                                    //       is AddToFavoriteCubitInProgress) {
+                                    //         favoriteInProgress = true;
+                                    //         setState(
+                                    //               () {},
+                                    //         );
+                                    //       } else {
+                                    //         favoriteInProgress = false;
+                                    //         setState(
+                                    //               () {},
+                                    //         );
+                                    //       }
+                                    //     },
+                                    //     property: property!,
+                                    //   ),
+                                    // ),
+                                    Positioned(
+                                      right: 20,
+                                      top: 20,
+                                      child: InkWell(
+                                        onTap: () {
+                                          GuestChecker.check(onNotGuest: () async {
+                                            setState(() {
+                                              likeLoading = true;
+                                            });
+                                            var body = {
+                                              "type": property!['is_favourite'] == 1 ? 0 : 1,
+                                              "project_id": property!['id']
+                                            };
+                                            var response = await Api.post(
+                                                url: Api.addFavProject, parameter: body);
+                                            if (!response['error']) {
+                                              property!['is_favourite'] = (property!['is_favourite'] == 1 ? 0 : 1);
+                                              setState(() {
+                                                likeLoading = false;
+                                              });
+
+                                            }
+                                          });
+                                        },
+                                        child: Container(
+                                          width: 32,
+                                          height: 32,
+                                          decoration: BoxDecoration(
+                                            color: context.color.secondaryColor,
+                                            shape: BoxShape.circle,
+                                            boxShadow: const [
+                                              BoxShadow(
+                                                color:
+                                                Color.fromARGB(12, 0, 0, 0),
+                                                offset: Offset(0, 2),
+                                                blurRadius: 15,
+                                                spreadRadius: 0,
+                                              )
+                                            ],
+                                          ),
                                           child: Container(
                                             width: 32,
                                             height: 32,
@@ -913,58 +1091,119 @@ class PropertyDetailsState extends State<ProjectDetails> {
                                                     spreadRadius: 0)
                                               ],
                                             ),
-                                            child: Icon(
-                                              Icons.share,
-                                              color: context.color.tertiaryColor,
+                                            child: Center(
+                                                child:
+                                                (likeLoading)
+                                                    ? UiUtils.progress(width: 20, height: 20)
+                                                    : property!['is_favourite'] == 1
+                                                    ?
+                                                UiUtils.getSvg(
+                                                  AppIcons.like_fill,
+                                                  color: context.color.tertiaryColor,
+                                                )
+                                                    : UiUtils.getSvg(AppIcons.like,
+                                                    color: context.color.tertiaryColor)
                                             ),
                                           ),
                                         ),
                                       ),
-                                      PositionedDirectional(
-                                        bottom: 5,
-                                        end: 18,
-                                        child: Visibility(
-                                          visible:
-                                          property?['image'] != "",
-                                          child: GestureDetector(
-                                            onTap: () {
-                                              Navigator.push(
-                                                context,
-                                                BlurredRouter(
-                                                  builder: (context) =>
-                                                      PanaromaImageScreen(
-                                                        imageUrl: property!
-                                                        ['image']!,
-                                                      ),
-                                                ),
-                                              );
-                                            },
-                                            child: Container(
-                                              decoration: BoxDecoration(
-                                                color: context
-                                                    .color.secondaryColor,
-                                                shape: BoxShape.circle,
+                                    ),
+                                    Positioned(
+                                      right: 20,
+                                      top: 60,
+                                      child: InkWell(
+                                        onTap: () {
+                                          share(property!['slug_id'] ?? "");
+                                        },
+                                        child: Container(
+                                          width: 32,
+                                          height: 32,
+                                          decoration: BoxDecoration(
+                                            color: context.color.primaryColor,
+                                            shape: BoxShape.circle,
+                                            boxShadow: const [
+                                              BoxShadow(
+                                                  color: Color.fromARGB(33, 0, 0, 0),
+                                                  offset: Offset(0, 2),
+                                                  blurRadius: 15,
+                                                  spreadRadius: 0)
+                                            ],
+                                          ),
+                                          child: Icon(
+                                            Icons.share,
+                                            color: context.color.tertiaryColor,
+                                          ),
+                                        ),
+                                      ),
+                                    ),
+                                 /*   PositionedDirectional(
+                                      bottom: 5,
+                                      end: 18,
+                                      child: Visibility(
+                                        visible:
+                                        property?['image'] != "",
+                                        child: GestureDetector(
+                                          onTap: () {
+                                            Navigator.push(
+                                              context,
+                                              BlurredRouter(
+                                                builder: (context) =>
+                                                    PanaromaImageScreen(
+                                                      imageUrl: property!
+                                                      ['image']!,
+                                                    ),
                                               ),
-                                              height: 40.rh(context),
-                                              width: 40.rw(context),
-                                              child: Padding(
-                                                padding:
-                                                const EdgeInsets.all(5.0),
-                                                child: UiUtils.getSvg(
-                                                    AppIcons.v360Degree,
-                                                    color: context
-                                                        .color.tertiaryColor),
-                                              ),
+                                            );
+                                          },
+                                          child: Container(
+                                            decoration: BoxDecoration(
+                                              color: context
+                                                  .color.secondaryColor,
+                                              shape: BoxShape.circle,
+                                            ),
+                                            height: 40.rh(context),
+                                            width: 40.rw(context),
+                                            child: Padding(
+                                              padding:
+                                              const EdgeInsets.all(5.0),
+                                              child: UiUtils.getSvg(
+                                                  AppIcons.v360Degree,
+                                                  color: context
+                                                      .color.tertiaryColor),
                                             ),
                                           ),
                                         ),
                                       ),
-                                      advertismentLable()
-                                    ],
-                                  ),
+                                    ),*/
+                                    advertismentLable()
+                                  ],
                                 ),
                               ),
                             ),
+                            if (gallary?.isNotEmpty ?? false) ...[
+                              const SizedBox(height: 15),
+                              Row(
+                                mainAxisAlignment: MainAxisAlignment.center,
+                                children: List.generate(
+                                  (gallary?.length ?? 0) + 1,
+                                      (index) {
+                                    return AnimatedContainer(
+                                      duration: const Duration(milliseconds: 300),
+                                      alignment: Alignment.center,
+                                      width: _currentImage == index ? 23 : 6.0,
+                                      height: 6.0,
+                                      margin: const EdgeInsets.symmetric(horizontal: 2.0),
+                                      decoration: BoxDecoration(
+                                        borderRadius: BorderRadius.circular(10),
+                                        color: _currentImage == index
+                                            ? const Color(0xff117af9)
+                                            : Colors.grey.withOpacity(0.3),
+                                      ),
+                                    );
+                                  },
+                                ),
+                              ),
+                            ],
                             const SizedBox(
                               height: 15,
                             ),
@@ -983,7 +1222,8 @@ class PropertyDetailsState extends State<ProjectDetails> {
                                 //     color: Constant.adaptThemeColorSvg
                                 //         ? context.color.tertiaryColor
                                 //         : null),
-                                if(property!['category'] != null)
+
+                                if(property!['project_details'][0]['furniture'] != null)
                                   Padding(
                                     padding: const EdgeInsets.all(3),
                                     child: Container(
@@ -992,7 +1232,7 @@ class PropertyDetailsState extends State<ProjectDetails> {
                                         color: Color(0xfffff2c8),
                                         borderRadius: BorderRadius.circular(7),
                                       ),
-                                      child: Text(property!['category']!['category'], style: TextStyle(
+                                      child: Text(property!['project_details'][0]['furniture'], style: TextStyle(
                                           color: Color(0xff333333),
                                           fontSize: 11,
                                           fontWeight: FontWeight.w500
@@ -1000,6 +1240,26 @@ class PropertyDetailsState extends State<ProjectDetails> {
                                           .setMaxLines(lines: 1),
                                     ),
                                   ),
+                                    if(property!['project_details'].length > 0)
+                                      Padding(
+                                        padding: const EdgeInsets.all(3),
+                                        child: Container(
+                                          padding: EdgeInsets.only(left: 10,right: 10,top: 5,bottom: 5),
+                                          decoration: BoxDecoration(
+                                              borderRadius:
+                                              BorderRadius.circular(7),
+                                              color: Color(0xff6c5555)),
+                                          child: Text(
+                                            property!['project_details'][0]['brokerage'] == 'yes' ? 'Brokerage' : 'No Brokerage'
+                                                .toString()
+                                                .translate(context),
+                                            style: TextStyle(
+                                                color: Colors.white,
+                                                fontSize: 11
+                                            ),
+                                          ),
+                                        ),
+                                      ),
                                 if(property!['project_details'].length > 0)
                                   Padding(
                                   padding: const EdgeInsets.all(3),
@@ -1012,7 +1272,6 @@ class PropertyDetailsState extends State<ProjectDetails> {
                                     child: Text(
                                       property!['project_details'][0]['project_status_name']
                                           .toString()
-                                          .toLowerCase()
                                           .translate(context),
                                       style: TextStyle(
                                           color: Colors.white,
@@ -1033,7 +1292,6 @@ class PropertyDetailsState extends State<ProjectDetails> {
                                     child: Text(
                                       property!['code']
                                           .toString()
-                                          .toLowerCase()
                                           .translate(context),
                                       style: TextStyle(
                                           color: Color(0xff00557a),
@@ -1042,27 +1300,7 @@ class PropertyDetailsState extends State<ProjectDetails> {
                                     ),
                                   ),
                                 ),
-                                if(property!['project_details'].length > 0)
-                                  Padding(
-                                    padding: const EdgeInsets.all(3),
-                                    child: Container(
-                                      padding: EdgeInsets.only(left: 10,right: 10,top: 5,bottom: 5),
-                                      decoration: BoxDecoration(
-                                          borderRadius:
-                                          BorderRadius.circular(7),
-                                          color: Color(0xff6c5555)),
-                                      child: Text(
-                                        property!['project_details'][0]['brokerage'] == 'yes' ? 'Brokerage' : 'No Brokerage'
-                                            .toString()
-                                            .toLowerCase()
-                                            .translate(context),
-                                        style: TextStyle(
-                                            color: Colors.white,
-                                            fontSize: 11
-                                        ),
-                                      ),
-                                    ),
-                                  ),
+
                                 if(property!['project_details'].length > 0 && property!['project_details'][0]['gated_community'] == 'yes')
                                   Padding(
                                     padding: const EdgeInsets.all(3),
@@ -1227,38 +1465,88 @@ class PropertyDetailsState extends State<ProjectDetails> {
                             const SizedBox(
                               height: 10,
                             ),
-                            Row(
-                              children: [
-                                Padding(
-                                  padding: EdgeInsets.symmetric( horizontal: 15,),
-                                  child: Row(
-                                    children: [
-                                      Text("Rs. ${formatAmount(property!['project_details'][0]['avg_price'])}",
-                                        style: TextStyle(
-                                            fontSize: 15,
-                                            fontWeight: FontWeight.w600,
-                                            color: Color(0xff333333)
-                                        ),
+                            if(property!['min_price'] == null)
+                              Padding(
+                                padding: EdgeInsets.symmetric( horizontal: 15,),
+                                child: Row(
+                                  children: [
+                                    Text(
+                                      '₹${property!['project_details'].length > 0 ? formatAmount(property!['project_details'][0]['avg_price'] ?? 0) : 0}'
+                                          .toString(),
+                                      maxLines: 1,
+                                      overflow: TextOverflow.ellipsis,
+                                      style: TextStyle(
+                                          color: Color(0xff333333),
+                                          fontSize: 12,
+                                          fontFamily: 'Robato',
+                                          fontWeight: FontWeight.w500
                                       ),
-                                    ],
+                                    ),
+                                    Padding(
+                                      padding: const EdgeInsets.symmetric(horizontal: 8.0),
+                                      child: Container(
+                                        height: 12,
+                                        width: 2,
+                                        color: Colors.black54,
+                                      ),
+                                    ),
+                                    Text(
+                                      '${property!['project_details'].length > 0 ? formatAmount(property!['project_details'][0]['size'] ?? 0) : 0} Sq.ft'
+                                          .toString(),
+                                      maxLines: 1,
+                                      overflow: TextOverflow.ellipsis,
+                                      style: TextStyle(
+                                          color: Color(0xffa2a2a2),
+                                          fontSize: 9,
+                                          fontWeight: FontWeight.w500
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                              ),
+                            if(property!['min_price'] != null)
+                          ...[
+                            const SizedBox(height: 8),
+                            Padding(
+                              padding: EdgeInsets.symmetric( horizontal: 15,),
+                              child: Row(
+                                children: [
+                                  Text(
+                                    '₹${formatAmount(property!['min_price'] ?? 0)} - ${formatAmount(property!['max_price'] ?? 0)}'
+                                        .toString(),
+                                    maxLines: 1,
+                                    overflow: TextOverflow.ellipsis,
+                                    style: TextStyle(
+                                        color: Color(0xff333333),
+                                        fontSize: 12,
+                                        fontFamily: 'Robato',
+                                        fontWeight: FontWeight.w500
+                                    ),
                                   ),
-                                ),
-                                const SizedBox(
-                                  width: 10,
-                                ),
-                                Container(height: 15, width: 2, color: Colors.black45),
-                                Padding(
-                                  padding: EdgeInsets.symmetric( horizontal: 15,),
-                                  child: Row(
-                                    children: [
-                                      if (property!['project_details'].length > 0)
-                                        Text("${property!['project_details'][0]['size']} SqFt."
-                                        ),
-                                    ],
-                                  ),
-                                ),
-                              ],
+                                ],
+                              ),
                             ),
+                          ],
+                            if(property!['min_price'] != null)
+                           ...[   const SizedBox(height: 8),
+                             Padding(
+                               padding: EdgeInsets.symmetric( horizontal: 15,),
+                               child: Row(
+                                 children: [
+                                   Text(
+                                     '${property!['min_size']} - ${property!['max_size']} Sq.ft'
+                                         .toString(),
+                                     maxLines: 1,
+                                     overflow: TextOverflow.ellipsis,
+                                     style: TextStyle(
+                                         color: Color(0xffa2a2a2),
+                                         fontSize: 10,
+                                         fontWeight: FontWeight.w500
+                                     ),
+                                   ),
+                                 ],
+                               ),
+                             ),],
 
                             const SizedBox(height: 8),
                             Padding(
