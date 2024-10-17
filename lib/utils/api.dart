@@ -65,6 +65,7 @@ class Api {
   static String apiGetCategories = "get_categories";
   static String apiGetUnit = "get_unit";
   static String apiGetProprty = "get_property";
+  static String apiGetReportPropertyReson = "get_report_reasons";
   static String apiViewContact = "view_contact";
   static String apiPostProperty = "post_property";
   static String apiUpdateProperty = "update_post_property";
@@ -107,6 +108,7 @@ class Api {
   static String getAppSettings = "get_app_settings";
   static String getAmenities = "get_amenities";
   static String getUserDetails = "get_users";
+  static String reportReason = "add_reports";
 
   ///
   static String createPaymentIntent = "createPaymentIntent";

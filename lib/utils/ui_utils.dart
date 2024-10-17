@@ -2,6 +2,7 @@ import 'dart:math';
 
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:Housepecker/app/app.dart';
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
@@ -287,13 +288,16 @@ class UiUtils {
                           ),
                         ),
                       ],
-                      Text(
-                        title ?? "",
-                      )
-                      .firstUpperCaseWidget()
-                          .color(Colors.white)
-                          .bold(weight: FontWeight.w500)
-                          .size(14),
+                      SizedBox(
+                        child: Text(
+                          title ?? "",maxLines: 1,overflow: TextOverflow.ellipsis,
+                        )
+                        .firstUpperCaseWidget()
+                            .color(Colors.white)
+                            .bold(weight: FontWeight.w500)
+                            .size(14),
+                        width: MediaQuery.of(context).size.width/1.5,
+                      ),
                       if (actions != null) ...[const Spacer(), ...actions],
                     ],
                   ),

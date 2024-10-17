@@ -4,6 +4,8 @@ import 'dart:convert';
 import 'dart:ui';
 
 import 'package:flutter/cupertino.dart';
+import 'package:flutter/painting.dart';
+import 'package:flutter/rendering.dart';
 import 'package:flutter/widgets.dart';
 import 'package:Housepecker/Ui/screens/chat/chat_screen.dart';
 import 'package:Housepecker/Ui/screens/proprties/Property%20tab/sell_rent_screen.dart';
@@ -55,9 +57,11 @@ import '../../../utils/guestChecker.dart';
 import '../../../utils/helper_utils.dart';
 import '../../../utils/ui_utils.dart';
 import '../analytics/analytics_screen.dart';
+import '../home/Widgets/property_horizontal_card.dart';
 import '../userprofile/userProfileScreen.dart';
 import '../widgets/AnimatedRoutes/blur_page_route.dart';
 import '../widgets/all_gallary_image.dart';
+import '../widgets/shimmerLoadingContainer.dart';
 import '../widgets/video_view_screen.dart';
 
 Map<String, String> rentDurationMap = {
@@ -140,6 +144,12 @@ class PropertyDetailsState extends State<PropertyDetails>
   @override
   bool get wantKeepAlive => true;
 
+  List reportCheckboxList = [];
+
+
+  bool similarIsLoading = false;
+  bool agentPropertiesIsLoading = false;
+
 
   final Completer<GoogleMapController> _controller =
       Completer<GoogleMapController>();
@@ -165,6 +175,7 @@ class PropertyDetailsState extends State<PropertyDetails>
   //  _scrollController.addListener(_onScroll);
     getSimilarProperties();
     getAgentProperties();
+    getReportResponseList();
     interstitialAdManager.load();
     // customListenerForConstant();
     //add title image along with gallary images1
@@ -215,6 +226,9 @@ class PropertyDetailsState extends State<PropertyDetails>
   }
 
   Future<void> getSimilarProperties() async {
+    setState(() {
+      similarIsLoading = true;
+    });
     var response = await Api.get(url: Api.apiGetProprty, queryParameters: {
       'category_id': widget.property!.category!.id,
       'get_simiilar': 1,
@@ -223,20 +237,49 @@ class PropertyDetailsState extends State<PropertyDetails>
     if(!response['error']) {
       setState(() {
         similarPropertiesList = response['data'].where((e) => e['is_type'] == 'property').toList();
+        similarIsLoading = false;
       });
     }
   }
 
   Future<void> getAgentProperties() async {
+    setState(() {
+      agentPropertiesIsLoading  = true;
+    });
     var response = await Api.get(url: Api.apiGetProprty, queryParameters: {
       'userid': widget.property!.addedBy,
     });
     if(!response['error']) {
       setState(() {
         agentPropertiesList = response['data'].where((e) => e['is_type'] == 'property').toList();
+        agentPropertiesIsLoading  = false;
       });
     }
   }
+
+
+  Future<void> getReportResponseList() async {
+
+    var response = await Api.get(url: Api.apiGetReportPropertyReson, queryParameters: {
+      'userid': widget.property!.addedBy,
+    });
+    if(!response['error']) {
+      setState(() {
+        reportCheckboxList = response['data'];
+      });
+    }
+  }
+
+
+  List<String> reportPropertiesList = ['Property 1', 'Property 2', 'Property 3', 'Property 4'];
+
+  int? selectedPropertyId;
+
+
+
+
+
+
 
   void loadAd() {
     _bannerAd = BannerAd(
@@ -762,7 +805,7 @@ class PropertyDetailsState extends State<PropertyDetails>
                                               );
                                             },
                                             child: Container(
-                                              padding: EdgeInsets.only(right: 13,left: 13),
+                                              padding: const EdgeInsets.only(right: 13,left: 13),
                                               width: MediaQuery.of(context).size.width,
                                               decoration: BoxDecoration(
                                                 borderRadius: BorderRadius.circular(10),
@@ -784,7 +827,7 @@ class PropertyDetailsState extends State<PropertyDetails>
                                         final galleryItem = gallary![index - 1];
 
                                         return Padding(
-                                          padding: EdgeInsets.only(right: 13,left: 13),
+                                          padding: const EdgeInsets.only(right: 13,left: 13),
                                           child: ClipRRect(
                                             borderRadius: BorderRadius.circular(10),
                                             child: Stack(
@@ -853,7 +896,7 @@ class PropertyDetailsState extends State<PropertyDetails>
                                                             ),
                                                             width: 30,
                                                             height: 30,
-                                                            child: Icon(
+                                                            child: const Icon(
                                                               Icons.play_arrow,
                                                               color: Colors.white,
                                                             ),
@@ -1127,7 +1170,7 @@ class PropertyDetailsState extends State<PropertyDetails>
                                   (gallary?.length ?? 0) + 1,
                                       (index) {
                                     return AnimatedContainer(
-                                      duration: Duration(milliseconds: 300),
+                                      duration: const Duration(milliseconds: 300),
                                       alignment: Alignment.center,
                                       width: _currentImage == index ? 23 : 6.0,
                                       height: 6.0,
@@ -1135,7 +1178,7 @@ class PropertyDetailsState extends State<PropertyDetails>
                                       decoration: BoxDecoration(
                                         borderRadius: BorderRadius.circular(10),
                                         color: _currentImage == index
-                                            ? Color(0xff117af9)
+                                            ? const Color(0xff117af9)
                                             : Colors.grey.withOpacity(0.3),
                                       ),
                                     );
@@ -1147,7 +1190,7 @@ class PropertyDetailsState extends State<PropertyDetails>
                                 height: 10,
                               ),
                               Padding(
-                                padding: EdgeInsets.symmetric(horizontal: 15,),
+                                padding: const EdgeInsets.symmetric(horizontal: 15,),
                                 child: SingleChildScrollView(
                                   scrollDirection: Axis.horizontal,
                                   child: Row(children: [
@@ -1163,16 +1206,16 @@ class PropertyDetailsState extends State<PropertyDetails>
                                                                  Row(
                                    children: [
                                      Container(
-                                       padding: EdgeInsets.only(left: 10,right: 10,top: 5,bottom: 5),
+                                       padding: const EdgeInsets.only(left: 10,right: 10,top: 5,bottom: 5),
                                        decoration: BoxDecoration(
-                                         color: Color(0xfffff2c8),
+                                         color: const Color(0xfffff2c8),
                                          borderRadius: BorderRadius.circular(7),
                                        ),
                                        child: Text(
                                          property!.parameters != null && property!.parameters!.isNotEmpty
                                              ? property!.parameters![0].value
                                              : '',
-                                         style: TextStyle(
+                                         style: const TextStyle(
                                            color: Color(0xff333333),
                                            fontSize: 11,
                                            fontWeight: FontWeight.w500,
@@ -1188,16 +1231,16 @@ class PropertyDetailsState extends State<PropertyDetails>
                                   Row(
                                     children: [
                                       Container(
-                                        padding: EdgeInsets.only(left: 10,right: 10,top: 5,bottom: 5),
+                                        padding: const EdgeInsets.only(left: 10,right: 10,top: 5,bottom: 5),
                                         decoration: BoxDecoration(
-                                          color: Color(0xffd6fffa),
+                                          color: const Color(0xffd6fffa),
                                           borderRadius: BorderRadius.circular(7),
                                         ),
                                         child: Row(
                                           children: [
                                             Image.asset("assets/NewPropertydetailscreen/__rara.png",width: 13,height: 13,fit: BoxFit.cover,),
-                                            SizedBox(width: 2,),
-                                            Text("RERA",
+                                            const SizedBox(width: 2,),
+                                            const Text("RERA",
                                               style: TextStyle(
                                                   fontSize: 11,
                                                   fontWeight: FontWeight.w500,
@@ -1207,7 +1250,7 @@ class PropertyDetailsState extends State<PropertyDetails>
                                           ],
                                         ),
                                       ),
-                                      SizedBox(width: 5,),
+                                      const SizedBox(width: 5,),
                                     ],
                                   ),
                                     // SizedBox(width: 5,),
@@ -1238,33 +1281,33 @@ class PropertyDetailsState extends State<PropertyDetails>
                                       decoration: BoxDecoration(
                                           borderRadius:
                                           BorderRadius.circular(7),
-                                          color: Color(0xff6c5555)),
+                                          color: const Color(0xff6c5555)),
                                       child: Padding(
-                                        padding: EdgeInsets.only(left: 10,right: 10,top: 5,bottom: 5),
+                                        padding: const EdgeInsets.only(left: 10,right: 10,top: 5,bottom: 5),
                                         child: Center(
                                           child: Text(
                                             property!.brokerage == 'Yes' ? 'Brokerage' : 'No Brokerage'.toString().translate(context),
-                                            style: TextStyle(
+                                            style: const TextStyle(
                                                 color: Colors.white,
                                                 fontSize: 11
                                             ),
                                           ),
                                         ),
                                       ),
-                                    ), SizedBox(width: 5,),
+                                    ), const SizedBox(width: 5,),
                                     Container(
                                       // width: 50,
                                       decoration: BoxDecoration(
                                           borderRadius:
                                           BorderRadius.circular(7),
-                                          color: Color(0xffcff4fc)),
+                                          color: const Color(0xffcff4fc)),
                                       child: Padding(
-                                        padding: EdgeInsets.only(left: 10,right: 10,top: 5,bottom: 5),
+                                        padding: const EdgeInsets.only(left: 10,right: 10,top: 5,bottom: 5),
                                         child: Center(
                                           child: Text(
                                             property!.code.toString()
                                                 .translate(context),
-                                            style: TextStyle(
+                                            style: const TextStyle(
                                                 color: Colors.black,
                                                 fontSize: 11
                                             ),
@@ -1279,9 +1322,9 @@ class PropertyDetailsState extends State<PropertyDetails>
                                 height: 10,
                               ),
                               Padding(
-                                padding: EdgeInsets.symmetric( horizontal: 15,),
+                                padding: const EdgeInsets.symmetric( horizontal: 15,),
                                 child: Text(
-                                  '${property!.title!.firstUpperCase()}',style: TextStyle(
+                                  '${property!.title!.firstUpperCase()}',style: const TextStyle(
                                     fontSize: 15,
                                     fontWeight: FontWeight.w600,
                                     color: Color(0xff333333)
@@ -1292,7 +1335,7 @@ class PropertyDetailsState extends State<PropertyDetails>
                                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                                 children: [
                                   Padding(
-                                    padding: EdgeInsets.symmetric( horizontal: 15,),
+                                    padding: const EdgeInsets.symmetric( horizontal: 15,),
                                     child: Row(
                                       children: [
                                         if (property!.properyType
@@ -1309,7 +1352,7 @@ class PropertyDetailsState extends State<PropertyDetails>
                                           //     disabled: Constant
                                           //             .isNumberWithSuffix ==
                                           //         false)
-                                              .formatAmount(prefix: true))
+                                              .formatAmount(prefix: true),style: TextStyle(  fontFamily: 'Roboto',),)
                                               .color(context.color.tertiaryColor)
                                               .size(15)
                                               .bold(weight: FontWeight.w500),
@@ -1331,9 +1374,9 @@ class PropertyDetailsState extends State<PropertyDetails>
                                     ),
                                   ),
                                   Padding(
-                                    padding: EdgeInsets.symmetric( horizontal: 15,),
+                                    padding: const EdgeInsets.symmetric( horizontal: 15,),
                                     child: Text(property?.sqft != null ? '${property?.sqft} Sq.Ft.' : '',
-                                      style: TextStyle(
+                                      style: const TextStyle(
                                           color: Color(0xffa2a2a2),
                                           fontSize: 12,
                                           fontWeight: FontWeight.w600
@@ -1344,7 +1387,7 @@ class PropertyDetailsState extends State<PropertyDetails>
                               ),
                               const SizedBox(height: 8),
                               Padding(
-                                padding: EdgeInsets.symmetric( horizontal: 15,),
+                                padding: const EdgeInsets.symmetric( horizontal: 15,),
                                 child: Row(
                                   mainAxisAlignment:
                                       MainAxisAlignment.spaceBetween,
@@ -1354,12 +1397,12 @@ class PropertyDetailsState extends State<PropertyDetails>
                                       child: Row(
                                         children: [
                                           Image.asset("assets/Home/__location.png",width:15,fit: BoxFit.cover,height: 15,),
-                                          SizedBox(width: 5,),
+                                          const SizedBox(width: 5,),
                                           Expanded(
                                             child: Text(property!.address!.firstUpperCase(),
                                               maxLines: 2,
                                               overflow: TextOverflow.ellipsis,
-                                              style: TextStyle(
+                                              style: const TextStyle(
                                                   color: Color(0xffa2a2a2),
                                                   fontSize: 11,
                                                   fontWeight: FontWeight.w400
@@ -1370,7 +1413,7 @@ class PropertyDetailsState extends State<PropertyDetails>
                                       ),
                                     ),
                                     Text(property?.postCreated ?? "",
-                                      style: TextStyle(
+                                      style: const TextStyle(
                                         color: Color(0xffa2a2a2),
                                         fontSize: 11,
                                         fontWeight: FontWeight.w400
@@ -1393,16 +1436,16 @@ class PropertyDetailsState extends State<PropertyDetails>
                                Column(
                                  children: [
                                    Padding(
-                                    padding: EdgeInsets.symmetric( horizontal: 15,),
+                                    padding: const EdgeInsets.symmetric( horizontal: 15,),
                                     child: Container(
-                                      padding: EdgeInsets.all(10),
+                                      padding: const EdgeInsets.all(10),
                                       width: double.infinity,
                                       decoration: BoxDecoration(
                                         borderRadius: BorderRadius.circular(15.0),
                                         color: Colors.white,
                                         boxShadow: [
                                           BoxShadow(
-                                            offset: Offset(0, 1),
+                                            offset: const Offset(0, 1),
                                             blurRadius: 5,
                                             color: Colors.black.withOpacity(0.1),
                                           ),
@@ -1411,12 +1454,12 @@ class PropertyDetailsState extends State<PropertyDetails>
                                       child: Column(
                                         crossAxisAlignment: CrossAxisAlignment.start,
                                         children: [
-                                          Text("Property Overview".translate(context),style: TextStyle(
+                                          Text("Property Overview".translate(context),style: const TextStyle(
                                             fontSize: 14,
                                             color: Color(0xff333333),
                                             fontWeight: FontWeight.w600
                                           ),),
-                                          SizedBox(height :10),
+                                          const SizedBox(height :10),
                                           Wrap(
                                             direction: Axis.horizontal,
                                             crossAxisAlignment: WrapCrossAlignment.start,
@@ -1486,7 +1529,7 @@ class PropertyDetailsState extends State<PropertyDetails>
                                                             children: [
                                                               Text(parameter?.name ?? "")
                                                                   .size(10)
-                                                                  .color(Color(0xff5d5d5d)),
+                                                                  .color(const Color(0xff5d5d5d)),
                                                               if (parameter
                                                                       ?.typeOfParameter ==
                                                                   "file") ...{
@@ -1778,34 +1821,34 @@ class PropertyDetailsState extends State<PropertyDetails>
                               // ),
                               if(property!.highlight != null && property!.highlight!.isNotEmpty )
                                 Padding(
-                                padding: EdgeInsets.symmetric( horizontal: 15,),
+                                padding: const EdgeInsets.symmetric( horizontal: 15,),
                                 child: Container(
-                                  padding: EdgeInsets.all(13),
+                                  padding: const EdgeInsets.all(13),
                                   decoration: BoxDecoration(
-                                      color: Color(0xfffffaf4),
+                                      color: const Color(0xfffffaf4),
                                       borderRadius: BorderRadius.circular(15),
                                   ),
                                   child: Column(
                                     crossAxisAlignment: CrossAxisAlignment.start,
                                     children: [
                                       Text("Property Highlights".translate(context),
-                                        style: TextStyle(
+                                        style: const TextStyle(
                                           fontSize: 14,
                                           color: Color(0xff333333),
                                           fontWeight: FontWeight.w600
                                       ),),
-                                      SizedBox(height: 13, ),
+                                      const SizedBox(height: 13, ),
                                       for(int i = 0; i < property!.highlight!.split(',').length; i++)
                                         Padding(
                                           padding: const EdgeInsets.only(bottom: 8.0),
                                           child: Row(
                                           children: [
                                             Image.asset("assets/NewPropertydetailscreen/_-55.png",width: 13,height: 13,fit: BoxFit.cover,),
-                                            SizedBox(width: 10,),
+                                            const SizedBox(width: 10,),
                                             Expanded(
                                               child: Text("${property!.highlight!.split(',')[i]}")
                                                   .size(11)
-                                                  .color(Color(0xff5d5d5d)),
+                                                  .color(const Color(0xff5d5d5d)),
                                             ),
                                           ],                                                                                ),
                                         ),
@@ -1820,7 +1863,7 @@ class PropertyDetailsState extends State<PropertyDetails>
                               if (widget.property?.assignedOutdoorFacility
                                   ?.isNotEmpty ??
                                   false) ...[
-                                Padding(
+                                const Padding(
                                   padding: EdgeInsets.symmetric( horizontal: 15,),
                                   child: Text("Near by Places",
                                     style: TextStyle(
@@ -1833,12 +1876,16 @@ class PropertyDetailsState extends State<PropertyDetails>
                               ],
 
 
-
+                              if (widget.property?.assignedOutdoorFacility
+                                  ?.isNotEmpty ??
+                                  false)
                               OutdoorFacilityListWidget(
                                   outdoorFacilityList: widget.property
                                       ?.assignedOutdoorFacility ??
                                       []),
-
+                              if (widget.property?.assignedOutdoorFacility
+                                  ?.isNotEmpty ??
+                                  false)
                               const SizedBox(
                                 height: 15,
                               ),
@@ -1846,16 +1893,16 @@ class PropertyDetailsState extends State<PropertyDetails>
 
 
                               Padding(
-                                padding: EdgeInsets.symmetric( horizontal: 15,),
+                                padding: const EdgeInsets.symmetric( horizontal: 15,),
                                 child: Container(
-                                  padding: EdgeInsets.all(10),
+                                  padding: const EdgeInsets.all(10),
                                   width: double.infinity,
                                   decoration: BoxDecoration(
                                     borderRadius: BorderRadius.circular(15.0),
                                     color: Colors.white,
                                     boxShadow: [
                                       BoxShadow(
-                                        offset: Offset(0, 1),
+                                        offset: const Offset(0, 1),
                                         blurRadius: 5,
                                         color: Colors.black.withOpacity(0.1),
                                       ),
@@ -1865,7 +1912,7 @@ class PropertyDetailsState extends State<PropertyDetails>
                                     crossAxisAlignment: CrossAxisAlignment.start,
                                     children: [
                                       Text(UiUtils.getTranslatedLabel(
-                                          context, "aboutThisPropLbl"),style: TextStyle(
+                                          context, "aboutThisPropLbl"),style: const TextStyle(
                                           fontSize: 14,
                                           color: Color(0xff333333),
                                           fontWeight: FontWeight.w600
@@ -1875,7 +1922,7 @@ class PropertyDetailsState extends State<PropertyDetails>
                                       ),
                                       ReadMoreText(
                                           text: property?.description ?? "",
-                                          style: TextStyle(
+                                          style: const TextStyle(
                                             fontSize: 11,
                                               color: Color(0xff707070)),
                                           readMoreButtonStyle: TextStyle(
@@ -1889,7 +1936,7 @@ class PropertyDetailsState extends State<PropertyDetails>
                               if (_bannerAd != null &&
                                   Constant.isAdmobAdsEnabled)
                                 Padding(
-                                  padding: EdgeInsets.only( left: 15,right:15,bottom: 20),
+                                  padding: const EdgeInsets.only( left: 15,right:15,bottom: 20),
                                   child: SizedBox(
                                       width: _bannerAd?.size.width.toDouble(),
                                       height: _bannerAd?.size.height.toDouble(),
@@ -2088,10 +2135,10 @@ class PropertyDetailsState extends State<PropertyDetails>
                                  height: 15,
                                ),
                                Padding(
-                                 padding: EdgeInsets.only( left: 15,right: 15),
+                                 padding: const EdgeInsets.only( left: 15,right: 15),
                                  child: Text(UiUtils.getTranslatedLabel(
                                      context, "Amenities"),
-                                   style: TextStyle(
+                                   style: const TextStyle(
                                        fontSize: 14,
                                        color: Color(0xff333333),
                                        fontWeight: FontWeight.w600
@@ -2104,7 +2151,7 @@ class PropertyDetailsState extends State<PropertyDetails>
                                  shrinkWrap: true,
                                  itemCount: property?.amenity!.length,
                                  physics: const NeverScrollableScrollPhysics(),
-                                 gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+                                 gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
                                    crossAxisCount: 3,
                                    crossAxisSpacing: 8,
                                    mainAxisSpacing: 8,
@@ -2119,7 +2166,7 @@ class PropertyDetailsState extends State<PropertyDetails>
                                      child: Container(
                                        padding: const EdgeInsets.only(left: 10,right: 10,bottom: 10),
                                        decoration: BoxDecoration(
-                                         color: Color(0xffebf4ff),
+                                         color: const Color(0xffebf4ff),
                                          borderRadius: BorderRadius.circular(10),
                                        ),
                                        child: Column(
@@ -2128,7 +2175,7 @@ class PropertyDetailsState extends State<PropertyDetails>
                                          children: [
                                            Container(
                                              padding: const EdgeInsets.only(left: 10,right: 10,top: 6,bottom: 6),
-                                             decoration: BoxDecoration(
+                                             decoration: const BoxDecoration(
                                                color: Colors.white,
                                                borderRadius: BorderRadius.only(
                                                  bottomLeft: Radius.circular(10),
@@ -2137,7 +2184,7 @@ class PropertyDetailsState extends State<PropertyDetails>
                                              ),
                                              child: Container(
                                                width: 23, height: 23,
-                                               child: UiUtils.networkSvg(griddata["image"], fit: BoxFit.cover, color: Color(0xff2e8af9)),
+                                               child: UiUtils.networkSvg(griddata["image"], fit: BoxFit.cover, color: const Color(0xff2e8af9)),
                                              ),
                                            ),
                                            Text(
@@ -2146,7 +2193,7 @@ class PropertyDetailsState extends State<PropertyDetails>
                                              overflow: TextOverflow.ellipsis,
                                            )
                                                .size(11)
-                                               .color(Color(0xff5d5d5d))
+                                               .color(const Color(0xff5d5d5d))
                                          ],
                                        ),
                                      ),
@@ -2159,10 +2206,10 @@ class PropertyDetailsState extends State<PropertyDetails>
                                 height: 10,
                               ),
                               Padding(
-                                padding: EdgeInsets.only( left: 15,right: 15),
+                                padding: const EdgeInsets.only( left: 15,right: 15),
                                 child: Text(UiUtils.getTranslatedLabel(
                                         context, "Property Location"))
-                                    .color(Color(0xff333333))
+                                    .color(const Color(0xff333333))
                                     .size(14)
                                     .bold(weight: FontWeight.w600),
                               ),
@@ -2170,7 +2217,7 @@ class PropertyDetailsState extends State<PropertyDetails>
                                 height: 15,
                               ),
                               Padding(
-                                padding: EdgeInsets.only( left: 15,right: 15),
+                                padding: const EdgeInsets.only( left: 15,right: 15),
                                 child: SizedBox(
                                   height: 150,
                                   child: ClipRRect(
@@ -2255,7 +2302,7 @@ class PropertyDetailsState extends State<PropertyDetails>
                                 height: 15,
                               ),
                               Padding(
-                                padding: EdgeInsets.only( left: 15,right: 15),
+                                padding: const EdgeInsets.only( left: 15,right: 15),
                                 child: Column(
                                   crossAxisAlignment: CrossAxisAlignment.start,
                                   children: [
@@ -2276,7 +2323,7 @@ class PropertyDetailsState extends State<PropertyDetails>
                                         //   width: 5.rw(context),
                                         // ),
                                         Expanded(
-                                          child: Text("${property?.address!}",style: TextStyle(fontSize: 12),),
+                                          child: Text("${property?.address!}",style: const TextStyle(fontSize: 12),),
                                         )
                                       ],
                                     ),
@@ -2359,12 +2406,59 @@ class PropertyDetailsState extends State<PropertyDetails>
                                 )
                             ],
                           ),
-
-                        SizedBox(height: 20,),
+                        const SizedBox(height: 10,),
                         Padding(
-                          padding: const EdgeInsets.only(left: 15,right: 15),
+                          padding:const EdgeInsets.symmetric(horizontal: 15),
                           child: Row(
-                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                            children: [
+                              Expanded(
+                                child: Container(
+                                child: const Text("Property have inaccurate data ?"),
+                                ),
+                              ),
+                              SizedBox(width: 10,),
+                              GestureDetector(
+                                  onTap: () {
+                                    showDialog(
+                                      context: context,
+                                      builder: (BuildContext context) {
+                                        return AlertDialog(
+                                          shape: const RoundedRectangleBorder(
+                                            borderRadius: BorderRadius.all(Radius.circular(20)),
+                                          ),
+                                          contentPadding: const EdgeInsets.all(0),
+                                          content: ReportPropertyDialog(propertyID: property!.id!),
+                                        );
+                                      },
+                                    );
+                                  // showModalBottomSheet(
+                                  //   context: context,
+                                  //   shape: const RoundedRectangleBorder(
+                                  //     borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
+                                  //   ),
+                                  //   builder: (BuildContext context) {
+                                  //     return  ReportPropertyBottomSheet(context,property!.id!,);
+                                  //   },
+                                  // );
+                                },
+                                child: Container(
+                                  height: 40,
+                                  alignment: Alignment.center,
+                                  padding: const EdgeInsets.symmetric(horizontal: 15),
+                                  decoration: BoxDecoration(
+                                    borderRadius: BorderRadius.circular(8),
+                                    color: const Color(0xffffe4e4)
+                                  ),child: Text("Report",style: TextStyle(color: Colors.red),),
+                                ),
+                              )
+                            ],
+                          ),
+                        ),
+                        const SizedBox(height: 20,),
+                        if (similarPropertiesList.isNotEmpty)
+                         const Padding(
+                          padding: EdgeInsets.only(left: 15,right: 15),
+                          child: Row(
                             children: [
                               Text("Similar Properties",
                                 style: TextStyle(
@@ -2373,164 +2467,61 @@ class PropertyDetailsState extends State<PropertyDetails>
                                     fontWeight: FontWeight.w500
                                 ),
                               ),
-                                      
                             ],
                           ),
                         ),
-                        SizedBox(height: 20,),
-                        Padding(
-                          padding: const EdgeInsets.only(left: 15),
-                          child: SingleChildScrollView(
-                              scrollDirection : Axis.horizontal,
-                              child:  Row(
-                                mainAxisAlignment: MainAxisAlignment.start,
-                                children: [
-                                  for(int i = 0; i < similarPropertiesList.length; i++)
-                                    InkWell(
-                                      onTap: () {
-                                        HelperUtils.goToNextPage(
-                                            Routes.propertyDetails, context, false, args: {
-                                          'propertyData': PropertyModel.fromMap(similarPropertiesList[i]),
-                                          'propertiesList': []
-                                        });
-                                      },
-                                      child: Container(
-                                        width: 180,
-                                      margin: EdgeInsets.only(right: 10),
-                                      decoration: BoxDecoration(
-                                          color: Colors.white,
-                                          borderRadius: BorderRadius.circular(15),
-                                          border: Border.all(
-                                              width: 1,
-                                              color: Color(0xffe0e0e0)
-                                          )
+                        if (similarIsLoading)
+                          Column(
+                            children: [
+                              const Padding(
+                                padding: EdgeInsets.only(left: 15,right: 15),
+                                child: Row(
+                                  children: [
+                                    Text("Similar Properties",
+                                      style: TextStyle(
+                                          color: Color(0xff333333),
+                                          fontSize: 16,
+                                          fontWeight: FontWeight.w500
                                       ),
-                                      child: Column(
-                                        children: [
-                                          Stack(
-                                            children: [
-                                              ClipRRect(
-                                                  borderRadius: BorderRadius.only(
-                                                    topRight: Radius.circular(15),
-                                                    topLeft:Radius.circular(15),
-                                                  ),
-                                                  // child: Image.asset("assets/propertylist/1.png",width: double.infinity,fit: BoxFit.cover,height: 150,),
-                                                  child: UiUtils.getImage(
-                                                    similarPropertiesList[i]['title_image'] ?? "",
-                                                    width: double.infinity,fit: BoxFit.cover,height: 130,
-                                                  ),
-                                              ),
-
-                                              Positioned(
-                                                  top: 10,
-                                                  right: 10,
-                                                  child: LikeButtonWidget(
-                                                    onStateChange:
-                                                        (AddToFavoriteCubitState state) {
-                                                      if (state is AddToFavoriteCubitInProgress) {
-                                                        favoriteInProgress = true;
-                                                        setState(
-                                                              () {},
-                                                        );
-                                                      } else {
-                                                        favoriteInProgress = false;
-                                                        setState(
-                                                              () {},
-                                                        );
-                                                      }
-                                                    },
-                                                    property: PropertyModel.fromMap(similarPropertiesList[i]!),
-                                                  ),
-                                              ),
-                                            ],
-                                          ),
-                                          Padding(
-                                            padding: const EdgeInsets.only(left:10,right: 10),
-                                            child: Column(
-                                              crossAxisAlignment: CrossAxisAlignment.start,
-                                              children: [
-                                                SizedBox(height: 8,),
-                                                Text("${similarPropertiesList[i]['title']}",
-                                                  maxLines: 1,
-                                                  overflow: TextOverflow.ellipsis,
-                                                  style: TextStyle(
-                                                      color: Color(0xff333333),
-                                                      fontSize: 12.5,
-                                                      fontWeight: FontWeight.w500
-                                                  ),
-                                                ),
-                                                SizedBox(height: 6,),
-                                                Row(
-                                                  children: [
-                                                    Image.asset("assets/Home/__location.png",width:15,fit: BoxFit.cover,height: 15,),
-                                                    SizedBox(width: 5,),
-                                                    Expanded(
-                                                      child: Text("${similarPropertiesList[i]['address']}",
-                                                        maxLines: 1,
-                                                        overflow: TextOverflow.ellipsis,
-                                                        style: TextStyle(
-                                                            color: Color(0xffa2a2a2),
-                                                            fontSize: 10.5,
-                                                            fontWeight: FontWeight.w400
-                                                        ),
-                                                      ),
-                                                    ),
-                                                  ],
-                                                ),
-                                                SizedBox(height: 6,),
-                                                Row(
-                                                  children: [
-                                                    Text("Rs. ${similarPropertiesList[i]['price']}",
-                                                      maxLines: 1,
-                                                      overflow: TextOverflow.ellipsis,
-                                                      style: TextStyle(
-                                                          color: Color(0xff333333),
-                                                          fontSize: 11,
-                                                          fontWeight: FontWeight.w500
-                                                      ),
-                                                    ),
-                                                    SizedBox(width: 15,),
-                                                    // Container(width: 1,height: 10,color: Color(0xff7d7d7d),),
-                                                    // SizedBox(width: 5,),
-                                                    // Text("952 sqft",
-                                                    //   maxLines: 1,
-                                                    //   overflow: TextOverflow.ellipsis,
-                                                    //   style: TextStyle(
-                                                    //       color: Color(0xff767676),
-                                                    //       fontSize: 11,
-                                                    //       fontWeight: FontWeight.w400
-                                                    //   ),
-                                                    // ),
-                                                  ],
-                                                ),
-                                                SizedBox(height: 6,),
-                                                Text("${similarPropertiesList[i]['category']['category']}",
-                                                  maxLines: 1,
-                                                  overflow: TextOverflow.ellipsis,
-                                                  style: TextStyle(
-                                                      color: Color(0xffa2a2a2),
-                                                      fontSize: 11,
-                                                      fontWeight: FontWeight.w400
-                                                  ),
-                                                ),
-                                                SizedBox(height: 8,),
-                                              ],
-                                            ),
-                                          )
-                                        ],
-                                      ),
-                                                                        ),
                                     ),
-                                ],
-                              )
+                                  ],
+                                ),
+                              ),
+                              Padding(
+                                padding: const EdgeInsets.only(left: 15,right: 15,top: 10),
+                                child: buildPropertiesShimmer(context, 2),
+                              ),
+                            ],
+                          )
+                        else if (similarPropertiesList.isNotEmpty)
+                        Container(
+                          height: 240,
+                          child: ListView.builder(
+                              padding: const EdgeInsets.symmetric(horizontal: 10),
+                              itemCount:  similarPropertiesList.length.clamp(0, 10),
+                              scrollDirection: Axis.horizontal,
+                              // shrinkWrap: true,
+                              itemBuilder: (context, index) {
+                                return GestureDetector(
+                                  onTap: () {
+                                    FocusScope.of(context).unfocus();
+                                    HelperUtils.goToNextPage(
+                                        Routes.propertyDetails, context, false, args: {
+                                      'propertyData': PropertyModel.fromMap(
+                                          similarPropertiesList[index]),
+                                    });
+                                  },
+                                  child:  PropertyVerticalCard(property: PropertyModel.fromMap( similarPropertiesList[index])),
+                                );
+                              }
                           ),
-                        ),
-                    
-                        SizedBox(height: 20,),
-                        Padding(
-                          padding: const EdgeInsets.only(left: 15,right: 15),
+                        ) else
+                          Container(),
+                        const SizedBox(height: 10,),
+                        if (agentPropertiesList.isNotEmpty)
+                        const Padding(
+                          padding: EdgeInsets.only(left: 15,right: 15),
                           child: Row(
-                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
                             children: [
                               Text("Other Project By Agent",
                                 style: TextStyle(
@@ -2539,161 +2530,63 @@ class PropertyDetailsState extends State<PropertyDetails>
                                     fontWeight: FontWeight.w500
                                 ),
                               ),
-                    
+
                             ],
                           ),
                         ),
-                        SizedBox(height: 20,),
-                        Padding(
-                          padding: const EdgeInsets.only(left: 15),
-                          child: SingleChildScrollView(
-                              scrollDirection : Axis.horizontal,
-                              child:  Row(
-                                mainAxisAlignment: MainAxisAlignment.start,
-                                children: [
-                                  for(int i = 0; i < agentPropertiesList.length; i++)
-                                    InkWell(
-                                      onTap: () {
-                                          HelperUtils.goToNextPage(
-                                              Routes.propertyDetails, context, false, args: {
-                                            'propertyData': PropertyModel.fromMap(agentPropertiesList[i]),
-                                            'propertiesList': []
-                                          });
-                                      },
-                                      child: Container(
-                                        width: 180,
-                                        margin: EdgeInsets.only(right: 10),
-                                        decoration: BoxDecoration(
-                                            color: Colors.white,
-                                            borderRadius: BorderRadius.circular(15),
-                                            border: Border.all(
-                                                width: 1,
-                                                color: Color(0xffe0e0e0)
-                                            )
-                                        ),
-                                        child: Column(
-                                          children: [
-                                            Stack(
-                                              children: [
-                                                ClipRRect(
-                                                  borderRadius: BorderRadius.only(
-                                                    topRight: Radius.circular(15),
-                                                    topLeft:Radius.circular(15),
-                                                  ),
-                                                  // child: Image.asset("assets/propertylist/1.png",width: double.infinity,fit: BoxFit.cover,height: 150,),
-                                                  child: UiUtils.getImage(
-                                                    agentPropertiesList[i]['title_image'] ?? "",
-                                                    width: double.infinity,fit: BoxFit.cover,height: 130,
-                                                  ),
-                                                ),
-
-                                                Positioned(
-                                                    top: 10,
-                                                    right: 10,
-                                                    child: LikeButtonWidget(
-                                                      onStateChange:
-                                                          (AddToFavoriteCubitState state) {
-                                                        if (state is AddToFavoriteCubitInProgress) {
-                                                          favoriteInProgress = true;
-                                                          setState(
-                                                                () {},
-                                                          );
-                                                        } else {
-                                                          favoriteInProgress = false;
-                                                          setState(
-                                                                () {},
-                                                          );
-                                                        }
-                                                      },
-                                                      property: PropertyModel.fromMap(agentPropertiesList[i]!),
-                                                    ),
-                                                ),
-                                              ],
+                                  if (agentPropertiesIsLoading )
+                                Column(
+                                  children: [
+                                    const Padding(
+                                      padding: EdgeInsets.only(left: 15,right: 15),
+                                      child: Row(
+                                        children: [
+                                          Text("Other Project By Agent",
+                                            style: TextStyle(
+                                                color: Color(0xff333333),
+                                                fontSize: 16,
+                                                fontWeight: FontWeight.w500
                                             ),
-                                            Padding(
-                                              padding: const EdgeInsets.only(left:10,right: 10),
-                                              child: Column(
-                                                crossAxisAlignment: CrossAxisAlignment.start,
-                                                children: [
-                                                  SizedBox(height: 8,),
-                                                  Text("${agentPropertiesList[i]['title']}",
-                                                    maxLines: 1,
-                                                    overflow: TextOverflow.ellipsis,
-                                                    style: TextStyle(
-                                                        color: Color(0xff333333),
-                                                        fontSize: 12.5,
-                                                        fontWeight: FontWeight.w500
-                                                    ),
-                                                  ),
-                                                  SizedBox(height: 6,),
-                                                  Row(
-                                                    children: [
-                                                      Image.asset("assets/Home/__location.png",width:15,fit: BoxFit.cover,height: 15,),
-                                                      SizedBox(width: 5,),
-                                                      Expanded(
-                                                        child: Text("${agentPropertiesList[i]['address']}",
-                                                          maxLines: 1,
-                                                          overflow: TextOverflow.ellipsis,
-                                                          style: TextStyle(
-                                                              color: Color(0xffa2a2a2),
-                                                              fontSize: 10.5,
-                                                              fontWeight: FontWeight.w400
-                                                          ),
-                                                        ),
-                                                      ),
-                                                    ],
-                                                  ),
-                                                  SizedBox(height: 6,),
-                                                  Row(
-                                                    children: [
-                                                      Text("Rs. ${agentPropertiesList[i]['price']}",
-                                                        maxLines: 1,
-                                                        overflow: TextOverflow.ellipsis,
-                                                        style: TextStyle(
-                                                            color: Color(0xff333333),
-                                                            fontSize: 11,
-                                                            fontWeight: FontWeight.w500
-                                                        ),
-                                                      ),
-                                                      SizedBox(width: 15,),
-                                                      // Container(width: 1,height: 10,color: Color(0xff7d7d7d),),
-                                                      // SizedBox(width: 5,),
-                                                      // Text("952 sqft",
-                                                      //   maxLines: 1,
-                                                      //   overflow: TextOverflow.ellipsis,
-                                                      //   style: TextStyle(
-                                                      //       color: Color(0xff767676),
-                                                      //       fontSize: 11,
-                                                      //       fontWeight: FontWeight.w400
-                                                      //   ),
-                                                      // ),
-                                                    ],
-                                                  ),
-                                                  SizedBox(height: 6,),
-                                                  Text("${agentPropertiesList[i]['category'] != null ? agentPropertiesList[i]['category']['category'] : ''}",
-                                                    maxLines: 1,
-                                                    overflow: TextOverflow.ellipsis,
-                                                    style: TextStyle(
-                                                        color: Color(0xffa2a2a2),
-                                                        fontSize: 11,
-                                                        fontWeight: FontWeight.w400
-                                                    ),
-                                                  ),
-                                                  SizedBox(height: 8,),
-                                                ],
-                                              ),
-                                            )
-                                          ],
-                                        ),
+                                          ),
+
+                                        ],
                                       ),
                                     ),
-                                ],
-                              )
+                                    Padding(
+                                      padding: const EdgeInsets.only(left: 15,right: 15,top: 10),
+                                    child: buildPropertiesShimmer(context, 2),
+                                                                  ),
+                                  ],
+                                )
+                              else if (agentPropertiesList.isNotEmpty)
+                          Container(
+                          height: 240,
+                          child: ListView.builder(
+                            padding: const EdgeInsets.symmetric(horizontal: 10),
+                            itemCount: agentPropertiesList.length.clamp(0, 10),
+                            scrollDirection: Axis.horizontal,
+                            itemBuilder: (context, index) {
+                              return GestureDetector(
+                                onTap: () {
+                                  FocusScope.of(context).unfocus();
+                                  HelperUtils.goToNextPage(
+                                    Routes.propertyDetails, context, false, args: {
+                                    'propertyData': PropertyModel.fromMap(
+                                        agentPropertiesList[index]),
+                                  },
+                                  );
+                                },
+                                child: PropertyVerticalCard(
+                                  property: PropertyModel.fromMap(agentPropertiesList[index]),
+                                ),
+                              );
+                            },
                           ),
-                        ),
-                        SizedBox(height: 20,),
-                    
-                        //here
+                        )
+                          else
+                          Container(),
+                      const SizedBox(height: 20,),
+
                         SizedBox(
                           height: 20.rh(context),
                         ),
@@ -2709,7 +2602,276 @@ class PropertyDetailsState extends State<PropertyDetails>
     );
   }
 
+  Widget ReportPropertyDialog({required int propertyID}) {
+    List<Map<String, dynamic>> reportCheckboxListWithOther = List.from(reportCheckboxList)
+      ..add({'id': 0, 'reason': 'Other'});
 
+    TextEditingController controller = TextEditingController();
+    String errorText = '';
+
+    return StatefulBuilder(
+      builder: (context, setState) {
+        return Container(
+          width: double.maxFinite,
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              const SizedBox(height: 10),
+              Center(
+                child: Container(
+                  height: 6,
+                  width: 35,
+                  decoration: BoxDecoration(
+                    color: Colors.grey.withOpacity(0.5),
+                    borderRadius: BorderRadius.circular(20),
+                  ),
+                ),
+              ),
+              Padding(
+                padding: const EdgeInsets.all(15),
+                child: Column(
+                  mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                  children: [
+                    const Text(
+                      "Report Property",
+                      style: TextStyle(fontSize: 18, fontWeight: FontWeight.w600),
+                    ),
+                    const SizedBox(height: 10),
+                    Row(
+                      children: [
+                        const Text(
+                          "Reasons",
+                          style: TextStyle(fontSize: 14, fontWeight: FontWeight.w600),
+                        ),
+                      ],
+                    ),
+                    const SizedBox(height: 10),
+                    Container(
+                      decoration: BoxDecoration(color: Color(0xfff4f5f4),borderRadius: BorderRadius.circular(10)),
+                      child: ListView.builder(
+                        padding: EdgeInsets.all(0),
+                        scrollDirection: Axis.vertical,
+                        shrinkWrap: true,
+                        itemCount: reportCheckboxListWithOther.length,
+                        itemBuilder: (context, index) {
+                          final reason = reportCheckboxListWithOther[index];
+                          final reasonId = reason['id'];
+                          return Container(
+                            alignment: Alignment.centerLeft,
+                            height: 45,
+                            child: CheckboxListTile(
+                              title: Text(
+                                reason['reason'] ?? '',
+                                style: TextStyle(fontSize: 14),
+                              ),
+                              value: selectedPropertyId == reasonId,
+                              onChanged: (bool? value) {
+                                setState(() {
+                                  if (value == true) {
+                                    selectedPropertyId = reasonId;
+                                  } else {
+                                    selectedPropertyId = null;
+                                  }
+                                  errorText = '';
+                                });
+                              },
+                            ),
+                          );
+                        },
+                      ),
+                    ),
+                    const SizedBox(height: 10),
+                    if (selectedPropertyId == 0)
+                      Container(
+                        alignment: Alignment.centerLeft,
+                        padding: EdgeInsets.symmetric(horizontal: 10),
+                        height: 45,
+                        width: MediaQuery.of(context).size.width,
+                        decoration: BoxDecoration(
+                          borderRadius: BorderRadius.circular(10),
+                          border: Border.all(color: Colors.grey),
+                        ),
+                        child: TextFormField(
+                          controller: controller,
+                          style: TextStyle(),
+                          decoration: const InputDecoration(
+                            border: InputBorder.none,
+                            hintText: "Write your reason here",
+                            hintStyle: TextStyle(fontSize: 13),
+                            contentPadding: EdgeInsets.only(bottom: 5),
+                          ),
+                        ),
+                      ),
+                    if(errorText.isNotEmpty)
+                    Row(
+                      children: [
+                        const SizedBox(height: 5),
+                        Text(errorText,style: TextStyle(fontSize: 12,color: Colors.red),),
+                      ],
+                    ),
+                    const SizedBox(height: 10),
+                    Row(
+                      children: [
+                        Expanded(
+                          child: GestureDetector(
+                            onTap: () {
+                              Navigator.pop(context);
+                            },
+                            child: Container(
+                              alignment: Alignment.center,
+                              height: 45,
+                              decoration: BoxDecoration(
+                                borderRadius: BorderRadius.circular(10),
+                                color: Color(0xffff1e1e),
+                              ),
+                              child: const Text(
+                                "Cancel",
+                                style: TextStyle(
+                                  color: Colors.white,
+                                  fontSize: 15,
+                                  fontWeight: FontWeight.w500,
+                                ),
+                              ),
+                            ),
+                          ),
+                        ),
+                        SizedBox(width: 15),
+                        Expanded(
+                          child: GestureDetector(
+                            onTap: () async {
+                              setState(() {
+                                errorText = '';
+                              });
+                              if (selectedPropertyId == null) {
+                                setState(() {
+                                  errorText = "Please select a reason for reporting.";
+                                });
+                                return;
+                              }
+
+                              if (selectedPropertyId == 0 && controller.text.isEmpty) {
+                                setState(() {
+                                  errorText = 'Please provide a reason when selecting "Other".';
+                                });
+                                return;
+                              }
+                              var response = await Api.post(url: Api.reportReason, parameter: {
+                                'property_id': propertyID,
+                                'reason_id': selectedPropertyId,
+                                'other_message': selectedPropertyId == 0 ? controller.text : "",
+                              });
+                              if (!response['error']) {
+                                Navigator.pop(context);
+                                HelperUtils.showSnackBarMessage(
+                                  context,
+                                  UiUtils.getTranslatedLabel(context, response['message']),
+                                  type: MessageType.success,
+                                  messageDuration: 3,
+                                );
+                              }
+                            },
+                            child: Container(
+                              alignment: Alignment.center,
+                              height: 45,
+                              decoration: BoxDecoration(
+                                borderRadius: BorderRadius.circular(10),
+                                color: Color(0xff117af9),
+                              ),
+                              child: const Text(
+                                "Report",
+                                style: TextStyle(
+                                  color: Colors.white,
+                                  fontSize: 15,
+                                  fontWeight: FontWeight.w500,
+                                ),
+                              ),
+                            ),
+                          ),
+                        ),
+                      ],
+                    )
+                  ],
+                ),
+              ),
+            ],
+          ),
+        );
+      },
+    );
+  }
+
+  Widget buildPropertiesShimmer(BuildContext context, int count) {
+    return GridView.builder(
+      shrinkWrap: true,
+      itemCount: count,
+      physics: const NeverScrollableScrollPhysics(),
+      gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+        crossAxisCount: 2,
+        crossAxisSpacing: 8,
+        mainAxisSpacing: 8,
+        childAspectRatio: MediaQuery.sizeOf(context).height / 950,
+      ),
+
+      itemBuilder: (context, index) {
+        return Container(
+          width: double.maxFinite,
+          decoration: BoxDecoration(
+              color: Colors.white,
+              borderRadius: BorderRadius.circular(15),
+              border: Border.all(
+                  width: 1,
+                  color: Color(0xffe0e0e0)
+              )
+          ),
+          child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: <Widget>[
+                const ClipRRect(
+                  clipBehavior: Clip.antiAliasWithSaveLayer,
+                  borderRadius: BorderRadius.only(
+                    topRight: Radius.circular(15),
+                    topLeft:Radius.circular(15),
+                  ),
+                  child: CustomShimmer(width: double.infinity,height: 110,),
+                ),
+                SizedBox(height: 8,),
+                LayoutBuilder(builder: (context, c) {
+                  return Padding(
+                    padding: const EdgeInsets.only(left:10,right: 10),
+                    child: Column(
+                      mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: <Widget>[
+
+                        CustomShimmer(
+                          height: 14,
+                          width: c.maxWidth - 50,
+                        ),
+                        SizedBox(height: 5,),
+                        const CustomShimmer(
+                          height: 13,
+                        ),
+                        SizedBox(height: 5,),
+                        CustomShimmer(
+                          height: 12,
+                          width: c.maxWidth / 1.2,
+                        ),
+                        SizedBox(height: 8,),
+                        Align(
+                          alignment: Alignment.bottomLeft,
+                          child: CustomShimmer(
+                            width: c.maxWidth / 4,
+                          ),
+                        ),
+                      ],
+                    ),
+                  );
+                })
+              ]),
+        );
+      },
+    );
+  }
 
 
   Widget advertismentLable() {
@@ -3016,7 +3178,7 @@ class PropertyDetailsState extends State<PropertyDetails>
                   content: Row(
                     children: [
                       Text( UiUtils.getTranslatedLabel(context, response['message'])),
-                      Spacer(),
+                      const Spacer(),
                       InkWell(
                         onTap: (){
                           ScaffoldMessenger.of(context).hideCurrentSnackBar();
@@ -3035,8 +3197,8 @@ class PropertyDetailsState extends State<PropertyDetails>
                       )
                     ],
                   ),
-                  duration: Duration(seconds: 5),
-                  backgroundColor: Color(0xff117af9),
+                  duration: const Duration(seconds: 5),
+                  backgroundColor: const Color(0xff117af9),
                 ),
               );
 
@@ -3044,9 +3206,9 @@ class PropertyDetailsState extends State<PropertyDetails>
             }
           },
           child: Center(child:isLoading
-              ? Text('Loading...').size(context.font.large)
+              ? const Text('Loading...').size(context.font.large)
               .bold().color(Color(0xff117af9))
-              :  Text('View Contact').size(context.font.large)
+              :  const Text('View Contact').size(context.font.large)
               .bold().color(Color(0xff117af9)),)),
       ),
     );
@@ -3185,7 +3347,7 @@ class PropertyDetailsState extends State<PropertyDetails>
   Widget email() {
     return UiUtils.buildButton(context,
         fontSize: 13,
-        buttonColor: Color(0xffff5f7a),
+        buttonColor: const Color(0xffff5f7a),
         outerPadding: const EdgeInsets.symmetric(horizontal: 10,vertical: 1),
         buttonTitle: UiUtils.getTranslatedLabel(context, "Email"),
         onPressed: _onTapEmail,
@@ -3201,7 +3363,7 @@ class PropertyDetailsState extends State<PropertyDetails>
   Widget messageButton() {
     return UiUtils.buildButton(context,
         fontSize: 13,
-        buttonColor: Color(0xff25d366),
+        buttonColor: const Color(0xff25d366),
         outerPadding: const EdgeInsets.symmetric(horizontal: 0,vertical: 1),
         buttonTitle: UiUtils.getTranslatedLabel(context, "WhatsApp"),
         onPressed: _onTapMessage,
@@ -3396,9 +3558,9 @@ class CusomterProfileWidget extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Container(
-      padding: EdgeInsets.only(left: 15,right: 15,top: 15,bottom: 15),
+      padding: const EdgeInsets.only(left: 15,right: 15,top: 15,bottom: 15),
       decoration: BoxDecoration(
-          color: Color(0xfff9f9f9),
+          color: const Color(0xfff9f9f9),
           borderRadius: BorderRadius.circular(10),
       ),
 
@@ -3419,7 +3581,7 @@ class CusomterProfileWidget extends StatelessWidget {
                     color: Colors.grey.shade200,
                     border: Border.all(
                       width: 1,
-                      color: Color(0xffdfdfdf)
+                      color: const Color(0xffdfdfdf)
                     ),
                     borderRadius: BorderRadius.circular(50)),
                 child: ClipRRect(
@@ -3473,7 +3635,7 @@ class CusomterProfileWidget1 extends StatelessWidget {
         borderRadius: BorderRadius.circular(10),
         boxShadow: [
           BoxShadow(
-            offset: Offset(0, 1),
+            offset: const Offset(0, 1),
             blurRadius: 5,
             color: Colors.black.withOpacity(0.1),
           ),
@@ -3504,7 +3666,7 @@ class CusomterProfileWidget1 extends StatelessWidget {
                               color: Colors.grey.shade200,
                               border: Border.all(
                                   width: 1,
-                                  color: Color(0xffdfdfdf)
+                                  color: const Color(0xffdfdfdf)
                               ),
                               borderRadius: BorderRadius.circular(50)),
                           child: ClipRRect(
@@ -3529,13 +3691,13 @@ class CusomterProfileWidget1 extends StatelessWidget {
                         children: [
                           Text(widget.property?.customerName ?? "")
                               .size(13)
-                              .color(Color(0xff4c4c4c))
+                              .color(const Color(0xff4c4c4c))
                               .bold(),
-                          SizedBox(height: 5,),
+                          const SizedBox(height: 5,),
                           Row(
                             children: [
                               Text("${widget.property?.customerRole == 1 ? 'Owner' : widget.property?.customerRole == 2 ? 'Agent' : 'Builder'}",
-                                style: TextStyle(
+                                style: const TextStyle(
                                     fontSize: 11,
                                     color: Color(0xff7d7d7d)
                                 ),
@@ -3558,17 +3720,17 @@ class CusomterProfileWidget1 extends StatelessWidget {
                     );
                   },
                   child: Container(
-                    padding: EdgeInsets.only(left: 20,right: 20,top: 5,bottom: 5),
+                    padding: const EdgeInsets.only(left: 20,right: 20,top: 5,bottom: 5),
                     decoration: BoxDecoration(
                         color: Colors.white,
                         borderRadius: BorderRadius.circular(30),
                         border: Border.all(
                             width: 1,
-                            color: Color(0xff2e8af9)
+                            color: const Color(0xff2e8af9)
                         )
 
                     ),
-                    child: Text("Profile",style: TextStyle(
+                    child: const Text("Profile",style: TextStyle(
                         color: Color(0xff2e8af9),
                         fontSize: 12,
                         fontWeight: FontWeight.w500
@@ -3577,7 +3739,7 @@ class CusomterProfileWidget1 extends StatelessWidget {
                 )
             ],
           ),
-          SizedBox(height: 20,),
+          const SizedBox(height: 20,),
           Padding(
             padding: const EdgeInsets.symmetric(horizontal: 10),
             child: Row(
@@ -3613,7 +3775,7 @@ class CusomterProfileWidget1 extends StatelessWidget {
                                   onPressed: () {
                                     Navigator.of(context).pop();
                                   },
-                                  child: Text('Done'),
+                                  child: const Text('Done'),
                                 ),
                               ],
                             );
@@ -3629,13 +3791,13 @@ class CusomterProfileWidget1 extends StatelessWidget {
                     },
                     child: Container(
                       height: 40,
-                      padding: EdgeInsets.only(left: 0,right: 0,top: 5,bottom: 5),
+                      padding: const EdgeInsets.only(left: 0,right: 0,top: 5,bottom: 5),
                       decoration: BoxDecoration(
-                        color: Color(0xff2e8af9),
+                        color: const Color(0xff2e8af9),
                         borderRadius: BorderRadius.circular(20),
 
                       ),
-                      child: Center(
+                      child: const Center(
                         child: Text("Request a Callback",style: TextStyle(
                             color: Colors.white,
                             fontSize: 12,
@@ -3749,8 +3911,8 @@ class OutdoorFacilityListWidget extends StatelessWidget {
     return SizedBox(
       height: 60,
       child: ListView.separated(
-        separatorBuilder: (context,i)=>SizedBox(width: 10,),
-        padding: EdgeInsets.symmetric(horizontal: 15),
+        separatorBuilder: (context,i)=>const SizedBox(width: 10,),
+        padding: const EdgeInsets.symmetric(horizontal: 15),
         scrollDirection: Axis.horizontal,
         itemCount: outdoorFacilityList.length,
         itemBuilder: (context, index) {
@@ -3758,13 +3920,13 @@ class OutdoorFacilityListWidget extends StatelessWidget {
 
           return Container(
             width: 140,
-            padding: EdgeInsets.all(6),
+            padding: const EdgeInsets.all(6),
             decoration: BoxDecoration(
               color: Colors.white,
               borderRadius: BorderRadius.circular(10),
               border: Border.all(
                 width: 1,
-                color: Color(0xffe9e9e9),
+                color: const Color(0xffe9e9e9),
               ),
             ),
             child: Row(
@@ -3774,7 +3936,7 @@ class OutdoorFacilityListWidget extends StatelessWidget {
                   height: 46,
                   decoration: BoxDecoration(
                     borderRadius: BorderRadius.circular(10),
-                    color: Color(0xfffff1db),
+                    color: const Color(0xfffff1db),
                   ),
                   child: Center(
                     child: UiUtils.imageType(
@@ -3794,7 +3956,7 @@ class OutdoorFacilityListWidget extends StatelessWidget {
                     children: [
                       Text(
                         facility.name ?? "",
-                        style: TextStyle(
+                        style: const TextStyle(
                           fontSize: 11,
                           color: Color(0xff585858),
                         ),
@@ -3804,7 +3966,7 @@ class OutdoorFacilityListWidget extends StatelessWidget {
                       const SizedBox(height: 4),
                       Text(
                         "${facility.distance} KM",
-                        style: TextStyle(
+                        style: const TextStyle(
                           color: Color(0xff333333),
                           fontSize: 12,
                           fontWeight: FontWeight.w500,

@@ -31,11 +31,16 @@ class _ReadMoreTextState extends State<ReadMoreText> {
     final numLines = textPainter.computeLineMetrics().length;
 
     if (numLines > 5) {
-      return Wrap(
+      return Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Text(
-            showingFullText ? text : _truncateText(text),
-            style: widget.style,
+          Wrap(
+            children: [
+              Text(
+                showingFullText ? text : _truncateText(text),
+                style: widget.style,
+              ),
+            ],
           ),
           TextButton(
             style: const ButtonStyle(
