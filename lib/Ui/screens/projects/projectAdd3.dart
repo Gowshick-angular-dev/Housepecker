@@ -257,7 +257,7 @@ class _ProjectFormThreeState extends State<ProjectFormThree> {
                                 style: TextStyle(color: Colors.red), // Customize asterisk color
                               ),
                               TextSpan(
-                                text: '  (Notes: Add every highlight using a comma ",")',
+                                text: '  (Notes: Add highlights using commas ",")',
                                 style: TextStyle(color: Colors.red, fontSize: 11), // Customize asterisk color
                               ),
                             ],

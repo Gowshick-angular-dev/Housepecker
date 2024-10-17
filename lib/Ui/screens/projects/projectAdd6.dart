@@ -40,12 +40,7 @@ class ProjectFormsixth extends StatefulWidget {
 class _ProjectFormSecondState extends State<ProjectFormsixth> {
   int? selectedPackage = 0;
   TextEditingController locationControler = TextEditingController();
-  TextEditingController descriptionControler = TextEditingController();
-  TextEditingController minPriceControler = TextEditingController();
-  TextEditingController maxPriceControler = TextEditingController();
-  TextEditingController avgPriceControler = TextEditingController();
-  TextEditingController nameControler = TextEditingController();
-  TextEditingController offersControler = TextEditingController();
+  FocusNode placesFocusNode = FocusNode();
   TextEditingController cityControler = TextEditingController();
   TextEditingController StateController = TextEditingController();
   TextEditingController ContryControler = TextEditingController();
@@ -139,26 +134,13 @@ class _ProjectFormSecondState extends State<ProjectFormsixth> {
 
   Future<void> getUpdateProject() async {
     locationControler.text = widget.data!['address'];
-    descriptionControler.text = widget.data!['description'];
-    nameControler.text = widget.data!['title'];
     cityControler.text = widget.data!['city'];
     projectType = widget.data!['project_type']!.toString();
-    minPriceControler.text = widget.data!['price'].toString();
-    maxPriceControler.text = widget.data!['price'].toString();
-    offersControler.text = widget.data!['project_details'][0]['offers'] ?? '';
-    avgPriceControler.text =
-        widget.data!['project_details'][0]['avg_price'] ?? '';
     brokerage = widget.data!['project_details'][0]['brokerage'] ?? '';
     propertyType = widget.data!['project_details'][0]['property_type'] ?? '';
     status = widget.data!['project_details'][0]['project_status'].toString();
-    // category = widget.data!['category_id'].toString();
     lat = widget.data!['latitude'];
     lng = widget.data!['longitude'];
-
-    // categoryWidget = categoryList.where((element) => element['id'].toString() == widget.data!['category_id'].toString()).toList().map((item) {
-    //   return ValueItem(
-    //       label: item['category'], value: item['id'].toString());
-    // }).toList();
 
     statusWidget = statusList
         .where((element) =>
@@ -230,6 +212,10 @@ class _ProjectFormSecondState extends State<ProjectFormsixth> {
       Placemark place = placemarks.first;
       String address =
           '${place.street} ${place.thoroughfare}, ${place.subLocality} ${place.locality}, ${place.administrativeArea}, ${place.postalCode}';
+      cityControler.text = place.locality ?? '';
+      StateController.text = place.administrativeArea ?? '';
+      ContryControler.text = place.country ?? '';
+      setState(() { });
       return address;
     } catch (e) {
       print("Error fetching address: $e");
@@ -321,51 +307,65 @@ class _ProjectFormSecondState extends State<ProjectFormsixth> {
                     ),
                     GooglePlaceAutoCompleteTextField(
                       textEditingController: locationControler,
+                      focusNode: placesFocusNode,
                       inputDecoration: const InputDecoration(
-                          hintText: 'Enter location..',
-                          hintStyle: TextStyle(
-                            fontFamily: 'Poppins',
-                            fontSize: 14.0,
-                            color: Color(0xff9c9c9c),
-                            fontWeight: FontWeight.w500,
-                            decoration: TextDecoration.none,
+                        hintText: 'Enter location..',
+                        hintStyle: TextStyle(
+                          fontFamily: 'Poppins',
+                          fontSize: 14.0,
+                          color: Color(0xff9c9c9c),
+                          fontWeight: FontWeight.w500,
+                          decoration: TextDecoration.none,
+                        ),
+                        enabledBorder: UnderlineInputBorder(
+                          borderSide: BorderSide(
+                            color: Colors.transparent,
                           ),
-                          enabledBorder: UnderlineInputBorder(
+                        ),
+                        focusedBorder: UnderlineInputBorder(
                             borderSide: BorderSide(
                               color: Colors.transparent,
-                            ),
-                          ),
-                          focusedBorder: UnderlineInputBorder(
-                              borderSide: BorderSide(
-                                color: Colors.transparent,
-                              ))),
+                            )
+                        )
+                      ),
                       googleAPIKey: "AIzaSyDDJ17OjVJ0TS2qYt7GMOnrMjAu1CYZFg8",
-                      debounceTime: 100,
+                      debounceTime: 800,
                       countries: ["in"],
                       isLatLngRequired: true,
                       getPlaceDetailWithLatLng: (Prediction prediction) {
                         print("placeDetails" + prediction.lng.toString());
+                        lat = prediction.lat.toString();
+                        lng = prediction.lng.toString();
+                        setState(() { });
                       },
                       itemClick: (Prediction prediction) {
                         locationControler.text = prediction.description!;
                         locationControler.selection =
                             TextSelection.fromPosition(TextPosition(
                                 offset: prediction.description!.length));
-                        // PlaceDetailsResponse details = await places.getPlaceDetails(prediction.placeId);
-                        //
-                        // // Extract city, state, country, and lat/lon
-                        // String city = details.result.addressComponents.firstWhere((component) => component.types.contains("locality"), orElse: () => null)?.longName;
-                        // String state = details.result.addressComponents.firstWhere((component) => component.types.contains("administrative_area_level_1"), orElse: () => null)?.longName;
-                        // String country = details.result.addressComponents.firstWhere((component) => component.types.contains("country"), orElse: () => null)?.longName;
-                        // double latitude = details.result.geometry.location.lat;
-                        // double longitude = details.result.geometry.location.lng;
-                        //
-                        // // Print extracted information
-                        // print("City: $city");
-                        // print("State: $state");
-                        // print("Country: $country");
-                        // print("Latitude: $latitude");
-                        // print("Longitude: $longitude");
+                        print('yyyyyyyyyyyyyyyyyyyyyyyyyy: ${prediction.lat}, ${prediction.lng}');
+                        List address = prediction.description!.split(',').reversed.toList();
+                        if(address.length >= 3) {
+                          cityControler.text = address[2];
+                          StateController.text = address[1];
+                          ContryControler.text = address[0];
+                          setState(() { });
+                        } else if(address.length == 2) {
+                          cityControler.text = address[1];
+                          StateController.text = address[1];
+                          ContryControler.text = address[0];
+                          setState(() { });
+                        } else if(address.length == 1) {
+                          cityControler.text = address[0];
+                          StateController.text = address[0];
+                          ContryControler.text = address[0];
+                          setState(() { });
+                        }
+                        // cityControler.text = place.locality ?? '';
+                        // StateController.text = place.administrativeArea ?? '';
+                        // ContryControler.text = place.country ?? '';
+                        // setState(() { });
+                        // getAddressFromLatLng(prediction.placeId);
                       },
                       itemBuilder: (context, index, Prediction prediction) {
                         return Container(
@@ -433,6 +433,9 @@ class _ProjectFormSecondState extends State<ProjectFormsixth> {
                                   child: TextFormField(
                                     controller: cityControler,
                                     readOnly: true,
+                                    onTap: () {
+                                      placesFocusNode.requestFocus();
+                                    },
                                     decoration: const InputDecoration(
                                         // hintText: 'Enter City..',
                                         hintStyle: TextStyle(
@@ -504,6 +507,9 @@ class _ProjectFormSecondState extends State<ProjectFormsixth> {
                                   child: TextFormField(
                                     controller: StateController,
                                     readOnly: true,
+                                    onTap: () {
+                                      placesFocusNode.requestFocus();
+                                    },
                                     decoration: const InputDecoration(
                                         // hintText: 'Enter State..',
                                         hintStyle: TextStyle(
@@ -575,6 +581,9 @@ class _ProjectFormSecondState extends State<ProjectFormsixth> {
                                   child: TextFormField(
                                     controller: ContryControler,
                                     readOnly: true,
+                                    onTap: () {
+                                      placesFocusNode.requestFocus();
+                                    },
                                     decoration: const InputDecoration(
                                         // hintText: 'Enter Country..',
                                         hintStyle: TextStyle(
@@ -746,25 +755,28 @@ class _ProjectFormSecondState extends State<ProjectFormsixth> {
                                     maxLines: 4,
                                     controller: locationControler,
                                     readOnly: true,
-                                    onTap: () async {
-                                      FocusManager.instance.primaryFocus
-                                          ?.unfocus();
-                                      Map? placeMark =
-                                          await Navigator.pushNamed(context,
-                                              Routes.chooseLocaitonMap) as Map?;
-                                      var latlng = placeMark!['latlng'];
-                                      if (latlng != null) {
-                                        var address =
-                                            await getAddressFromLatLng(
-                                                latlng.latitude,
-                                                latlng.longitude);
-                                        setState(() {
-                                          locationControler.text =
-                                              address as String;
-                                          lat = '${latlng.latitude}';
-                                          lng = '${latlng.longitude}';
-                                        });
-                                      }
+                                    // onTap: () async {
+                                    //   FocusManager.instance.primaryFocus
+                                    //       ?.unfocus();
+                                    //   Map? placeMark =
+                                    //       await Navigator.pushNamed(context,
+                                    //           Routes.chooseLocaitonMap) as Map?;
+                                    //   var latlng = placeMark!['latlng'];
+                                    //   if (latlng != null) {
+                                    //     var address =
+                                    //         await getAddressFromLatLng(
+                                    //             latlng.latitude,
+                                    //             latlng.longitude);
+                                    //     setState(() {
+                                    //       locationControler.text =
+                                    //           address as String;
+                                    //       lat = '${latlng.latitude}';
+                                    //       lng = '${latlng.longitude}';
+                                    //     });
+                                    //   }
+                                    // },
+                                    onTap: () {
+                                      placesFocusNode.requestFocus();
                                     },
                                     decoration: const InputDecoration(
                                         // hintText: 'location..',
@@ -832,28 +844,21 @@ class _ProjectFormSecondState extends State<ProjectFormsixth> {
           if (!loading)
             InkWell(
               onTap: () {
-                if (nameControler.text != '' &&
-                    minPriceControler.text != '' &&
-                    maxPriceControler.text != '' &&
-                    brokerage != '' &&
-                    status != '' &&
-                    descriptionControler.text != '' &&
-                    ((remainFreeProPost > 0 && selectedPackage == 0) ||
-                        (selectedPackage != 0 && remainFreeProPost < 1))) {
-                  var body = {
-                    'package_id': selectedPackage,
-                    'title': nameControler.text,
-                    'min_price': minPriceControler.text,
-                    'max_price': maxPriceControler.text,
-                    'avg_price': avgPriceControler.text,
-                    'property_type': propertyType,
-                    'project_status': status,
-                    'brokerage': brokerage,
-                    'project_status': status,
-                    'offers': offersControler.text,
-                    'description': descriptionControler.text,
-                    ...widget.body!
-                  };
+                var body = {
+                  'city': cityControler.text,
+                  'state' : StateController.text,
+                  'country' : ContryControler.text,
+                  'address': locationControler.text,
+                  'latitude': lat,
+                  'longitude': lng,
+                  ...widget.body!
+                };
+                print('uuuuuuuuuuuuuuuuuuuuuuuu: ${body}');
+                if (cityControler.text != '' &&
+                    StateController.text != '' &&
+                    ContryControler.text != '' &&
+                    locationControler.text != '' &&
+                    lat != '' && lng != '') {
                   Navigator.push(
                     context,
                     MaterialPageRoute(

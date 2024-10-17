@@ -443,6 +443,12 @@ class _ProjectFormSecondState extends State<ProjectFormSecond> {
                                     propertyTypeWidget = selectedOptions;
                                   });
                                 },
+                                // selectedItemBuilder: (BuildContext, ValueItem) {
+                                //
+                                // },
+                                // hintStyle: TextStyle(
+                                //   fontSize: 15
+                                // ),
                                 selectedOptions:
                                 widget.isEdit! ? propertyTypeWidget : [],
                                 options: widget.body!['category_id'] == 2 ? [
