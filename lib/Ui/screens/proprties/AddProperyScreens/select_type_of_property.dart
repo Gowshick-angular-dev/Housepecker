@@ -311,15 +311,11 @@ class _SelectPropertyTypeState extends State<SelectPropertyType> {
               height: 28.rh(context),
               width: 28.rw(context),
               child: UiUtils.imageType(category.image!,
-                  color: selectedIndex == index
-                      ? context.color.secondaryColor
-                      : (Constant.adaptThemeColorSvg
-                          ? context.color.tertiaryColor
-                          : null)),
+                  color: context.color.tertiaryColor),
             ),
-
+            SizedBox(height: 5),
             Padding(
-              padding: const EdgeInsets.all(2.0),
+              padding: const EdgeInsets.all(5),
               child: Text(
                 category.category!,
                 textAlign: TextAlign.center,

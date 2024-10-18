@@ -1055,8 +1055,8 @@ class _ProjectFormTwoState extends State<ProjectFormTwo> {
                                   selectedOptions:
                                   widget.isEdit! ? gatedCommunityWidget : [],
                                   options: [
-                                    ValueItem(label: "Yes", value: "Yes"),
-                                    ValueItem(label: "No", value: "No")
+                                    ValueItem(label: "Yes", value: "yes"),
+                                    ValueItem(label: "No", value: "no")
                                   ],
                                   selectionType: SelectionType.single,
                                   chipConfig:
@@ -1111,8 +1111,8 @@ class _ProjectFormTwoState extends State<ProjectFormTwo> {
                                   selectedOptions:
                                   widget.isEdit! ? highRiseApartmentWidget : [],
                                   options: [
-                                    ValueItem(label: "Yes", value: "Yes"),
-                                    ValueItem(label: "No", value: "No")
+                                    ValueItem(label: "Yes", value: "yes"),
+                                    ValueItem(label: "No", value: "no")
                                   ],
                                   selectionType: SelectionType.single,
                                   chipConfig:
@@ -1167,8 +1167,8 @@ class _ProjectFormTwoState extends State<ProjectFormTwo> {
                                   selectedOptions:
                                   widget.isEdit! ? lakeViewWidget : [],
                                   options: [
-                                    ValueItem(label: "Yes", value: "Yes"),
-                                    ValueItem(label: "No", value: "No")
+                                    ValueItem(label: "Yes", value: "yes"),
+                                    ValueItem(label: "No", value: "no")
                                   ],
                                   selectionType: SelectionType.single,
                                   chipConfig:
@@ -1289,8 +1289,8 @@ class _ProjectFormTwoState extends State<ProjectFormTwo> {
                                 selectedOptions:
                                 widget.isEdit! ? vegOnlyWidget : [],
                                 options: [
-                                  ValueItem(label: "Yes", value: "Yes"),
-                                  ValueItem(label: "No", value: "No")
+                                  ValueItem(label: "Yes", value: "yes"),
+                                  ValueItem(label: "No", value: "no")
                                 ],
                                 selectionType: SelectionType.single,
                                 chipConfig:
@@ -1474,8 +1474,8 @@ class _ProjectFormTwoState extends State<ProjectFormTwo> {
                                 selectedOptions:
                                 widget.isEdit! ? coveredParkingWidget : [],
                                 options: [
-                                  ValueItem(label: "Yes", value: "Yes"),
-                                  ValueItem(label: "No", value: "No")
+                                  ValueItem(label: "Yes", value: "yes"),
+                                  ValueItem(label: "No", value: "no")
                                 ],
                                 selectionType: SelectionType.single,
                                 chipConfig:
@@ -1535,8 +1535,8 @@ class _ProjectFormTwoState extends State<ProjectFormTwo> {
                                 selectedOptions:
                                 widget.isEdit! ? openParkingWidget : [],
                                 options: [
-                                  ValueItem(label: "Yes", value: "Yes"),
-                                  ValueItem(label: "No", value: "No")
+                                  ValueItem(label: "Yes", value: "yes"),
+                                  ValueItem(label: "No", value: "no")
                                 ],
                                 selectionType: SelectionType.single,
                                 chipConfig:
