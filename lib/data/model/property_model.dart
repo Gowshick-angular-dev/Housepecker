@@ -71,7 +71,9 @@ class PropertyModel {
       this.metaKeywords,
       this.metaImage,
       this.viewContact,
-      this.titleimagehash});
+      this.titleimagehash,
+      this.companyName
+      });
 
   final int? id;
   final String? title;
@@ -134,6 +136,7 @@ class PropertyModel {
   final String? video;
   final dynamic advertisment;
   final String? slugId;
+  final String? companyName;
 
   PropertyModel copyWith(
           {int? id,
@@ -184,6 +187,7 @@ class PropertyModel {
           String? video,
           dynamic advertisment,
           String? rentduration,
+            String? companyName,
           String? titleImageHash}) =>
       PropertyModel(
           id: id ?? this.id,
@@ -234,6 +238,7 @@ class PropertyModel {
           amenity: amenity ?? this.amenity,
           threeDImage: threeDimage ?? threeDImage,
           video: video ?? this.video,
+          companyName: customerName ?? this.companyName,
           assignedOutdoorFacility:
               assignedOutdoorFacility ?? this.assignedOutdoorFacility,
           titleimagehash: titleImageHash ?? titleimagehash);
@@ -304,6 +309,7 @@ class PropertyModel {
         isInterested: Adapter.forceInt(rawjson["is_interested"]),
         isPremium: Adapter.forceInt(rawjson["is_premium"]),
         isDeal: Adapter.forceInt(rawjson["is_deal"]),
+        companyName: rawjson['company_name'],
         favouriteUsers: rawjson["favourite_users"] == null
             ? null
             : List<dynamic>.from(rawjson["favourite_users"].map((x) => x)),

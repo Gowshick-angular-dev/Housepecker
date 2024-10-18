@@ -53,6 +53,8 @@ import '../../../utils/ui_utils.dart';
 import '../userprofile/edit_profile.dart';
 import '../userprofile/userProfileScreen.dart';
 import '../widgets/AnimatedRoutes/blur_page_route.dart';
+import '../widgets/all_gallary_image.dart';
+import '../widgets/shimmerLoadingContainer.dart';
 import '../widgets/video_view_screen.dart';
 
 Map<String, String> rentDurationMap = {
@@ -123,6 +125,8 @@ class PropertyDetailsState extends State<ProjectDetails> {
   List promotedProeprtiesIds = [];
   List similarProjectsList = [];
   List agentProjectsList = [];
+  List reportCheckboxList = [];
+  int? selectedPropertyId;
   bool toggleEnqButton = false;
   Map<String, dynamic>? property;
   bool isPromoted = false;
@@ -131,6 +135,11 @@ class PropertyDetailsState extends State<ProjectDetails> {
   bool likeLoading = false;
   bool showContact = false;
   BannerAd? _bannerAd;
+  bool similarIsLoading = false;
+  bool agentPropertiesIsLoading = false;
+
+  List<bool> likeLoadingg = [];
+  List<bool> likeLoadingg2 = [];
   @override
   bool get wantKeepAlive => true;
 
@@ -143,6 +152,7 @@ class PropertyDetailsState extends State<ProjectDetails> {
   bool downloading = false;
   bool downloading2 = false;
   int _currentImage = 0;
+  bool isLoading = false;
 
   InterstitialAdManager interstitialAdManager = InterstitialAdManager();
 
@@ -151,8 +161,10 @@ class PropertyDetailsState extends State<ProjectDetails> {
   @override
   void initState() {
     super.initState();
+
     getAgentProperties();
     getSimilarProperties();
+    getReportResponseList();
     _pageController.addListener(() {
       setState(() {
         _currentImage = _pageController.page!.round();
@@ -339,6 +351,15 @@ class PropertyDetailsState extends State<ProjectDetails> {
       }
     }
   }
+  Future<void> getReportResponseList() async {
+
+    var response = await Api.get(url: Api.apiGetReportPropertyReson, );
+    if(!response['error']) {
+      setState(() {
+        reportCheckboxList = response['data'];
+      });
+    }
+  }
 
   void setData() {
     fromMyProperty = widget.fromMyProperty!;
@@ -371,25 +392,37 @@ class PropertyDetailsState extends State<ProjectDetails> {
   }
 
   Future<void> getSimilarProperties() async {
+    setState(() {
+      similarIsLoading = true;
+    });
     var response = await Api.get(url: Api.getProject, queryParameters: {
       'category_id': widget.property!['category']['id']!,
       'get_simiilar': 1,
-      'id': widget.property!['id']
+      'id': widget.property!['id'],
+      'current_user': HiveUtils.getUserId(),
     });
     if(!response['error']) {
       setState(() {
         similarProjectsList = response['data'];
+        likeLoadingg = List.filled(response['data'].length, false);
+        similarIsLoading = false;
       });
     }
   }
 
   Future<void> getAgentProperties() async {
+    setState(() {
+      agentPropertiesIsLoading  = true;
+    });
     var response = await Api.get(url: Api.getProject, queryParameters: {
       'userid': widget.property!['added_by'],
+      'current_user': HiveUtils.getUserId(),
     });
     if(!response['error']) {
       setState(() {
         agentProjectsList = response['data'];
+        likeLoadingg2 = List.filled(response['data'].length, false);
+        agentPropertiesIsLoading  = false;
       });
     }
   }
@@ -541,10 +574,17 @@ class PropertyDetailsState extends State<ProjectDetails> {
         ),
         child: SafeArea(
             child: Scaffold(
-              appBar: AppBar(
+                backgroundColor:const Color(0xFFFAF9F6),
+              appBar: UiUtils.buildAppBar(context,
+                  showBackButton: true,
+                  title: property!['title']!,
+                  actions: [
+
+                  ]),
+            /*  appBar: AppBar(
                   elevation: 0,
                   backgroundColor: tertiaryColor_,
-                  title: Text(property!['title']!,style: TextStyle(
+                  title: Text(property!['title']!,style: const TextStyle(
                       fontSize: 14,
                       fontWeight: FontWeight.w500,
                       color: Colors.white
@@ -657,8 +697,7 @@ class PropertyDetailsState extends State<ProjectDetails> {
                   //     width: 10,
                   //   )
                   // ]
-              ),
-              backgroundColor: Colors.white,
+              ),*/
               bottomNavigationBar: isPlayingYoutubeVideo == false
                   ? BottomAppBar(
                       padding: const EdgeInsets.symmetric(horizontal: 20),
@@ -1205,10 +1244,10 @@ class PropertyDetailsState extends State<ProjectDetails> {
                               ),
                             ],
                             const SizedBox(
-                              height: 15,
+                              height: 10,
                             ),
                             Padding(
-                              padding: EdgeInsets.symmetric(horizontal: 15,),
+                              padding: const EdgeInsets.symmetric(horizontal: 15,),
                               child: Wrap(
                                   direction: Axis.horizontal,
                                   crossAxisAlignment: WrapCrossAlignment.start,
@@ -1227,12 +1266,12 @@ class PropertyDetailsState extends State<ProjectDetails> {
                                   Padding(
                                     padding: const EdgeInsets.all(3),
                                     child: Container(
-                                      padding: EdgeInsets.only(left: 10,right: 10,top: 5,bottom: 5),
+                                      padding: const EdgeInsets.only(left: 10,right: 10,top: 5,bottom: 5),
                                       decoration: BoxDecoration(
-                                        color: Color(0xfffff2c8),
+                                        color: const Color(0xfffff2c8),
                                         borderRadius: BorderRadius.circular(7),
                                       ),
-                                      child: Text(property!['project_details'][0]['furniture'], style: TextStyle(
+                                      child: Text(property!['project_details'][0]['furniture'], style: const TextStyle(
                                           color: Color(0xff333333),
                                           fontSize: 11,
                                           fontWeight: FontWeight.w500
@@ -1244,16 +1283,16 @@ class PropertyDetailsState extends State<ProjectDetails> {
                                       Padding(
                                         padding: const EdgeInsets.all(3),
                                         child: Container(
-                                          padding: EdgeInsets.only(left: 10,right: 10,top: 5,bottom: 5),
+                                          padding: const EdgeInsets.only(left: 10,right: 10,top: 5,bottom: 5),
                                           decoration: BoxDecoration(
                                               borderRadius:
                                               BorderRadius.circular(7),
-                                              color: Color(0xff6c5555)),
+                                              color: const Color(0xff6c5555)),
                                           child: Text(
                                             property!['project_details'][0]['brokerage'] == 'yes' ? 'Brokerage' : 'No Brokerage'
                                                 .toString()
                                                 .translate(context),
-                                            style: TextStyle(
+                                            style: const TextStyle(
                                                 color: Colors.white,
                                                 fontSize: 11
                                             ),
@@ -1264,7 +1303,7 @@ class PropertyDetailsState extends State<ProjectDetails> {
                                   Padding(
                                   padding: const EdgeInsets.all(3),
                                   child: Container(
-                                    padding: EdgeInsets.only(left: 10,right: 10,top: 5,bottom: 5),
+                                    padding: const EdgeInsets.only(left: 10,right: 10,top: 5,bottom: 5),
                                     decoration: BoxDecoration(
                                         borderRadius:
                                         BorderRadius.circular(7),
@@ -1273,7 +1312,7 @@ class PropertyDetailsState extends State<ProjectDetails> {
                                       property!['project_details'][0]['project_status_name']
                                           .toString()
                                           .translate(context),
-                                      style: TextStyle(
+                                      style: const TextStyle(
                                           color: Colors.white,
                                           fontSize: 11
                                       ),
@@ -1284,16 +1323,16 @@ class PropertyDetailsState extends State<ProjectDetails> {
                                   Padding(
                                   padding: const EdgeInsets.all(3),
                                   child: Container(
-                                    padding: EdgeInsets.only(left: 10,right: 10,top: 5,bottom: 5),
+                                    padding: const EdgeInsets.only(left: 10,right: 10,top: 5,bottom: 5),
                                     decoration: BoxDecoration(
                                         borderRadius:
                                         BorderRadius.circular(7),
-                                        color: Color(0xFFcff4fc)),
+                                        color: const Color(0xFFcff4fc)),
                                     child: Text(
                                       property!['code']
                                           .toString()
                                           .translate(context),
-                                      style: TextStyle(
+                                      style: const TextStyle(
                                           color: Color(0xff00557a),
                                           fontSize: 11
                                       ),
@@ -1305,17 +1344,17 @@ class PropertyDetailsState extends State<ProjectDetails> {
                                   Padding(
                                     padding: const EdgeInsets.all(3),
                                     child: Container(
-                                      padding: EdgeInsets.only(left: 10,right: 10,top: 5,bottom: 5),
+                                      padding: const EdgeInsets.only(left: 10,right: 10,top: 5,bottom: 5),
                                       decoration: BoxDecoration(
                                           borderRadius:
                                           BorderRadius.circular(7),
-                                          color: Color(0xff6c5555)),
+                                          color: const Color(0xff6c5555)),
                                       child: Text(
                                         'Gated Community'
                                             .toString()
                                             .toLowerCase()
                                             .translate(context),
-                                        style: TextStyle(
+                                        style: const TextStyle(
                                             color: Colors.white,
                                             fontSize: 11
                                         ),
@@ -1326,17 +1365,17 @@ class PropertyDetailsState extends State<ProjectDetails> {
                                   Padding(
                                   padding: const EdgeInsets.all(3),
                                   child: Container(
-                                    padding: EdgeInsets.only(left: 10,right: 10,top: 5,bottom: 5),
+                                    padding: const EdgeInsets.only(left: 10,right: 10,top: 5,bottom: 5),
                                     decoration: BoxDecoration(
                                         borderRadius:
                                         BorderRadius.circular(7),
-                                        color: Color(0xff6c5555)),
+                                        color: const Color(0xff6c5555)),
                                     child: Text(
                                       'High-Rise Appartment'
                                           .toString()
                                           .toLowerCase()
                                           .translate(context),
-                                      style: TextStyle(
+                                      style: const TextStyle(
                                           color: Colors.white,
                                           fontSize: 11
                                       ),
@@ -1347,17 +1386,17 @@ class PropertyDetailsState extends State<ProjectDetails> {
                                   Padding(
                                   padding: const EdgeInsets.all(3),
                                   child: Container(
-                                    padding: EdgeInsets.only(left: 10,right: 10,top: 5,bottom: 5),
+                                    padding: const EdgeInsets.only(left: 10,right: 10,top: 5,bottom: 5),
                                     decoration: BoxDecoration(
                                         borderRadius:
                                         BorderRadius.circular(7),
-                                        color: Color(0xff800020)),
+                                        color: const Color(0xff800020)),
                                     child: Text(
                                       'Lake View'
                                           .toString()
                                           .toLowerCase()
                                           .translate(context),
-                                      style: TextStyle(
+                                      style: const TextStyle(
                                           color: Colors.white,
                                           fontSize: 11
                                       ),
@@ -1368,17 +1407,17 @@ class PropertyDetailsState extends State<ProjectDetails> {
                                   Padding(
                                   padding: const EdgeInsets.all(3),
                                   child: Container(
-                                    padding: EdgeInsets.only(left: 10,right: 10,top: 5,bottom: 5),
+                                    padding: const EdgeInsets.only(left: 10,right: 10,top: 5,bottom: 5),
                                     decoration: BoxDecoration(
                                         borderRadius:
                                         BorderRadius.circular(7),
-                                        color: Color(0xff3D3D3D)),
+                                        color: const Color(0xff3D3D3D)),
                                     child: Text(
                                       'Near Metro'
                                           .toString()
                                           .toLowerCase()
                                           .translate(context),
-                                      style: TextStyle(
+                                      style: const TextStyle(
                                           color: Colors.white,
                                           fontSize: 11
                                       ),
@@ -1389,17 +1428,17 @@ class PropertyDetailsState extends State<ProjectDetails> {
                                   Padding(
                                   padding: const EdgeInsets.all(3),
                                   child: Container(
-                                    padding: EdgeInsets.only(left: 10,right: 10,top: 5,bottom: 5),
+                                    padding: const EdgeInsets.only(left: 10,right: 10,top: 5,bottom: 5),
                                     decoration: BoxDecoration(
                                         borderRadius:
                                         BorderRadius.circular(7),
-                                        color: Color(0xffA06392)),
+                                        color: const Color(0xffA06392)),
                                     child: Text(
                                       'Veg Only'
                                           .toString()
                                           .toLowerCase()
                                           .translate(context),
-                                      style: TextStyle(
+                                      style: const TextStyle(
                                           color: Colors.white,
                                           fontSize: 11
                                       ),
@@ -1410,17 +1449,17 @@ class PropertyDetailsState extends State<ProjectDetails> {
                                   Padding(
                                   padding: const EdgeInsets.all(3),
                                   child: Container(
-                                    padding: EdgeInsets.only(left: 10,right: 10,top: 5,bottom: 5),
+                                    padding: const EdgeInsets.only(left: 10,right: 10,top: 5,bottom: 5),
                                     decoration: BoxDecoration(
                                         borderRadius:
                                         BorderRadius.circular(7),
-                                        color: Color(0xff785E46)),
+                                        color: const Color(0xff785E46)),
                                     child: Text(
                                       'Covered Parking'
                                           .toString()
                                           .toLowerCase()
                                           .translate(context),
-                                      style: TextStyle(
+                                      style: const TextStyle(
                                           color: Colors.white,
                                           fontSize: 11
                                       ),
@@ -1431,17 +1470,17 @@ class PropertyDetailsState extends State<ProjectDetails> {
                                   Padding(
                                   padding: const EdgeInsets.all(3),
                                   child: Container(
-                                    padding: EdgeInsets.only(left: 10,right: 10,top: 5,bottom: 5),
+                                    padding: const EdgeInsets.only(left: 10,right: 10,top: 5,bottom: 5),
                                     decoration: BoxDecoration(
                                         borderRadius:
                                         BorderRadius.circular(7),
-                                        color: Color(0xff334756)),
+                                        color: const Color(0xff334756)),
                                     child: Text(
                                       'Open Parking'
                                           .toString()
                                           .toLowerCase()
                                           .translate(context),
-                                      style: TextStyle(
+                                      style: const TextStyle(
                                           color: Colors.white,
                                           fontSize: 11
                                       ),
@@ -1454,20 +1493,20 @@ class PropertyDetailsState extends State<ProjectDetails> {
                               height: 10,
                             ),
                             Padding(
-                              padding: EdgeInsets.symmetric( horizontal: 15,),
+                              padding: const EdgeInsets.symmetric( horizontal: 15,),
                               child: Text(
-                                property!['title']!,style: TextStyle(
+                                property!['title']!,style: const TextStyle(
                                   fontSize: 15,
                                   fontWeight: FontWeight.w600,
                                   color: Color(0xff333333)
                               ),),
                             ),
                             const SizedBox(
-                              height: 10,
+                              height: 5,
                             ),
                             if(property!['min_price'] == null)
                               Padding(
-                                padding: EdgeInsets.symmetric( horizontal: 15,),
+                                padding: const EdgeInsets.symmetric( horizontal: 15,),
                                 child: Row(
                                   children: [
                                     Text(
@@ -1475,9 +1514,9 @@ class PropertyDetailsState extends State<ProjectDetails> {
                                           .toString(),
                                       maxLines: 1,
                                       overflow: TextOverflow.ellipsis,
-                                      style: TextStyle(
-                                          color: Color(0xff333333),
-                                          fontSize: 12,
+                                      style: const TextStyle(
+                                          color: Color(0xff117af9),
+                                          fontSize: 14,
                                           fontFamily: 'Robato',
                                           fontWeight: FontWeight.w500
                                       ),
@@ -1495,10 +1534,10 @@ class PropertyDetailsState extends State<ProjectDetails> {
                                           .toString(),
                                       maxLines: 1,
                                       overflow: TextOverflow.ellipsis,
-                                      style: TextStyle(
+                                      style: const TextStyle(
                                           color: Color(0xffa2a2a2),
-                                          fontSize: 9,
-                                          fontWeight: FontWeight.w500
+                                          fontSize: 10,
+                                          fontWeight: FontWeight.w600
                                       ),
                                     ),
                                   ],
@@ -1506,61 +1545,59 @@ class PropertyDetailsState extends State<ProjectDetails> {
                               ),
                             if(property!['min_price'] != null)
                           ...[
-                            const SizedBox(height: 8),
                             Padding(
-                              padding: EdgeInsets.symmetric( horizontal: 15,),
+                              padding: const EdgeInsets.symmetric( horizontal: 15,),
                               child: Row(
+                                mainAxisAlignment: MainAxisAlignment.spaceBetween,
                                 children: [
                                   Text(
                                     '₹${formatAmount(property!['min_price'] ?? 0)} - ${formatAmount(property!['max_price'] ?? 0)}'
                                         .toString(),
                                     maxLines: 1,
                                     overflow: TextOverflow.ellipsis,
-                                    style: TextStyle(
-                                        color: Color(0xff333333),
-                                        fontSize: 12,
+                                    style: const TextStyle(
+                                        color: Color(0xff117af9),
+                                        fontSize: 14,
                                         fontFamily: 'Robato',
                                         fontWeight: FontWeight.w500
                                     ),
                                   ),
+                                  if(property!['min_price'] != null)
+                                    ...[   
+                                      Row(
+                                        children: [
+                                          Text(
+                                            '${property!['min_size']} - ${property!['max_size']} Sq.ft'
+                                                .toString(),
+                                            maxLines: 1,
+                                            overflow: TextOverflow.ellipsis,
+                                            style: const TextStyle(
+                                                color: Color(0xffa2a2a2),
+                                                fontSize: 10,
+                                                fontWeight: FontWeight.w600
+                                            ),
+                                          ),
+                                        ],
+                                      ),],
                                 ],
                               ),
                             ),
                           ],
-                            if(property!['min_price'] != null)
-                           ...[   const SizedBox(height: 8),
-                             Padding(
-                               padding: EdgeInsets.symmetric( horizontal: 15,),
-                               child: Row(
-                                 children: [
-                                   Text(
-                                     '${property!['min_size']} - ${property!['max_size']} Sq.ft'
-                                         .toString(),
-                                     maxLines: 1,
-                                     overflow: TextOverflow.ellipsis,
-                                     style: TextStyle(
-                                         color: Color(0xffa2a2a2),
-                                         fontSize: 10,
-                                         fontWeight: FontWeight.w500
-                                     ),
-                                   ),
-                                 ],
-                               ),
-                             ),],
+
 
                             const SizedBox(height: 8),
                             Padding(
-                              padding: EdgeInsets.symmetric( horizontal: 15,),
+                              padding: const EdgeInsets.symmetric( horizontal: 15,),
                               child: Row(
                                 children: [
                                   Image.asset("assets/Home/__location.png",width:15,fit: BoxFit.cover,height: 15,),
-                                  SizedBox(width: 5,),
+                                  const SizedBox(width: 5,),
                                   Expanded(
                                     child: Text(
                                       property!['address'],
                                       maxLines: 2,
                                       overflow: TextOverflow.ellipsis,
-                                      style: TextStyle(
+                                      style: const TextStyle(
                                           color: Color(0xffa2a2a2),
                                           fontSize: 11,
                                           fontWeight: FontWeight.w400
@@ -1569,72 +1606,134 @@ class PropertyDetailsState extends State<ProjectDetails> {
                                 ],
                               ),
                             ),
+
+                            if(property!['customer'] != null)
                             Padding(
-                              padding: EdgeInsets.symmetric( horizontal: 15,),
+                              padding: const EdgeInsets.only(left: 15,right: 15,top: 15),
                               child: Row(
-                                mainAxisAlignment: MainAxisAlignment.end,
                                 children: [
-                                  Text(
-                                    getRelativeTimeString(DateTime.parse(property!['created_at'])),
-                                    maxLines: 2,
-                                    overflow: TextOverflow.ellipsis,
-                                    style: TextStyle(
-                                        color: Color(0xffa2a2a2),
-                                        fontSize: 11,
-                                        fontWeight: FontWeight.w400
-                                    ),),
-                                ],
-                              ),
-                            ),
-                            const SizedBox(
-                              height: 20,
-                            ),
-                            if(property!['customer'] != null)
-                              CusomterProfileWidget1(
-                                data: property!['customer'],
-                              ),
-                            if(property!['customer'] != null)
-                              const SizedBox(
-                                height: 20,
-                              ),
-                            Container(
-                              padding: EdgeInsets.only(top: 15, bottom: 10, right: 20, left: 20),
-                              decoration: BoxDecoration(
-                                color: Color(0xfff7f6fe),
-                              ),
-                              width: MediaQuery.sizeOf(context).width,
-                              child: Column(
-                                crossAxisAlignment: CrossAxisAlignment.start,
-                                children: [
-                                  Container(
-                                    padding: EdgeInsets.only(top: 3, bottom: 3,left: 7, right: 3),
-                                    width: 70,
-                                    decoration: BoxDecoration(
-                                      borderRadius: BorderRadius.circular(10),
-                                      color: Color(0xff7e71d8),
-                                    ),
+                                  Expanded(
                                     child: Row(
                                       children: [
-                                        Image.asset("assets/NewPropertydetailscreen/Offers.png",width: 12,height: 12,fit: BoxFit.cover,),
-                                        SizedBox(width: 10,),
-                                        Expanded(
-                                          child: Text('Offer',
-                                            style: TextStyle(
-                                                color: Color(0xffffffff),
-                                                fontSize: 12,
-                                                fontWeight: FontWeight.w400
-                                            ),
+                                        GestureDetector(
+                                          onTap: () {
+                                            UiUtils.showFullScreenImage(context,
+                                                provider:
+                                                NetworkImage(widget.property?['profile'] ?? ""));
+                                          },
+
+                                          child: Container(
+                                              width: 43,
+                                              height: 43,
+                                              clipBehavior: Clip.antiAlias,
+                                              decoration: BoxDecoration(
+                                                  color: Colors.grey.shade200,
+                                                  border: Border.all(
+                                                      width: 1,
+                                                      color: const Color(0xffdfdfdf)
+                                                  ),
+                                                  borderRadius: BorderRadius.circular(50)),
+                                              child: ClipRRect(
+                                                borderRadius: BorderRadius.circular(50),
+                                                child: UiUtils.getImage(widget.property?['profile'] ?? "",
+                                                    fit: BoxFit.cover),
+                                              )
+
+                                            //  CachedNetworkImage(
+                                            //   imageUrl: widget.propertyData?.customerProfile ?? "",
+                                            //   fit: BoxFit.cover,
+                                            // ),
+
                                           ),
                                         ),
+                                        const SizedBox(
+                                          width: 10,
+                                        ),
+                                        Expanded(
+                                          child: Column(
+                                            crossAxisAlignment: CrossAxisAlignment.start,
+                                            children: [
+                                              const Text("Marketed by",style: TextStyle( color: Color(0xff7d7d7d),fontSize: 12,),),
+                                              const SizedBox(height: 2,),
+                                              Row(
+                                                children: [
+                                                  Expanded(
+                                                    child: Text(
+                                                      widget.property?['customer']?['company_name'] ?? "No Company Name",
+                                                      maxLines: 2,
+                                                      overflow: TextOverflow.ellipsis,
+                                                      style: const TextStyle(
+                                                        fontSize: 12,
+                                                        color: Colors.black,
+                                                        fontWeight: FontWeight.w600,
+                                                      ),
+                                                    ),
+                                                  ),
+
+                                                ],
+                                              ),
+                                            ],
+                                          ),
+                                        )
                                       ],
                                     ),
                                   ),
-                                  Padding(
-                                    padding: const EdgeInsets.all(8.0),
+
+                                  Text(getRelativeTimeString(DateTime.parse(property!['created_at'])),
+                                    style: const TextStyle(
+                                        color: Color(0xffa2a2a2),
+                                        fontSize: 11,
+                                        fontWeight: FontWeight.w400
+                                    ),
+                                  )
+
+                                ],
+                              ),
+                            ),
+                         SizedBox(height: 15,),
+
+                            Container(
+                              padding: EdgeInsets.symmetric(horizontal: 15),
+                              height: 60,
+                              margin: const EdgeInsets.symmetric(horizontal: 15),
+                              decoration:  BoxDecoration(
+                                color: const Color(0xffebedff), borderRadius: BorderRadius.circular(10),
+                                boxShadow: [
+                                  BoxShadow(
+                                    offset: const Offset(0, 2),
+                                    blurRadius: 2,
+                                    color: Colors.black.withOpacity(0.1),
+                                  ),
+                                ],
+
+                              ),
+                              width: MediaQuery.sizeOf(context).width,
+                              child: Row(
+                                mainAxisAlignment: MainAxisAlignment.center,
+                                children: [
+                                  Image.asset("assets/assets/Images/__offer.png",height: 28,),
+                                  const SizedBox(width: 8,),
+                                  const Text("Offer",style: TextStyle(fontSize: 14,fontWeight: FontWeight.w600),),
+                                  const SizedBox(width: 5,),
+                                  Column(
+                                      mainAxisAlignment: MainAxisAlignment.center,
+                                    children: List.generate(5, (index) {
+                                      return Container(
+                                        width: 1,
+                                        height: 3,
+                                        color: const Color(0xffa2a2a2),
+                                        margin: const EdgeInsets.symmetric(vertical: 1),
+                                      );
+                                    }),
+                                  ),
+                                  const SizedBox(width: 5,),
+                                  Expanded(
                                     child: Text('${property!['project_details'][0]['offers']}',
-                                      style: TextStyle(
+                                      maxLines: 1,
+                                      overflow: TextOverflow.ellipsis,
+                                      style: const TextStyle(
                                           color: Color(0xffa2a2a2),
-                                          fontSize: 11,
+                                          fontSize: 12,
                                           fontWeight: FontWeight.w400
                                       ),
                                     ),
@@ -1808,19 +1907,19 @@ class PropertyDetailsState extends State<ProjectDetails> {
                             //   ),
                             // ),
                             const SizedBox(
-                              height: 14,
+                              height: 15,
                             ),
                             Padding(
-                              padding: EdgeInsets.symmetric( horizontal: 15,),
+                              padding: const EdgeInsets.symmetric( horizontal: 15,),
                               child: Container(
-                                padding: EdgeInsets.all(10),
+                                padding: const EdgeInsets.all(10),
                                 width: double.infinity,
                                 decoration: BoxDecoration(
                                   borderRadius: BorderRadius.circular(15.0),
                                   color: Colors.white,
                                   boxShadow: [
                                     BoxShadow(
-                                      offset: Offset(0, 1),
+                                      offset: const Offset(0, 1),
                                       blurRadius: 5,
                                       color: Colors.black.withOpacity(0.1),
                                     ),
@@ -1829,40 +1928,40 @@ class PropertyDetailsState extends State<ProjectDetails> {
                                 child: Column(
                                   crossAxisAlignment: CrossAxisAlignment.start,
                                   children: [
-                                    Text("Project Details".translate(context), style: TextStyle(
+                                    Text("Project Overview".translate(context), style: const TextStyle(
                                         fontSize: 14,
                                         color: Color(0xff333333),
                                         fontWeight: FontWeight.w600
                                     ),),
-                                    SizedBox(height :15),
+                                    const SizedBox(height :15),
+                                    // Padding(
+                                    //   padding: const EdgeInsets.only(bottom: 10),
+                                    //   child: Row(
+                                    //     children: [
+                                    //       Expanded(
+                                    //         child: const Text("Age of the property:")
+                                    //             .size(11)
+                                    //             .color(const Color(0xff5d5d5d)),
+                                    //       ),
+                                    //       const SizedBox(width: 10,),
+                                    //       Expanded(
+                                    //         child: Text("${property!['project_details'][0]['project_age'] ?? '-'}")
+                                    //             .size(11)
+                                    //             .bold( weight: FontWeight.w500,),
+                                    //       )
+                                    //     ],
+                                    //   ),
+                                    // ),
                                     Padding(
                                       padding: const EdgeInsets.only(bottom: 10),
                                       child: Row(
                                         children: [
                                           Expanded(
-                                            child: Text("Age of the property:")
+                                            child: const Text("Total no of Units:")
                                                 .size(11)
-                                                .color(Color(0xff5d5d5d)),
+                                                .color(const Color(0xff5d5d5d)),
                                           ),
-                                          SizedBox(width: 10,),
-                                          Expanded(
-                                            child: Text("${property!['project_details'][0]['project_age'] ?? '-'}")
-                                                .size(11)
-                                                .bold( weight: FontWeight.w500,),
-                                          )
-                                        ],
-                                      ),
-                                    ),
-                                    Padding(
-                                      padding: const EdgeInsets.only(bottom: 10),
-                                      child: Row(
-                                        children: [
-                                          Expanded(
-                                            child: Text("Total no of Units:")
-                                                .size(11)
-                                                .color(Color(0xff5d5d5d)),
-                                          ),
-                                          SizedBox(width: 10,),
+                                          const SizedBox(width: 10,),
                                           Expanded(
                                             child: Text("${property!['project_details'][0]['total_units'] ?? '-'}")
                                                 .size(11)
@@ -1876,29 +1975,11 @@ class PropertyDetailsState extends State<ProjectDetails> {
                                       child: Row(
                                         children: [
                                           Expanded(
-                                            child: Text("Launch Date:")
+                                            child: const Text("Total Project Area:")
                                                 .size(11)
-                                                .color(Color(0xff5d5d5d)),
+                                                .color(const Color(0xff5d5d5d)),
                                           ),
-                                          SizedBox(width: 10,),
-                                          Expanded(
-                                            child: Text("${property!['project_details'][0]['launch_date'] ?? '-'}")
-                                                .size(11)
-                                                .bold( weight: FontWeight.w500,),
-                                          )
-                                        ],
-                                      ),
-                                    ),
-                                    Padding(
-                                      padding: const EdgeInsets.only(bottom: 10),
-                                      child: Row(
-                                        children: [
-                                          Expanded(
-                                            child: Text("Total Project Area:")
-                                                .size(11)
-                                                .color(Color(0xff5d5d5d)),
-                                          ),
-                                          SizedBox(width: 10,),
+                                          const SizedBox(width: 10,),
                                           Expanded(
                                             child: Text("${property!['project_details'][0]['size'] ?? '-'}")
                                                 .size(11)
@@ -1912,11 +1993,65 @@ class PropertyDetailsState extends State<ProjectDetails> {
                                       child: Row(
                                         children: [
                                           Expanded(
-                                            child: Text("Rera No:")
+                                            child: const Text("Launch Date:")
                                                 .size(11)
-                                                .color(Color(0xff5d5d5d)),
+                                                .color(const Color(0xff5d5d5d)),
                                           ),
-                                          SizedBox(width: 10,),
+                                          const SizedBox(width: 10,),
+                                          Expanded(
+                                            child: Text("${property!['project_details'][0]['launch_date'] ?? '-'}")
+                                                .size(11)
+                                                .bold( weight: FontWeight.w500,),
+                                          )
+                                        ],
+                                      ),
+                                    ),
+                                    Padding(
+                                      padding: const EdgeInsets.only(bottom: 10),
+                                      child: Row(
+                                        children: [
+                                          Expanded(
+                                            child: const Text("Possession Starts:")
+                                                .size(11)
+                                                .color(const Color(0xff5d5d5d)),
+                                          ),
+                                          const SizedBox(width: 10,),
+                                          Expanded(
+                                            child: Text("${property!['project_details'][0]['possession_start'] ?? '-'}")
+                                                .size(11)
+                                                .bold( weight: FontWeight.w500,),
+                                          )
+                                        ],
+                                      ),
+                                    ),
+                                    Padding(
+                                      padding: const EdgeInsets.only(bottom: 10),
+                                      child: Row(
+                                        children: [
+                                          Expanded(
+                                            child: const Text("Configurations :")
+                                                .size(11)
+                                                .color(const Color(0xff5d5d5d)),
+                                          ),
+                                          const SizedBox(width: 10,),
+                                          Expanded(
+                                            child: Text("${property!['project_details'][0]['configuration'] ?? '-'}")
+                                                .size(11)
+                                                .bold( weight: FontWeight.w500,),
+                                          )
+                                        ],
+                                      ),
+                                    ),
+                                    Padding(
+                                      padding: const EdgeInsets.only(bottom: 10),
+                                      child: Row(
+                                        children: [
+                                          Expanded(
+                                            child: const Text("Rera No:")
+                                                .size(11)
+                                                .color(const Color(0xff5d5d5d)),
+                                          ),
+                                          const SizedBox(width: 10,),
                                           Expanded(
                                             child: Text("${property!['project_details'][0]['rera_no'] ?? '-'}")
                                                 .size(11)
@@ -1943,52 +2078,18 @@ class PropertyDetailsState extends State<ProjectDetails> {
                                     //     ],
                                     //   ),
                                     // ),
+
+
                                     Padding(
                                       padding: const EdgeInsets.only(bottom: 10),
                                       child: Row(
                                         children: [
                                           Expanded(
-                                            child: Text("Possession Starts:")
+                                            child: const Text("Avg Price:")
                                                 .size(11)
-                                                .color(Color(0xff5d5d5d)),
+                                                .color(const Color(0xff5d5d5d)),
                                           ),
-                                          SizedBox(width: 10,),
-                                          Expanded(
-                                            child: Text("${property!['project_details'][0]['possession_start'] ?? '-'}")
-                                                .size(11)
-                                                .bold( weight: FontWeight.w500,),
-                                          )
-                                        ],
-                                      ),
-                                    ),
-                                    Padding(
-                                      padding: const EdgeInsets.only(bottom: 10),
-                                      child: Row(
-                                        children: [
-                                          Expanded(
-                                            child: Text("Configurations :")
-                                                .size(11)
-                                                .color(Color(0xff5d5d5d)),
-                                          ),
-                                          SizedBox(width: 10,),
-                                          Expanded(
-                                            child: Text("${property!['project_details'][0]['configuration'] ?? '-'}")
-                                                .size(11)
-                                                .bold( weight: FontWeight.w500,),
-                                          )
-                                        ],
-                                      ),
-                                    ),
-                                    Padding(
-                                      padding: const EdgeInsets.only(bottom: 10),
-                                      child: Row(
-                                        children: [
-                                          Expanded(
-                                            child: Text("Avg Price:")
-                                                .size(11)
-                                                .color(Color(0xff5d5d5d)),
-                                          ),
-                                          SizedBox(width: 10,),
+                                          const SizedBox(width: 10,),
                                           Expanded(
                                             child: Text("${property!['project_details'][0]['avg_price'] ?? '0'}")
                                                 .size(11)
@@ -2002,29 +2103,11 @@ class PropertyDetailsState extends State<ProjectDetails> {
                                       child: Row(
                                         children: [
                                           Expanded(
-                                            child: Text("Total Floors:")
+                                            child: const Text("Approved By:")
                                                 .size(11)
-                                                .color(Color(0xff5d5d5d)),
+                                                .color(const Color(0xff5d5d5d)),
                                           ),
-                                          SizedBox(width: 10,),
-                                          Expanded(
-                                            child: Text("${property!['project_details'][0]['floors'] ?? '-'}")
-                                                .size(11)
-                                                .bold( weight: FontWeight.w500,),
-                                          )
-                                        ],
-                                      ),
-                                    ),
-                                    Padding(
-                                      padding: const EdgeInsets.only(bottom: 10),
-                                      child: Row(
-                                        children: [
-                                          Expanded(
-                                            child: Text("Approved By:")
-                                                .size(11)
-                                                .color(Color(0xff5d5d5d)),
-                                          ),
-                                          SizedBox(width: 10,),
+                                          const SizedBox(width: 10,),
                                           Expanded(
                                             child: Text("${property!['project_details'][0]['approved_by'] ?? '-'}")
                                                 .size(11)
@@ -2038,109 +2121,128 @@ class PropertyDetailsState extends State<ProjectDetails> {
                                       child: Row(
                                         children: [
                                           Expanded(
-                                            child: Text("City:")
+                                            child: const Text("Total Floors:")
                                                 .size(11)
-                                                .color(Color(0xff5d5d5d)),
+                                                .color(const Color(0xff5d5d5d)),
                                           ),
-                                          SizedBox(width: 10,),
+                                          const SizedBox(width: 10,),
                                           Expanded(
-                                            child: Text("${property!['city']}")
+                                            child: Text("${property!['project_details'][0]['floors'] ?? '-'}")
                                                 .size(11)
                                                 .bold( weight: FontWeight.w500,),
                                           )
                                         ],
                                       ),
                                     ),
-                                    Padding(
-                                      padding: const EdgeInsets.only(bottom: 10),
-                                      child: Row(
-                                        children: [
-                                          Expanded(
-                                            child: Text("Road Width:")
-                                                .size(11)
-                                                .color(Color(0xff5d5d5d)),
-                                          ),
-                                          SizedBox(width: 10,),
-                                          Expanded(
-                                            child: Text("${property!['project_details'][0]['road_width'] ?? 0}")
-                                                .size(11)
-                                                .bold( weight: FontWeight.w500,),
-                                          )
-                                        ],
-                                      ),
-                                    ),
-                                    Padding(
-                                      padding: const EdgeInsets.only(bottom: 10),
-                                      child: Row(
-                                        children: [
-                                          Expanded(
-                                            child: Text("Project completed:")
-                                                .size(11)
-                                                .color(Color(0xff5d5d5d)),
-                                          ),
-                                          SizedBox(width: 10,),
-                                          Expanded(
-                                            child: Text("${property!['project_details'][0]['project_completed'] ?? '-'}")
-                                                .size(11)
-                                                .bold( weight: FontWeight.w500,),
-                                          )
-                                        ],
-                                      ),
-                                    ),
-                                    Padding(
-                                      padding: const EdgeInsets.only(bottom: 10),
-                                      child: Row(
-                                        children: [
-                                          Expanded(
-                                            child: Text("Rate:")
-                                                .size(11)
-                                                .color(Color(0xff5d5d5d)),
-                                          ),
-                                          SizedBox(width: 10,),
-                                          Expanded(
-                                            child: Text("${property!['project_details'][0]['rate_per_sqft'] ?? '-'}/sqft.")
-                                                .size(11)
-                                                .bold( weight: FontWeight.w500,),
-                                          )
-                                        ],
-                                      ),
-                                    ),
-                                    Padding(
-                                      padding: const EdgeInsets.only(bottom: 10),
-                                      child: Row(
-                                        children: [
-                                          Expanded(
-                                            child: Text("Suitable for:")
-                                                .size(11)
-                                                .color(Color(0xff5d5d5d)),
-                                          ),
-                                          SizedBox(width: 10,),
-                                          Expanded(
-                                            child: Text("${property!['project_details'][0]['suitable_for'] ?? '-'}")
-                                                .size(11)
-                                                .bold( weight: FontWeight.w500,),
-                                          )
-                                        ],
-                                      ),
-                                    ),
-                                    Padding(
-                                      padding: const EdgeInsets.only(bottom: 10),
-                                      child: Row(
-                                        children: [
-                                          Expanded(
-                                            child: Text("Project placed:")
-                                                .size(11)
-                                                .color(Color(0xff5d5d5d)),
-                                          ),
-                                          SizedBox(width: 10,),
-                                          Expanded(
-                                            child: Text("${property!['project_details'][0]['project_placed'] ?? '-'}")
-                                                .size(11)
-                                                .bold( weight: FontWeight.w500,),
-                                          )
-                                        ],
-                                      ),
-                                    ),
+
+                                    // Padding(
+                                    //   padding: const EdgeInsets.only(bottom: 10),
+                                    //   child: Row(
+                                    //     children: [
+                                    //       Expanded(
+                                    //         child: const Text("City:")
+                                    //             .size(11)
+                                    //             .color(const Color(0xff5d5d5d)),
+                                    //       ),
+                                    //       const SizedBox(width: 10,),
+                                    //       Expanded(
+                                    //         child: Text("${property!['city']}")
+                                    //             .size(11)
+                                    //             .bold( weight: FontWeight.w500,),
+                                    //       )
+                                    //     ],
+                                    //   ),
+                                    // ),
+                                    // Padding(
+                                    //   padding: const EdgeInsets.only(bottom: 10),
+                                    //   child: Row(
+                                    //     children: [
+                                    //       Expanded(
+                                    //         child: const Text("Road Width:")
+                                    //             .size(11)
+                                    //             .color(const Color(0xff5d5d5d)),
+                                    //       ),
+                                    //       const SizedBox(width: 10,),
+                                    //       Expanded(
+                                    //         child: Text("${property!['project_details'][0]['road_width'] ?? 0}")
+                                    //             .size(11)
+                                    //             .bold( weight: FontWeight.w500,),
+                                    //       )
+                                    //     ],
+                                    //   ),
+                                    // ),
+                                    // Padding(
+                                    //   padding: const EdgeInsets.only(bottom: 10),
+                                    //   child: Row(
+                                    //     children: [
+                                    //       Expanded(
+                                    //         child: const Text("Project completed:")
+                                    //             .size(11)
+                                    //             .color(const Color(0xff5d5d5d)),
+                                    //       ),
+                                    //       const SizedBox(width: 10,),
+                                    //       Expanded(
+                                    //         child: Text("${property!['project_details'][0]['project_completed'] ?? '-'}")
+                                    //             .size(11)
+                                    //             .bold( weight: FontWeight.w500,),
+                                    //       )
+                                    //     ],
+                                    //   ),
+                                    // ),
+                                    // Padding(
+                                    //   padding: const EdgeInsets.only(bottom: 10),
+                                    //   child: Row(
+                                    //     children: [
+                                    //       Expanded(
+                                    //         child: const Text("Rate:")
+                                    //             .size(11)
+                                    //             .color(const Color(0xff5d5d5d)),
+                                    //       ),
+                                    //       const SizedBox(width: 10,),
+                                    //       Expanded(
+                                    //         child: Text("${property!['project_details'][0]['rate_per_sqft'] ?? '-'}/sqft.")
+                                    //             .size(11)
+                                    //             .bold( weight: FontWeight.w500,),
+                                    //       )
+                                    //     ],
+                                    //   ),
+                                    // ),
+                                    // Padding(
+                                    //   padding: const EdgeInsets.only(bottom: 10),
+                                    //   child: Row(
+                                    //     children: [
+                                    //       Expanded(
+                                    //         child: const Text("Suitable for:")
+                                    //             .size(11)
+                                    //             .color(const Color(0xff5d5d5d)),
+                                    //       ),
+                                    //       const SizedBox(width: 10,),
+                                    //       Expanded(
+                                    //         child: Text("${property!['project_details'][0]['suitable_for'] ?? '-'}")
+                                    //             .size(11)
+                                    //             .bold( weight: FontWeight.w500,),
+                                    //       )
+                                    //     ],
+                                    //   ),
+                                    // ),
+                                    // Padding(
+                                    //   padding: const EdgeInsets.only(bottom: 10),
+                                    //   child: Row(
+                                    //     children: [
+                                    //       Expanded(
+                                    //         child: const Text("Project placed:")
+                                    //             .size(11)
+                                    //             .color(const Color(0xff5d5d5d)),
+                                    //       ),
+                                    //       const SizedBox(width: 10,),
+                                    //       Expanded(
+                                    //         child: Text("${property!['project_details'][0]['project_placed'] ?? '-'}")
+                                    //             .size(11)
+                                    //             .bold( weight: FontWeight.w500,),
+                                    //       )
+                                    //     ],
+                                    //   ),
+                                    // ),
                                     // Text("Read More",style: TextStyle(
                                     //   fontSize: 13,
                                     //   fontWeight: FontWeight.w600,
@@ -2150,53 +2252,64 @@ class PropertyDetailsState extends State<ProjectDetails> {
                                 ),
                               ),
                             ),
-                            const SizedBox(
-                              height: 14,
-                            ),
-                            Padding(
-                              padding: EdgeInsets.symmetric( horizontal: 15,),
-                              child: Container(
-                                padding: EdgeInsets.all(13),
-                                decoration: BoxDecoration(
-                                  color: Color(0xfffffaf4),
-                                  borderRadius: BorderRadius.circular(15),
-                                ),
-                                child: Column(
-                                  crossAxisAlignment: CrossAxisAlignment.start,
-                                  children: [
-                                    Text("Project Highlights".translate(context),style: TextStyle(
-                                        fontSize: 14,
-                                        color: Color(0xff333333),
-                                        fontWeight: FontWeight.w600
-                                    ),),
-                                    SizedBox(height: 13, ),
-                                    for(int i = 0; i < property!['project_details'][0]['highlights'].split(',').length; i++)
-                                      Padding(
-                                        padding: const EdgeInsets.only(bottom: 10),
-                                        child: Row(
-                                          children: [
-                                            Image.asset("assets/NewPropertydetailscreen/_-55.png",width: 13,height: 13,fit: BoxFit.cover,),
-                                            SizedBox(width: 10,),
-                                            Expanded(
-                                              child: Text("${property!['project_details'][0]['highlights'].split(',')[i]}")
-                                                  .size(11)
-                                                  .color(Color(0xff5d5d5d)),
-                                            ),
-                                          ],
-                                        ),
+
+                            if(property!['project_details'][0]['highlights']!.isNotEmpty )
+                            ...[
+                              const SizedBox(
+                                height: 15,
+                              ),
+                              Padding(
+                                padding: const EdgeInsets.symmetric( horizontal: 15,),
+                                child: Container(
+                                  padding: const EdgeInsets.all(13),
+                                  decoration: BoxDecoration(
+                                    color: const Color(0xfffffaf4),
+                                    borderRadius: BorderRadius.circular(15),
+                                    boxShadow: [
+                                      BoxShadow(
+                                        offset: const Offset(0, 2),
+                                        blurRadius: 3,
+                                        color: Colors.black.withOpacity(0.1),
                                       ),
-                                  ],
+                                    ],
+                                  ),
+                                  child: Column(
+                                    crossAxisAlignment: CrossAxisAlignment.start,
+                                    children: [
+                                      Text("Project Highlights".translate(context),style: const TextStyle(
+                                          fontSize: 14,
+                                          color: Color(0xff333333),
+                                          fontWeight: FontWeight.w600
+                                      ),),
+                                      const SizedBox(height: 13, ),
+                                      for(int i = 0; i < property!['project_details'][0]['highlights'].split(',').length; i++)
+                                        Padding(
+                                          padding: const EdgeInsets.only(bottom: 10),
+                                          child: Row(
+                                            children: [
+                                              Image.asset("assets/NewPropertydetailscreen/_-55.png",width: 13,height: 13,fit: BoxFit.cover,),
+                                              const SizedBox(width: 10,),
+                                              Expanded(
+                                                child: Text("${property!['project_details'][0]['highlights'].split(',')[i]}")
+                                                    .size(11)
+                                                    .color(const Color(0xff5d5d5d)),
+                                              ),
+                                            ],
+                                          ),
+                                        ),
+                                    ],
+                                  ),
                                 ),
                               ),
-                            ),
+                            ],
                             const SizedBox(
-                              height: 14,
+                              height: 15,
                             ),
 
                             if (property?['assignfacilities']
                                 ?.isNotEmpty ??
                                 false) ...[
-                              Padding(
+                              const Padding(
                                 padding: EdgeInsets.symmetric( horizontal: 15,),
                                 child: Text("Near by Places",
                                   style: TextStyle(
@@ -2206,13 +2319,9 @@ class PropertyDetailsState extends State<ProjectDetails> {
                                   ),),
                               ),
                               const SizedBox(height: 10),
-                            ],
-
-
-
-                            Padding(
-                              padding: EdgeInsets.only( left: 15,),
-                              child: OutdoorFacilityListWidget(
+                               Padding(
+                                padding: const EdgeInsets.only( left: 15,),
+                                child: OutdoorFacilityListWidget(
                                   outdoorFacilityList:  List<AssignedOutdoorFacility>.from(
                                       (property!["assignfacilities"] as List).map((x) {
                                         return AssignedOutdoorFacility.fromJson({
@@ -2226,25 +2335,26 @@ class PropertyDetailsState extends State<ProjectDetails> {
                                           'name': x['outdoorfacilities']['name'],
                                         });
                                       })),),
-                            ),
+                              ),
 
-                            const SizedBox(
-                              height: 15,
-                            ),
+                              const SizedBox(
+                                height: 15,
+                              ),
 
+                            ],
 
 
                             Padding(
-                              padding: EdgeInsets.symmetric( horizontal: 15,),
+                              padding: const EdgeInsets.symmetric( horizontal: 15,),
                               child: Container(
-                                padding: EdgeInsets.all(10),
+                                padding: const EdgeInsets.all(10),
                                 width: double.infinity,
                                 decoration: BoxDecoration(
                                   borderRadius: BorderRadius.circular(15.0),
                                   color: Colors.white,
                                   boxShadow: [
                                     BoxShadow(
-                                      offset: Offset(0, 1),
+                                      offset: const Offset(0, 1),
                                       blurRadius: 5,
                                       color: Colors.black.withOpacity(0.1),
                                     ),
@@ -2254,7 +2364,7 @@ class PropertyDetailsState extends State<ProjectDetails> {
                                   crossAxisAlignment: CrossAxisAlignment.start,
                                   children: [
                                     Text(UiUtils.getTranslatedLabel(
-                                        context, "aboutThisPropLbl"),style: TextStyle(
+                                        context, "About this project"),style: const TextStyle(
                                         fontSize: 14,
                                         color: Color(0xff333333),
                                         fontWeight: FontWeight.w600
@@ -2264,7 +2374,7 @@ class PropertyDetailsState extends State<ProjectDetails> {
                                     ),
                                     ReadMoreText(
                                         text: property?['description'] ?? "",
-                                        style: TextStyle(
+                                        style: const TextStyle(
                                             fontSize: 11,
                                             color: Color(0xff707070)),
                                         readMoreButtonStyle: TextStyle(
@@ -2273,12 +2383,13 @@ class PropertyDetailsState extends State<ProjectDetails> {
                                 ),
                               ),
                             ),
+                            
 
                             //TODO:
                             if (_bannerAd != null &&
                                 Constant.isAdmobAdsEnabled)
                               Padding(
-                                padding: EdgeInsets.only( left: 15,right:15,bottom: 20),
+                                padding: const EdgeInsets.only( left: 15,right:15,bottom: 20),
                                 child: SizedBox(
                                     width: _bannerAd?.size.width.toDouble(),
                                     height: _bannerAd?.size.height.toDouble(),
@@ -2293,9 +2404,9 @@ class PropertyDetailsState extends State<ProjectDetails> {
                             const SizedBox( height: 15,),
                             if (property?['gallary_images']?.isNotEmpty ?? false) ...[
                               Padding(
-                                padding: EdgeInsets.only( left: 15,right: 15),
+                                padding: const EdgeInsets.only( left: 15,right: 15),
                                 child: Text(UiUtils.getTranslatedLabel(
-                                  context, "Videos & Photos",),  style: TextStyle(
+                                  context, "Videos & Photos",),  style: const TextStyle(
                                     fontSize: 14,
                                     color: Color(0xff333333),
                                     fontWeight: FontWeight.w600
@@ -2309,7 +2420,7 @@ class PropertyDetailsState extends State<ProjectDetails> {
                               SingleChildScrollView(
                                 scrollDirection: Axis.horizontal,
                                 child: Padding(
-                                  padding: EdgeInsets.only( left: 15,bottom: 15),
+                                  padding: const EdgeInsets.only( left: 15,bottom: 15),
                                   child: Row(
                                       children: [
                                         if(property?['video_link'] != null && property?['video_link'] != '')
@@ -2398,7 +2509,7 @@ class PropertyDetailsState extends State<ProjectDetails> {
                                                                       0.8)),
                                                               width: 30,
                                                               height: 30,
-                                                              child: Icon(
+                                                              child: const Icon(
                                                                 Icons.play_arrow,
                                                                 color: Colors.white,
                                                               ),
@@ -2601,121 +2712,224 @@ class PropertyDetailsState extends State<ProjectDetails> {
                             //     ),
                             //   ),
                             // ),
+                            if(property!['customer'] != null)
+                            Padding(
+                              padding: const EdgeInsets.only( left: 15,right: 15),
+                              child: Text(UiUtils.getTranslatedLabel(
+                                  context, "${widget.property?['customer']['role_id'] == 1 ? 'Owner' : widget.property?['customer']['role_id'] == 2 ? 'Agent' : 'Builder'} Profile"))
+                                  .color(const Color(0xff333333))
+                                  .size(14)
+                                  .bold(weight: FontWeight.w600),
+                            ),
+
+                            if(property!['customer'] != null)
+                              CusomterProfileWidget1(
+                                data: property!['customer'], propertyID: widget.property!['id'], reraId:  "${widget.property!['project_details']?.isNotEmpty == true ? widget.property!['project_details'][0]['rera_no'] ?? '' : ''}",
+                              ),
+                            Padding(
+                              padding:const EdgeInsets.symmetric(horizontal: 15),
+                              child: Row(
+                                children: [
+                                  Expanded(
+                                    child: Container(
+                                      child: const Text("Property have inaccurate data ?",style: TextStyle(fontSize: 13),),
+                                    ),
+                                  ),
+                                  SizedBox(width: 10,),
+                                  GestureDetector(
+                                    onTap: () {
+                                      showDialog(
+                                        context: context,
+                                        builder: (BuildContext context) {
+                                          return AlertDialog(
+                                            shape: const RoundedRectangleBorder(
+                                              borderRadius: BorderRadius.all(Radius.circular(20)),
+                                            ),
+                                            contentPadding: const EdgeInsets.all(0),
+                                            content: ReportPropertyDialog(propertyID: widget.property!['id']!),
+                                          );
+                                        },
+                                      );
+                                      // showModalBottomSheet(
+                                      //   context: context,
+                                      //   shape: const RoundedRectangleBorder(
+                                      //     borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
+                                      //   ),
+                                      //   builder: (BuildContext context) {
+                                      //     return  ReportPropertyBottomSheet(context,property!.id!,);
+                                      //   },
+                                      // );
+                                    },
+                                    child: Container(
+                                      height: 35,
+                                      alignment: Alignment.center,
+                                      padding: const EdgeInsets.symmetric(horizontal: 15),
+                                      decoration: BoxDecoration(
+                                          borderRadius: BorderRadius.circular(8),
+                                          color: const Color(0xffffe4e4)
+                                      ),child: Text("Report",style: TextStyle(color: Colors.red,fontSize: 13),),
+                                    ),
+                                  )
+                                ],
+                              ),
+                            ),
                             const SizedBox(
                               height: 15,
                             ),
-                            if(property!['amenity'] != null && property!['amenity'].length > 0)
+                            if(property?['latitude'] != null && property?['longitude'] != null && property?['latitude'] != '' && property?['longitude'] != '')
                               Padding(
-                                padding: EdgeInsets.only( left: 15,right: 15),
-                                child: Text(UiUtils.getTranslatedLabel(
-                                    context, "Amenities"),
-                                  style: TextStyle(
-                                      fontSize: 14,
-                                      color: Color(0xff333333),
-                                      fontWeight: FontWeight.w600
+                                padding: const EdgeInsets.only(right: 15, left: 15),
+                                child: SizedBox(
+                                  height: 150,
+                                  child: ClipRRect(
+                                    borderRadius: BorderRadius.circular(10),
+                                    child: GoogleMap(
+                                      key: const Key("AIzaSyDDJ17OjVJ0TS2qYt7GMOnrMjAu1CYZFg8"),
+                                      myLocationButtonEnabled: false,
+                                      gestureRecognizers: <f.Factory<OneSequenceGestureRecognizer>>{
+                                        f.Factory<OneSequenceGestureRecognizer>(
+                                              () => EagerGestureRecognizer(),
+                                        ),
+                                      },
+                                      markers: {
+                                        Marker(
+                                            markerId: const MarkerId("1"),
+                                            position: LatLng(
+                                                double.parse((property?['latitude'] ?? "0.0")),
+                                                double.parse((property?['longitude'] ?? "0.0"))))
+                                      },
+                                      mapType: AppSettings.googleMapType,
+                                      initialCameraPosition: CameraPosition(
+                                        target: LatLng(
+                                          double.parse(
+                                            (property?['latitude'] ?? "0.0"),
+                                          ),
+                                          double.parse(
+                                            (property?['longitude'] ?? "0.0"),
+                                          ),
+                                        ),
+                                        zoom: 14.4746,
+                                      ),
+                                      onMapCreated: (GoogleMapController controller) {
+                                        // if (!widget._controller.isCompleted) {
+                                        //   widget._controller.complete(controller);
+                                        // }
+                                      },
+                                    ),
                                   ),
                                 ),
                               ),
+                            
                             if(property!['amenity'] != null && property!['amenity'].length > 0)
-                              GridView.builder(
-                              padding: const EdgeInsets.all(15),
-                              shrinkWrap: true,
-                              itemCount: property!['amenity'].length,
-                              physics: const NeverScrollableScrollPhysics(),
-                              gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
-                                crossAxisCount: 3,
-                                crossAxisSpacing: 8,
-                                mainAxisSpacing: 8,
-                                childAspectRatio: 1 / 0.7,
-                              ),
+                             ...[
+                               Padding(
+                                 padding: const EdgeInsets.only( left: 15,right: 15,top: 15),
+                                 child: Text(UiUtils.getTranslatedLabel(
+                                     context, "Amenities"),
+                                   style: const TextStyle(
+                                       fontSize: 14,
+                                       color: Color(0xff333333),
+                                       fontWeight: FontWeight.w600
+                                   ),
+                                 ),
+                               ),
+                               GridView.builder(
+                                 padding: const EdgeInsets.only(left: 15,right: 15,top: 10),
+                                 shrinkWrap: true,
+                                 itemCount: property!['amenity'].length,
+                                 physics: const NeverScrollableScrollPhysics(),
+                                 gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+                                   crossAxisCount: 3,
+                                   crossAxisSpacing: 8,
+                                   mainAxisSpacing: 8,
+                                   childAspectRatio: 1 / 0.7,
+                                 ),
 
-                              itemBuilder: (context, index) {
-                                final Map<String, dynamic> griddata = property!['amenity'][index];
-                                return GestureDetector(
-                                  onTap: () {
-                                  },
-                                  child: Container(
-                                    padding: const EdgeInsets.only(left: 10,right: 10,bottom: 10),
-                                    decoration: BoxDecoration(
-                                      color: Color(0xffebf4ff),
-                                      borderRadius: BorderRadius.circular(10),
-                                    ),
-                                    child: Column(
-                                      crossAxisAlignment: CrossAxisAlignment.start,
-                                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                                      children: [
-                                        Container(
-                                          padding: const EdgeInsets.only(left: 10,right: 10,top: 6,bottom: 6),
-                                          decoration: BoxDecoration(
-                                            color: Colors.white,
-                                            borderRadius: BorderRadius.only(
-                                              bottomLeft: Radius.circular(10),
-                                              bottomRight: Radius.circular(10),
-                                            ),
-                                          ),
-                                          child: Container(
-                                              width: 23, height: 23,
-                                              child: UiUtils.networkSvg(griddata["image"], fit: BoxFit.cover,),
-                                          ),
-                                          // child: Image.asset(griddata["image"],width: 23,height: 23,),
-                                        ),
-                                        Text(
-                                          griddata["name"],
-                                          maxLines: 1,
-                                          overflow: TextOverflow.ellipsis,
-                                        )
-                                            .size(11)
-                                            .color(Color(0xff5d5d5d))
-                                      ],
-                                    ),
-                                  ),
-                                );
-                              },
-                            ),
-                            const SizedBox(
-                              height: 5,
-                            ),
+                                 itemBuilder: (context, index) {
+                                   final Map<String, dynamic> griddata = property!['amenity'][index];
+                                   return GestureDetector(
+                                     onTap: () {
+                                     },
+                                     child: Container(
+                                       padding: const EdgeInsets.only(left: 10,right: 10,bottom: 10),
+                                       decoration: BoxDecoration(
+                                         color: const Color(0xffebf4ff),
+                                         borderRadius: BorderRadius.circular(10),
+                                       ),
+                                       child: Column(
+                                         crossAxisAlignment: CrossAxisAlignment.start,
+                                         mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                                         children: [
+                                           Container(
+                                             padding: const EdgeInsets.only(left: 10,right: 10,top: 6,bottom: 6),
+                                             decoration: const BoxDecoration(
+                                               color: Colors.white,
+                                               borderRadius: BorderRadius.only(
+                                                 bottomLeft: Radius.circular(10),
+                                                 bottomRight: Radius.circular(10),
+                                               ),
+                                             ),
+                                             child: Container(
+                                               width: 23, height: 23,
+                                               child: UiUtils.networkSvg(griddata["image"], fit: BoxFit.cover,color: const Color(0xff117af9)),
+                                             ),
+                                             // child: Image.asset(griddata["image"],width: 23,height: 23,),
+                                           ),
+                                           Text(
+                                             griddata["name"],
+                                             maxLines: 1,
+                                             overflow: TextOverflow.ellipsis,
+                                           )
+                                               .size(11)
+                                               .color(const Color(0xff5d5d5d))
+                                         ],
+                                       ),
+                                     ),
+                                   );
+                                 },
+                               ),
+                             ],
                             if(property?['documents'].length > 0)
                               Padding(
-                              padding: EdgeInsets.only( left: 15,right: 15),
+                              padding: const EdgeInsets.only( left: 15,right: 15,top: 15),
                               child: Row(
                                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                                 children: [
                                   Text(UiUtils.getTranslatedLabel(
                                       context, "Download Broucher"),
-                                    style: TextStyle(
+                                    style: const TextStyle(
                                         fontSize: 14,
                                         color: Color(0xff333333),
                                         fontWeight: FontWeight.w600
                                     ),
                                   ),
-                                  // if(downloading)
-                                  // Container(
-                                  //   width: 150,
-                                  //   height: 15,
-                                  //   decoration: BoxDecoration(
-                                  //     borderRadius: BorderRadius.circular(15.0),
-                                  //     color: Colors.white,
-                                  //     border: Border.all(
-                                  //       width: 1,
-                                  //       color: Color(0xff117af9),
-                                  //     ),
-                                  //     boxShadow: [
-                                  //       BoxShadow(
-                                  //         offset: Offset(0, 1),
-                                  //         blurRadius: 5,
-                                  //         color: Colors.black.withOpacity(0.1),
-                                  //       ),
-                                  //     ],
-                                  //   ),
-                                  //   child: LinearProgressIndicator(
-                                  //     value: progress / 100,
-                                  //     valueColor: AlwaysStoppedAnimation<Color>(Colors.green),
-                                  //     backgroundColor: Colors.grey[200],
-                                  //     minHeight: 10,
-                                  //   ),
-                                  // ),
-                                  // if(!downloading)
+                                  if(downloading)
+                                  Container(
+                                    width: 150,
+                                    height: 15,
+                                    decoration: BoxDecoration(
+                                      borderRadius: BorderRadius.circular(15.0),
+                                      color: Colors.white,
+                                      border: Border.all(
+                                        width: 1,
+                                        color: Color(0xff117af9),
+                                      ),
+                                      boxShadow: [
+                                        BoxShadow(
+                                          offset: Offset(0, 1),
+                                          blurRadius: 5,
+                                          color: Colors.black.withOpacity(0.1),
+                                        ),
+                                      ],
+                                    ),
+                                    child: LinearProgressIndicator(
+                                      value: progress / 100,
+                                      valueColor: AlwaysStoppedAnimation<Color>(Colors.green),
+                                      backgroundColor: Colors.grey[200],
+                                      minHeight: 10,
+                                    ),
+                                  ),
+                                  if(!downloading)
                                   InkWell(
                                     onTap: () async {
                                       final Directory? downloadsDirectory = await getExternalStorageDirectory();
@@ -2730,17 +2944,18 @@ class PropertyDetailsState extends State<ProjectDetails> {
                                       );
                                     },
                                     child: Container(
-                                      padding: EdgeInsets.only(top: 5, bottom: 5, left: 10, right: 10),
+                                      height: 30,
+                                      padding: const EdgeInsets.only( left: 10, right: 10),
                                       decoration: BoxDecoration(
-                                        borderRadius: BorderRadius.circular(15.0),
+                                        borderRadius: BorderRadius.circular(8),
                                         color: Colors.white,
                                         border: Border.all(
                                           width: 1,
-                                          color: Color(0xff117af9),
+                                          color: const Color(0xff117af9),
                                         ),
                                         boxShadow: [
                                           BoxShadow(
-                                            offset: Offset(0, 1),
+                                            offset: const Offset(0, 1),
                                             blurRadius: 5,
                                             color: Colors.black.withOpacity(0.1),
                                           ),
@@ -2749,8 +2964,8 @@ class PropertyDetailsState extends State<ProjectDetails> {
                                       child: Row(
                                         children: [
                                           Image.asset("assets/NewPropertydetailscreen/_-76.png",width: 17,height: 17,),
-                                          SizedBox(width: 5,),
-                                          Text('Download',
+                                          const SizedBox(width: 5,),
+                                          const Text('Download',
                                             style: TextStyle(
                                                 fontSize: 11,
                                                 color: Color(0xff117af9),
@@ -2767,232 +2982,197 @@ class PropertyDetailsState extends State<ProjectDetails> {
                             SizedBox(
                               height: 10.rh(context),
                             ),
-                            Padding(
-                              padding: EdgeInsets.only( left: 15,right: 15),
-                              child: Text(UiUtils.getTranslatedLabel(
-                                context, "Floor Plans",), style: TextStyle(
-                                  fontSize: 14,
-                                  color: Color(0xff333333),
-                                  fontWeight: FontWeight.w600
-                              ),),
-                            ),
-                            SizedBox(
-                              height: 10.rh(context),
-                            ),
-                            SingleChildScrollView(
-                              scrollDirection: Axis.horizontal,
-                              child: Padding(
-                                padding: EdgeInsets.only( left: 15,bottom: 15),
-                                child: Row(
-                                  children: [
-                                    ...List.generate(
-                                      (property?['plans']?.length) ?? 0,
-                                          (index) {
-                                        return Padding(
-                                          padding: const EdgeInsets.only(right: 13),
-                                          child: ClipRRect(
-                                            borderRadius:
-                                            BorderRadius.circular(13),
-                                            child: Stack(
-                                              children: [
-                                                GestureDetector(
-                                                  onTap: () {
-                                                    if (property?['plans']?[index].isVideo ==
-                                                        true) return;
+                            if(property?['plans']?.isNotEmpty)
+                              ...[
+                                Padding(
+                                  padding: const EdgeInsets.only( left: 15,right: 15),
+                                  child: Text(UiUtils.getTranslatedLabel(
+                                    context, "Floor Plans",), style: const TextStyle(
+                                      fontSize: 14,
+                                      color: Color(0xff333333),
+                                      fontWeight: FontWeight.w600
+                                  ),),
+                                ),
+                                SizedBox(
+                                  height: 10.rh(context),
+                                ),
+                                SingleChildScrollView(
+                                  scrollDirection: Axis.horizontal,
+                                  child: Padding(
+                                    padding: const EdgeInsets.only( left: 15,bottom: 15),
+                                    child: Row(
+                                      children: [
+                                        ...List.generate(
+                                          (property?['plans']?.length) ?? 0,
+                                              (index) {
+                                            return Padding(
+                                              padding: const EdgeInsets.only(right: 13),
+                                              child: ClipRRect(
+                                                borderRadius:
+                                                BorderRadius.circular(13),
+                                                child: Stack(
+                                                  children: [
+                                                    GestureDetector(
+                                                      onTap: () {
+                                                        if (property?['plans']?[index].isVideo ==
+                                                            true) return;
 
-                                                    //google map doesn't allow blur so we hide it:)
-                                                    showGoogleMap = false;
-                                                    setState(() {});
-
-                                                    var images = property?['plans']
-                                                        ?.map((e) => e.imageUrl)
-                                                        .toList();
-
-                                                    UiUtils.imageGallaryView(
-                                                      context,
-                                                      images: images!,
-                                                      initalIndex: index,
-                                                      then: () {
-                                                        showGoogleMap = true;
+                                                        //google map doesn't allow blur so we hide it:)
+                                                        showGoogleMap = false;
                                                         setState(() {});
+
+                                                        var images = property?['plans']
+                                                            ?.map((e) => e.imageUrl)
+                                                            .toList();
+
+                                                        UiUtils.imageGallaryView(
+                                                          context,
+                                                          images: images!,
+                                                          initalIndex: index,
+                                                          then: () {
+                                                            showGoogleMap = true;
+                                                            setState(() {});
+                                                          },
+                                                        );
                                                       },
-                                                    );
-                                                  },
-                                                  child: SizedBox(
-                                                    width: 240.rw(context),
-                                                    height: 150.rh(context),
-                                                    child:
-                                                    UiUtils.getImage(
-                                                        property?['plans']?[index]['document']
-                                                            ??
-                                                            "",
-                                                        fit: BoxFit.cover),
-                                                  ),
-                                                ),
-                                                PositionedDirectional(
-                                                  bottom: 6,
-                                                  start: 6,
-                                                  child: Container(
-                                                    height: 19,
-                                                    clipBehavior: Clip.antiAlias,
-                                                    decoration: BoxDecoration(
-                                                        color: context.color.secondaryColor
-                                                            .withOpacity(0.7),
-                                                        borderRadius:
-                                                        BorderRadius.circular(4)),
-                                                    child: BackdropFilter(
-                                                      filter: ImageFilter.blur(
-                                                          sigmaX: 2, sigmaY: 3),
-                                                      child: Padding(
-                                                        padding: const EdgeInsets.symmetric(
-                                                            horizontal: 8.0),
-                                                        child: Center(
-                                                          child: Text(
-                                                            property?['plans']?[index]['title'],
-                                                          )
-                                                              .color(
-                                                            context.color.textColorDark,
-                                                          )
-                                                              .bold(weight: FontWeight.w500)
-                                                              .size(10),
+                                                      child: SizedBox(
+                                                        width: 240.rw(context),
+                                                        height: 150.rh(context),
+                                                        child:
+                                                        UiUtils.getImage(
+                                                            property?['plans']?[index]['document']
+                                                                ??
+                                                                "",
+                                                            fit: BoxFit.cover),
+                                                      ),
+                                                    ),
+                                                    PositionedDirectional(
+                                                      bottom: 6,
+                                                      start: 6,
+                                                      child: Container(
+                                                        padding: const EdgeInsets.symmetric(horizontal: 5,),
+                                                        height: 20,
+                                                        decoration:  BoxDecoration(
+                                                          color: Colors.black54,
+                                                          borderRadius:
+                                                          BorderRadius.circular(4),
+                                                        ),
+                                                        alignment: Alignment.centerLeft,
+                                                        child: Text(
+                                                          property?['plans']?[index]['title'],
+                                                          style: const TextStyle(
+                                                            color: Colors.white,
+                                                            fontSize: 10,
+                                                            fontWeight: FontWeight.w500,
+                                                          ),
                                                         ),
                                                       ),
                                                     ),
-                                                  ),
-                                                ),
-                                              ],
-                                            ),
-                                          ),
-                                        );
-                                      },
-                                    ),
-                                  ],
-                                ),
-                              ),
-                            ),
-                            SizedBox(
-                              height: 10.rh(context),
-                            ),
-                            if(property?['project_details'][0]['payment_plan'] != null)
-                              Padding(
-                                padding: EdgeInsets.only( left: 15,right: 15),
-                                child: Row(
-                                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                                  children: [
-                                    Text(UiUtils.getTranslatedLabel(
-                                        context, "Download Payment Plans"),
-                                      style: TextStyle(
-                                          fontSize: 14,
-                                          color: Color(0xff333333),
-                                          fontWeight: FontWeight.w600
-                                      ),
-                                    ),
-                                      InkWell(
-                                        onTap: () async {
-                                          // downloadFileToDownloads(property?['project_details'][0]['payment_plan'], 2);
-                                          final Directory? downloadsDirectory = await getExternalStorageDirectory();
 
-                                          final taskId = await FlutterDownloader.enqueue(
-                                            url: property?['project_details'][0]['payment_plan'],
-                                            headers: {},
-                                            saveInPublicStorage: true,// optional: header send with url (auth token etc)
-                                            savedDir: '${downloadsDirectory!.path}',
-                                            showNotification: true, // show download progress in status bar (for Android)
-                                            openFileFromNotification: true, // click on notification to open downloaded file (for Android)
-                                          );
-                                        },
-                                        child: Container(
-                                          padding: EdgeInsets.only(top: 5, bottom: 5, left: 10, right: 10),
-                                          decoration: BoxDecoration(
-                                            borderRadius: BorderRadius.circular(15.0),
-                                            color: Colors.white,
-                                            border: Border.all(
-                                              width: 1,
-                                              color: Color(0xff117af9),
-                                            ),
-                                            boxShadow: [
-                                              BoxShadow(
-                                                offset: Offset(0, 1),
-                                                blurRadius: 5,
-                                                color: Colors.black.withOpacity(0.1),
-                                              ),
-                                            ],
-                                          ),
-                                          child: Row(
-                                            children: [
-                                              Image.asset("assets/NewPropertydetailscreen/_-76.png",width: 17,height: 17,),
-                                              SizedBox(width: 5,),
-                                              Text('Download',
-                                                style: TextStyle(
-                                                    fontSize: 11,
-                                                    color: Color(0xff117af9),
-                                                    fontWeight: FontWeight.w600
+                                                  ],
                                                 ),
                                               ),
-                                            ],
-                                          ),
+                                            );
+                                          },
                                         ),
-                                      ),
-                                  ],
-                                ),
-                              ),
-                            const SizedBox(
-                              height: 15,
-                            ),
-                            if(property?['latitude'] != null && property?['longitude'] != null && property?['latitude'] != '' && property?['longitude'] != '')
-                              Padding(
-                              padding: const EdgeInsets.only(right: 15, left: 15),
-                              child: SizedBox(
-                                height: 150,
-                                child: ClipRRect(
-                                  borderRadius: BorderRadius.circular(10),
-                                  child: GoogleMap(
-                                    key: const Key("AIzaSyDDJ17OjVJ0TS2qYt7GMOnrMjAu1CYZFg8"),
-                                    myLocationButtonEnabled: false,
-                                    gestureRecognizers: <f.Factory<OneSequenceGestureRecognizer>>{
-                                      f.Factory<OneSequenceGestureRecognizer>(
-                                            () => EagerGestureRecognizer(),
-                                      ),
-                                    },
-                                    markers: {
-                                      Marker(
-                                          markerId: const MarkerId("1"),
-                                          position: LatLng(
-                                              double.parse((property?['latitude'] ?? "0.0")),
-                                              double.parse((property?['longitude'] ?? "0.0"))))
-                                    },
-                                    mapType: AppSettings.googleMapType,
-                                    initialCameraPosition: CameraPosition(
-                                      target: LatLng(
-                                        double.parse(
-                                          (property?['latitude'] ?? "0.0"),
-                                        ),
-                                        double.parse(
-                                          (property?['longitude'] ?? "0.0"),
-                                        ),
-                                      ),
-                                      zoom: 14.4746,
+                                      ],
                                     ),
-                                    onMapCreated: (GoogleMapController controller) {
-                                      // if (!widget._controller.isCompleted) {
-                                      //   widget._controller.complete(controller);
-                                      // }
-                                    },
                                   ),
                                 ),
+                                SizedBox(
+                                  height: 10.rh(context),
+                                ),
+                              ],
+
+                            if(property?['project_details'][0]['payment_plan'] != null&&property?['project_details'][0]['payment_plan'].isNotEmpty)
+                            ...[
+                              Padding(
+                                padding: const EdgeInsets.only( left: 15,right: 15),
+                                child: Row(
+                                  children: [
+                                    Expanded(
+                                      child: Row(
+                                        children: [
+                                          Image.asset("assets/assets/Images/__brouchre.png",height: 35,),
+                                          const SizedBox(width: 5,),
+                                          SizedBox(
+                                            width:MediaQuery.of(context).size.width/2,
+                                            child: Text(UiUtils.getTranslatedLabel(
+                                                context, "Download Payment Plans"),
+                                              overflow: TextOverflow.ellipsis,
+                                              maxLines: 1,
+                                              style: const TextStyle(
+                                                  fontSize: 14,
+                                                  color: Color(0xff333333),
+                                                  fontWeight: FontWeight.w600
+                                              ),
+                                            ),
+                                          ),
+                                        ],
+                                      ),
+                                    ),
+                                    InkWell(
+                                      onTap: () async {
+                                        // downloadFileToDownloads(property?['project_details'][0]['payment_plan'], 2);
+                                        final Directory? downloadsDirectory = await getExternalStorageDirectory();
+
+                                        final taskId = await FlutterDownloader.enqueue(
+                                          url: property?['project_details'][0]['payment_plan'],
+                                          headers: {},
+                                          saveInPublicStorage: true,// optional: header send with url (auth token etc)
+                                          savedDir: '${downloadsDirectory!.path}',
+                                          showNotification: true, // show download progress in status bar (for Android)
+                                          openFileFromNotification: true, // click on notification to open downloaded file (for Android)
+                                        );
+                                      },
+                                      child: Container(
+                                        height: 30,
+                                        padding: const EdgeInsets.only( left: 10, right: 10),
+                                        decoration: BoxDecoration(
+                                          borderRadius: BorderRadius.circular(8),
+                                          color: Colors.white,
+                                          border: Border.all(
+                                            width: 1,
+                                            color: const Color(0xff117af9),
+                                          ),
+                                          boxShadow: [
+                                            BoxShadow(
+                                              offset: const Offset(0, 1),
+                                              blurRadius: 5,
+                                              color: Colors.black.withOpacity(0.1),
+                                            ),
+                                          ],
+                                        ),
+                                        child: Row(
+                                          children: [
+                                            Image.asset("assets/NewPropertydetailscreen/_-76.png",width: 17,height: 17,),
+                                            const SizedBox(width: 5,),
+                                            const Text('Download',
+                                              style: TextStyle(
+                                                  fontSize: 11,
+                                                  color: Color(0xff117af9),
+                                                  fontWeight: FontWeight.w600
+                                              ),
+                                            ),
+                                          ],
+                                        ),
+                                      ),
+                                    ),
+                                  ],
+                                ),
                               ),
-                            ),
-                            const SizedBox(
-                              height: 15,
-                            ),
+                              const SizedBox(
+                                height: 15,
+                              ),
+                            ],
                             if(property?['project_details'] != null && property?['project_details'][0]['approved_banks'].length > 0)
                               Column(
                               crossAxisAlignment: CrossAxisAlignment.start,
                               children: [
                                 Padding(
-                                  padding: EdgeInsets.only( left: 15,right: 15),
+                                  padding: const EdgeInsets.only( left: 15,right: 15),
                                   child: Text(UiUtils.getTranslatedLabel(
-                                    context, "Approved Banks",), style: TextStyle(
+                                    context, "Approved Banks",), style: const TextStyle(
                                       fontSize: 14,
                                       color: Color(0xff333333),
                                       fontWeight: FontWeight.w600
@@ -3002,9 +3182,10 @@ class PropertyDetailsState extends State<ProjectDetails> {
                                   height: 10.rh(context),
                                 ),
                                 GridView.builder(
+                                  padding: const EdgeInsets.symmetric(horizontal: 15),
                                   shrinkWrap: true,
-                                  physics: NeverScrollableScrollPhysics(),
-                                  gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+                                  physics: const NeverScrollableScrollPhysics(),
+                                  gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
                                     crossAxisCount: 3,
                                     childAspectRatio:2/1.3,
                                     crossAxisSpacing: 10.0,
@@ -3014,9 +3195,10 @@ class PropertyDetailsState extends State<ProjectDetails> {
                                   itemBuilder: (context, index) {
                                     final item = property?['project_details'][0]['approved_banks'][index];
                                     return Container(
+                                      padding: const EdgeInsets.all(8),
                                       decoration: BoxDecoration(
                                         border: Border.all(
-                                            color: Color(0xffe5e5e5),
+                                            color: const Color(0xffe5e5e5),
                                             width: 1
                                         ),
                                         borderRadius: BorderRadius.circular(15),
@@ -3040,14 +3222,14 @@ class PropertyDetailsState extends State<ProjectDetails> {
                               ],
                             ),
 
-                            Padding(
-                              padding: EdgeInsets.only( left: 15,right: 15),
-                              child: Text(UiUtils.getTranslatedLabel(
-                                  context, "Builder"))
-                                  .color(context.color.textColorDark)
-                                  .size(context.font.large)
-                                  .bold(weight: FontWeight.w600),
-                            ),
+                            // Padding(
+                            //   padding: const EdgeInsets.only( left: 15,right: 15),
+                            //   child: Text(UiUtils.getTranslatedLabel(
+                            //       context, "Builder"))
+                            //       .color(context.color.textColorDark)
+                            //       .size(context.font.large)
+                            //       .bold(weight: FontWeight.w600),
+                            // ),
 
                             // const SizedBox(
                             //   height: 15,
@@ -3134,188 +3316,188 @@ class PropertyDetailsState extends State<ProjectDetails> {
                             //     ),
                             //   ),
                             // ),
-                            const SizedBox(
+                       /*     const SizedBox(
                               height: 5,
-                            ),
-                            Padding(
-                              padding: const EdgeInsets.only(top: 10, bottom: 10, right: 15, left: 15),
-                              child: Container(
-                                decoration: BoxDecoration(
-                                  borderRadius: BorderRadius.circular(15),
-                                  boxShadow: [
-                                    BoxShadow(
-                                      color: Color(0xfff0f0f0),
-                                      offset: Offset(0, 2),
-                                      blurRadius: 2.0,
-                                      spreadRadius: 2.0,
-                                    ),
-                                  ],
-                                ),
-                                padding: EdgeInsets.only(left: 15,right: 15,top: 15, bottom: 15),
-                                child: Column(
-                                  children: [
-                                    Row(
-                                      children: [
-                                        Expanded(
-                                          child: Row(
-                                            children: [
-                                              if(property!['customer'] != null)
-                                                GestureDetector(
-                                                onTap: () {
-                                                  UiUtils.showFullScreenImage(context,
-                                                      provider:
-                                                      NetworkImage(property!['customer']['profile']));
-                                                },
-
-                                                child: Container(
-                                                    width: 80,
-                                                    height: 80,
-                                                    clipBehavior: Clip.antiAlias,
-                                                    decoration: BoxDecoration(
-                                                        color: Colors.grey.shade200,
-                                                        border: Border.all(
-                                                            width: 1,
-                                                            color: Color(0xffdfdfdf)
-                                                        ),
-                                                        borderRadius: BorderRadius.circular(50)),
-                                                    child: ClipRRect(
-                                                      borderRadius: BorderRadius.circular(50),
-                                                      child: UiUtils.getImage(property!['customer']['profile'] ?? "",
-                                                          fit: BoxFit.cover),
-                                                    )
-
-                                                  //  CachedNetworkImage(
-                                                  //   imageUrl: widget.propertyData?.customerProfile ?? "",
-                                                  //   fit: BoxFit.cover,
-                                                  // ),
-
-                                                ),
-                                              ),
-                                              if(property!['customer'] != null)
-                                                const SizedBox(
-                                                  width: 10,
-                                                ),
-                                              if(property!['customer'] != null)
-                                               Expanded(
-                                                child: Column(
-                                                  crossAxisAlignment: CrossAxisAlignment.start,
-                                                  children: [
-                                                    Text(property!['customer']['name'] ?? "")
-                                                        .size(17)
-                                                        .color(Color(0xff4c4c4c))
-                                                        .bold(),
-                                                    SizedBox(height: 5,),
-                                                    Row(
-                                                      children: [
-                                                        Image.asset("assets/NewPropertydetailscreen/__rara.png",width: 13,height: 13,fit: BoxFit.cover,),
-                                                        SizedBox(width: 2,),
-                                                        Text("RERA ID: ",
-                                                          style: TextStyle(
-                                                              fontSize: 9,
-                                                              fontWeight: FontWeight.w500,
-                                                              color: Color(0xff009681)
-                                                          ),
-                                                        ),
-                                                        Text("TN/29/A/0049/2019",
-                                                          style: TextStyle(
-                                                              fontSize: 9,
-                                                              fontWeight: FontWeight.w500,
-                                                              color: Colors.black
-                                                          ),
-                                                        ),
-                                                      ],
-                                                    ),
-                                                    // SizedBox(height: 5,),
-                                                    // Row(
-                                                    //   children: [
-                                                    //     Text("42",
-                                                    //       style: TextStyle(
-                                                    //           fontSize: 18,
-                                                    //           fontWeight: FontWeight.w500,
-                                                    //           color: Colors.black
-                                                    //       ),
-                                                    //     ),
-                                                    //     SizedBox(width: 5,),
-                                                    //     Text("Total Projects",
-                                                    //       style: TextStyle(
-                                                    //           fontSize: 9,
-                                                    //           fontWeight: FontWeight.w500,
-                                                    //           color: Colors.black38
-                                                    //       ),
-                                                    //     ),
-                                                    //     SizedBox(width: 10,),
-                                                    //     Container(height: 15, width: 2, color: Colors.black45),
-                                                    //     SizedBox(width: 10,),
-                                                    //     Text("8",
-                                                    //       style: TextStyle(
-                                                    //           fontSize: 18,
-                                                    //           fontWeight: FontWeight.w500,
-                                                    //           color: Colors.black
-                                                    //       ),
-                                                    //     ),
-                                                    //     SizedBox(width: 5,),
-                                                    //     Text("In This City",
-                                                    //       style: TextStyle(
-                                                    //           fontSize: 9,
-                                                    //           fontWeight: FontWeight.w500,
-                                                    //           color: Colors.black38
-                                                    //       ),
-                                                    //     ),
-                                                    //   ],
-                                                    // ),
-                                                  ],
-                                                ),
-                                              )
-                                            ],
-                                          ),
-                                        ),
-                                      ],
-                                    ),
-                                    SizedBox(height: 10),
-                                    Row(
-                                      children: [
-                                        Expanded(
-                                          child: InkWell(
-                                            onTap: () async {
-                                              var response = await Api.post(url: Api.interestedProjects, parameter: {
-                                                'project_id': widget.property!['id'],
-                                                'type': 1,
-                                              });
-                                              if(!response['error']) {
-                                                HelperUtils.showSnackBarMessage(
-                                                    context, UiUtils.getTranslatedLabel(context, response['message']),
-                                                    type: MessageType.success, messageDuration: 3);
-                                                HelperUtils.showSnackBarMessage(
-                                                    context, UiUtils.getTranslatedLabel(context, 'Our Executive will reach you shortly!'),
-                                                    type: MessageType.success, messageDuration: 5);
-                                              }
-                                            },
-                                            child: Container(
-                                              padding: EdgeInsets.only(left: 20,right: 20,top: 5,bottom: 5),
-                                              decoration: BoxDecoration(
-                                                  color: Colors.white,
-                                                  borderRadius: BorderRadius.circular(30),
-                                                  border: Border.all(
-                                                      width: 1,
-                                                      color: Color(0xff2e8af9)
-                                                  )
-                                              ),
-                                              child: Center(
-                                                child: Text("Request a Callback",style: TextStyle(
-                                                    color: Color(0xff2e8af9),
-                                                    fontSize: 12,
-                                                    fontWeight: FontWeight.w500
-                                                ),),
-                                              ),
-                                            ),
-                                          ),
-                                        ),
-                                      ],
-                                    )
-                                  ],
-                                ),
-                              ),
-                            ),
+                            ),*/
+                            // Padding(
+                            //   padding: const EdgeInsets.only(top: 10, bottom: 10, right: 15, left: 15),
+                            //   child: Container(
+                            //     decoration: BoxDecoration(
+                            //       borderRadius: BorderRadius.circular(15),
+                            //       boxShadow: [
+                            //         const BoxShadow(
+                            //           color: Color(0xfff0f0f0),
+                            //           offset: Offset(0, 2),
+                            //           blurRadius: 2.0,
+                            //           spreadRadius: 2.0,
+                            //         ),
+                            //       ],
+                            //     ),
+                            //     padding: const EdgeInsets.only(left: 15,right: 15,top: 15, bottom: 15),
+                            //     child: Column(
+                            //       children: [
+                            //         Row(
+                            //           children: [
+                            //             Expanded(
+                            //               child: Row(
+                            //                 children: [
+                            //                   if(property!['customer'] != null)
+                            //                     GestureDetector(
+                            //                     onTap: () {
+                            //                       UiUtils.showFullScreenImage(context,
+                            //                           provider:
+                            //                           NetworkImage(property!['customer']['profile']));
+                            //                     },
+                            //
+                            //                     child: Container(
+                            //                         width: 80,
+                            //                         height: 80,
+                            //                         clipBehavior: Clip.antiAlias,
+                            //                         decoration: BoxDecoration(
+                            //                             color: Colors.grey.shade200,
+                            //                             border: Border.all(
+                            //                                 width: 1,
+                            //                                 color: const Color(0xffdfdfdf)
+                            //                             ),
+                            //                             borderRadius: BorderRadius.circular(50)),
+                            //                         child: ClipRRect(
+                            //                           borderRadius: BorderRadius.circular(50),
+                            //                           child: UiUtils.getImage(property!['customer']['profile'] ?? "",
+                            //                               fit: BoxFit.cover),
+                            //                         )
+                            //
+                            //                       //  CachedNetworkImage(
+                            //                       //   imageUrl: widget.propertyData?.customerProfile ?? "",
+                            //                       //   fit: BoxFit.cover,
+                            //                       // ),
+                            //
+                            //                     ),
+                            //                   ),
+                            //                   if(property!['customer'] != null)
+                            //                     const SizedBox(
+                            //                       width: 10,
+                            //                     ),
+                            //                   if(property!['customer'] != null)
+                            //                    Expanded(
+                            //                     child: Column(
+                            //                       crossAxisAlignment: CrossAxisAlignment.start,
+                            //                       children: [
+                            //                         Text(property!['customer']['name'] ?? "")
+                            //                             .size(17)
+                            //                             .color(const Color(0xff4c4c4c))
+                            //                             .bold(),
+                            //                         const SizedBox(height: 5,),
+                            //                         Row(
+                            //                           children: [
+                            //                             Image.asset("assets/NewPropertydetailscreen/__rara.png",width: 13,height: 13,fit: BoxFit.cover,),
+                            //                             const SizedBox(width: 2,),
+                            //                             const Text("RERA ID: ",
+                            //                               style: TextStyle(
+                            //                                   fontSize: 9,
+                            //                                   fontWeight: FontWeight.w500,
+                            //                                   color: Color(0xff009681)
+                            //                               ),
+                            //                             ),
+                            //                             const Text("TN/29/A/0049/2019",
+                            //                               style: TextStyle(
+                            //                                   fontSize: 9,
+                            //                                   fontWeight: FontWeight.w500,
+                            //                                   color: Colors.black
+                            //                               ),
+                            //                             ),
+                            //                           ],
+                            //                         ),
+                            //                         // SizedBox(height: 5,),
+                            //                         // Row(
+                            //                         //   children: [
+                            //                         //     Text("42",
+                            //                         //       style: TextStyle(
+                            //                         //           fontSize: 18,
+                            //                         //           fontWeight: FontWeight.w500,
+                            //                         //           color: Colors.black
+                            //                         //       ),
+                            //                         //     ),
+                            //                         //     SizedBox(width: 5,),
+                            //                         //     Text("Total Projects",
+                            //                         //       style: TextStyle(
+                            //                         //           fontSize: 9,
+                            //                         //           fontWeight: FontWeight.w500,
+                            //                         //           color: Colors.black38
+                            //                         //       ),
+                            //                         //     ),
+                            //                         //     SizedBox(width: 10,),
+                            //                         //     Container(height: 15, width: 2, color: Colors.black45),
+                            //                         //     SizedBox(width: 10,),
+                            //                         //     Text("8",
+                            //                         //       style: TextStyle(
+                            //                         //           fontSize: 18,
+                            //                         //           fontWeight: FontWeight.w500,
+                            //                         //           color: Colors.black
+                            //                         //       ),
+                            //                         //     ),
+                            //                         //     SizedBox(width: 5,),
+                            //                         //     Text("In This City",
+                            //                         //       style: TextStyle(
+                            //                         //           fontSize: 9,
+                            //                         //           fontWeight: FontWeight.w500,
+                            //                         //           color: Colors.black38
+                            //                         //       ),
+                            //                         //     ),
+                            //                         //   ],
+                            //                         // ),
+                            //                       ],
+                            //                     ),
+                            //                   )
+                            //                 ],
+                            //               ),
+                            //             ),
+                            //           ],
+                            //         ),
+                            //         const SizedBox(height: 10),
+                            //         Row(
+                            //           children: [
+                            //             Expanded(
+                            //               child: InkWell(
+                            //                 onTap: () async {
+                            //                   var response = await Api.post(url: Api.interestedProjects, parameter: {
+                            //                     'project_id': widget.property!['id'],
+                            //                     'type': 1,
+                            //                   });
+                            //                   if(!response['error']) {
+                            //                     HelperUtils.showSnackBarMessage(
+                            //                         context, UiUtils.getTranslatedLabel(context, response['message']),
+                            //                         type: MessageType.success, messageDuration: 3);
+                            //                     HelperUtils.showSnackBarMessage(
+                            //                         context, UiUtils.getTranslatedLabel(context, 'Our Executive will reach you shortly!'),
+                            //                         type: MessageType.success, messageDuration: 5);
+                            //                   }
+                            //                 },
+                            //                 child: Container(
+                            //                   padding: const EdgeInsets.only(left: 20,right: 20,top: 5,bottom: 5),
+                            //                   decoration: BoxDecoration(
+                            //                       color: Colors.white,
+                            //                       borderRadius: BorderRadius.circular(30),
+                            //                       border: Border.all(
+                            //                           width: 1,
+                            //                           color: const Color(0xff2e8af9)
+                            //                       )
+                            //                   ),
+                            //                   child: const Center(
+                            //                     child: Text("Request a Callback",style: TextStyle(
+                            //                         color: Color(0xff2e8af9),
+                            //                         fontSize: 12,
+                            //                         fontWeight: FontWeight.w500
+                            //                     ),),
+                            //                   ),
+                            //                 ),
+                            //               ),
+                            //             ),
+                            //           ],
+                            //         )
+                            //       ],
+                            //     ),
+                            //   ),
+                            // ),
                             // const SizedBox(
                             //   height: 18,
                             // ),
@@ -3379,365 +3561,682 @@ class PropertyDetailsState extends State<ProjectDetails> {
                             //         .contains(widget.property!['id']) &&
                             //     widget.property!['addedBy'].toString() !=
                             //         HiveUtils.getUserId())
-                              Padding(
-                                padding: const EdgeInsets.only(left: 15,right: 15,top: 15),
-                                child: ReportProjectButton(
-                                  propertyId: property!['id']!,
-                                  onSuccess: () {
-                                    setState(
-                                          () {},
-                                    );
-                                  },
-                                ),
-                                ),
+                            //   Padding(
+                            //     padding: const EdgeInsets.only(left: 15,right: 15,top: 15),
+                            //     child: ReportProjectButton(
+                            //       propertyId: property!['id']!,
+                            //       onSuccess: () {
+                            //         setState(
+                            //               () {},
+                            //         );
+                            //       },
+                            //     ),
+                            //     ),
                             //   )
                           ],
                         ),
-                      SizedBox(height: 10,),
-                      if(similarProjectsList.length > 0)
-                        Column(
-                        children: [
-                          Padding(
-                            padding: const EdgeInsets.only(left: 15,right: 15),
-                            child: Row(
-                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                              children: [
-                                Text("Similar Projects",
-                                  style: TextStyle(
-                                      color: Color(0xff333333),
-                                      fontSize: 16,
-                                      fontWeight: FontWeight.w500
-                                  ),
-                                ),
-
-                              ],
-                            ),
-                          ),
-                          SizedBox(height: 20,),
-                          Padding(
-                            padding: const EdgeInsets.only(left: 15),
-                            child: SingleChildScrollView(
-                                scrollDirection : Axis.horizontal,
-                                child:  Row(
-                                  mainAxisAlignment: MainAxisAlignment.start,
+                      const SizedBox(height: 10,),
+                      if (similarIsLoading)
+                        Container(
+                            color: const Color(0xffebf4ff),
+                          child: Column(
+                            children: [
+                              const SizedBox(height: 10),
+                              const Padding(
+                                padding: EdgeInsets.only(left: 15,right: 15),
+                                child: Row(
                                   children: [
-                                    for(int i = 0; i < similarProjectsList.length; i++)
-                                      InkWell(
-                                        onTap: () {
-                                          Navigator.push(
-                                            context,
-                                            MaterialPageRoute(builder: (context) =>
-                                                ProjectDetails(property: similarProjectsList[i], fromMyProperty: true,
-                                                    fromCompleteEnquiry: true, fromSlider: false, fromPropertyAddSuccess: true
-                                                )),
-                                          );
-                                        },
-                                        child: Container(
-                                          width: 230,
-                                          margin: EdgeInsets.only(right: 10),
-                                          decoration: BoxDecoration(
-                                              color: Colors.white,
-                                              borderRadius: BorderRadius.circular(15),
-                                              border: Border.all(
-                                                  width: 1,
-                                                  color: Color(0xffe0e0e0)
-                                              )
+                                    Text("Similar Projects",
+                                      style: TextStyle(
+                                          color: Color(0xff333333),
+                                          fontSize: 16,
+                                          fontWeight: FontWeight.w500
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                              ),
+                              Padding(
+                                padding: const EdgeInsets.only(left: 15,right: 15,top: 10),
+                                child: buildPropertiesShimmer(context, 2),
+                              ),
+                              const SizedBox(height: 10),
+                            ],
+                          ),
+                        )
+                     else if (similarProjectsList.isNotEmpty)
+                        Container(
+                          color: const Color(0xffebf4ff),
+                          child: Column(
+                            children: [
+                              const SizedBox(height: 15),
+                              const Padding(
+                                padding: EdgeInsets.symmetric(horizontal: 15),
+                                child: Row(
+                                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                                  children: [
+                                    Text(
+                                      "Similar Projects",
+                                      style: TextStyle(
+                                        color: Color(0xff333333),
+                                        fontSize: 16,
+                                        fontWeight: FontWeight.w500,
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                              ),
+                              const SizedBox(height: 20),
+                              SizedBox(
+                                height: 240,
+                                child: ListView.separated(
+                                  separatorBuilder: (context,index)=>const SizedBox(width:10),
+                                  padding: const EdgeInsets.symmetric(horizontal: 15),
+                                  scrollDirection: Axis.horizontal,
+                                  itemCount: similarProjectsList.length.clamp(0, 10),
+                                  itemBuilder: (context, index) {
+                                    final project = similarProjectsList[index];
+                                    return InkWell(
+                                      onTap: () {
+                                        Navigator.push(
+                                          context,
+                                          MaterialPageRoute(
+                                            builder: (context) => ProjectDetails(
+                                              property: project,
+                                              fromMyProperty: true,
+                                              fromCompleteEnquiry: true,
+                                              fromSlider: false,
+                                              fromPropertyAddSuccess: true,
+                                            ),
                                           ),
-                                          child: Column(
-                                            children: [
-                                              Stack(
-                                                children: [
-                                                  ClipRRect(
-                                                    borderRadius: BorderRadius.only(
-                                                      topRight: Radius.circular(15),
-                                                      topLeft:Radius.circular(15),
-                                                    ),
-                                                    // child: Image.asset("assets/propertylist/1.png",width: double.infinity,fit: BoxFit.cover,height: 150,),
-                                                    child: UiUtils.getImage(
-                                                      similarProjectsList[i]['image'] ?? "",
-                                                      width: double.infinity,fit: BoxFit.cover,height: 150,
-                                                    ),
+                                        );
+                                      },
+                                      child: Container(
+                                        width: 180,
+                                        decoration: BoxDecoration(
+                                          color: Colors.white,
+                                          borderRadius: BorderRadius.circular(15),
+                                          border: Border.all(
+                                            width: 1,
+                                            color: const Color(0xffe0e0e0),
+                                          ),
+                                        ),
+                                        child: Column(
+                                          children: [
+                                            Stack(
+                                              children: [
+                                                ClipRRect(
+                                                  borderRadius: const BorderRadius.only(
+                                                    topRight: Radius.circular(15),
+                                                    topLeft: Radius.circular(15),
                                                   ),
+                                                  child: UiUtils.getImage(
+                                                    project['image'] ?? "",
+                                                    width: double.infinity,
+                                                    fit: BoxFit.cover,
+                                                    height: 130,
+                                                  ),
+                                                ),
+                                                Positioned(
+                                                  right: 8,
+                                                  top: 8,
+                                                  child: Row(
+                                                    children: [
+                                                      if(similarProjectsList![index]['gallary_images'] != null)
+                                                        ...[
+                                                          InkWell(
+                                                            onTap: () {
+                                                              Navigator.push(context,
+                                                                  BlurredRouter(
+                                                                    builder: (context) {
+                                                                      return AllGallaryImages(
+                                                                          images: similarProjectsList![index]['gallary_images'] ?? [],
+                                                                          isProject: true);
+                                                                    },
+                                                                  ));
+                                                            },
+                                                            child: Container(
+                                                              width: 35,
+                                                              height: 28,
+                                                              decoration: BoxDecoration(
+                                                                color: const Color(0xff000000).withOpacity(0.35),
+                                                                borderRadius: BorderRadius.circular(8),
+                                                                border: Border.all(width: 1, color: const Color(0xffe0e0e0)),
+                                                                boxShadow: const [
+                                                                  BoxShadow(
+                                                                    color: Color.fromARGB(12, 0, 0, 0),
+                                                                    offset: Offset(0, 2),
+                                                                    blurRadius: 15,
+                                                                    spreadRadius: 0,
+                                                                  )
+                                                                ],
+                                                              ),
+                                                              child: Row(
+                                                                mainAxisAlignment: MainAxisAlignment.center,
+                                                                children: [
+                                                                  const Icon(
+                                                                      Icons.image,
+                                                                      color: Color(0xffe0e0e0),
+                                                                      size: 15
+                                                                  ),
+                                                                  const SizedBox(width: 3,),
+                                                                  Text('${similarProjectsList[index]['gallary_images']!.length}',
+                                                                    style: const TextStyle(
+                                                                        color: Color(0xffe0e0e0),
+                                                                        fontSize: 10
+                                                                    ),),
+                                                                ],
+                                                              ),
+                                                            ),
+                                                          ),
+                                                          const SizedBox(width: 8,),
+                                                        ],
+                                                      InkWell(
+                                                        onTap: () {
+                                                          GuestChecker.check(onNotGuest: () async {
+                                                            setState(() {
+                                                              likeLoadingg[index] = true;
+                                                            });
+                                                            var body = {
+                                                              "type": similarProjectsList[index]['is_favourite'] == 1 ? 0 : 1,
+                                                              "project_id": similarProjectsList[index]['id']
+                                                            };
+                                                            var response = await Api.post(
+                                                                url: Api.addFavProject, parameter: body);
+                                                            if (!response['error']) {
+                                                              similarProjectsList[index]['is_favourite'] = (similarProjectsList[index]['is_favourite'] == 1 ? 0 : 1);
+                                                              setState(() {
+                                                                likeLoadingg[index] = false;
+                                                              });
 
-                                                  // Positioned(
-                                                  //   top: 10,
-                                                  //   right: 10,
-                                                  //   child: LikeButtonWidget(
-                                                  //     onStateChange:
-                                                  //         (AddToFavoriteCubitState state) {
-                                                  //       if (state is AddToFavoriteCubitInProgress) {
-                                                  //         favoriteInProgress = true;
-                                                  //         setState(
-                                                  //               () {},
-                                                  //         );
-                                                  //       } else {
-                                                  //         favoriteInProgress = false;
-                                                  //         setState(
-                                                  //               () {},
-                                                  //         );
-                                                  //       }
-                                                  //     },
-                                                  //     property: PropertyModel.fromMap(similarPropertiesList[i]!),
-                                                  //   ),
-                                                  // ),
-                                                ],
-                                              ),
-                                              Padding(
-                                                padding: const EdgeInsets.only(left:10,right: 10),
-                                                child: Column(
-                                                  crossAxisAlignment: CrossAxisAlignment.start,
-                                                  children: [
-                                                    SizedBox(height: 8,),
-                                                    Text("${similarProjectsList[i]['title']}",
-                                                      maxLines: 1,
-                                                      overflow: TextOverflow.ellipsis,
-                                                      style: TextStyle(
-                                                          color: Color(0xff333333),
-                                                          fontSize: 12.5,
-                                                          fontWeight: FontWeight.w500
-                                                      ),
-                                                    ),
-                                                    SizedBox(height: 6,),
-                                                    Row(
-                                                      children: [
-                                                        Image.asset("assets/Home/__location.png",width:15,fit: BoxFit.cover,height: 15,),
-                                                        SizedBox(width: 5,),
-                                                        Expanded(
-                                                          child: Text("${similarProjectsList[i]['address']}",
-                                                            maxLines: 1,
-                                                            overflow: TextOverflow.ellipsis,
-                                                            style: TextStyle(
-                                                                color: Color(0xffa2a2a2),
-                                                                fontSize: 10.5,
-                                                                fontWeight: FontWeight.w400
+                                                            }
+                                                          });
+                                                        },
+                                                        child: Container(
+                                                          width: 32,
+                                                          height: 30,
+                                                          decoration: BoxDecoration(
+                                                            color: context.color.secondaryColor,
+                                                            shape: BoxShape.circle,
+                                                            boxShadow: const [
+                                                              BoxShadow(
+                                                                color:
+                                                                Color.fromARGB(12, 0, 0, 0),
+                                                                offset: Offset(0, 2),
+                                                                blurRadius: 15,
+                                                                spreadRadius: 0,
+                                                              )
+                                                            ],
+                                                          ),
+                                                          child: Container(
+                                                            width: 32,
+                                                            height: 32,
+                                                            decoration: BoxDecoration(
+                                                              color: context.color.primaryColor,
+                                                              shape: BoxShape.circle,
+                                                              boxShadow: const [
+                                                                BoxShadow(
+                                                                    color: Color.fromARGB(33, 0, 0, 0),
+                                                                    offset: Offset(0, 2),
+                                                                    blurRadius: 15,
+                                                                    spreadRadius: 0)
+                                                              ],
+                                                            ),
+                                                            child: Center(
+                                                                child:
+                                                                (likeLoadingg[index])
+                                                                    ? UiUtils.progress(width: 20, height: 20)
+                                                                    : similarProjectsList[index]['is_favourite'] == 1
+                                                                    ?
+                                                                UiUtils.getSvg(
+                                                                  AppIcons.like_fill,
+                                                                  color: context.color.tertiaryColor,
+                                                                )
+                                                                    : UiUtils.getSvg(AppIcons.like,
+                                                                    color: context.color.tertiaryColor)
                                                             ),
                                                           ),
                                                         ),
-                                                      ],
+                                                      ),
+
+                                                    ],
+                                                  ),
+                                                ),
+                                              ],
+                                            ),
+                                            Padding(
+                                              padding: const EdgeInsets.symmetric(horizontal: 10),
+                                              child: Column(
+                                                crossAxisAlignment: CrossAxisAlignment.start,
+                                                children: [
+                                                  const SizedBox(height: 8),
+                                                  Text(
+                                                    project['title'] ?? '',
+                                                    maxLines: 1,
+                                                    overflow: TextOverflow.ellipsis,
+                                                    style: const TextStyle(
+                                                      color: Color(0xff333333),
+                                                      fontSize: 12.5,
+                                                      fontWeight: FontWeight.w500,
                                                     ),
-                                                    SizedBox(height: 6,),
+                                                  ),
+                                                  const SizedBox(height: 6),
+                                                  if(similarProjectsList[index]['min_price'] == null)
                                                     Row(
                                                       children: [
-                                                        Text("Rs. ${similarProjectsList[i]['project_details'][0]['avg_price']}",
+                                                        Text(
+                                                          '₹${similarProjectsList[index]['project_details'].length > 0 ? formatAmount(similarProjectsList[index]['project_details'][0]['avg_price'] ?? 0) : 0}'
+                                                              .toString(),
                                                           maxLines: 1,
                                                           overflow: TextOverflow.ellipsis,
-                                                          style: TextStyle(
+                                                          style: const TextStyle(
                                                               color: Color(0xff333333),
-                                                              fontSize: 11,
+                                                              fontSize: 12,
+                                                              fontFamily: 'Robato',
                                                               fontWeight: FontWeight.w500
                                                           ),
                                                         ),
-                                                        SizedBox(width: 15,),
-                                                        // Container(width: 1,height: 10,color: Color(0xff7d7d7d),),
-                                                        // SizedBox(width: 5,),
-                                                        // Text("952 sqft",
-                                                        //   maxLines: 1,
-                                                        //   overflow: TextOverflow.ellipsis,
-                                                        //   style: TextStyle(
-                                                        //       color: Color(0xff767676),
-                                                        //       fontSize: 11,
-                                                        //       fontWeight: FontWeight.w400
-                                                        //   ),
-                                                        // ),
+                                                        Padding(
+                                                          padding: const EdgeInsets.symmetric(horizontal: 8.0),
+                                                          child: Container(
+                                                            height: 12,
+                                                            width: 2,
+                                                            color: Colors.black54,
+                                                          ),
+                                                        ),
+                                                        Text(
+                                                          '${similarProjectsList[index]['project_details'].length > 0 ? formatAmount(similarProjectsList[index]['project_details'][0]['size'] ?? 0) : 0} Sq.ft'
+                                                              .toString(),
+                                                          maxLines: 1,
+                                                          overflow: TextOverflow.ellipsis,
+                                                          style: const TextStyle(
+                                                              color: Color(0xffa2a2a2),
+                                                              fontSize: 9,
+                                                              fontWeight: FontWeight.w500
+                                                          ),
+                                                        ),
                                                       ],
                                                     ),
-                                                    SizedBox(height: 6,),
-                                                    Text("${similarProjectsList[i]['category']['category']}",
-                                                      maxLines: 1,
-                                                      overflow: TextOverflow.ellipsis,
-                                                      style: TextStyle(
-                                                          color: Color(0xffa2a2a2),
-                                                          fontSize: 11,
-                                                          fontWeight: FontWeight.w400
-                                                      ),
-                                                    ),
-                                                    SizedBox(height: 8,),
-                                                  ],
-                                                ),
-                                              )
-                                            ],
-                                          ),
-                                        ),
-                                      ),
-                                  ],
-                                )
-                            ),
-                          ),
-                          SizedBox(height: 20,),
-                        ],
-                      ),
-                      if(agentProjectsList.length > 0)
-                        Column(
-                        children: [
-                          Padding(
-                            padding: const EdgeInsets.only(left: 15,right: 15),
-                            child: Row(
-                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                              children: [
-                                Text("Other Project By Agent",
-                                  style: TextStyle(
-                                      color: Color(0xff333333),
-                                      fontSize: 16,
-                                      fontWeight: FontWeight.w500
-                                  ),
-                                ),
-
-                              ],
-                            ),
-                          ),
-                          SizedBox(height: 20,),
-                          Padding(
-                            padding: const EdgeInsets.only(left: 15),
-                            child: SingleChildScrollView(
-                                scrollDirection : Axis.horizontal,
-                                child:  Row(
-                                  mainAxisAlignment: MainAxisAlignment.start,
-                                  children: [
-                                    for(int i = 0; i < agentProjectsList.length; i++)
-                                      InkWell(
-                                        onTap: () {
-                                          Navigator.push(
-                                            context,
-                                            MaterialPageRoute(builder: (context) =>
-                                                ProjectDetails(property: agentProjectsList[i], fromMyProperty: true,
-                                                    fromCompleteEnquiry: true, fromSlider: false, fromPropertyAddSuccess: true
-                                                )),
-                                          );
-                                        },
-                                        child: Container(
-                                          width: 230,
-                                          margin: EdgeInsets.only(right: 10),
-                                          decoration: BoxDecoration(
-                                              color: Colors.white,
-                                              borderRadius: BorderRadius.circular(15),
-                                              border: Border.all(
-                                                  width: 1,
-                                                  color: Color(0xffe0e0e0)
-                                              )
-                                          ),
-                                          child: Column(
-                                            children: [
-                                              Stack(
-                                                children: [
-                                                  ClipRRect(
-                                                    borderRadius: BorderRadius.only(
-                                                      topRight: Radius.circular(15),
-                                                      topLeft:Radius.circular(15),
-                                                    ),
-                                                    // child: Image.asset("assets/propertylist/1.png",width: double.infinity,fit: BoxFit.cover,height: 150,),
-                                                    child: UiUtils.getImage(
-                                                      agentProjectsList[i]['image'] ?? "",
-                                                      width: double.infinity,fit: BoxFit.cover,height: 150,
-                                                    ),
-                                                  ),
-
-                                                  // Positioned(
-                                                  //   top: 10,
-                                                  //   right: 10,
-                                                  //   child: LikeButtonWidget(
-                                                  //     onStateChange:
-                                                  //         (AddToFavoriteCubitState state) {
-                                                  //       if (state is AddToFavoriteCubitInProgress) {
-                                                  //         favoriteInProgress = true;
-                                                  //         setState(
-                                                  //               () {},
-                                                  //         );
-                                                  //       } else {
-                                                  //         favoriteInProgress = false;
-                                                  //         setState(
-                                                  //               () {},
-                                                  //         );
-                                                  //       }
-                                                  //     },
-                                                  //     property: PropertyModel.fromMap(similarPropertiesList[i]!),
-                                                  //   ),
-                                                  // ),
-                                                ],
-                                              ),
-                                              Padding(
-                                                padding: const EdgeInsets.only(left:10,right: 10),
-                                                child: Column(
-                                                  crossAxisAlignment: CrossAxisAlignment.start,
-                                                  children: [
-                                                    SizedBox(height: 8,),
-                                                    Text("${agentProjectsList[i]['title']}",
-                                                      maxLines: 1,
-                                                      overflow: TextOverflow.ellipsis,
-                                                      style: TextStyle(
-                                                          color: Color(0xff333333),
-                                                          fontSize: 12.5,
-                                                          fontWeight: FontWeight.w500
-                                                      ),
-                                                    ),
-                                                    SizedBox(height: 6,),
-                                                    Row(
-                                                      children: [
-                                                        Image.asset("assets/Home/__location.png",width:15,fit: BoxFit.cover,height: 15,),
-                                                        SizedBox(width: 5,),
-                                                        Expanded(
-                                                          child: Text("${agentProjectsList[i]['address']}",
+                                                  if(similarProjectsList[index]['min_price'] != null)
+                                                    ...[
+                                                      Row(
+                                                        children: [
+                                                          Text(
+                                                            '₹${formatAmount(similarProjectsList[index]['min_price'] ?? 0)} - ${formatAmount(similarProjectsList[index]['max_price'] ?? 0)}'
+                                                                .toString(),
                                                             maxLines: 1,
                                                             overflow: TextOverflow.ellipsis,
-                                                            style: TextStyle(
-                                                                color: Color(0xffa2a2a2),
-                                                                fontSize: 10.5,
-                                                                fontWeight: FontWeight.w400
+                                                            style: const TextStyle(
+                                                                color: Color(0xff333333),
+                                                                fontSize: 12,
+                                                                fontFamily: 'Robato',
+                                                                fontWeight: FontWeight.w500
+                                                            ),
+                                                          ),
+                                                        ],
+                                                      ),
+                                                    ],
+                                                  const SizedBox(height: 6),
+                                                  Row(
+                                                    children: [
+                                                      Image.asset(
+                                                        "assets/Home/__location.png",
+                                                        width: 15,
+                                                        fit: BoxFit.cover,
+                                                        height: 15,
+                                                      ),
+                                                      const SizedBox(width: 5),
+                                                      Expanded(
+                                                        child: Text(
+                                                          project['address'] ?? '',
+                                                          maxLines: 1,
+                                                          overflow: TextOverflow.ellipsis,
+                                                          style: const TextStyle(
+                                                            color: Color(0xffa2a2a2),
+                                                            fontSize: 10.5,
+                                                            fontWeight: FontWeight.w400,
+                                                          ),
+                                                        ),
+                                                      ),
+                                                    ],
+                                                  ),
+
+
+
+                                                  const SizedBox(height: 6),
+                                                  Text(
+                                                    "${similarProjectsList[index]['project_details']?.isNotEmpty == true ? similarProjectsList[index]['project_details'][0]['project_status_name'] ?? '' : ''}",
+                                                    maxLines: 1,
+                                                    overflow: TextOverflow.ellipsis,
+                                                    style: const TextStyle(
+                                                      color: Color(0xffa2a2a2),
+                                                      fontSize: 11,
+                                                      fontWeight: FontWeight.w400,
+                                                    ),
+                                                  ),
+                                                ],
+                                              ),
+                                            )
+                                          ],
+                                        ),
+                                      ),
+                                    );
+                                  },
+                                ),
+                              ),
+                              const SizedBox(height: 20),
+                            ],
+                          ),
+                        ),
+
+
+                      if (agentPropertiesIsLoading )
+                        Container(
+                          color: const Color(0xffebf4ff),
+                          child: Column(
+                            children: [
+                              const SizedBox(height: 10),
+                              const Padding(
+                                padding: EdgeInsets.only(left: 15,right: 15,top: 15),
+                                child: Row(
+                                  children: [
+                                    Text("Other Project By Agent",
+                                      style: TextStyle(
+                                          color: Color(0xff333333),
+                                          fontSize: 16,
+                                          fontWeight: FontWeight.w500
+                                      ),
+                                    ),
+
+                                  ],
+                                ),
+                              ),
+                              Padding(
+                                padding: const EdgeInsets.only(left: 15,right: 15,top: 10),
+                                child: buildPropertiesShimmer(context, 2),
+                              ),
+                              const SizedBox(height: 20),
+                            ],
+                          ),
+                        )
+                    else if (agentProjectsList.isNotEmpty)
+                        Container(
+                          color: const Color(0xffebf4ff),
+                          child: Column(
+                            children: [
+                              const Padding(
+                                padding: EdgeInsets.only(left: 15, right: 15),
+                                child: Row(
+                                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                                  children: [
+                                    Text(
+                                      "Other Project By Agent",
+                                      style: TextStyle(
+                                          color: Color(0xff333333),
+                                          fontSize: 16,
+                                          fontWeight: FontWeight.w500),
+                                    ),
+                                  ],
+                                ),
+                              ),
+                              const SizedBox(height: 20),
+                              SizedBox(
+                                height: 240,
+                                child: ListView.separated(
+                                  separatorBuilder: (context,index)=>const SizedBox(width:10),
+                                  padding: const EdgeInsets.symmetric(horizontal: 15),
+                                  scrollDirection: Axis.horizontal,
+                                  itemCount: agentProjectsList.length.clamp(0, 10),
+                                  itemBuilder: (context, i) {
+                                    return InkWell(
+                                      onTap: () {
+                                        Navigator.push(
+                                          context,
+                                          MaterialPageRoute(
+                                            builder: (context) => ProjectDetails(
+                                              property: agentProjectsList[i],
+                                              fromMyProperty: true,
+                                              fromCompleteEnquiry: true,
+                                              fromSlider: false,
+                                              fromPropertyAddSuccess: true,
+                                            ),
+                                          ),
+                                        );
+                                      },
+                                      child: Container(
+                                        width: 180,
+                                        decoration: BoxDecoration(
+                                          color: Colors.white,
+                                          borderRadius: BorderRadius.circular(15),
+                                          border: Border.all(
+                                            width: 1,
+                                            color: const Color(0xffe0e0e0),
+                                          ),
+                                        ),
+                                        child: Column(
+                                          children: [
+                                            Stack(
+                                              children: [
+                                                ClipRRect(
+                                                  borderRadius: const BorderRadius.only(
+                                                    topRight: Radius.circular(15),
+                                                    topLeft: Radius.circular(15),
+                                                  ),
+                                                  child: UiUtils.getImage(
+                                                    agentProjectsList[i]['image'] ?? "",
+                                                    width: double.infinity,
+                                                    fit: BoxFit.cover,
+                                                    height: 130,
+                                                  ),
+                                                ),
+                                                Positioned(
+                                                  right: 8,
+                                                  top: 8,
+                                                  child: Row(
+                                                    children: [
+                                                      if(agentProjectsList[i]['gallary_images'] != null)
+                                                        ...[
+                                                          InkWell(
+                                                            onTap: () {
+                                                              Navigator.push(context,
+                                                                  BlurredRouter(
+                                                                    builder: (context) {
+                                                                      return AllGallaryImages(
+                                                                          images: agentProjectsList[i]['gallary_images'] ?? [],
+                                                                          isProject: true);
+                                                                    },
+                                                                  ));
+                                                            },
+                                                            child: Container(
+                                                              width: 35,
+                                                              height: 28,
+                                                              decoration: BoxDecoration(
+                                                                color: const Color(0xff000000).withOpacity(0.35),
+                                                                borderRadius: BorderRadius.circular(8),
+                                                                border: Border.all(width: 1, color: const Color(0xffe0e0e0)),
+                                                                boxShadow: const [
+                                                                  BoxShadow(
+                                                                    color: Color.fromARGB(12, 0, 0, 0),
+                                                                    offset: Offset(0, 2),
+                                                                    blurRadius: 15,
+                                                                    spreadRadius: 0,
+                                                                  )
+                                                                ],
+                                                              ),
+                                                              child: Row(
+                                                                mainAxisAlignment: MainAxisAlignment.center,
+                                                                children: [
+                                                                  const Icon(
+                                                                      Icons.image,
+                                                                      color: Color(0xffe0e0e0),
+                                                                      size: 15
+                                                                  ),
+                                                                  const SizedBox(width: 3,),
+                                                                  Text('${agentProjectsList[i]['gallary_images']!.length}',
+                                                                    style: const TextStyle(
+                                                                        color: Color(0xffe0e0e0),
+                                                                        fontSize: 10
+                                                                    ),),
+                                                                ],
+                                                              ),
+                                                            ),
+                                                          ),
+                                                          const SizedBox(width: 8,),
+                                                        ],
+                                                      InkWell(
+                                                        onTap: () {
+                                                          GuestChecker.check(onNotGuest: () async {
+                                                            setState(() {
+                                                              likeLoadingg2[i] = true;
+                                                            });
+                                                            var body = {
+                                                              "type": agentProjectsList[i]['is_favourite'] == 1 ? 0 : 1,
+                                                              "project_id": agentProjectsList[i]['id']
+                                                            };
+                                                            var response = await Api.post(
+                                                                url: Api.addFavProject, parameter: body);
+                                                            if (!response['error']) {
+                                                              agentProjectsList[i]['is_favourite'] = (agentProjectsList[i]['is_favourite'] == 1 ? 0 : 1);
+                                                              setState(() {
+                                                                likeLoadingg2[i] = false;
+                                                              });
+
+                                                            }
+                                                          });
+                                                        },
+                                                        child: Container(
+                                                          width: 32,
+                                                          height: 30,
+                                                          decoration: BoxDecoration(
+                                                            color: context.color.secondaryColor,
+                                                            shape: BoxShape.circle,
+                                                            boxShadow: const [
+                                                              BoxShadow(
+                                                                color:
+                                                                Color.fromARGB(12, 0, 0, 0),
+                                                                offset: Offset(0, 2),
+                                                                blurRadius: 15,
+                                                                spreadRadius: 0,
+                                                              )
+                                                            ],
+                                                          ),
+                                                          child: Container(
+                                                            width: 32,
+                                                            height: 32,
+                                                            decoration: BoxDecoration(
+                                                              color: context.color.primaryColor,
+                                                              shape: BoxShape.circle,
+                                                              boxShadow: const [
+                                                                BoxShadow(
+                                                                    color: Color.fromARGB(33, 0, 0, 0),
+                                                                    offset: Offset(0, 2),
+                                                                    blurRadius: 15,
+                                                                    spreadRadius: 0)
+                                                              ],
+                                                            ),
+                                                            child: Center(
+                                                                child:
+                                                                (likeLoadingg2[i])
+                                                                    ? UiUtils.progress(width: 20, height: 20)
+                                                                    : agentProjectsList[i]['is_favourite'] == 1
+                                                                    ?
+                                                                UiUtils.getSvg(
+                                                                  AppIcons.like_fill,
+                                                                  color: context.color.tertiaryColor,
+                                                                )
+                                                                    : UiUtils.getSvg(AppIcons.like,
+                                                                    color: context.color.tertiaryColor)
                                                             ),
                                                           ),
                                                         ),
-                                                      ],
-                                                    ),
-                                                    SizedBox(height: 6,),
-                                                    Row(
-                                                      children: [
-                                                        Text("Rs. ${agentProjectsList[i]['project_details'][0]['avg_price']}",
+                                                      ),
+
+                                                    ],
+                                                  ),
+                                                ),
+                                              ],
+                                            ),
+                                            Padding(
+                                              padding: const EdgeInsets.only(left: 10, right: 10),
+                                              child: Column(
+                                                crossAxisAlignment: CrossAxisAlignment.start,
+                                                children: [
+                                                  const SizedBox(height: 8),
+                                                  Text(
+                                                    "${agentProjectsList[i]['title']}",
+                                                    maxLines: 1,
+                                                    overflow: TextOverflow.ellipsis,
+                                                    style: const TextStyle(
+                                                        color: Color(0xff333333),
+                                                        fontSize: 12.5,
+                                                        fontWeight: FontWeight.w500),
+                                                  ),
+
+                                                  const SizedBox(height: 6),
+                                                  Row(
+                                                    children: [
+                                                      Text(
+                                                        formatAmount(agentProjectsList[i]['project_details'][0]['avg_price']).formatAmount(prefix: true,),
+                                                        maxLines: 1,
+                                                        overflow: TextOverflow.ellipsis,
+                                                        style: const TextStyle(
+                                                            color: Color(0xff333333),
+                                                            fontSize: 11,
+                                                            fontFamily: 'Robato',
+                                                            fontWeight: FontWeight.w500),
+                                                      ),
+                                                      const SizedBox(width: 15),
+                                                    ],
+                                                  ),
+                                                  const SizedBox(height: 6),
+                                                  Row(
+                                                    children: [
+                                                      Image.asset(
+                                                        "assets/Home/__location.png",
+                                                        width: 15,
+                                                        fit: BoxFit.cover,
+                                                        height: 15,
+                                                      ),
+                                                      const SizedBox(width: 5),
+                                                      Expanded(
+                                                        child: Text(
+                                                          "${agentProjectsList[i]['address']}",
                                                           maxLines: 1,
                                                           overflow: TextOverflow.ellipsis,
-                                                          style: TextStyle(
-                                                              color: Color(0xff333333),
-                                                              fontSize: 11,
-                                                              fontWeight: FontWeight.w500
-                                                          ),
+                                                          style: const TextStyle(
+                                                              color: Color(0xffa2a2a2),
+                                                              fontSize: 10.5,
+                                                              fontWeight: FontWeight.w400),
                                                         ),
-                                                        SizedBox(width: 15,),
-                                                        // Container(width: 1,height: 10,color: Color(0xff7d7d7d),),
-                                                        // SizedBox(width: 5,),
-                                                        // Text("952 sqft",
-                                                        //   maxLines: 1,
-                                                        //   overflow: TextOverflow.ellipsis,
-                                                        //   style: TextStyle(
-                                                        //       color: Color(0xff767676),
-                                                        //       fontSize: 11,
-                                                        //       fontWeight: FontWeight.w400
-                                                        //   ),
-                                                        // ),
-                                                      ],
-                                                    ),
-                                                    SizedBox(height: 6,),
-                                                    Text("${agentProjectsList[i]['category'] != null ? agentProjectsList[i]['category']['category'] : ''}",
-                                                      maxLines: 1,
-                                                      overflow: TextOverflow.ellipsis,
-                                                      style: TextStyle(
-                                                          color: Color(0xffa2a2a2),
-                                                          fontSize: 11,
-                                                          fontWeight: FontWeight.w400
                                                       ),
+                                                    ],
+                                                  ),
+                                                  const SizedBox(height: 6),
+                                                  Text(
+                                                    "${agentProjectsList[i]['project_details']?.isNotEmpty == true ? agentProjectsList[i]['project_details'][0]['project_status_name'] ?? '' : ''}",
+                                                    maxLines: 1,
+                                                    overflow: TextOverflow.ellipsis,
+                                                    style: const TextStyle(
+                                                      color: Color(0xffa2a2a2),
+                                                      fontSize: 11,
+                                                      fontWeight: FontWeight.w400,
                                                     ),
-                                                    SizedBox(height: 8,),
-                                                  ],
-                                                ),
-                                              )
-                                            ],
-                                          ),
+                                                  ),
+                                                  const SizedBox(height: 8),
+                                                ],
+                                              ),
+                                            ),
+                                          ],
                                         ),
                                       ),
-                                  ],
-                                )
-                            ),
+                                    );
+                                  },
+                                ),
+                              ),
+                              const SizedBox(height: 20),
+                            ],
                           ),
-                          SizedBox(height: 20,),
-                        ],
-                      ),
+                        ),
                       //here
                       SizedBox(
                         height: 20.rh(context),
@@ -3751,7 +4250,78 @@ class PropertyDetailsState extends State<ProjectDetails> {
     );
   }
 
+  Widget buildPropertiesShimmer(BuildContext context, int count) {
+    return GridView.builder(
+      shrinkWrap: true,
+      itemCount: count,
+      physics: const NeverScrollableScrollPhysics(),
+      gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+        crossAxisCount: 2,
+        crossAxisSpacing: 8,
+        mainAxisSpacing: 8,
+        childAspectRatio: MediaQuery.sizeOf(context).height / 950,
+      ),
 
+      itemBuilder: (context, index) {
+        return Container(
+          width: double.maxFinite,
+          decoration: BoxDecoration(
+              color: Colors.white,
+              borderRadius: BorderRadius.circular(15),
+              border: Border.all(
+                  width: 1,
+                  color: Color(0xffe0e0e0)
+              )
+          ),
+          child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: <Widget>[
+                const ClipRRect(
+                  clipBehavior: Clip.antiAliasWithSaveLayer,
+                  borderRadius: BorderRadius.only(
+                    topRight: Radius.circular(15),
+                    topLeft:Radius.circular(15),
+                  ),
+                  child: CustomShimmer(width: double.infinity,height: 110,),
+                ),
+                SizedBox(height: 8,),
+                LayoutBuilder(builder: (context, c) {
+                  return Padding(
+                    padding: const EdgeInsets.only(left:10,right: 10),
+                    child: Column(
+                      mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: <Widget>[
+
+                        CustomShimmer(
+                          height: 14,
+                          width: c.maxWidth - 50,
+                        ),
+                        SizedBox(height: 5,),
+                        const CustomShimmer(
+                          height: 13,
+                        ),
+                        SizedBox(height: 5,),
+                        CustomShimmer(
+                          height: 12,
+                          width: c.maxWidth / 1.2,
+                        ),
+                        SizedBox(height: 8,),
+                        Align(
+                          alignment: Alignment.bottomLeft,
+                          child: CustomShimmer(
+                            width: c.maxWidth / 4,
+                          ),
+                        ),
+                      ],
+                    ),
+                  );
+                })
+              ]),
+        );
+      },
+    );
+  }
 
 
   Widget advertismentLable() {
@@ -3810,6 +4380,205 @@ class PropertyDetailsState extends State<ProjectDetails> {
   //     },
   //   );
   // }
+
+  Widget ReportPropertyDialog({required int propertyID}) {
+    List<Map<String, dynamic>> reportCheckboxListWithOther = List.from(reportCheckboxList)
+      ..add({'id': 0, 'reason': 'Other'});
+
+    TextEditingController controller = TextEditingController();
+    String errorText = '';
+
+    return StatefulBuilder(
+      builder: (context, setState) {
+        return Container(
+          width: double.maxFinite,
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              const SizedBox(height: 10),
+              Center(
+                child: Container(
+                  height: 6,
+                  width: 35,
+                  decoration: BoxDecoration(
+                    color: Colors.grey.withOpacity(0.5),
+                    borderRadius: BorderRadius.circular(20),
+                  ),
+                ),
+              ),
+              Padding(
+                padding: const EdgeInsets.all(15),
+                child: Column(
+                  mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                  children: [
+                    const Text(
+                      "Report Property",
+                      style: TextStyle(fontSize: 18, fontWeight: FontWeight.w600),
+                    ),
+                    const SizedBox(height: 10),
+                    Row(
+                      children: [
+                        const Text(
+                          "Reasons",
+                          style: TextStyle(fontSize: 14, fontWeight: FontWeight.w600),
+                        ),
+                      ],
+                    ),
+                    const SizedBox(height: 10),
+                    Container(
+                      decoration: BoxDecoration(color: Color(0xfff4f5f4),borderRadius: BorderRadius.circular(10)),
+                      child: ListView.builder(
+                        padding: EdgeInsets.all(0),
+                        scrollDirection: Axis.vertical,
+                        shrinkWrap: true,
+                        itemCount: reportCheckboxListWithOther.length,
+                        itemBuilder: (context, index) {
+                          final reason = reportCheckboxListWithOther[index];
+                          final reasonId = reason['id'];
+                          return Container(
+                            alignment: Alignment.centerLeft,
+                            height: 45,
+                            child: CheckboxListTile(
+                              title: Text(
+                                reason['reason'] ?? '',
+                                style: TextStyle(fontSize: 14),
+                              ),
+                              value: selectedPropertyId == reasonId,
+                              onChanged: (bool? value) {
+                                setState(() {
+                                  if (value == true) {
+                                    selectedPropertyId = reasonId;
+                                  } else {
+                                    selectedPropertyId = null;
+                                  }
+                                  errorText = '';
+                                });
+                              },
+                            ),
+                          );
+                        },
+                      ),
+                    ),
+                    const SizedBox(height: 10),
+                    if (selectedPropertyId == 0)
+                      Container(
+                        alignment: Alignment.centerLeft,
+                        padding: EdgeInsets.symmetric(horizontal: 10),
+                        height: 45,
+                        width: MediaQuery.of(context).size.width,
+                        decoration: BoxDecoration(
+                          borderRadius: BorderRadius.circular(10),
+                          border: Border.all(color: Colors.grey),
+                        ),
+                        child: TextFormField(
+                          controller: controller,
+                          style: TextStyle(),
+                          decoration: const InputDecoration(
+                            border: InputBorder.none,
+                            hintText: "Write your reason here",
+                            hintStyle: TextStyle(fontSize: 13),
+                            contentPadding: EdgeInsets.only(bottom: 5),
+                          ),
+                        ),
+                      ),
+                    if(errorText.isNotEmpty)
+                      Row(
+                        children: [
+                          const SizedBox(height: 5),
+                          Text(errorText,style: TextStyle(fontSize: 12,color: Colors.red),),
+                        ],
+                      ),
+                    const SizedBox(height: 10),
+                    Row(
+                      children: [
+                        Expanded(
+                          child: GestureDetector(
+                            onTap: () {
+                              Navigator.pop(context);
+                            },
+                            child: Container(
+                              alignment: Alignment.center,
+                              height: 45,
+                              decoration: BoxDecoration(
+                                borderRadius: BorderRadius.circular(10),
+                                color: Color(0xffff1e1e),
+                              ),
+                              child: const Text(
+                                "Cancel",
+                                style: TextStyle(
+                                  color: Colors.white,
+                                  fontSize: 15,
+                                  fontWeight: FontWeight.w500,
+                                ),
+                              ),
+                            ),
+                          ),
+                        ),
+                        SizedBox(width: 15),
+                        Expanded(
+                          child: GestureDetector(
+                            onTap: () async {
+                              setState(() {
+                                errorText = '';
+                              });
+                              if (selectedPropertyId == null) {
+                                setState(() {
+                                  errorText = "Please select a reason for reporting.";
+                                });
+                                return;
+                              }
+
+                              if (selectedPropertyId == 0 && controller.text.isEmpty) {
+                                setState(() {
+                                  errorText = 'Please provide a reason when selecting "Other".';
+                                });
+                                return;
+                              }
+                              var response = await Api.post(url: Api.reportReason, parameter: {
+                                'property_id': propertyID,
+                                'reason_id': selectedPropertyId,
+                                'other_message': selectedPropertyId == 0 ? controller.text : "",
+                              });
+                              if (!response['error']) {
+                                Navigator.pop(context);
+                                HelperUtils.showSnackBarMessage(
+                                  context,
+                                  UiUtils.getTranslatedLabel(context, response['message']),
+                                  type: MessageType.success,
+                                  messageDuration: 3,
+                                );
+                              }
+                            },
+                            child: Container(
+                              alignment: Alignment.center,
+                              height: 45,
+                              decoration: BoxDecoration(
+                                borderRadius: BorderRadius.circular(10),
+                                color: Color(0xff117af9),
+                              ),
+                              child: const Text(
+                                "Report",
+                                style: TextStyle(
+                                  color: Colors.white,
+                                  fontSize: 15,
+                                  fontWeight: FontWeight.w500,
+                                ),
+                              ),
+                            ),
+                          ),
+                        ),
+                      ],
+                    )
+                  ],
+                ),
+              ),
+            ],
+          ),
+        );
+      },
+    );
+  }
+
 
   Widget bottomNavBar() {
     /// IF property is added by current user then it will show promote button
@@ -4031,14 +4800,21 @@ class PropertyDetailsState extends State<ProjectDetails> {
           ],
         ) : InkWell(
             onTap:() async {
+              setState(() {
+                isLoading = true;
+              });
               var response = await Api.post(url: Api.apiViewContact, parameter: {
                 'property_id': '',
                 'project_id': property!['id']
+              });
+              setState(() {
+                isLoading = false;
               });
               if(!response['error'] && response['message'] == 'Update Successfully') {
                 setState(() {
                   showContact = true;
                 });
+
               } else {
                 print('................................................');
                 // ScaffoldMessenger.of(context).showSnackBar(SnackBar(
@@ -4049,7 +4825,10 @@ class PropertyDetailsState extends State<ProjectDetails> {
                     type: MessageType.success, messageDuration: 3);
               }
             },
-            child: Center(child: Text('View Contact').size(context.font.large)
+            child: Center(child:isLoading
+                ? const Text('Loading...').size(context.font.large)
+                .bold().color(Color(0xff117af9))
+                :  const Text('View Contact').size(context.font.large)
                 .bold().color(Color(0xff117af9)),)),
       ),
     );
@@ -4197,7 +4976,7 @@ class PropertyDetailsState extends State<ProjectDetails> {
   Widget messageButton() {
     return UiUtils.buildButton(context,
         fontSize: 13,
-        buttonColor: Color(0xff25d366),
+        buttonColor: const Color(0xff25d366),
         outerPadding: const EdgeInsets.symmetric(vertical : 1),
         buttonTitle: UiUtils.getTranslatedLabel(context, "WhatsApp"),
         onPressed: _onTapMessage,
@@ -4231,7 +5010,7 @@ class PropertyDetailsState extends State<ProjectDetails> {
   Widget email() {
     return UiUtils.buildButton(context,
         fontSize: 13,
-        buttonColor: Color(0xffff5f7a),
+        buttonColor: const Color(0xffff5f7a),
         outerPadding: const EdgeInsets.symmetric(horizontal: 10,vertical: 1),
         buttonTitle: UiUtils.getTranslatedLabel(context, "Email"),
         onPressed: _onTapChat,
@@ -4405,9 +5184,9 @@ class CusomterProfileWidget extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Container(
-      padding: EdgeInsets.only(left: 15,right: 15,top: 15,bottom: 15),
+      padding: const EdgeInsets.only(left: 15,right: 15,top: 15,bottom: 15),
       decoration: BoxDecoration(
-        color: Color(0xfff9f9f9),
+        color: const Color(0xfff9f9f9),
         borderRadius: BorderRadius.circular(10),
       ),
 
@@ -4428,7 +5207,7 @@ class CusomterProfileWidget extends StatelessWidget {
                     color: Colors.grey.shade200,
                     border: Border.all(
                         width: 1,
-                        color: Color(0xffdfdfdf)
+                        color: const Color(0xffdfdfdf)
                     ),
                     borderRadius: BorderRadius.circular(50)),
                 child: ClipRRect(
@@ -4468,125 +5247,235 @@ class CusomterProfileWidget1 extends StatelessWidget {
   const CusomterProfileWidget1({
     super.key,
     required this.data,
+    required this.propertyID,
+    required this.reraId
   });
 
   final Map data;
+  final  int propertyID;
+ final String? reraId;
+  
 
   @override
   Widget build(BuildContext context) {
     return Container(
-      padding: EdgeInsets.only(left: 15,right: 15,),
-      child: Row(
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(10),
+        boxShadow: [
+          BoxShadow(
+            offset: const Offset(0, 1),
+            blurRadius: 5,
+            color: Colors.black.withOpacity(0.1),
+          ),
+        ],
+      ),
+      margin: const EdgeInsets.only(left: 15,right: 15,top: 10,bottom: 10),
+      padding: const EdgeInsets.all(10),
+      child: Column(
         children: [
-
-          Expanded(
-            child: Row(
-              children: [
-                GestureDetector(
-                  onTap: () {
-                    UiUtils.showFullScreenImage(context,
-                        provider:
-                        NetworkImage(data['profile'] ?? ""));
-                  },
-
-                  child: Container(
-                      width: 43,
-                      height: 43,
-                      clipBehavior: Clip.antiAlias,
-                      decoration: BoxDecoration(
-                          color: Colors.grey.shade200,
-                          border: Border.all(
-                              width: 1,
-                              color: Color(0xffdfdfdf)
-                          ),
-                          borderRadius: BorderRadius.circular(50)),
-                      child: ClipRRect(
-                        borderRadius: BorderRadius.circular(50),
-                        child: UiUtils.getImage(data['profile'] ?? "",
-                            fit: BoxFit.cover),
-                      )
-
-                    //  CachedNetworkImage(
-                    //   imageUrl: widget.propertyData?.customerProfile ?? "",
-                    //   fit: BoxFit.cover,
-                    // ),
-
-                  ),
-                ),
-                const SizedBox(
-                  width: 10,
-                ),
-                Expanded(
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text(data['name'] ?? "")
-                          .size(13)
-                          .color(Color(0xff4c4c4c))
-                          .bold(),
-                      SizedBox(height: 5,),
-                      Row(
+          Row(
+            children: [
+          
+              Expanded(
+                child: Row(
+                  children: [
+                    GestureDetector(
+                      onTap: () {
+                        UiUtils.showFullScreenImage(context,
+                            provider:
+                            NetworkImage(data['profile'] ?? ""));
+                      },
+          
+                      child: Container(
+                          width: 43,
+                          height: 43,
+                          clipBehavior: Clip.antiAlias,
+                          decoration: BoxDecoration(
+                              color: Colors.grey.shade200,
+                              border: Border.all(
+                                  width: 1,
+                                  color: const Color(0xffdfdfdf)
+                              ),
+                              borderRadius: BorderRadius.circular(50)),
+                          child: ClipRRect(
+                            borderRadius: BorderRadius.circular(50),
+                            child: UiUtils.getImage(data['profile'] ?? "",
+                                fit: BoxFit.cover),
+                          )
+          
+                        //  CachedNetworkImage(
+                        //   imageUrl: widget.propertyData?.customerProfile ?? "",
+                        //   fit: BoxFit.cover,
+                        // ),
+          
+                      ),
+                    ),
+                    const SizedBox(
+                      width: 10,
+                    ),
+                    Expanded(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
-                          Text("Agent",
-                            style: TextStyle(
-                                fontSize: 11,
-                                color: Color(0xff7d7d7d)
-                            ),
-                          ),
-                          SizedBox(width: 5,),
-                          Container(
-                            padding: EdgeInsets.only(left: 5,right: 5,top: 2,bottom: 2),
-                            decoration: BoxDecoration(
-                              color: Color(0xffd6fffa),
-                              borderRadius: BorderRadius.circular(7),
-                            ),
-                            child: Row(
-                              children: [
-                                Image.asset("assets/NewPropertydetailscreen/__rara.png",width: 13,height: 13,fit: BoxFit.cover,),
-                                SizedBox(width: 2,),
-                                Text("RERA",
-                                  style: TextStyle(
-                                      fontSize: 9,
-                                      fontWeight: FontWeight.w500,
-                                      color: Color(0xff009681)
-                                  ),
+                          Text(data['company_name'] ?? "")
+                              .size(13)
+                              .color(const Color(0xff4c4c4c))
+                              .bold(),
+                          const SizedBox(height: 5,),
+                          Row(
+                            children: [
+                              const Text("Agent",
+                                style: TextStyle(
+                                    fontSize: 11,
+                                    color: Color(0xff7d7d7d)
                                 ),
-                              ],
-                            ),
+                              ),
+                              const SizedBox(width: 5,),
+                              if(reraId != null && reraId!.isNotEmpty)
+                                Row(
+                                  children: [
+                                    Image.asset('assets/rera_tic.png', height: 14, width:14),
+                                    const SizedBox(width: 2),
+                                    Container(
+                                      width: MediaQuery.of(context).size.width/3,
+                                      child: Text(
+                                        'RERA ID : ${reraId}',
+                                        overflow: TextOverflow.ellipsis,
+                                        maxLines: 1,
+                                        style: const TextStyle(
+                                          fontSize: 11,
+                                          color: Color(0xFF9ea1a7),
+
+                                        ),
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                            ],
                           ),
+                          // Padding(
+                          //   padding: const EdgeInsets.only(bottom: 10),
+                          //   child: Row(
+                          //     children: [
+                          //       Expanded(
+                          //         child: const Text("Rera No:")
+                          //             .size(11)
+                          //             .color(const Color(0xff5d5d5d)),
+                          //       ),
+                          //       const SizedBox(width: 10,),
+                          //       Expanded(
+                          //         child: Text("${property!['project_details'][0]['rera_no'] ?? '-'}")
+                          //             .size(11)
+                          //             .bold( weight: FontWeight.w500,),
+                          //       )
+                          //     ],
+                          //   ),
+                          // ),
                         ],
                       ),
-                    ],
+                    )
+                  ],
+                ),
+              ),
+              InkWell(
+                onTap: () {
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(builder: (context) =>
+                        UserDetailProfileScreen(id: data['id'])),
+                  );
+                },
+                child: Container(
+                  padding: const EdgeInsets.only(left: 20,right: 20,top: 5,bottom: 5),
+                  decoration: BoxDecoration(
+                      color: Colors.white,
+                      borderRadius: BorderRadius.circular(30),
+                      border: Border.all(
+                          width: 1,
+                          color: const Color(0xff2e8af9)
+                      )
                   ),
-                )
+                  child: const Text("Profile",style: TextStyle(
+                      color: Color(0xff2e8af9),
+                      fontSize: 12,
+                      fontWeight: FontWeight.w500
+                  ),),
+                ),
+              )
+            ],
+          ),
+          const SizedBox(height: 20,),
+          Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 10),
+            child: Row(
+              children: [
+                Expanded(
+                  child: InkWell(
+                    onTap: () async {
+                      print("eeeeeeeeee$propertyID");
+                      var response = await Api.post(url: Api.interestedUsers, parameter: {
+                        'property_id': propertyID,
+                        'type': 1,
+                      });
+                      if(!response['error']) {
+                        showDialog(
+                          context: context,
+                          builder: (BuildContext context) {
+                            return AlertDialog(
+                              shape: RoundedRectangleBorder(
+                                  borderRadius: BorderRadius.circular(16)
+                              ),
+                              title: Text(
+                                UiUtils.getTranslatedLabel(context, response['message']).toString().replaceFirstMapped(
+                                  RegExp(r'^[a-z]'),
+                                      (match) => match.group(0)!.toUpperCase(),
+                                ),
+                              ),
+                              content: Text(UiUtils.getTranslatedLabel(context, 'Our Executive will reach you shortly!')),
+                              actions: [
+                                ElevatedButton(
+                                  style: ElevatedButton.styleFrom(
+                                    foregroundColor: Colors.white, backgroundColor: Colors.blue,
+                                  ),
+                                  onPressed: () {
+                                    Navigator.of(context).pop();
+                                  },
+                                  child: const Text('Done'),
+                                ),
+                              ],
+                            );
+                          },
+                        );
+                        // HelperUtils.showSnackBarMessage(
+                        //     context, UiUtils.getTranslatedLabel(context, response['message']),
+                        //     type: MessageType.success, messageDuration: 3);
+                        // HelperUtils.showSnackBarMessage(
+                        //     context, UiUtils.getTranslatedLabel(context, 'Our Executive will reach you shortly!'),
+                        //     type: MessageType.success, messageDuration: 5);
+                      }
+                    },
+                    child: Container(
+                      height: 40,
+                      padding: const EdgeInsets.only(left: 0,right: 0,top: 5,bottom: 5),
+                      decoration: BoxDecoration(
+                        color: const Color(0xff2e8af9),
+                        borderRadius: BorderRadius.circular(20),
+
+                      ),
+                      child: const Center(
+                        child: Text("Request a Callback",style: TextStyle(
+                            color: Colors.white,
+                            fontSize: 12,
+                            fontWeight: FontWeight.w500
+                        ),),
+                      ),
+                    ),
+                  ),
+                ),
               ],
             ),
           ),
-          InkWell(
-            onTap: () {
-              Navigator.push(
-                context,
-                MaterialPageRoute(builder: (context) =>
-                    UserDetailProfileScreen(id: data['id'])),
-              );
-            },
-            child: Container(
-              padding: EdgeInsets.only(left: 20,right: 20,top: 5,bottom: 5),
-              decoration: BoxDecoration(
-                  color: Colors.white,
-                  borderRadius: BorderRadius.circular(30),
-                  border: Border.all(
-                      width: 1,
-                      color: Color(0xff2e8af9)
-                  )
-              ),
-              child: Text("Profile",style: TextStyle(
-                  color: Color(0xff2e8af9),
-                  fontSize: 12,
-                  fontWeight: FontWeight.w500
-              ),),
-            ),
-          )
         ],
       ),
     );
@@ -4704,13 +5593,13 @@ class OutdoorFacilityListWidget extends StatelessWidget {
             children: [
               Container(
                 width: 140,
-                padding: EdgeInsets.all(6),
+                padding: const EdgeInsets.all(6),
                 decoration: BoxDecoration(
                   color: Colors.white,
                   borderRadius: BorderRadius.circular(10),
                   border: Border.all(
                     width: 1,
-                    color: Color(0xffe9e9e9),
+                    color: const Color(0xffe9e9e9),
                   ),
                 ),
                 child: SizedBox(
@@ -4722,7 +5611,7 @@ class OutdoorFacilityListWidget extends StatelessWidget {
                         height: 46,
                         decoration: BoxDecoration(
                           borderRadius: BorderRadius.circular(10),
-                          color: Color(0xfffff1db),
+                          color: const Color(0xfffff1db),
                         ),
                         child: Center(
                           child: UiUtils.imageType(
@@ -4742,7 +5631,7 @@ class OutdoorFacilityListWidget extends StatelessWidget {
                           children: [
                             Text(
                               facility.name ?? "",
-                              style: TextStyle(
+                              style: const TextStyle(
                                 fontSize: 11,
                                 color: Color(0xff585858),
                               ),
@@ -4752,7 +5641,7 @@ class OutdoorFacilityListWidget extends StatelessWidget {
                             const SizedBox(height: 4),
                             Text(
                               "${facility.distance} KM",
-                              style: TextStyle(
+                              style: const TextStyle(
                                 color: Color(0xff333333),
                                 fontSize: 12,
                                 fontWeight: FontWeight.w500,

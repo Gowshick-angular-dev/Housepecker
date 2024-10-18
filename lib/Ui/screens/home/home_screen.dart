@@ -325,8 +325,13 @@ class HomeScreenState extends State<HomeScreen>
   List<bool> recentPropertyLikeLoading = [];
   List<bool> propertyDealLikeLoading = [];
   bool projectLoading = false;
-  bool propertyLoading = false;
+
   Map? systemSetting;
+
+  bool premiumLoading = false;
+  bool  recentLoading = false;
+  bool dealLoading = false;
+
 
 
   Future<void> getProjects() async {
@@ -353,7 +358,9 @@ class HomeScreenState extends State<HomeScreen>
 
   Future<void> getProperties() async {
     setState(() {
-      propertyLoading = true;
+      premiumLoading = true;
+      recentLoading = true;
+      dealLoading = true;
     });
     var response = await Api.get(url: Api.apiGetProprty, queryParameters: {
       'offset': 0,
@@ -366,6 +373,7 @@ class HomeScreenState extends State<HomeScreen>
       setState(() {
         premiumPropertiesList = response['data'].where((e) => e['is_type'] == 'property').toList();
         premiumPropertyLikeLoading = List.filled(response['data'].length, false);
+        premiumLoading = false;
       });
     }
     var recentResponse = await Api.get(url: Api.apiGetProprty, queryParameters: {
@@ -379,6 +387,7 @@ class HomeScreenState extends State<HomeScreen>
       setState(() {
         recentPropertiesList = recentResponse['data'].where((e) => e['is_type'] == 'property').toList();
         recentPropertyLikeLoading = List.filled(recentResponse['data'].length, false);
+        recentLoading = false;
       });
     }
     var dealResponse = await Api.get(url: Api.apiGetProprty, queryParameters: {
@@ -392,7 +401,8 @@ class HomeScreenState extends State<HomeScreen>
       setState(() {
         propertyDealList = dealResponse['data'].where((e) => e['is_type'] == 'property').toList();
         propertyDealLikeLoading = List.filled(dealResponse['data'].length, false);
-        propertyLoading = false;
+        dealLoading = false;
+
       });
     }
   }
@@ -624,7 +634,7 @@ class HomeScreenState extends State<HomeScreen>
               _onRefresh();
             },
             child: Scaffold(
-              backgroundColor: Color(0xff000000).withOpacity(0.04),
+              backgroundColor: const Color(0xff000000).withOpacity(0.04),
               appBar: AppBar(
                 elevation: 0,
                 leadingWidth: HiveUtils.getCityName() != null ? 200.rw(context) : 130,
@@ -674,19 +684,19 @@ class HomeScreenState extends State<HomeScreen>
                                   height: 10,
                                   fit: BoxFit.cover,
                                 ),
-                                SizedBox(width: 5,),
+                                const SizedBox(width: 5,),
                                 Container(
                                   width: 80,
                                   child: Text('${currentMainCity}',
                                     overflow: TextOverflow.ellipsis,
-                                    style: TextStyle(
+                                    style: const TextStyle(
                                         fontSize: 12,
                                         fontWeight: FontWeight.w500,
                                         color: Colors.white
                                     ),
                                   ),
                                 ),
-                                SizedBox(width: 5,),
+                                const SizedBox(width: 5,),
                                 Image.asset(
                                   'assets/AddPostforms/__Down white.png',
                                   width: 10,
@@ -724,7 +734,7 @@ class HomeScreenState extends State<HomeScreen>
                                   _forAdsController.forward();
                                   _forSellAnimationController.forward();
                                   setState(() {});
-                                  _timer = Timer(Duration(seconds: 3), () {
+                                  _timer = Timer(const Duration(seconds: 3), () {
                                     showSellRentButton = false;
                                     isReverse?.value = true;
                                     _forRentController.reverse();
@@ -760,8 +770,8 @@ class HomeScreenState extends State<HomeScreen>
                                         height: 18,
                                         fit: BoxFit.cover,
                                       ),
-                                      SizedBox(width: 5,),
-                                      Text(
+                                      const SizedBox(width: 5,),
+                                      const Text(
                                         'Post Ads',
                                         style: TextStyle(
                                           fontFamily: 'Poppins',
@@ -770,14 +780,14 @@ class HomeScreenState extends State<HomeScreen>
                                           fontWeight: FontWeight.w500,
                                         ),
                                       ),
-                                      SizedBox(width: 5,),
+                                      const SizedBox(width: 5,),
                                       Container(
                                         padding: const EdgeInsets.only(right: 8.0,left: 8,top: 5,bottom: 5),
                                         decoration: BoxDecoration(
-                                          color: Color(0xffffa920),
+                                          color: const Color(0xffffa920),
                                           borderRadius: BorderRadius.circular(30),
                                         ),
-                                        child: Text(
+                                        child: const Text(
                                           'FREE',
                                           style: TextStyle(
                                             fontFamily: 'Poppins',
@@ -792,7 +802,7 @@ class HomeScreenState extends State<HomeScreen>
                                 ),
                               ),
                             ),
-                          SizedBox(width: 10,),
+                          const SizedBox(width: 10,),
                           InkWell(
                             onTap: () {
                               GuestChecker.check(onNotGuest: () {
@@ -826,7 +836,7 @@ class HomeScreenState extends State<HomeScreen>
                     ],
                   ),
                 ),
-                backgroundColor: Color(0xff117af9),
+                backgroundColor: const Color(0xff117af9),
                 // actions: [
                 //   GuestChecker.updateUI(
                 //     onChangeStatus: (bool? isGuest) {
@@ -1096,7 +1106,7 @@ class HomeScreenState extends State<HomeScreen>
                             Navigator.push(
                               context,
                               MaterialPageRoute(builder: (context) =>
-                                  ProjectFormOne()),
+                                  const ProjectFormOne()),
                             );
                           });
                         },
@@ -1558,19 +1568,23 @@ class HomeScreenState extends State<HomeScreen>
         if (state is FetchNearbyPropertiesFailure) {
           if (state.error is ApiException) {
             homeStateListener.setNetworkState(
-                setState, !(state.error.error == "no-internet"));
+              setState,
+              !(state.error.error == "no-internet"),
+            );
+          } else if (state.error is String) {
+            homeStateListener.setNetworkState(setState, false);
           }
-
           setState(() {});
         }
         if (state is FetchNearbyPropertiesSuccess) {
           setState(() {});
         }
       },
+
       builder: (context, state) {
         if (state is FetchNearbyPropertiesInProgress) {
           return Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 15),
+            padding: const EdgeInsets.symmetric(horizontal: 10),
             child: Column(
               children: [
                 TitleHeader(
@@ -1585,49 +1599,56 @@ class HomeScreenState extends State<HomeScreen>
             ),
           );
         }
-
         if (state is FetchNearbyPropertiesFailure) {
-          return Center(child: Text(state.error.error.toString()));
+          final errorMessage = state.error is String
+              ? state.error
+              : state.error.error;
+          return Center();
         }
+        // if (state is FetchNearbyPropertiesFailure) {
+        //   final errorMessage = state.error is String
+        //       ? state.error
+        //       : state.error.error;
+        //   return Center(child: Text(errorMessage));
+        // }
         if (state is FetchNearbyPropertiesSuccess) {
           if (state.properties.isEmpty) {
             return Container();
           }
 
-          return Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 15),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                TitleHeader(
+          return Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 10),
+                child: TitleHeader(
                   onSeeAll: _onTapNearByPropertiesAll,
                   title: "${UiUtils.getTranslatedLabel(
                     context,
                     "nearByProperties",
                   )} (${currentCity})",
                 ),
-                SizedBox(
-                  height: 200,
-                  child: ListView.builder(
-                      shrinkWrap: true,
-                      padding: const EdgeInsets.symmetric(
-                        horizontal: sidePadding,
-                      ),
-                      physics: const BouncingScrollPhysics(),
-                      itemCount: state.properties.length.clamp(0, 10),
-                      scrollDirection: Axis.horizontal,
-                      itemBuilder: (context, index) {
-                        PropertyModel model = state.properties[index];
-                        model = context.watch<PropertyEditCubit>().get(model);
-                        return PropertyGradiendCard(
-                          model: model,
-                          isFirst: index == 0,
-                          showEndPadding: false,
-                        );
-                      }),
-                ),
-              ],
-            ),
+              ),
+              SizedBox(
+                height: 200,
+                child: ListView.separated(
+                  separatorBuilder: (context,i)=>SizedBox(width: 10,),
+                    padding: const EdgeInsets.symmetric(horizontal: 15),
+                    shrinkWrap: true,
+                    physics: const BouncingScrollPhysics(),
+                    itemCount: state.properties.length.clamp(0, 10),
+                    scrollDirection: Axis.horizontal,
+                    itemBuilder: (context, index) {
+                      PropertyModel model = state.properties[index];
+                      model = context.watch<PropertyEditCubit>().get(model);
+                      return PropertyGradiendCard(
+                        model: model,
+                        isFirst: index == 0,
+                        showEndPadding: false,
+                      );
+                    }),
+              ),
+            ],
           );
         }
 
@@ -1815,10 +1836,10 @@ class HomeScreenState extends State<HomeScreen>
                             child: Container(
                               width: MediaQuery.sizeOf(context).width/4.9,
                               decoration: BoxDecoration(
-                                color: Color(0xff117af9).withOpacity(0.1),
+                                color: const Color(0xff117af9).withOpacity(0.1),
                                 borderRadius: BorderRadius.circular(15.0),
                                 boxShadow: [
-                                  BoxShadow(
+                                  const BoxShadow(
                                     color: Color(0xfff0f0f0),
                                     offset: Offset(0, 2),
                                     blurRadius: 2.0,
@@ -1839,8 +1860,8 @@ class HomeScreenState extends State<HomeScreen>
                                         child: Image.asset("assets/Home/__Buy.png", width: 25, height: 25,),
                                       ),
                                     ),
-                                    SizedBox(height: 5),
-                                    SizedBox(
+                                    const SizedBox(height: 5),
+                                    const SizedBox(
                                         child: Text('Buy',
                                             style: TextStyle(
                                                 fontSize: 9,
@@ -1869,10 +1890,10 @@ class HomeScreenState extends State<HomeScreen>
                             child: Container(
                               width: MediaQuery.sizeOf(context).width/4.9,
                               decoration: BoxDecoration(
-                                color: Color(0xff117af9).withOpacity(0.1),
+                                color: const Color(0xff117af9).withOpacity(0.1),
                                 borderRadius: BorderRadius.circular(15.0),
                                 boxShadow: [
-                                  BoxShadow(
+                                  const BoxShadow(
                                     color: Color(0xfff0f0f0),
                                     offset: Offset(0, 2),
                                     blurRadius: 2.0,
@@ -1893,8 +1914,8 @@ class HomeScreenState extends State<HomeScreen>
                                         child: Image.asset("assets/Home/__Rent.png", width: 25, height: 25,),
                                       ),
                                     ),
-                                    SizedBox(height: 5),
-                                    SizedBox(
+                                    const SizedBox(height: 5),
+                                    const SizedBox(
                                         child: Text('Rent/Lease',
                                             style: TextStyle(
                                                 fontSize: 9,
@@ -1925,10 +1946,10 @@ class HomeScreenState extends State<HomeScreen>
                             child: Container(
                               width: MediaQuery.sizeOf(context).width/4.9,
                               decoration: BoxDecoration(
-                                color: Color(0xff117af9).withOpacity(0.1),
+                                color: const Color(0xff117af9).withOpacity(0.1),
                                 borderRadius: BorderRadius.circular(15.0),
                                 boxShadow: [
-                                  BoxShadow(
+                                  const BoxShadow(
                                     color: Color(0xfff0f0f0),
                                     offset: Offset(0, 2),
                                     blurRadius: 2.0,
@@ -1949,8 +1970,8 @@ class HomeScreenState extends State<HomeScreen>
                                         child: Image.asset("assets/Home/__PG.png", width: 25, height: 25,),
                                       ),
                                     ),
-                                    SizedBox(height: 5),
-                                    SizedBox(
+                                    const SizedBox(height: 5),
+                                    const SizedBox(
                                         child: Text('New Projects',
                                             style: TextStyle(
                                                 fontSize: 9,
@@ -1979,9 +2000,9 @@ class HomeScreenState extends State<HomeScreen>
           ),
         ),
         if(adListLoading)
-          Padding(
-            padding: const EdgeInsets.all(13),
-            child: const CategoryShimmer(),
+          const Padding(
+            padding: EdgeInsets.all(13),
+            child: CategoryShimmer(),
           ),
         if(adList.length > 0 && !adListLoading)
           Padding(
@@ -1995,7 +2016,7 @@ class HomeScreenState extends State<HomeScreen>
                       onNotGuest: () {
                         Navigator.push(
                           context,
-                          MaterialPageRoute(builder: (context) =>  JointVenture()),
+                          MaterialPageRoute(builder: (context) =>  const JointVenture()),
                         );
                       },
                     );
@@ -2004,12 +2025,12 @@ class HomeScreenState extends State<HomeScreen>
                     padding: const EdgeInsets.only(left: 5, right: 5),
                     child: Container(
                       height: 75,
-                      padding: EdgeInsets.only(top: 4, bottom: 4),
+                      padding: const EdgeInsets.only(top: 4, bottom: 4),
                       decoration: BoxDecoration(
-                        color: Color(0xff117af9).withOpacity(0.1),
+                        color: const Color(0xff117af9).withOpacity(0.1),
                         borderRadius: BorderRadius.circular(15.0),
                         boxShadow: [
-                          BoxShadow(
+                          const BoxShadow(
                             color: Color(0xfff0f0f0),
                             offset: Offset(0, 2),
                             blurRadius: 2.0,
@@ -2036,10 +2057,10 @@ class HomeScreenState extends State<HomeScreen>
                                         : null),
                               ),
                             ),
-                            SizedBox(height: 5),
+                            const SizedBox(height: 5),
                             SizedBox(
                                 child: Text(adList[0]['name'],
-                                    style: TextStyle(
+                                    style: const TextStyle(
                                         fontSize: 9,
                                         fontWeight: FontWeight.w500,
                                         color: Color(0xff333333)
@@ -2062,7 +2083,7 @@ class HomeScreenState extends State<HomeScreen>
                       onNotGuest: () {
                         Navigator.push(
                           context,
-                          MaterialPageRoute(builder: (context) =>  ConstructionHome()),
+                          MaterialPageRoute(builder: (context) =>  const ConstructionHome()),
                         );
                       },
                     );
@@ -2071,12 +2092,12 @@ class HomeScreenState extends State<HomeScreen>
                     padding: const EdgeInsets.only(left: 5, right: 5),
                     child: Container(
                       height: 75,
-                      padding: EdgeInsets.only(top: 4, bottom: 4),
+                      padding: const EdgeInsets.only(top: 4, bottom: 4),
                       decoration: BoxDecoration(
-                        color: Color(0xff117af9).withOpacity(0.1),
+                        color: const Color(0xff117af9).withOpacity(0.1),
                         borderRadius: BorderRadius.circular(15.0),
                         boxShadow: [
-                          BoxShadow(
+                          const BoxShadow(
                             color: Color(0xfff0f0f0),
                             offset: Offset(0, 2),
                             blurRadius: 2.0,
@@ -2103,10 +2124,10 @@ class HomeScreenState extends State<HomeScreen>
                                         : null),
                               ),
                             ),
-                            SizedBox(height: 5),
+                            const SizedBox(height: 5),
                             SizedBox(
                                 child: Text(adList[1]['name'],
-                                    style: TextStyle(
+                                    style: const TextStyle(
                                         fontSize: 9,
                                         fontWeight: FontWeight.w500,
                                         color: Color(0xff333333)
@@ -2129,7 +2150,7 @@ class HomeScreenState extends State<HomeScreen>
                       onNotGuest: () {
                         Navigator.push(
                           context,
-                          MaterialPageRoute(builder: (context) =>  ServiceHome()),
+                          MaterialPageRoute(builder: (context) =>  const ServiceHome()),
                         );
                       },
                     );
@@ -2138,12 +2159,12 @@ class HomeScreenState extends State<HomeScreen>
                     padding: const EdgeInsets.only(left: 5, right: 5),
                     child: Container(
                       height: 75,
-                      padding: EdgeInsets.only(top: 4, bottom: 4),
+                      padding: const EdgeInsets.only(top: 4, bottom: 4),
                       decoration: BoxDecoration(
-                        color: Color(0xff117af9).withOpacity(0.1),
+                        color: const Color(0xff117af9).withOpacity(0.1),
                         borderRadius: BorderRadius.circular(15.0),
                         boxShadow: [
-                          BoxShadow(
+                          const BoxShadow(
                             color: Color(0xfff0f0f0),
                             offset: Offset(0, 2),
                             blurRadius: 2.0,
@@ -2170,10 +2191,10 @@ class HomeScreenState extends State<HomeScreen>
                                         : null),
                               ),
                             ),
-                            SizedBox(height: 5),
+                            const SizedBox(height: 5),
                             SizedBox(
                                 child: Text(adList[2]['name'],
-                                    style: TextStyle(
+                                    style: const TextStyle(
                                         fontSize: 9,
                                         fontWeight: FontWeight.w500,
                                         color: Color(0xff333333)
@@ -2196,7 +2217,7 @@ class HomeScreenState extends State<HomeScreen>
                       onNotGuest: () {
                         Navigator.push(
                           context,
-                          MaterialPageRoute(builder: (context) =>  LoanHome()),
+                          MaterialPageRoute(builder: (context) =>  const LoanHome()),
                         );
                       },
                     );
@@ -2205,12 +2226,12 @@ class HomeScreenState extends State<HomeScreen>
                     padding: const EdgeInsets.only(left: 5, right: 5),
                     child: Container(
                       height: 75,
-                      padding: EdgeInsets.only(top: 4, bottom: 4),
+                      padding: const EdgeInsets.only(top: 4, bottom: 4),
                       decoration: BoxDecoration(
-                        color: Color(0xff117af9).withOpacity(0.1),
+                        color: const Color(0xff117af9).withOpacity(0.1),
                         borderRadius: BorderRadius.circular(15.0),
                         boxShadow: [
-                          BoxShadow(
+                          const BoxShadow(
                             color: Color(0xfff0f0f0),
                             offset: Offset(0, 2),
                             blurRadius: 2.0,
@@ -2237,10 +2258,10 @@ class HomeScreenState extends State<HomeScreen>
                                         : null),
                               ),
                             ),
-                            SizedBox(height: 5),
+                            const SizedBox(height: 5),
                             SizedBox(
                                 child: Text(adList[3]['name'],
-                                    style: TextStyle(
+                                    style: const TextStyle(
                                         fontSize: 9,
                                         fontWeight: FontWeight.w500,
                                         color: Color(0xff333333)
@@ -2293,13 +2314,13 @@ class HomeScreenState extends State<HomeScreen>
     return Column(
       mainAxisSize: MainAxisSize.min,
       children: <Widget>[
-        SizedBox(height: 20,),
+        const SizedBox(height: 20,),
         Padding(
           padding: const EdgeInsets.only(left: 15,right: 15),
           child: Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
-              Text("Premium Properties For Sale",
+              const Text("Premium Properties For Sale",
                 style: TextStyle(
                     color: Color(0xff333333),
                     fontSize: 16,
@@ -2311,11 +2332,11 @@ class HomeScreenState extends State<HomeScreen>
                   Navigator.push(
                     context,
                     MaterialPageRoute(builder: (context) =>
-                        PropertiesListWidget(typeName: "Premium Properties For Sale"),
+                        const PropertiesListWidget(typeName: "Premium Properties For Sale"),
                     ),
                   );
                 },
-                child: Text("See All",
+                child: const Text("See All",
                   style: TextStyle(
                       color: Color(0xff117af9),
                       fontSize: 13,
@@ -2326,13 +2347,13 @@ class HomeScreenState extends State<HomeScreen>
             ],
           ),
         ),
-        SizedBox(height: 20,),
-        if(propertyLoading)
+        const SizedBox(height: 20,),
+        if(premiumLoading )
           Padding(
             padding: const EdgeInsets.symmetric(horizontal: 15),
             child: buildPropertiesShimmer(context, 2),
           ),
-        if(!propertyLoading)
+        if(!premiumLoading )
           Container(
             height: 230,
             child: ListView.builder(
@@ -2357,20 +2378,20 @@ class HomeScreenState extends State<HomeScreen>
               }
             ),
           ),
-        SizedBox(height: 20,),
+        const SizedBox(height: 20,),
 
         Stack(
           children: [
             Image.asset("assets/Home/bg.png",width: double.infinity,fit: BoxFit.cover,height: (propertyDealList.length > 2 ? 450 : propertyDealList.length == 0 ? 450 : 250),),
             Column(
               children: [
-                SizedBox(height: 15,),
+                const SizedBox(height: 15,),
                 Padding(
                   padding: const EdgeInsets.only(left: 15,right: 15),
                   child: Row(
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
-                      Text("Deal Of The Month",
+                      const Text("Deal Of The Month",
                         style: TextStyle(
                             color: Color(0xff333333),
                             fontSize: 16,
@@ -2382,11 +2403,11 @@ class HomeScreenState extends State<HomeScreen>
                           Navigator.push(
                             context,
                             MaterialPageRoute(builder: (context) =>
-                                PropertiesListWidget(typeName: "Deal Of The Month"),
+                                const PropertiesListWidget(typeName: "Deal Of The Month"),
                             ),
                           );
                         },
-                        child: Text("See All",
+                        child: const Text("See All",
                           style: TextStyle(
                               color: Color(0xff117af9),
                               fontSize: 13,
@@ -2397,19 +2418,19 @@ class HomeScreenState extends State<HomeScreen>
                     ],
                   ),
                 ),
-                SizedBox(height: 10,),
-                if(propertyLoading)
+                const SizedBox(height: 10,),
+                if(dealLoading)
                   Padding(
                     padding: const EdgeInsets.symmetric(horizontal: 15),
                     child: buildPropertiesShimmer(context, 4),
                   ),
-                if(!propertyLoading)
+                if(!dealLoading)
                   Padding(
                     padding: const EdgeInsets.only(left: 15,right: 15),
                     child: GridView.builder(
                       shrinkWrap: true,
                       itemCount: propertyDealList.length,
-                      physics: NeverScrollableScrollPhysics(),
+                      physics: const NeverScrollableScrollPhysics(),
                       gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
                         crossAxisCount: 2,
                         crossAxisSpacing: 8,
@@ -2441,7 +2462,7 @@ class HomeScreenState extends State<HomeScreen>
             ),
           ],
         ),
-        SizedBox(height: 20,),
+        const SizedBox(height: 20,),
         buildExpolerPropertiesType(),
         // if(systemSetting != null)
         //   Padding( padding: const EdgeInsets.only(right: 15,left: 15),
@@ -2451,15 +2472,15 @@ class HomeScreenState extends State<HomeScreen>
         // if(HiveUtils.getUserDetails().role != null && HiveUtils.getUserDetails().role == '3')
 
         RecentPropertiesSectionWidget(projectLoading: projectLoading, likeLoading: likeLoading, projectList: projectList),
-        SizedBox(height: 20,),
+        const SizedBox(height: 20,),
         buildAllPropertyNeeds(),
-        SizedBox(height: 20,),
+        const SizedBox(height: 20,),
         Padding(
           padding: const EdgeInsets.only(left: 15,right: 15),
           child: Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
-              Text("Recently Added",
+              const Text("Recently Added",
                 style: TextStyle(
                     color: Color(0xff333333),
                     fontSize: 16,
@@ -2471,11 +2492,11 @@ class HomeScreenState extends State<HomeScreen>
                   Navigator.push(
                     context,
                     MaterialPageRoute(builder: (context) =>
-                        PropertiesListWidget(typeName: "Recently Added Properties"),
+                        const PropertiesListWidget(typeName: "Recently Added Properties"),
                     ),
                   );
                 },
-                child: Text("See All",
+                child: const Text("See All",
                   style: TextStyle(
                       color: Color(0xff117af9),
                       fontSize: 13,
@@ -2486,13 +2507,13 @@ class HomeScreenState extends State<HomeScreen>
             ],
           ),
         ),
-        SizedBox(height: 20,),
-        if(propertyLoading)
+        const SizedBox(height: 20,),
+        if(recentLoading )
           Padding(
             padding: const EdgeInsets.symmetric(horizontal: 15),
             child: buildPropertiesShimmer(context, 2),
           ),
-        if(!propertyLoading)
+        if(!recentLoading )
           Container(
             height: 230,
             child: ListView.builder(
@@ -2535,14 +2556,14 @@ class HomeScreenState extends State<HomeScreen>
           ),
         ),
         Container(
-          margin: EdgeInsets.only(left: 15,right: 15),
-          padding: EdgeInsets.only(left: 10,right: 15,top: 5),
+          margin: const EdgeInsets.only(left: 15,right: 15),
+          padding: const EdgeInsets.only(left: 10,right: 15,top: 5),
           decoration: BoxDecoration(
               color: Colors.white,
               borderRadius: BorderRadius.circular(15),
               border: Border.all(
                   width: 1,
-                  color: Color(0xffDBDBDB)
+                  color: const Color(0xffDBDBDB)
               )
 
           ),
@@ -2611,6 +2632,7 @@ class HomeScreenState extends State<HomeScreen>
                       Routes.articleDetailsScreenRoute,
                       arguments: {
                         "model": ArticleModel.fromJson(blogsList[i]),
+                        "title": blogsList[i]['title']
                       },
                     );
                   },
@@ -2621,32 +2643,32 @@ class HomeScreenState extends State<HomeScreen>
                         ClipRRect(
                             borderRadius : BorderRadius.circular(10),
                             child: Image.network(blogsList[i]['meta_image'],width: 80,fit: BoxFit.cover,height: 80,)),
-                        SizedBox(width: 15,),
+                        const SizedBox(width: 15,),
                         Expanded(
                           child: Column(
                             crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
-                              SizedBox(height: 8,),
+                              const SizedBox(height: 8,),
                               Text(blogsList[i]['title'],
                                 maxLines: 2,
                                 overflow: TextOverflow.ellipsis,
-                                style: TextStyle(
+                                style: const TextStyle(
                                     color: Color(0xff333333),
                                     fontSize: 12.5,
                                     fontWeight: FontWeight.w500
                                 ),
                               ),
-                              SizedBox(height: 6,),
+                              const SizedBox(height: 6,),
                               Text(blogsList[i]['created_at'],
                                 maxLines: 1,
                                 overflow: TextOverflow.ellipsis,
-                                style: TextStyle(
+                                style: const TextStyle(
                                     color: Color(0xffa2a2a2),
                                     fontSize: 10.5,
                                     fontWeight: FontWeight.w400
                                 ),
                               ),
-                              SizedBox(height: 8,),
+                              const SizedBox(height: 8,),
                             ],
                           ),
                         ),
@@ -2663,7 +2685,7 @@ class HomeScreenState extends State<HomeScreen>
 
   Widget buildAllPropertyNeeds(){
     return Container(
-      color: Color(0xffebf4ff),
+      color: const Color(0xffebf4ff),
       child: Column(
         children: [
           Padding(
@@ -2680,9 +2702,9 @@ class HomeScreenState extends State<HomeScreen>
           Container(
             height: 220,
             child: ListView.separated(
-              physics: BouncingScrollPhysics(),
-              separatorBuilder: (context,i)=>SizedBox(width: 15,),
-              padding: EdgeInsets.symmetric(horizontal: 10),
+              physics: const BouncingScrollPhysics(),
+              separatorBuilder: (context,i)=>const SizedBox(width: 15,),
+              padding: const EdgeInsets.symmetric(horizontal: 10),
                 scrollDirection: Axis.horizontal,
                 itemCount: allPropertyData.length,
                 itemBuilder: (context,index){
@@ -2693,7 +2715,7 @@ class HomeScreenState extends State<HomeScreen>
                     Navigator.push(
                       context,
                       MaterialPageRoute(
-                        builder: (context) => PropertiesListWidget(
+                        builder: (context) => const PropertiesListWidget(
                           typeName: "Properties",
                         ),
                       ),
@@ -2708,14 +2730,14 @@ class HomeScreenState extends State<HomeScreen>
                   }
                 },
                 child: Container(
-                  padding: EdgeInsets.all(7),
-                  margin: EdgeInsets.symmetric(vertical: 10),
+                  padding: const EdgeInsets.all(7),
+                  margin: const EdgeInsets.symmetric(vertical: 10),
                   width: MediaQuery.of(context).size.width/1.7,
                   decoration: BoxDecoration(
                     color: Colors.white,
                       border: Border.all(
                           width: 1,
-                          color: Color(0xffe0e0e0)
+                          color: const Color(0xffe0e0e0)
                       ),
                     borderRadius: BorderRadius.circular(10),
                   ),child: Column(
@@ -2737,16 +2759,16 @@ class HomeScreenState extends State<HomeScreen>
                         mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                          crossAxisAlignment:CrossAxisAlignment.start,
                         children: [
-                          Text(data["count"].toString(),style: TextStyle(fontSize: 14,fontWeight: FontWeight.w600),),
+                          Text(data["count"].toString(),style: const TextStyle(fontSize: 14,fontWeight: FontWeight.w600),),
                           Row(
                             mainAxisAlignment: MainAxisAlignment.spaceBetween,
                             children: [
                               Expanded(
                                 child: Container(
-                                  margin: EdgeInsets.only(right: 10),
-                                    child: Text(data["name"],style: TextStyle(fontSize: 10,fontWeight: FontWeight.w600),maxLines: 1,overflow: TextOverflow.ellipsis,)),
+                                  margin: const EdgeInsets.only(right: 10),
+                                    child: Text(data["name"],style: const TextStyle(fontSize: 10,fontWeight: FontWeight.w600),maxLines: 1,overflow: TextOverflow.ellipsis,)),
                               ),
-                              Row(
+                              const Row(
                                 children: [
                                   Text("Explore Now",style: TextStyle(fontSize: 10,fontWeight: FontWeight.w600),),
                                   SizedBox(width: 3,),
@@ -2771,7 +2793,7 @@ class HomeScreenState extends State<HomeScreen>
 
   Widget buildExpolerPropertiesType(){
     return Container(
-      color: Color(0xffebf4ff),
+      color: const Color(0xffebf4ff),
       child: Column(
         children: [
           Padding(
@@ -2807,9 +2829,9 @@ class HomeScreenState extends State<HomeScreen>
             },
             builder: (context, state) {
               if (state is FetchCategoryInProgress) {
-                return Padding(
-                  padding: const EdgeInsets.only(bottom: 20,left: 15,right: 15),
-                  child: const CategoryShimmer(),
+                return const Padding(
+                  padding: EdgeInsets.only(bottom: 20,left: 15,right: 15),
+                  child: CategoryShimmer(),
                 );
               }
               if (state is FetchCategoryFailure) {
@@ -2819,12 +2841,12 @@ class HomeScreenState extends State<HomeScreen>
               }
               if (state is FetchCategorySuccess) {
                 return Container(
-                  padding: EdgeInsets.only(bottom: 15,top: 0,),
+                  padding: const EdgeInsets.only(bottom: 15,top: 0,),
                   height: 190,
-                  color: Color(0xffebf4ff),
+                  color: const Color(0xffebf4ff),
                   child: ListView.separated(
-                      separatorBuilder: (context,i)=>SizedBox(width: 0,),
-                      padding: EdgeInsets.symmetric(horizontal: 15),
+                      separatorBuilder: (context,i)=>const SizedBox(width: 0,),
+                      padding: const EdgeInsets.symmetric(horizontal: 15),
                       scrollDirection: Axis.horizontal,
                       itemCount: state.categories.length,
                       itemBuilder: (context,index){
@@ -2835,8 +2857,8 @@ class HomeScreenState extends State<HomeScreen>
                                 arguments: {'catID': category.id, 'catName': category.category});
                           },
                           child: Container(
-                            margin: EdgeInsets.all(6),
-                            padding: EdgeInsets.all(10),
+                            margin: const EdgeInsets.all(6),
+                            padding: const EdgeInsets.all(10),
                             width: 140,
                             decoration: BoxDecoration(
                                 borderRadius: BorderRadius.circular(10),
@@ -2846,7 +2868,7 @@ class HomeScreenState extends State<HomeScreen>
                                   color: Colors.grey.withOpacity(0.1),
                                   spreadRadius: 3,
                                   blurRadius: 4,
-                                  offset: Offset(0, 2),
+                                  offset: const Offset(0, 2),
                                 ),
                               ],
                             ),child: Column(
@@ -2856,11 +2878,11 @@ class HomeScreenState extends State<HomeScreen>
                               Row(
                                 children: [
                                   Container(
-                                    padding: EdgeInsets.all(15),
+                                    padding: const EdgeInsets.all(15),
                                     height: 65,
                                     width: 65,
                                     decoration: BoxDecoration(
-                                      color: Color(0xffebf4ff),
+                                      color: const Color(0xffebf4ff),
                                       borderRadius: BorderRadius.circular(8),
                                     ),
                                     child: UiUtils.imageType(category.image!,
@@ -2876,8 +2898,8 @@ class HomeScreenState extends State<HomeScreen>
                              Column(
                                crossAxisAlignment: CrossAxisAlignment.start,
                                children: [
-                                 Text(category.category??'',style: TextStyle(fontWeight: FontWeight.w500),),
-                                 Text("${category.propertyCount?.toString()??'0'} Properties",style: TextStyle(fontSize: 12),)
+                                 Text(category.category??'',style: const TextStyle(fontWeight: FontWeight.w500),),
+                                 Text("${category.propertyCount?.toString()??'0'} Properties",style: const TextStyle(fontSize: 12),)
                                ],
                              )
                             ],
@@ -2916,7 +2938,7 @@ class HomeScreenState extends State<HomeScreen>
               borderRadius: BorderRadius.circular(15),
               border: Border.all(
                   width: 1,
-                  color: Color(0xffe0e0e0)
+                  color: const Color(0xffe0e0e0)
               )
           ),
           child: Column(
@@ -2930,7 +2952,7 @@ class HomeScreenState extends State<HomeScreen>
                   ),
                   child: CustomShimmer(width: double.infinity,height: 110,),
                 ),
-                SizedBox(height: 8,),
+                const SizedBox(height: 8,),
                 LayoutBuilder(builder: (context, c) {
                   return Padding(
                     padding: const EdgeInsets.only(left:10,right: 10),
@@ -2943,16 +2965,16 @@ class HomeScreenState extends State<HomeScreen>
                           height: 14,
                           width: c.maxWidth - 50,
                         ),
-                        SizedBox(height: 5,),
+                        const SizedBox(height: 5,),
                         const CustomShimmer(
                           height: 13,
                         ),
-                        SizedBox(height: 5,),
+                        const SizedBox(height: 5,),
                         CustomShimmer(
                           height: 12,
                           width: c.maxWidth / 1.2,
                         ),
-                        SizedBox(height: 8,),
+                        const SizedBox(height: 8,),
                         Align(
                           alignment: Alignment.bottomLeft,
                           child: CustomShimmer(
@@ -3095,7 +3117,7 @@ class _RecentPropertiesSectionWidgetState
                                 borderRadius: BorderRadius.circular(15),
                                 border: Border.all(
                                     width: 1,
-                                    color: Color(0xffe0e0e0)
+                                    color: const Color(0xffe0e0e0)
                                 )
                             ),
                             child: Stack(
@@ -3107,7 +3129,7 @@ class _RecentPropertiesSectionWidgetState
                                     Column(
                                       children: [
                                         ClipRRect(
-                                          borderRadius: BorderRadius.only(
+                                          borderRadius: const BorderRadius.only(
                                             topRight: Radius.circular(15),
                                             topLeft:Radius.circular(15),
                                           ),
@@ -3120,124 +3142,129 @@ class _RecentPropertiesSectionWidgetState
                                               Positioned(
                                                 right: 8,
                                                 top: 8,
-                                                child: InkWell(
-                                                  onTap: () {
-                                                    GuestChecker.check(onNotGuest: () async {
-                                                      setState(() {
-                                                        widget.likeLoading![index] = true;
-                                                      });
-                                                      var body = {
-                                                        "type": widget.projectList![index]['is_favourite'] == 1 ? 0 : 1,
-                                                        "project_id": widget.projectList![index]['id']
-                                                      };
-                                                      var response = await Api.post(
-                                                          url: Api.addFavProject, parameter: body);
-                                                      if (!response['error']) {
-                                                        widget.projectList![index]['is_favourite'] = (widget.projectList![index]['is_favourite'] == 1 ? 0 : 1);
-                                                        setState(() {
-                                                          widget.likeLoading![index] = false;
-                                                        });
-
-                                                      }
-                                                    });
-                                                  },
-                                                  child: Container(
-                                                    width: 32,
-                                                    height: 32,
-                                                    decoration: BoxDecoration(
-                                                      color: context.color.secondaryColor,
-                                                      shape: BoxShape.circle,
-                                                      boxShadow: const [
-                                                        BoxShadow(
-                                                          color:
-                                                          Color.fromARGB(12, 0, 0, 0),
-                                                          offset: Offset(0, 2),
-                                                          blurRadius: 15,
-                                                          spreadRadius: 0,
-                                                        )
+                                                child: Row(
+                                                  children: [
+                                                    if(widget.projectList![index]['gallary_images'] != null)
+                                                      ...[
+                                                        InkWell(
+                                                          onTap: () {
+                                                            Navigator.push(context,
+                                                                BlurredRouter(
+                                                                  builder: (context) {
+                                                                    return AllGallaryImages(
+                                                                        images: widget.projectList![index]['gallary_images'] ?? [],
+                                                                        isProject: true);
+                                                                  },
+                                                                ));
+                                                          },
+                                                          child: Container(
+                                                            width: 35,
+                                                            height: 28,
+                                                            decoration: BoxDecoration(
+                                                              color: const Color(0xff000000).withOpacity(0.35),
+                                                              borderRadius: BorderRadius.circular(8),
+                                                              border: Border.all(width: 1, color: const Color(0xffe0e0e0)),
+                                                              boxShadow: const [
+                                                                BoxShadow(
+                                                                  color: Color.fromARGB(12, 0, 0, 0),
+                                                                  offset: Offset(0, 2),
+                                                                  blurRadius: 15,
+                                                                  spreadRadius: 0,
+                                                                )
+                                                              ],
+                                                            ),
+                                                            child: Row(
+                                                              mainAxisAlignment: MainAxisAlignment.center,
+                                                              children: [
+                                                                const Icon(
+                                                                    Icons.image,
+                                                                    color: Color(0xffe0e0e0),
+                                                                    size: 15
+                                                                ),
+                                                                const SizedBox(width: 3,),
+                                                                Text('${widget.projectList![index]['gallary_images']!.length}',
+                                                                  style: const TextStyle(
+                                                                      color: Color(0xffe0e0e0),
+                                                                      fontSize: 10
+                                                                  ),),
+                                                              ],
+                                                            ),
+                                                          ),
+                                                        ),
+                                                        const SizedBox(width: 8,),
                                                       ],
-                                                    ),
-                                                    child: Container(
-                                                      width: 32,
-                                                      height: 32,
-                                                      decoration: BoxDecoration(
-                                                        color: context.color.primaryColor,
-                                                        shape: BoxShape.circle,
-                                                        boxShadow: const [
-                                                          BoxShadow(
-                                                              color: Color.fromARGB(33, 0, 0, 0),
+                                                    InkWell(
+                                                      onTap: () {
+                                                        GuestChecker.check(onNotGuest: () async {
+                                                          setState(() {
+                                                            widget.likeLoading![index] = true;
+                                                          });
+                                                          var body = {
+                                                            "type": widget.projectList![index]['is_favourite'] == 1 ? 0 : 1,
+                                                            "project_id": widget.projectList![index]['id']
+                                                          };
+                                                          var response = await Api.post(
+                                                              url: Api.addFavProject, parameter: body);
+                                                          if (!response['error']) {
+                                                            widget.projectList![index]['is_favourite'] = (widget.projectList![index]['is_favourite'] == 1 ? 0 : 1);
+                                                            setState(() {
+                                                              widget.likeLoading![index] = false;
+                                                            });
+
+                                                          }
+                                                        });
+                                                      },
+                                                      child: Container(
+                                                        width: 32,
+                                                        height: 30,
+                                                        decoration: BoxDecoration(
+                                                          color: context.color.secondaryColor,
+                                                          shape: BoxShape.circle,
+                                                          boxShadow: const [
+                                                            BoxShadow(
+                                                              color:
+                                                              Color.fromARGB(12, 0, 0, 0),
                                                               offset: Offset(0, 2),
                                                               blurRadius: 15,
-                                                              spreadRadius: 0)
-                                                        ],
+                                                              spreadRadius: 0,
+                                                            )
+                                                          ],
+                                                        ),
+                                                        child: Container(
+                                                          width: 32,
+                                                          height: 32,
+                                                          decoration: BoxDecoration(
+                                                            color: context.color.primaryColor,
+                                                            shape: BoxShape.circle,
+                                                            boxShadow: const [
+                                                              BoxShadow(
+                                                                  color: Color.fromARGB(33, 0, 0, 0),
+                                                                  offset: Offset(0, 2),
+                                                                  blurRadius: 15,
+                                                                  spreadRadius: 0)
+                                                            ],
+                                                          ),
+                                                          child: Center(
+                                                              child:
+                                                              (widget.likeLoading![index])
+                                                                  ? UiUtils.progress(width: 20, height: 20)
+                                                                  : widget.projectList![index]['is_favourite'] == 1
+                                                                  ?
+                                                                  UiUtils.getSvg(
+                                                                    AppIcons.like_fill,
+                                                                    color: context.color.tertiaryColor,
+                                                                  )
+                                                                  : UiUtils.getSvg(AppIcons.like,
+                                                                  color: context.color.tertiaryColor)
+                                                        ),
+                                                        ),
                                                       ),
-                                                      child: Center(
-                                                          child:
-                                                          (widget.likeLoading![index])
-                                                              ? UiUtils.progress(width: 20, height: 20)
-                                                              : widget.projectList![index]['is_favourite'] == 1
-                                                              ?
-                                                              UiUtils.getSvg(
-                                                                AppIcons.like_fill,
-                                                                color: context.color.tertiaryColor,
-                                                              )
-                                                              : UiUtils.getSvg(AppIcons.like,
-                                                              color: context.color.tertiaryColor)
                                                     ),
-                                                    ),
-                                                  ),
+
+                                                  ],
                                                 ),
                                               ),
-                                              if(widget.projectList![index]['gallary_images'] != null)
-                                                Positioned(
-                                                  right: 48,
-                                                  top: 8,
-                                                  child: InkWell(
-                                                    onTap: () {
-                                                      Navigator.push(context,
-                                                          BlurredRouter(
-                                                            builder: (context) {
-                                                              return AllGallaryImages(
-                                                                  images: widget.projectList![index]['gallary_images'] ?? [],
-                                                                  isProject: true);
-                                                            },
-                                                          ));
-                                                    },
-                                                    child: Container(
-                                                      width: 35,
-                                                      height: 25,
-                                                      decoration: BoxDecoration(
-                                                        color: Color(0xff000000).withOpacity(0.35),
-                                                        borderRadius: BorderRadius.circular(8),
-                                                        border: Border.all(width: 1, color: Color(0xffe0e0e0)),
-                                                        boxShadow: const [
-                                                          BoxShadow(
-                                                            color: Color.fromARGB(12, 0, 0, 0),
-                                                            offset: Offset(0, 2),
-                                                            blurRadius: 15,
-                                                            spreadRadius: 0,
-                                                          )
-                                                        ],
-                                                      ),
-                                                      child: Row(
-                                                        mainAxisAlignment: MainAxisAlignment.center,
-                                                        children: [
-                                                          Icon(
-                                                              Icons.image,
-                                                              color: Color(0xffe0e0e0),
-                                                              size: 15
-                                                          ),
-                                                          SizedBox(width: 3,),
-                                                          Text('${widget.projectList![index]['gallary_images']!.length}',
-                                                            style: TextStyle(
-                                                                color: Color(0xffe0e0e0),
-                                                                fontSize: 10
-                                                            ),),
-                                                        ],
-                                                      ),
-                                                    ),
-                                                  ),
-                                                ),
+
                                             ],
                                           ),
                                         ),
@@ -3250,18 +3277,18 @@ class _RecentPropertiesSectionWidgetState
                                         mainAxisAlignment:
                                         MainAxisAlignment.spaceEvenly,
                                         children: [
-                                          SizedBox(height: 6,),
+                                          const SizedBox(height: 6,),
                                           Text(
                                             widget.projectList![index]['title'],
                                             maxLines: 1,
                                             overflow: TextOverflow.ellipsis,
-                                            style: TextStyle(
+                                            style: const TextStyle(
                                                 color: Color(0xff333333),
                                                 fontSize: 12.5,
                                                 fontWeight: FontWeight.w500
                                             ),
                                           ),
-                                          SizedBox(height: 4,),
+                                          const SizedBox(height: 4,),
                                         if(widget.projectList![index]['min_price'] == null)
                                           Row(
                                             children: [
@@ -3270,7 +3297,7 @@ class _RecentPropertiesSectionWidgetState
                                                     .toString(),
                                                 maxLines: 1,
                                                 overflow: TextOverflow.ellipsis,
-                                                style: TextStyle(
+                                                style: const TextStyle(
                                                     color: Color(0xff333333),
                                                     fontSize: 12,
                                                     fontFamily: 'Robato',
@@ -3290,7 +3317,7 @@ class _RecentPropertiesSectionWidgetState
                                                     .toString(),
                                                 maxLines: 1,
                                                 overflow: TextOverflow.ellipsis,
-                                                style: TextStyle(
+                                                style: const TextStyle(
                                                     color: Color(0xffa2a2a2),
                                                     fontSize: 9,
                                                     fontWeight: FontWeight.w500
@@ -3300,7 +3327,6 @@ class _RecentPropertiesSectionWidgetState
                                           ),
                                         if(widget.projectList![index]['min_price'] != null)
                                           ...[
-                                            SizedBox(height: 5,),
                                             Row(
                                               children: [
                                                 Text(
@@ -3308,7 +3334,7 @@ class _RecentPropertiesSectionWidgetState
                                                       .toString(),
                                                   maxLines: 1,
                                                   overflow: TextOverflow.ellipsis,
-                                                  style: TextStyle(
+                                                  style: const TextStyle(
                                                       color: Color(0xff333333),
                                                       fontSize: 12,
                                                       fontFamily: 'Robato',
@@ -3320,7 +3346,7 @@ class _RecentPropertiesSectionWidgetState
                                           ],
                                         if(widget.projectList![index]['min_price'] != null)
                                           ...[
-                                            SizedBox(height: 5,),
+                                            const SizedBox(height: 5,),
                                             Row(
                                               children: [
                                                 Text(
@@ -3328,7 +3354,7 @@ class _RecentPropertiesSectionWidgetState
                                                       .toString(),
                                                   maxLines: 1,
                                                   overflow: TextOverflow.ellipsis,
-                                                  style: TextStyle(
+                                                  style: const TextStyle(
                                                       color: Color(0xffa2a2a2),
                                                       fontSize: 10,
                                                       fontWeight: FontWeight.w500
@@ -3337,19 +3363,19 @@ class _RecentPropertiesSectionWidgetState
                                               ],
                                             ),
                                           ],
-                                          SizedBox(height: 4,),
+                                          const SizedBox(height: 4,),
                                           if (widget.projectList![index]['address'] != "")
                                             Padding(
                                               padding: const EdgeInsets.only(bottom: 4),
                                               child: Row(
                                                 children: [
                                                   Image.asset("assets/Home/__location.png",width:15,fit: BoxFit.cover,height: 15,),
-                                                  SizedBox(width: 5,),
+                                                  const SizedBox(width: 5,),
                                                   Expanded(
                                                       child: Text(
                                                         widget.projectList![index]['address']?.trim() ?? "",  maxLines: 1,
                                                         overflow: TextOverflow.ellipsis,
-                                                        style: TextStyle(
+                                                        style: const TextStyle(
                                                             color: Color(0xffa2a2a2),
                                                             fontSize: 9,
                                                             fontWeight: FontWeight.w400
@@ -3358,8 +3384,8 @@ class _RecentPropertiesSectionWidgetState
                                                 ],
                                               ),
                                             ),
-                                          SizedBox(height: 4,),
-                                          Row(
+                                          const SizedBox(height: 4,),
+                                          const Row(
                                             mainAxisAlignment: MainAxisAlignment.end,
                                             children: [
                                               // Text("Posted By ${premiumPropertiesList[i]['role'] == 1 ? 'Owner' : premiumPropertiesList[i]['role'] == 2 ? 'Agent' : premiumPropertiesList[i]['role'] == 3 ? 'Builder' : 'Housepecker'}",
@@ -3385,7 +3411,7 @@ class _RecentPropertiesSectionWidgetState
                     ),
                   );
                 } else {
-                  return ClipRRect(
+                  return const ClipRRect(
                     clipBehavior: Clip.antiAliasWithSaveLayer,
                     borderRadius: BorderRadius.all(Radius.circular(15)),
                     child: CustomShimmer(height: 90, width: 90),
@@ -3416,7 +3442,7 @@ class PersonalizedPropertyWidget extends StatelessWidget {
                 onSeeAll: () {},
                 title: "personalizedFeed".translate(context),
               ),
-              PromotedPropertiesShimmer(),
+              const PromotedPropertiesShimmer(),
             ],
           );
         }
@@ -3597,7 +3623,7 @@ class _TopAgentsState extends State<TopAgents> {
               Navigator.push(
                 context,
                 MaterialPageRoute(
-                  builder: (context) => seeallAgent(), // Assuming SeeAllAgent is a widget.
+                  builder: (context) => const seeallAgent(), // Assuming SeeAllAgent is a widget.
                 ),
               );
 
@@ -3629,9 +3655,9 @@ class _TopAgentsState extends State<TopAgents> {
     return Container(
       width: size.width * 0.75,
       decoration: BoxDecoration(
-        border: Border.all(color: Color(0xFF9ea1a7).withOpacity(0.5)),
+        border: Border.all(color: const Color(0xFF9ea1a7).withOpacity(0.5)),
         borderRadius: BorderRadius.circular(12),
-        color: Color(0xffffffff),
+        color: const Color(0xffffffff),
       ),
       child: Padding(
         padding: const EdgeInsets.all(8.0),
@@ -3643,7 +3669,7 @@ class _TopAgentsState extends State<TopAgents> {
                   height: size.height * 0.07,
                   width: size.width * 0.15,
                   decoration: BoxDecoration(
-                    border: Border.all(color: Color(0xFF9ea1a7).withOpacity(0.5)),
+                    border: Border.all(color: const Color(0xFF9ea1a7).withOpacity(0.5)),
                     borderRadius: BorderRadius.circular(15),
                     // color: Color(0xffffffff),
                   ),
@@ -3658,13 +3684,13 @@ class _TopAgentsState extends State<TopAgents> {
                             : null),
                   ),
                 ),
-                SizedBox(width: 10),
+                const SizedBox(width: 10),
                 Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Text(
                       agent['name'],  // Display agent's name
-                      style: TextStyle(
+                      style: const TextStyle(
                         fontSize: 14.5,
                         fontWeight: FontWeight.w500,
                         overflow: TextOverflow.ellipsis,
@@ -3675,12 +3701,12 @@ class _TopAgentsState extends State<TopAgents> {
                       child: Row(
                         children: [
                           Image.asset('assets/rera_tic.png', height: 14, width:14),
-                          SizedBox(width: 2),
+                          const SizedBox(width: 2),
                           Text(
                             'RERA ID : ${agent['rera'] ?? 'N/A'}',
                             overflow: TextOverflow.ellipsis,
                             maxLines: 1,// Display RERA ID
-                            style: TextStyle(
+                            style: const TextStyle(
                               fontSize: 11,
                               color: Color(0xFF9ea1a7),
 
@@ -3693,23 +3719,23 @@ class _TopAgentsState extends State<TopAgents> {
                 ),
               ],
             ),
-            SizedBox(height: 10),
+            const SizedBox(height: 10),
             Container(
               height: size.height * 0.11,
               decoration: BoxDecoration(
-                color: Color(0xFFfff5f1),
+                color: const Color(0xFFfff5f1),
                 borderRadius: BorderRadius.circular(12),
               ),
               child: Row(
                 mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                 children: [
                   buildPropertyColumn(agent['sell_property']?.toString() ?? '0', "Properties for\nsale"),  // Default to '0'
-                  VerticalDivider(color: Colors.grey, thickness: 2),
+                  const VerticalDivider(color: Colors.grey, thickness: 2),
                   buildPropertyColumn(agent['rent_property']?.toString() ?? '0', "Properties for\nrent"),  // Default to '0'
                 ],
               ),
             ),
-            SizedBox(height: 10),
+            const SizedBox(height: 10),
             Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
@@ -3721,7 +3747,7 @@ class _TopAgentsState extends State<TopAgents> {
                           UserDetailProfileScreen(id: agent['id'] )),
                     );
                   },
-                  child: Text(
+                  child: const Text(
                     'View All Properties',
                     style: TextStyle(fontWeight: FontWeight.bold, color: Color(0xFF9ea1a7)),
                   ),
@@ -3735,14 +3761,14 @@ class _TopAgentsState extends State<TopAgents> {
                     );
                   },
                   child: Container(
-                    padding: EdgeInsets.symmetric(vertical: 7, horizontal: 15),
+                    padding: const EdgeInsets.symmetric(vertical: 7, horizontal: 15),
                     // height: 30,
                     // width: 90,
                     decoration: BoxDecoration(
                       color: Colors.blueAccent,
                       borderRadius: BorderRadius.circular(15),
                     ),
-                    child: Center(
+                    child: const Center(
                       child: Text(
                         'View Profile',
                         style: TextStyle(color: Colors.white, fontSize: 10,fontWeight: FontWeight.bold),
@@ -3761,20 +3787,20 @@ class _TopAgentsState extends State<TopAgents> {
     return Column(
       // crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        SizedBox(height: 5),
+        const SizedBox(height: 5),
         Padding(
           padding: const EdgeInsets.symmetric(horizontal: 5),
           child: Text(
             count,
             textAlign: TextAlign.start,
-            style: TextStyle(fontSize: 24, fontWeight: FontWeight.w500),
+            style: const TextStyle(fontSize: 24, fontWeight: FontWeight.w500),
           ),
         ),
-        SizedBox(height: 5),
+        const SizedBox(height: 5),
         Text(
           label,
           textAlign: TextAlign.justify,
-          style: TextStyle(fontSize: 13, fontWeight: FontWeight.w500, color: Color(0xFF9ea1a7)),
+          style: const TextStyle(fontSize: 13, fontWeight: FontWeight.w500, color: Color(0xFF9ea1a7)),
         ),
       ],
     );
@@ -3875,7 +3901,7 @@ class _TopBuildersState extends State<TopBuilders> {
               Navigator.push(
                 context,
                 MaterialPageRoute(
-                  builder: (context) => see_allBuilders(), // Assuming SeeAllAgent is a widget.
+                  builder: (context) => const see_allBuilders(), // Assuming SeeAllAgent is a widget.
                 ),
               );
             },
@@ -3886,7 +3912,7 @@ class _TopBuildersState extends State<TopBuilders> {
           child: builderLoading
               ? _buildShimmerList(size) // Show shimmer when loading
               : topBuilderList.isEmpty
-              ? Center(child: Text('No Builders Found')) // Show message if list is empty
+              ? const Center(child: Text('No Builders Found')) // Show message if list is empty
               : ListView.builder(
                 scrollDirection: Axis.horizontal,
                 itemCount: topBuilderList.length,
@@ -3939,23 +3965,23 @@ class _TopBuildersState extends State<TopBuilders> {
     return Container(
       width: size.width * 0.7,
       decoration: BoxDecoration(
-        border: Border.all(color: Color(0xFF9ea1a7).withOpacity(0.5)),
+        border: Border.all(color: const Color(0xFF9ea1a7).withOpacity(0.5)),
         borderRadius: BorderRadius.circular(12),
-        color: Color(0xffffffff),
+        color: const Color(0xffffffff),
       ),
       child: Padding(
         padding: const EdgeInsets.all(8.0),
         child: Column(
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
           children: [
-            Spacer(),
+            const Spacer(),
             Row(
               children: [
                 Container(
                   height: size.height * 0.07,
                   width: size.width * 0.15,
                   decoration: BoxDecoration(
-                    border: Border.all(color: Color(0xFF9ea1a7).withOpacity(0.5)),
+                    border: Border.all(color: const Color(0xFF9ea1a7).withOpacity(0.5)),
                     borderRadius: BorderRadius.circular(15),
                   ),
                   child: ClipRRect(
@@ -3969,13 +3995,13 @@ class _TopBuildersState extends State<TopBuilders> {
                             : null),
                   ),
                 ),
-                SizedBox(width: 10), // Space between image and text
+                const SizedBox(width: 10), // Space between image and text
                 Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Text(
                       agent['name'] ?? 'Unknown', // Fallback if null
-                      style: TextStyle(
+                      style: const TextStyle(
                           fontSize: 14.5,
                           fontWeight: FontWeight.w500,
                           overflow: TextOverflow.ellipsis),
@@ -3985,10 +4011,10 @@ class _TopBuildersState extends State<TopBuilders> {
                       child: Row(
                         children: [
                           Image.asset('assets/rera_tic.png', height: 14, width:14),
-                          SizedBox(width: 2),
+                          const SizedBox(width: 2),
                           Text(
                             'RERA ID : ${agent['rera'] ?? 'N/A'}', // Fallback if null
-                            style: TextStyle(
+                            style: const TextStyle(
                                 fontSize: 10, color: Color(0xFF9ea1a7)),
                           ),
                         ],
@@ -3998,11 +4024,11 @@ class _TopBuildersState extends State<TopBuilders> {
                 ),
               ],
             ),
-            Spacer(),
+            const Spacer(),
             Container(
               height: size.height * 0.11,
               decoration: BoxDecoration(
-                color: Color(0xFFf5f9ff),
+                color: const Color(0xFFf5f9ff),
                 borderRadius: BorderRadius.circular(12),
               ),
               child: Row(
@@ -4016,8 +4042,8 @@ class _TopBuildersState extends State<TopBuilders> {
                       ],
                     ),
                   ),
-                  Padding(
-                    padding: const EdgeInsets.symmetric(vertical: 10),
+                  const Padding(
+                    padding: EdgeInsets.symmetric(vertical: 10),
                     child: VerticalDivider(color: Colors.grey, thickness: 2),
                   ),
                   Expanded(
@@ -4030,7 +4056,7 @@ class _TopBuildersState extends State<TopBuilders> {
                 ],
               ),
             ),
-            Spacer(),
+            const Spacer(),
           ],
         ),
       ),
@@ -4041,18 +4067,18 @@ class _TopBuildersState extends State<TopBuilders> {
   Widget buildPropertyColumn(String count, String label) {
     return Column(
       children: [
-        SizedBox(height: 5),
+        const SizedBox(height: 5),
         Padding(
           padding: const EdgeInsets.symmetric(horizontal: 5),
           child: Text(
             count,
-            style: TextStyle(fontSize: 24, fontWeight: FontWeight.w500),
+            style: const TextStyle(fontSize: 24, fontWeight: FontWeight.w500),
           ),
         ),
         Text(
           label,
           textAlign: TextAlign.start,
-          style: TextStyle(
+          style: const TextStyle(
               fontSize: 13, fontWeight: FontWeight.w500, color: Color(0xFF9ea1a7)),
         ),
       ],

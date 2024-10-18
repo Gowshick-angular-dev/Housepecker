@@ -158,83 +158,85 @@ class PropertyHorizontalCard extends StatelessWidget {
                                     ),
                                   )
                               ),
-                            if (showLikeButton ?? true)
-                              Positioned(
-                                right: 8,
-                                top: 8,
-                                child: Container(
-                                  width: 32,
-                                  height: 32,
-                                  decoration: BoxDecoration(
-                                    color: context.color.secondaryColor,
-                                    shape: BoxShape.circle,
-                                    boxShadow: const [
-                                      BoxShadow(
-                                        color:
-                                        Color.fromARGB(12, 0, 0, 0),
-                                        offset: Offset(0, 2),
-                                        blurRadius: 15,
-                                        spreadRadius: 0,
-                                      )
-                                    ],
-                                  ),
-                                  child: LikeButtonWidget(
-                                    property: property,
-                                    onLikeChanged: onLikeChange,
-                                  ),
-                                ),
-                              ),
-                            if(property.gallery != null)
-                              Positioned(
-                                right: 48,
-                                top: 8,
-                                child: InkWell(
-                                  onTap: () {
-                                    Navigator.push(context,
-                                        BlurredRouter(
-                                          builder: (context) {
-                                            return AllGallaryImages(
-                                                images: property
-                                                    ?.gallery ??
-                                                    []);
-                                          },
-                                        ));
-                                  },
-                                  child: Container(
-                                    width: 35,
-                                    height: 25,
-                                    decoration: BoxDecoration(
-                                      color: Color(0xff000000).withOpacity(0.35),
-                                      borderRadius: BorderRadius.circular(8),
-                                      border: Border.all(width: 1, color: Color(0xffe0e0e0)),
-                                      boxShadow: const [
-                                        BoxShadow(
-                                          color: Color.fromARGB(12, 0, 0, 0),
-                                          offset: Offset(0, 2),
-                                          blurRadius: 15,
-                                          spreadRadius: 0,
-                                        )
-                                      ],
-                                    ),
-                                    child: Row(
-                                      mainAxisAlignment: MainAxisAlignment.center,
-                                      children: [
-                                        Icon(
-                                            Icons.image,
-                                            color: Color(0xffe0e0e0),
-                                            size: 15
+                            Positioned(
+                              right: 8,
+                              top: 8,
+                              child: Row(
+                                children: [
+                                  if(property.gallery != null)
+                                    ...[
+                                      InkWell(
+                                        onTap: () {
+                                          Navigator.push(context,
+                                              BlurredRouter(
+                                                builder: (context) {
+                                                  return AllGallaryImages(
+                                                      images: property
+                                                          ?.gallery ??
+                                                          []);
+                                                },
+                                              ));
+                                        },
+                                        child: Container(
+                                          width: 35,
+                                          height: 28,
+                                          decoration: BoxDecoration(
+                                            color: Color(0xff000000).withOpacity(0.35),
+                                            borderRadius: BorderRadius.circular(8),
+                                            border: Border.all(width: 1, color: Color(0xffe0e0e0)),
+                                            boxShadow: const [
+                                              BoxShadow(
+                                                color: Color.fromARGB(12, 0, 0, 0),
+                                                offset: Offset(0, 2),
+                                                blurRadius: 15,
+                                                spreadRadius: 0,
+                                              )
+                                            ],
+                                          ),
+                                          child: Row(
+                                            mainAxisAlignment: MainAxisAlignment.center,
+                                            children: [
+                                              Icon(
+                                                  Icons.image,
+                                                  color: Color(0xffe0e0e0),
+                                                  size: 15
+                                              ),
+                                              SizedBox(width: 3,),
+                                              Text('${property.gallery!.length}',
+                                                style: TextStyle(
+                                                    color: Color(0xffe0e0e0),
+                                                    fontSize: 10
+                                                ),),
+                                            ],
+                                          ),
                                         ),
-                                        SizedBox(width: 3,),
-                                        Text('${property.gallery!.length}',
-                                          style: TextStyle(
-                                              color: Color(0xffe0e0e0),
-                                              fontSize: 10
-                                          ),),
-                                      ],
+                                      ),
+                                      SizedBox(width: 8,),
+                                    ],
+                                  if (showLikeButton ?? true)
+                                    Container(
+                                      width: 32,
+                                      height: 30,
+                                      decoration: BoxDecoration(
+                                        color: context.color.secondaryColor,
+                                        shape: BoxShape.circle,
+                                        boxShadow: const [
+                                          BoxShadow(
+                                            color: Color.fromARGB(12, 0, 0, 0),
+                                            offset: Offset(0, 2),
+                                            blurRadius: 15,
+                                            spreadRadius: 0,
+                                          )
+                                        ],
+                                      ),
+                                      child: LikeButtonWidget(
+                                        property: property,
+                                        onLikeChanged: onLikeChange,
+                                      ),
                                     ),
-                                  ),
-                                ),
+                                ],
                               ),
+                            ),
                             if (property.promoted ?? false)
                               const PositionedDirectional(
                                   start: 5,
@@ -623,82 +625,87 @@ class PropertyVerticalCard extends StatelessWidget {
                             ),
                           )
                       ),
-                    if (showLikeButton ?? true)
+
                       Positioned(
                         right: 8,
                         top: 8,
-                        child: Container(
-                          width: 32,
-                          height: 32,
-                          decoration: BoxDecoration(
-                            color: context.color.secondaryColor,
-                            shape: BoxShape.circle,
-                            boxShadow: const [
-                              BoxShadow(
-                                color: Color.fromARGB(12, 0, 0, 0),
-                                offset: Offset(0, 2),
-                                blurRadius: 15,
-                                spreadRadius: 0,
-                              )
-                            ],
-                          ),
-                          child: LikeButtonWidget(
-                            property: property,
-                            onLikeChanged: onLikeChange,
-                          ),
-                        ),
-                      ),
-                    if(property.gallery != null)
-                      Positioned(
-                      right: 48,
-                      top: 8,
-                      child: InkWell(
-                        onTap: () {
-                          Navigator.push(context,
-                              BlurredRouter(
-                                builder: (context) {
-                                  return AllGallaryImages(
-                                      images: property
-                                          ?.gallery ??
-                                          []);
-                                },
-                              ));
-                        },
-                        child: Container(
-                          width: 35,
-                          height: 25,
-                          decoration: BoxDecoration(
-                            color: Color(0xff000000).withOpacity(0.35),
-                            borderRadius: BorderRadius.circular(8),
-                            border: Border.all(width: 1, color: Color(0xffe0e0e0)),
-                            boxShadow: const [
-                              BoxShadow(
-                                color: Color.fromARGB(12, 0, 0, 0),
-                                offset: Offset(0, 2),
-                                blurRadius: 15,
-                                spreadRadius: 0,
-                              )
-                            ],
-                          ),
-                          child: Row(
-                            mainAxisAlignment: MainAxisAlignment.center,
-                            children: [
-                              Icon(
-                                Icons.image,
-                                color: Color(0xffe0e0e0),
-                                size: 15
+                        child: Row(
+                          children: [
+                            if(property.gallery != null)
+                           ...[
+                             InkWell(
+                               onTap: () {
+                                 Navigator.push(context,
+                                     BlurredRouter(
+                                       builder: (context) {
+                                         return AllGallaryImages(
+                                             images: property
+                                                 ?.gallery ??
+                                                 []);
+                                       },
+                                     ));
+                               },
+                               child: Container(
+                                 width: 35,
+                                 height: 28,
+                                 decoration: BoxDecoration(
+                                   color: Color(0xff000000).withOpacity(0.35),
+                                   borderRadius: BorderRadius.circular(8),
+                                   border: Border.all(width: 1, color: Color(0xffe0e0e0)),
+                                   boxShadow: const [
+                                     BoxShadow(
+                                       color: Color.fromARGB(12, 0, 0, 0),
+                                       offset: Offset(0, 2),
+                                       blurRadius: 15,
+                                       spreadRadius: 0,
+                                     )
+                                   ],
+                                 ),
+                                 child: Row(
+                                   mainAxisAlignment: MainAxisAlignment.center,
+                                   children: [
+                                     Icon(
+                                         Icons.image,
+                                         color: Color(0xffe0e0e0),
+                                         size: 15
+                                     ),
+                                     SizedBox(width: 3,),
+                                     Text('${property.gallery!.length}',
+                                       style: TextStyle(
+                                           color: Color(0xffe0e0e0),
+                                           fontSize: 10
+                                       ),),
+                                   ],
+                                 ),
+                               ),
+                             ),
+                             SizedBox(width: 8,),
+                           ],
+                            if (showLikeButton ?? true)
+                            Container(
+                              width: 32,
+                              height: 30,
+                              decoration: BoxDecoration(
+                                color: context.color.secondaryColor,
+                                shape: BoxShape.circle,
+                                boxShadow: const [
+                                  BoxShadow(
+                                    color: Color.fromARGB(12, 0, 0, 0),
+                                    offset: Offset(0, 2),
+                                    blurRadius: 15,
+                                    spreadRadius: 0,
+                                  )
+                                ],
                               ),
-                              SizedBox(width: 3,),
-                              Text('${property.gallery!.length}',
-                              style: TextStyle(
-                                color: Color(0xffe0e0e0),
-                                fontSize: 10
-                              ),),
-                            ],
-                          ),
+                              child: LikeButtonWidget(
+                                property: property,
+                                onLikeChanged: onLikeChange,
+                              ),
+                            ),
+                          ],
                         ),
                       ),
-                    ),
+
                     if (property.promoted ?? false)
                       const PositionedDirectional(
                         start: 5,
