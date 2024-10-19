@@ -66,18 +66,27 @@ class HomeSearchField extends StatelessWidget {
             child: Column(
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
-                Text(banner != null ? banner!['home_banner_title'] : '',
-                  style: TextStyle(
-                      color: Colors.black87,
-                      fontWeight: FontWeight.w600,
-                      fontSize: 15,
+                Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 15),
+                  child: Text(banner != null ? banner!['home_banner_title'] : '',
+                    textAlign: TextAlign.center,
+                    style: TextStyle(
+                        color: Colors.black87,
+                        fontWeight: FontWeight.w600,
+                        fontSize: 15,
+                    ),
                   ),
                 ),
-                Text(banner != null ? banner!['home_banner_subtitle'] : '',
-                  style: TextStyle(
-                    color: Colors.black45,
-                    fontWeight: FontWeight.w300,
-                    fontSize: 8,
+                SizedBox(height: 3,),
+                Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 15),
+                  child: Text(banner != null ? banner!['home_banner_subtitle'] : '',
+                    textAlign: TextAlign.center,
+                    style: TextStyle(
+                      color: Colors.black45,
+                      fontWeight: FontWeight.w300,
+                      fontSize: 11,
+                    ),
                   ),
                 ),
               ],

@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
 
 import '../../../utils/api.dart';
+import '../../../utils/ui_utils.dart';
 import '../../Theme/theme.dart';
 import '../Advertisement/loanAdForm.dart';
 import '../widgets/shimmerLoadingContainer.dart';
@@ -27,6 +28,7 @@ class _LoanHomeState extends State<LoanHome> {
   bool tapped = false;
   String agentType = '';
   String selectedBank = '';
+
 
   String dropdownvalue6 = 'Chennai';
   var items6 = ['Chennai','Madurai'];
@@ -82,7 +84,12 @@ class _LoanHomeState extends State<LoanHome> {
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: Colors.white,
-      appBar: AppBar(
+      appBar: UiUtils.buildAppBar(context,
+          showBackButton: true,
+          title:'Loan',
+          actions: [
+          ]),
+    /*  appBar: AppBar(
         backgroundColor: tertiaryColor_,
         title: Text('Loan',
           style: TextStyle(
@@ -111,7 +118,7 @@ class _LoanHomeState extends State<LoanHome> {
         //     ),
         //   )
         // ]
-      ),
+      ),*/
       body: Column(
         children: [
           Expanded(
@@ -183,7 +190,7 @@ class _LoanHomeState extends State<LoanHome> {
                     //     ],
                     //   ),
                     // ),
-                    SizedBox(height: 15,),
+                    SizedBox(height: 10,),
                     Row(
                       children: [
                         Expanded(
@@ -194,7 +201,7 @@ class _LoanHomeState extends State<LoanHome> {
                                   color: Color(0xffe1e1e1)
                               ),
                               color: Color(0xfff5f5f5),
-                              borderRadius: BorderRadius.circular(10.0), // Optional: Add border radius
+                              borderRadius: BorderRadius.circular(10.0),
                             ),
                             child: Padding(
                               padding: const EdgeInsets.only(left: 8.0,right: 5),
@@ -203,10 +210,11 @@ class _LoanHomeState extends State<LoanHome> {
                                 onChanged: (String? val) {
                                   getBanks(loanType, searchControler.text, val!, branchControler.text);
                                 },
+                                style: TextStyle(fontSize: 12),
                                 decoration: const InputDecoration(
                                     hintText: 'Location..',
                                     hintStyle: TextStyle(
-                                      fontFamily: 'Poppins',
+                                      fontFamily: 'Manrope',
                                       fontSize: 12.0,
                                       color: Color(0xff9c9c9c),
                                       fontWeight: FontWeight.w500,
@@ -226,7 +234,7 @@ class _LoanHomeState extends State<LoanHome> {
                             ),
                           ),
                         ),
-                        SizedBox(width: 5,),
+                        SizedBox(width: 10,),
                         // Expanded(
                         //   child: Container(
                         //     decoration: BoxDecoration(
@@ -294,12 +302,12 @@ class _LoanHomeState extends State<LoanHome> {
                                 // icon: Icon(Icons.keyboard_arrow_down,color:Colors.black,size: 15,),
                                 items: [DropdownMenuItem(
                                     value: '',
-                                    child: Text('Loan Type', maxLines: 1,),
+                                    child: Text('Loan Type', maxLines: 1,style: TextStyle(  fontFamily: 'Manrope',fontSize: 12),),
                                     enabled: false,
                                 ), ...loanList.map((items) {
                                   return DropdownMenuItem(
                                       value: items['id'].toString(),
-                                      child: Text(items['name'], maxLines: 1,)
+                                      child: Text(items['name'], maxLines: 1,style: TextStyle(fontSize: 12),)
                                   );
                                 }
                                 ).toList()],
@@ -352,10 +360,9 @@ class _LoanHomeState extends State<LoanHome> {
                             child: Center(
                               child: ClipRRect(
                                 borderRadius: BorderRadius.circular(15),
-                                child: Image.network(
-                                  item['image']!,
-                                  fit: BoxFit.cover,
-                                ),
+                                child: UiUtils.getImage(
+                                    item['image']!,
+                                    fit: BoxFit.cover),
                               ),
                             ),
                           ),

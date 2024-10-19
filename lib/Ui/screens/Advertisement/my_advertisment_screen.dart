@@ -80,6 +80,42 @@ class _MyAdvertismentScreenState extends State<MyAdvertismentScreen> {
 
               itemBuilder: (context, index) {
                 var item = myAdvertisementList[index];
+                String displayText = "";
+
+                switch (item['category_id']) {
+                  case 1:
+                    displayText = item['post_type_name'] ?? '';
+                    break;
+                  case 2:
+                    displayText = (item['post_details'] != null && item['post_details'].isNotEmpty)
+                        ? (item['post_details'][0]['property_type_name'] is List
+                        ? (item['post_details'][0]['property_type_name'] as List)
+                        .map((property) => property.toString())
+                        .join(', ')
+                        : item['post_details'][0]['property_type_name'] ?? '')
+                        : '';
+                    break;
+                  case 3:
+                    displayText = (item['post_details'] != null && item['post_details'].isNotEmpty)
+                        ? (item['post_details'][0]['service_type_name'] is List
+                        ? (item['post_details'][0]['service_type_name'] as List)
+                        .map((service) => service.toString())
+                        .join(', ')
+                        : item['post_details'][0]['service_type_name'] ?? '')
+                        : '';
+                    break;
+                  case 4:
+                    displayText = (item['post_details'] != null && item['post_details'].isNotEmpty)
+                        ? (item['post_details'][0]['loan_type_name'] is List
+                        ? (item['post_details'][0]['loan_type_name'] as List)
+                        .map((loan) => loan.toString())
+                        .join(', ')
+                        : item['post_details'][0]['loan_type_name'] ?? '')
+                        : '';
+                    break;
+                  default:
+                    displayText = '';
+                }
                 return GestureDetector(
                   onLongPress: () {
                     // HelperUtils.share(context, property.id!, property?.slugId ?? "");
@@ -167,7 +203,7 @@ class _MyAdvertismentScreenState extends State<MyAdvertismentScreen> {
                                     //   ],
                                     // ),
                                     Text(item['title']??'',
-                                      maxLines: 2,overflow: TextOverflow.ellipsis,
+                                      maxLines: 1,overflow: TextOverflow.ellipsis,
                                       style: TextStyle(
                                           fontSize: 13,
                                           color: Color(0xff333333),
@@ -183,6 +219,16 @@ class _MyAdvertismentScreenState extends State<MyAdvertismentScreen> {
                                             fontWeight: FontWeight.w500),
                                         )
                                       ],
+                                    ),
+                                    Text(
+                                      displayText,
+                                      maxLines: 1,
+                                      overflow: TextOverflow.ellipsis,
+                                      style: TextStyle(
+                                        fontSize: 9,
+                                        color: Colors.black,
+                                        fontWeight: FontWeight.w600,
+                                      ),
                                     ),
                                     Text('Posted On : ${item['post_time']}',
                                       maxLines: 2,overflow:TextOverflow.ellipsis,

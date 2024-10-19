@@ -7,6 +7,7 @@ import 'package:shimmer/shimmer.dart';
 import '../../../app/routes.dart';
 import '../../../utils/api.dart';
 import '../../../utils/hive_utils.dart';
+import '../../../utils/ui_utils.dart';
 import '../home/Widgets/header_card.dart';
 import '../userprofile/userProfileScreen.dart';
 
@@ -68,7 +69,12 @@ class _seeallAgentState extends State<seeallAgent> {
     Size size = MediaQuery.sizeOf(context);
 
     return Scaffold(
-      appBar: AppBar(
+      appBar: UiUtils.buildAppBar(context,
+          showBackButton: true,
+          title:'Top Agents',
+          actions: [
+          ]),
+     /* appBar: AppBar(
         backgroundColor: tertiaryColor_,
         leadingWidth: 40, // Adjust the width to decrease the space between back icon and title
         titleSpacing: 15,
@@ -135,7 +141,7 @@ class _seeallAgentState extends State<seeallAgent> {
             ),
           ],
         ),
-      ),
+      ),*/
       body: SingleChildScrollView(
         child: Column(
           children: [

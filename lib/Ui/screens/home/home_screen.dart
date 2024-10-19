@@ -407,13 +407,21 @@ class HomeScreenState extends State<HomeScreen>
     }
   }
 
+  bool isBannerLoading = false;
+
   Future<void> getBanners(String address) async {
+
+    setState(() {
+      isBannerLoading = true;
+    });
+
     var response = await Api.get(url: Api.getBannerData, queryParameters: {
       'address': address
     });
     if(!response['error']) {
       setState(() {
         banners = response['data'];
+        isBannerLoading = false;
       });
     }
   }
@@ -939,7 +947,8 @@ class HomeScreenState extends State<HomeScreen>
                           ///Looping through sections so arrange it
                           ...List.generate(
                             AppSettings.sections.length,
-                            (index) {  HomeScreenSections section = AppSettings.sections[index];
+                            (index) {
+                              HomeScreenSections section = AppSettings.sections[index];
 
                               if (section == HomeScreenSections.Search) {
                                 return HomeSearchField(banner: systemSetting != null ? systemSetting : null);
@@ -954,7 +963,10 @@ class HomeScreenState extends State<HomeScreen>
                               }
 
                               else if (section == HomeScreenSections.banner) {
-                                return bannerWidget();
+                                return isBannerLoading?const Padding(
+                                  padding: EdgeInsets.symmetric(horizontal: 15),
+                                  child: SliderShimmer(),
+                                ):bannerWidget();
                               }
 
                               // else if (section == HomeScreenSections.RecentlyAdded) {
@@ -2291,21 +2303,29 @@ class HomeScreenState extends State<HomeScreen>
         Padding(
           padding: const EdgeInsets.only(left: 0),
           child: CarouselSlider(
-              options: CarouselOptions(
-                aspectRatio: 2.5,
-                autoPlay: true,
-                viewportFraction: 1.0,
-                onPageChanged: (index, reason) {
-                },
-              ),
-              items: [
-                for(int i = 0; i < banners.length; i++)
-                  ClipRRect( borderRadius : BorderRadius.circular(20),
-                      child: Image.network('${banners[i]['banner']}', width: MediaQuery.sizeOf(context).width - 30, fit: BoxFit.cover, height: 150,)
-                  ),
-              ]
+            options: CarouselOptions(
+              aspectRatio: 2.5,
+              autoPlay: true,
+              viewportFraction: 1.0,
+              onPageChanged: (index, reason) {},
+            ),
+            items: banners.map((banner) {
+              return ClipRRect(
+                borderRadius: BorderRadius.circular(20),
+                child: CachedNetworkImage(
+                  imageUrl: '${banner['banner']}',
+                  width: MediaQuery.sizeOf(context).width - 30,
+                  fit: BoxFit.cover,
+                  height: 150,
+                  placeholder: (context, url) =>
+                      Image.asset("assets/profile/noimg.png", fit: BoxFit.cover),
+                  errorWidget: (context, url, error) =>
+                      Image.asset("assets/profile/noimg.png", fit: BoxFit.cover),
+                ),
+              );
+            }).toList(),
           ),
-        ),
+        )
       ],
     );
   }
@@ -3747,9 +3767,14 @@ class _TopAgentsState extends State<TopAgents> {
                           UserDetailProfileScreen(id: agent['id'] )),
                     );
                   },
-                  child: const Text(
-                    'View All Properties',
-                    style: TextStyle(fontWeight: FontWeight.bold, color: Color(0xFF9ea1a7)),
+                  child: Row(
+                    children: [
+                      const Text(
+                        'View All Properties',
+                        style: TextStyle(fontWeight: FontWeight.w600, color: Color(0xFF9ea1a7),fontSize: 14),
+                      ),
+                      Image.asset("assets/assets/Images/blue_arr.png",height: 25,color: Colors.black,)
+                    ],
                   ),
                 ),
                 InkWell(

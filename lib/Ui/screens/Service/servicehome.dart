@@ -169,6 +169,7 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:Housepecker/Ui/screens/Service/servicelist.dart';
 import '../../../utils/api.dart';
+import '../../../utils/ui_utils.dart';
 import '../../Theme/theme.dart';
 import '../widgets/shimmerLoadingContainer.dart';
 
@@ -260,25 +261,74 @@ class _ServiceHomeState extends State<ServiceHome> {
       });
     }
   }
+  String? selectedSubcategory;
 
+  // Example data structure
+  final Map<String, List<String>> categories = {
+    'Fruits': ['Apple', 'Banana', 'Orange'],
+    'Vegetables': ['Carrot', 'Broccoli', 'Spinach'],
+    'Dairy': ['Milk', 'Cheese', 'Yogurt'],
+  };
+
+  List<DropdownMenuItem<String>> get dropdownItems {
+    List<DropdownMenuItem<String>> items = [];
+
+    categories.forEach((category, subcategories) {
+      // Add the category as a non-selectable item
+      items.add(
+        DropdownMenuItem<String>(
+          value: null, // Null value indicates non-selectable
+          enabled: false, // Make this item non-selectable
+          child: Text(
+            category,
+            style: TextStyle(fontWeight: FontWeight.bold),
+          ),
+        ),
+      );
+
+      // Add each subcategory as a selectable item
+      for (String subcategory in subcategories) {
+        items.add(
+          DropdownMenuItem<String>(
+            value: subcategory,
+            child: Text(subcategory),
+          ),
+        );
+      }
+    });
+
+    return items;
+  }
   @override
   Widget build(BuildContext context) {
     Size size = MediaQuery.sizeOf(context);
     return Scaffold(
       backgroundColor: Colors.white,
-      appBar: AppBar(
-        backgroundColor: tertiaryColor_,
-        title: Text(
-          'Services',
-          style: TextStyle(fontSize: 14, color: Colors.white),
-        ),
-      ),
+      appBar: UiUtils.buildAppBar(context,
+          showBackButton: true,
+          title:'Services',
+          actions: [
+          ]),
       body: SingleChildScrollView(
         child: Padding(
           padding: const EdgeInsets.all(15),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
+           /*   DropdownButton<String>(
+                hint: Text('Select Subcategory'),
+                value: selectedSubcategory,
+                items: dropdownItems,
+                onChanged: (value) {
+                  setState(() {
+                    selectedSubcategory = value;
+                  });
+                },
+              ),*/
+              // SizedBox(height: 20),
+              // if (selectedSubcategory != null) ...[
+              //   Text('Selected: $selectedSubcategory'),
+              // ],
               // Search Input
               Container(
                 height: size.height * 0.06,
@@ -288,9 +338,11 @@ class _ServiceHomeState extends State<ServiceHome> {
                 child: Center(
                   child: TextField(
                     controller: _searchController,
+                    style: TextStyle(fontSize: 14),
                     decoration: InputDecoration(
                       contentPadding: EdgeInsets.symmetric(vertical: 0), // Align text vertically in center
                       hintText: "Search Services...",
+                      hintStyle: TextStyle(fontSize: 14),
                       prefixIcon: Icon(Icons.search),
                       border: OutlineInputBorder(
                         borderRadius: BorderRadius.circular(25), // Circular border

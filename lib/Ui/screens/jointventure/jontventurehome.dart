@@ -42,6 +42,7 @@ class _JointVentureState extends State<JointVenture> {
 
 
   String? _selectedItemID;
+  String? locationValue='';
 
 
   String dropdownvalue6 = 'Chennai';
@@ -268,6 +269,20 @@ class _JointVentureState extends State<JointVenture> {
                                locationControler.selection =
                                    TextSelection.fromPosition(TextPosition(
                                        offset: prediction.description!.length));
+                               List address = prediction.description!.split(',').reversed.toList();
+                               if(address.length >= 3) {
+                                 locationValue = address[2];
+
+                                 setState(() { });
+                               } else if(address.length == 2) {
+                                 locationValue = address[1];
+
+                                 setState(() { });
+                               } else if(address.length == 1) {
+                                 locationValue = address[0];
+
+                                 setState(() { });
+                               }
                              },
                              itemBuilder: (context, index, Prediction prediction) {
                                return Container(
@@ -357,7 +372,17 @@ class _JointVentureState extends State<JointVenture> {
               SizedBox(height: 10,),
               InkWell(
                 onTap: (){
-                  getVentures(location: locationControler.text,jointType:_selectedItemID );
+
+                 if(locationControler.text.isEmpty){
+
+                   setState(() {
+                     locationValue="";
+                   });
+                      getVentures(location: locationValue,jointType:_selectedItemID );
+                 }else{
+                      getVentures(location: locationValue,jointType:_selectedItemID );
+                 }
+
                 },
                 child: Container(
                   height: 45,
@@ -559,129 +584,134 @@ class _JointVentureState extends State<JointVenture> {
                     SizedBox(height: 10,),
                   ],
                 ),
-                if(venturesList.length != 0)
-                  Column(
-                    children: [
-                      for(var i = 0; i < venturesList.length; i++)
-                        InkWell(
-                      onTap: (){
+              if (venturesList.isNotEmpty)
+                ListView.builder(
+                  scrollDirection: Axis.vertical,
+                  physics: const NeverScrollableScrollPhysics(),
+                  shrinkWrap: true,
+                  itemCount: venturesList.length,
+                  itemBuilder: (context, index) {
+                    return InkWell(
+                      onTap: () {
                         Navigator.push(
                           context,
-                          MaterialPageRoute(builder: (context) =>  JointventureDetail(id: venturesList[i]['id'])),
+                          MaterialPageRoute(
+                            builder: (context) => JointventureDetail(id: venturesList[index]['id']),
+                          ),
                         );
                       },
                       child: Padding(
                         padding: const EdgeInsets.only(bottom: 10),
                         child: Container(
                           decoration: BoxDecoration(
-                              color: Colors.white,
-                              borderRadius: BorderRadius.circular(15),
-                              border: Border.all(
-                                  width: 1,
-                                  color: Color(0xffe5e5e5)
-                              )
+                            color: Colors.white,
+                            borderRadius: BorderRadius.circular(15),
+                            border: Border.all(
+                              width: 1,
+                              color: Color(0xffe5e5e5),
+                            ),
                           ),
                           child: Column(
                             crossAxisAlignment: CrossAxisAlignment.start,
-                            mainAxisAlignment: MainAxisAlignment.start,
                             children: [
                               ClipRRect(
-                                  borderRadius: BorderRadius.only(
-                                    topLeft: Radius.circular(15),
-                                    topRight: Radius.circular(15),
-                                  ),
-                                  // child: Image.network(venturesList[i]['image'],width: double.infinity,height: 150,fit: BoxFit.cover,)
-                                  child: UiUtils.getImage(
-                                    venturesList[i]['image'] ?? "",
-                                    width: double.infinity,fit: BoxFit.cover,height: 150,
-                                  ),
+                                borderRadius: BorderRadius.only(
+                                  topLeft: Radius.circular(15),
+                                  topRight: Radius.circular(15),
+                                ),
+                                child: UiUtils.getImage(
+                                  venturesList[index]['image'] ?? "",
+                                  width: double.infinity,
+                                  fit: BoxFit.cover,
+                                  height: 150,
+                                ),
                               ),
-                              SizedBox(width: 10,),
+                              SizedBox(width: 10),
                               Padding(
                                 padding: const EdgeInsets.all(8.0),
                                 child: Column(
                                   crossAxisAlignment: CrossAxisAlignment.start,
                                   children: [
-                                    Row(children: [
-                                      ClipRRect(
+                                    Row(
+                                      children: [
+                                        ClipRRect(
                                           borderRadius: BorderRadius.circular(50),
-                                          // child: Image.network(venturesList[i]['photo'],width: 30,height: 30,fit: BoxFit.cover,),
                                           child: UiUtils.getImage(
-                                            venturesList[i]['photo'] ?? "",
-                                            width: 30,fit: BoxFit.cover,height: 30,
+                                            venturesList[index]['photo'] ?? "",
+                                            width: 30,
+                                            fit: BoxFit.cover,
+                                            height: 30,
                                           ),
-                                      ),
-                                      SizedBox(width: 10,),
-                                      Expanded(
-                                        child: Column(
-                                          crossAxisAlignment: CrossAxisAlignment.start,
-                                          children: [
-                                            Row(
-                                              children: [
-                                                Expanded(
-                                                  child: Text('${venturesList[i]['title']}',
-                                                    style: TextStyle(
-                                                      fontSize: 12,
-                                                      color: Colors.black,
-                                                      fontWeight: FontWeight.w500,
-                                                    ),),
-                                                ),
-                                                // Row(
-                                                //   children: [
-                                                //     Image.asset("assets/Loans/_-114.png",width: 15,height: 15,),
-                                                //     SizedBox(width: 5,),
-                                                //     Text('${UiUtils.trimNumberToOneDecimal(venturesList[i]['reviews_avg_ratting'] ?? '0')} (${venturesList[i]['user_count']} Ratings)',
-                                                //       style: TextStyle(
-                                                //         fontSize: 11,
-                                                //         color: Color(0xff7d7d7d)
-                                                //     ),)
-                                                //   ],
-                                                // ),
-                                              ],
-                                            ),
-                                            SizedBox(height: 3,),
-                                            Text('${venturesList[i]['post_date']}',
-                                              style: TextStyle(
-                                                fontSize: 9,
-                                                color: Colors.black,
-                                                fontWeight: FontWeight.w400,
-                                              ),),
-                                          ],
                                         ),
-                                      )
-                                    ],),
-                                    SizedBox(height: 5,),
-                                    Text('${venturesList[i]['post_name']}: ${venturesList[i]['land_size']}',
+                                        SizedBox(width: 10),
+                                        Expanded(
+                                          child: Column(
+                                            crossAxisAlignment: CrossAxisAlignment.start,
+                                            children: [
+                                              Row(
+                                                children: [
+                                                  Expanded(
+                                                    child: Text(
+                                                      '${venturesList[index]['title']}',
+                                                      style: TextStyle(
+                                                        fontSize: 12,
+                                                        color: Colors.black,
+                                                        fontWeight: FontWeight.w500,
+                                                      ),
+                                                    ),
+                                                  ),
+                                                ],
+                                              ),
+                                              SizedBox(height: 3),
+                                              Text(
+                                                '${venturesList[index]['post_date']}',
+                                                style: TextStyle(
+                                                  fontSize: 9,
+                                                  color: Colors.black,
+                                                  fontWeight: FontWeight.w400,
+                                                ),
+                                              ),
+                                            ],
+                                          ),
+                                        )
+                                      ],
+                                    ),
+                                    SizedBox(height: 5),
+                                    Text(
+                                      '${venturesList[index]['post_name']}: ${venturesList[index]['land_size']}',
                                       style: TextStyle(
                                         fontSize: 13,
                                         color: Colors.black,
                                         fontWeight: FontWeight.w600,
-                                      ),),
-                                    SizedBox(height: 5,),
+                                      ),
+                                    ),
+                                    SizedBox(height: 5),
                                     Row(
                                       children: [
-                                        Image.asset("assets/Home/__location.png",width: 15,height: 15,),
-                                        SizedBox(width: 5,),
-                                        Text('${venturesList[i]['location']}',style: TextStyle(
+                                        Image.asset("assets/Home/__location.png", width: 15, height: 15),
+                                        SizedBox(width: 5),
+                                        Text(
+                                          '${venturesList[index]['location']}',
+                                          style: TextStyle(
                                             fontSize: 11,
-                                            color: Color(0xff7d7d7d)
-                                        ),),
-
-
+                                            color: Color(0xff7d7d7d),
+                                          ),
+                                        ),
                                       ],
                                     ),
                                   ],
                                 ),
-                              )
+                              ),
                             ],
                           ),
                         ),
                       ),
-                                    ),
-                    ],
-                  ),
-                if(venturesList.length == 0 && !Loading)
-                  NoDataFound(),
+                    );
+                  },
+                )
+              else if (venturesList.isEmpty && !Loading)
+                NoDataFound(),
+
             ],
           ),
         ),

@@ -1,3 +1,4 @@
+import 'package:cached_network_image/cached_network_image.dart';
 import 'package:carousel_slider/carousel_slider.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
@@ -11,7 +12,8 @@ import 'LoanDetail.dart';
 
 class LoanList extends StatefulWidget {
   final List? agents;
-  const LoanList({super.key, this.agents});
+  final String? name;
+  const LoanList({super.key, this.agents,this.name});
 
   @override
   State<LoanList> createState() => _LoanListState();
@@ -41,9 +43,11 @@ class _LoanListState extends State<LoanList> {
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: Colors.white,
-      appBar: AppBar(
-        backgroundColor: tertiaryColor_,
-      ),
+      appBar: UiUtils.buildAppBar(context,
+          showBackButton: true,
+          title:'Loan',
+          actions: [
+          ]),
       body: Padding(
         padding: const EdgeInsets.all(15),
         child: Column(
@@ -64,12 +68,13 @@ class _LoanListState extends State<LoanList> {
                 for (var img in banners)
                   Container(
                     child: ClipRRect(
-                      borderRadius:
-                      BorderRadius.circular(15.0),
-                      child: Image.network(
-                        img,
+                      borderRadius: BorderRadius.circular(15.0),
+                      child: CachedNetworkImage(
+                        imageUrl: img,
                         fit: BoxFit.cover,
                         width: double.infinity,
+                        placeholder: (context, url) => Image.asset("assets/profile/noimg.png", fit: BoxFit.cover),
+                        errorWidget: (context, url, error) =>  Image.asset("assets/profile/noimg.png", fit: BoxFit.cover),
                       ),
                     ),
                   )

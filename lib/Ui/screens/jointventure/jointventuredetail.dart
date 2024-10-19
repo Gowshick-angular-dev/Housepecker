@@ -61,16 +61,26 @@ class _JointventureDetailState extends State<JointventureDetail> {
     }
   }
 
-  Future<void> saveRatting() async {
-    var response =
-    await Api.post(url: Api.addRatting, parameter: {
-      'advertisement_id': widget.id!,
-      'ratting': selectedStar!,
-    });
+  Future<void> saveRatting(String? message) async {
+
+    var parameters = {
+      'advertisement_id': widget.id!.toString(),
+      'ratting': selectedStar!.toString(),
+    };
+
+    if (message != null && message.isNotEmpty) {
+      parameters['comment'] = message;
+    }
+
+    // Send the API request
+    var response = await Api.post(url: Api.addRatting, parameter: parameters);
+
+    // Check for errors in the response
     if (!response['error']) {
       getVentures();
     }
   }
+
 
   share(String slugId) {
     showModalBottomSheet(
@@ -113,62 +123,90 @@ class _JointventureDetailState extends State<JointventureDetail> {
   }
 
   void _showAlertDialog(BuildContext context) async {
+    TextEditingController feedbackController = TextEditingController();
+
     await UiUtils.showBlurredDialoge(
       context,
       dialoge: BlurredDialogBuilderBox(
-          title: "Add Ratting",
-          acceptButtonName: "submit".translate(context),
-          onAccept: saveRatting,
+          title: "Add Rating",
+          acceptButtonName: "Submit".translate(context),
+          onAccept: ()  async{
+            String feedback = feedbackController.text;
+            saveRatting(feedback);
+          },
           contentBuilder: (context, s) {
             return StatefulBuilder(
                 builder: (context, setState) {
-                  return FittedBox(
-                    fit: BoxFit.none,
-                    child: Row(
-                      // mainAxisAlignment: MainAxisAlignment.center,
-                      children: [
-                        for (int i = 0; i < 5; i++)
-                          CupertinoButton(
-                            onPressed: () {
-                              setState(() {
-                                selectedStar = i;
-                              });
-                            },
-                            minSize: 10,
-                            child: Image.asset(
-                              selectedStar! < i ?
-                              "assets/Loans/_-115.png" : "assets/Loans/_-114.png",
-                              width: selectedStar! < i ? 18 : 20,
-                              height: selectedStar! < i ? 18 : 20,
+                  return Column(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      Row(
+                        // Star Rating Section
+                        children: [
+                          for (int i = 0; i < 5; i++)
+                            CupertinoButton(
+                              onPressed: () {
+                                setState(() {
+                                  selectedStar = i;
+                                });
+                              },
+                              minSize: 10,
+                              child: Image.asset(
+                                selectedStar! < i
+                                    ? "assets/Loans/_-115.png"
+                                    : "assets/Loans/_-114.png",
+                                width: selectedStar! < i ? 18 : 20,
+                                height: selectedStar! < i ? 18 : 20,
+                              ),
                             ),
+                        ],
+                      ),
+                      const SizedBox(height: 10),
+                      Container(
+                        padding: EdgeInsets.symmetric(horizontal: 10),
+                        height: 45,
+                        decoration: BoxDecoration(
+                         borderRadius: BorderRadius.circular(10),
+                         color: Colors.white,
+                          border: Border.all( color: Colors.grey.withOpacity(0.5))
+                        ),
+                        child: TextFormField(
+                          style: TextStyle(fontSize: 14),
+                          controller: feedbackController,
+                          decoration: InputDecoration(
+                            hintText: 'Enter your feedback',
+                            hintStyle: TextStyle(fontSize: 14),
+                            border: InputBorder.none,
                           ),
-                      ],
-                    ),
+                          maxLines: 3,
+                        ),
+                      ),
+                    ],
                   );
-                }
-            );
+                });
           }),
     );
   }
+
+
+
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: Colors.white,
-      appBar: AppBar(
-        backgroundColor: tertiaryColor_,
-        title: Loading ? Text('') : Text('${venturesDetails!['post_name']}: ${venturesDetails!['land_size']}',
-          style: TextStyle(
-              fontSize: 14,color: Colors.white
-          ),
-        ),
-      ),
 
-      body: Loading ? Center(
-        child: CircularProgressIndicator(
-          color: Color(0xff117af9),
-        ),
-      ) : Column(
+      appBar: UiUtils.buildAppBar(context,
+          showBackButton: true,
+        title: "${Loading ?"":'${venturesDetails!['post_name']}: ${venturesDetails!['land_size']}'}",
+          actions: [
+          ]),
+
+      body: Loading ? Center(child: Center(
+    child: UiUtils.progress(
+      normalProgressColor: context.color.tertiaryColor,
+    ),
+    ),) : Column(
         children: [
           Expanded(
             child: SingleChildScrollView(
@@ -190,17 +228,31 @@ class _JointventureDetailState extends State<JointventureDetail> {
                             },
                           ),
                           items: [
+                            if(venturesDetails!['image']!=null&&venturesDetails!['image'].isNotEmpty)
+                          ...[
                             for(var img in venturesDetails!['image'])
                               Container(
                                 child: ClipRRect(
                                   borderRadius: BorderRadius.circular(15.0),
-                                  child: Image.network(
+                                  child: UiUtils.getImage(
                                     img,
-                                    fit: BoxFit.cover,
                                     width: double.infinity,
+                                    fit: BoxFit.cover,
+                                    height: 150,
                                   ),
                                 ),
                               )
+                          ]else    Container(
+                              child: ClipRRect(
+                                borderRadius: BorderRadius.circular(15.0),
+                                child: UiUtils.getImage(
+                                  "",
+                                  width: double.infinity,
+                                  fit: BoxFit.cover,
+                                  height: 150,
+                                ),
+                              ),
+                            )
                           ],
                         ),
                         Positioned(
@@ -253,7 +305,7 @@ class _JointventureDetailState extends State<JointventureDetail> {
                       padding: EdgeInsets.only(left: 10, right: 10, top: 3, bottom: 3),
                       decoration: BoxDecoration(
                         color: Color(0xff06e300),
-                        borderRadius: BorderRadius.circular(10),
+                        borderRadius: BorderRadius.circular(4),
                       ),
                       child: Text('${venturesDetails!['code']}',
                         style: TextStyle(
@@ -329,12 +381,20 @@ class _JointventureDetailState extends State<JointventureDetail> {
                                 children: [
                                   Row(
                                     children: [
-                                      Image.asset("assets/Home/__location.png",width:15,fit: BoxFit.cover,height: 15,),
-                                      SizedBox(width: 5,),
-                                      Text('${venturesDetails!['city']}',
+                                      Image.asset(
+                                        "assets/Home/__location.png",
+                                        width: 15,
+                                        fit: BoxFit.cover,
+                                        height: 15,
+                                      ),
+                                      SizedBox(width: 5),
+                                      Text(
+                                        venturesDetails!['city'] != null
+                                            ? '${venturesDetails!['city']}'
+                                            : 'Location not available',
                                         style: TextStyle(
                                           fontSize: 11,
-                                          color: Color(0xff7d7d7d)
+                                          color: Color(0xff7d7d7d),
                                         ),
                                       ),
                                     ],
@@ -586,7 +646,10 @@ class _JointventureDetailState extends State<JointventureDetail> {
                               fontWeight: FontWeight.w600,
                             ),),
                           SizedBox(height: 10,),
-                          Text('${venturesDetails!['address']}',
+
+                          Text(  venturesDetails!['address'] != null
+                              ? '${venturesDetails!['address']}'
+                              : 'Location not available',
                             style: TextStyle(
                                 fontSize: 12,
                                 color: Color(0xff707070)
@@ -599,7 +662,10 @@ class _JointventureDetailState extends State<JointventureDetail> {
                               fontWeight: FontWeight.w600,
                             ),),
                           SizedBox(height: 10,),
-                          Text('${venturesDetails!['description']}',
+                          Text(
+                            venturesDetails!['description'] != null
+                                ? '${venturesDetails!['description']}'
+                                : 'Description not available',
                             style: TextStyle(
                               fontSize: 12,
                               color: Color(0xff707070)

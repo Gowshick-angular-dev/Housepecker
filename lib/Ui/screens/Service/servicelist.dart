@@ -1,3 +1,4 @@
+import 'package:cached_network_image/cached_network_image.dart';
 import 'package:carousel_slider/carousel_slider.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
@@ -5,6 +6,9 @@ import 'package:flutter/widgets.dart';
 import 'package:Housepecker/Ui/screens/Service/servicedetail.dart';
 import 'package:geocoding/geocoding.dart';
 import 'package:geolocator/geolocator.dart';
+import 'package:google_places_flutter/google_places_flutter.dart';
+import 'package:google_places_flutter/model/place_type.dart';
+import 'package:google_places_flutter/model/prediction.dart';
 
 import '../../../app/routes.dart';
 import '../../../utils/api.dart';
@@ -26,6 +30,8 @@ class ServiceList extends StatefulWidget {
 
 class _ServiceListState extends State<ServiceList> {
   TextEditingController searchControler = TextEditingController();
+  TextEditingController locationControler = TextEditingController();
+  String? locationValue='';
   bool Loading = false;
   List serviceList = [];
   List banners = [];
@@ -61,7 +67,7 @@ class _ServiceListState extends State<ServiceList> {
 
   @override
   void initState() {
-    _getCurrentLocation();
+   // _getCurrentLocation();
     getServiceList('', '');
     getBanners();
     super.initState();
@@ -75,7 +81,7 @@ class _ServiceListState extends State<ServiceList> {
     return permission;
   }
 
-  Future<void> _getCurrentLocation() async {
+/*  Future<void> _getCurrentLocation() async {
     setState(() {
       Loading = true;
     });
@@ -105,7 +111,7 @@ class _ServiceListState extends State<ServiceList> {
     } catch (e) {
       print("Error fetching address: $e");
     }
-  }
+  }*/
 
   Future<void> getServiceList(String? search, String? city) async {
     setState(() {
@@ -142,7 +148,12 @@ class _ServiceListState extends State<ServiceList> {
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: Colors.white,
-      appBar: AppBar(
+      appBar: UiUtils.buildAppBar(context,
+          showBackButton: true,
+          title:'${widget.name!}',
+          actions: [
+          ]),
+   /*   appBar: AppBar(
         backgroundColor: tertiaryColor_,
         leadingWidth: 40,
         titleSpacing: 15,
@@ -216,7 +227,7 @@ class _ServiceListState extends State<ServiceList> {
             ),
           ],
         ),
-      ),
+      ),*/
       body: SingleChildScrollView(
         child: Padding(
           padding: const EdgeInsets.all(15),
@@ -285,6 +296,95 @@ class _ServiceListState extends State<ServiceList> {
               //     ],
               //   ),
               // ),
+              Container(
+                height: 50,
+                padding: const EdgeInsets.only(left: 10),
+                width: double.infinity,
+                decoration: BoxDecoration(
+                    borderRadius: BorderRadius.circular(10.0),
+                    border: Border.all(
+                        color: const Color(0xffebebeb),
+                        width: 1
+                    )
+                ),
+                child: Row(
+                  children: [
+                    Image.asset("assets/Home/__location.png",width: 17,height: 17,color:  const Color(0xff117af9),),
+                    const SizedBox(width: 10,),
+                    Expanded(
+                      child: GooglePlaceAutoCompleteTextField(
+                        boxDecoration: BoxDecoration(
+                            border: Border.all(color: Colors.transparent)
+                        ),
+                        textEditingController: locationControler,
+                        textStyle: const TextStyle(fontSize: 14),
+                        inputDecoration:   const InputDecoration(
+                          hintText: 'Enter City,Locality...',
+                          hintStyle: TextStyle(
+                            fontSize: 14.0,
+                            color: Color(0xff9c9c9c),
+                            fontWeight: FontWeight.w400,
+                            decoration: TextDecoration.none,
+                          ),
+                          border: InputBorder.none,
+                          enabledBorder: InputBorder.none,
+                          focusedBorder: InputBorder.none,
+                        ),
+
+                        googleAPIKey: "AIzaSyDDJ17OjVJ0TS2qYt7GMOnrMjAu1CYZFg8",
+                        debounceTime: 800,
+                        countries: ["in"],
+                        isLatLngRequired: true,
+                        getPlaceDetailWithLatLng: (Prediction prediction) {
+                          print("placeDetails" + prediction.lng.toString());
+                          // lat = prediction.lat.toString();
+                          // lng = prediction.lng.toString();
+                          setState(() { });
+                        },
+                        itemClick: (Prediction prediction) {
+                          locationControler.text = prediction.description!;
+                          locationControler.selection =
+                              TextSelection.fromPosition(TextPosition(
+                                  offset: prediction.description!.length));
+                          List address = prediction.description!.split(',').reversed.toList();
+                          if(address.length >= 3) {
+                            locationValue = address[2];
+
+                            setState(() { });
+                          } else if(address.length == 2) {
+                            locationValue = address[1];
+
+                            setState(() { });
+                          } else if(address.length == 1) {
+                            locationValue = address[0];
+
+                            setState(() { });
+                          }
+                          getServiceList("",locationValue);
+                        },
+                        itemBuilder: (context, index, Prediction prediction) {
+                          return Container(
+                            padding: const EdgeInsets.all(10),
+                            child: Row(
+                              children: [
+                                Image.asset("assets/Home/__location.png",width: 17,height: 17,color:  const Color(0xff117af9),),
+                                const SizedBox(width: 7,),
+                                Expanded(
+                                    child:
+                                    Text("${prediction.description ?? ""}",style: const TextStyle(fontSize: 14,color: Colors.black),))
+                              ],
+                            ),
+                          );
+                        },
+                        seperatedBuilder: const Divider(),
+                        isCrossBtnShown: true,
+                        placeType: PlaceType.geocode,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+              const SizedBox(height: 10,),
               CarouselSlider(
                 options: CarouselOptions(
                   aspectRatio: 1.9,
@@ -301,10 +401,12 @@ class _ServiceListState extends State<ServiceList> {
                     Container(
                       child: ClipRRect(
                         borderRadius: BorderRadius.circular(15.0),
-                        child: Image.network(
-                          img,
+                        child: CachedNetworkImage(
+                          imageUrl: img,
                           fit: BoxFit.cover,
                           width: double.infinity,
+                          placeholder: (context, url) => Image.asset("assets/profile/noimg.png", fit: BoxFit.cover),
+                          errorWidget: (context, url, error) =>  Image.asset("assets/profile/noimg.png", fit: BoxFit.cover),
                         ),
                       ),
                     )

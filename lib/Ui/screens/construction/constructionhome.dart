@@ -63,13 +63,11 @@ class _ConstructionHomeState extends State<ConstructionHome> {
     Size size = MediaQuery.sizeOf(context);
     return Scaffold(
       backgroundColor: Colors.white,
-      appBar: AppBar(
-        backgroundColor: tertiaryColor_,
-        title: Text(
-          'Constructions',
-          style: TextStyle(fontSize: 14, color: Colors.white),
-        ),
-      ),
+      appBar: UiUtils.buildAppBar(context,
+          showBackButton: true,
+          title:'Constructions',
+          actions: [
+          ]),
       body: SingleChildScrollView(
         child: Padding(
           padding: const EdgeInsets.all(15),
@@ -85,9 +83,11 @@ class _ConstructionHomeState extends State<ConstructionHome> {
                 child: Center(
                   child: TextField(
                     onChanged: filterCategories,
+                    style: TextStyle(fontSize: 14),
                     decoration: InputDecoration(
                       contentPadding: EdgeInsets.symmetric(vertical: 0), // Align text vertically in center
                       hintText: "Search constructions...",
+                      hintStyle: TextStyle(fontSize: 14),
                       prefixIcon: Icon(Icons.search),
                       border: OutlineInputBorder(
                         borderRadius: BorderRadius.circular(25), // Circular border

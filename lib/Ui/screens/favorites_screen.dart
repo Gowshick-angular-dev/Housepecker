@@ -185,7 +185,7 @@ class _FavoritesScreenState extends State<FavoritesScreen> {
                                       crossAxisCount: 2,
                                       crossAxisSpacing: 8,
                                       mainAxisSpacing: 8,
-                                      childAspectRatio: 1 / 1.2,
+                                          childAspectRatio: MediaQuery.sizeOf(context).height / 950,
                                     ),
                                     itemBuilder: (context, index) {
                                       PropertyModel property =
@@ -256,7 +256,8 @@ class _FavoritesScreenState extends State<FavoritesScreen> {
                                     crossAxisCount: 2,
                                     crossAxisSpacing: 8,
                                     mainAxisSpacing: 8,
-                                    mainAxisExtent: 230,
+                                        childAspectRatio: MediaQuery.sizeOf(context).height / 950,
+
                                   ),
                                   itemBuilder: (context, index) {
                                     if (!projectLoading) {
@@ -324,12 +325,12 @@ class _FavoritesScreenState extends State<FavoritesScreen> {
                                                                       .cover,
                                                                   height: 103,
                                                                 ),
-                                                                const PositionedDirectional(
-                                                                    start: 5,
-                                                                    top: 5,
-                                                                    child: PromotedCard(
-                                                                        type: PromoteCardType
-                                                                            .icon)),
+                                                                // const PositionedDirectional(
+                                                                //     start: 5,
+                                                                //     top: 5,
+                                                                //     child: PromotedCard(
+                                                                //         type: PromoteCardType
+                                                                //             .icon)),
                                                                 PositionedDirectional(
                                                                   bottom: 6,
                                                                   start: 6,
@@ -339,41 +340,29 @@ class _FavoritesScreenState extends State<FavoritesScreen> {
                                                                     clipBehavior:
                                                                         Clip.antiAlias,
                                                                     decoration: BoxDecoration(
-                                                                        color: context
-                                                                            .color
-                                                                            .secondaryColor
-                                                                            .withOpacity(
-                                                                                0.7),
+                                                                      color: Colors.black38,
                                                                         borderRadius:
                                                                             BorderRadius.circular(4)),
                                                                     child:
-                                                                        BackdropFilter(
-                                                                      filter: ImageFilter.blur(
-                                                                          sigmaX:
-                                                                              2,
-                                                                          sigmaY:
-                                                                              3),
-                                                                      child:
-                                                                          Padding(
-                                                                        padding: const EdgeInsets
-                                                                            .symmetric(
-                                                                            horizontal:
-                                                                                8.0),
-                                                                        child:
-                                                                            Center(
-                                                                          child: Text(
-                                                                            favProjectsList[index]['category'] != null
-                                                                                ? favProjectsList[index]['category']['category']
-                                                                                : '',
-                                                                          )
-                                                                              .color(
-                                                                                context.color.textColorDark,
-                                                                              )
-                                                                              .bold(weight: FontWeight.w500)
-                                                                              .size(10),
-                                                                        ),
-                                                                      ),
-                                                                    ),
+                                                                        Padding(
+                                                                                                                                                padding: const EdgeInsets
+                                                                          .symmetric(
+                                                                          horizontal:
+                                                                              8.0),
+                                                                                                                                                child:
+                                                                          Center(
+                                                                        child: Text(
+                                                                          favProjectsList[index]['category'] != null
+                                                                              ? favProjectsList[index]['category']['category']
+                                                                              : '',
+                                                                        )
+                                                                            .color(
+                                                                              Colors.white
+                                                                            )
+                                                                            .bold(weight: FontWeight.w500)
+                                                                            .size(10),
+                                                                                                                                                ),
+                                                                                                                                              ),
                                                                   ),
                                                                 ),
                                                                 Positioned(
@@ -508,51 +497,6 @@ class _FavoritesScreenState extends State<FavoritesScreen> {
                                                             SizedBox(
                                                               height: 4,
                                                             ),
-                                                            if (favProjectsList[
-                                                                        index][
-                                                                    'address'] !=
-                                                                "")
-                                                              Padding(
-                                                                padding:
-                                                                    const EdgeInsets
-                                                                        .only(
-                                                                        bottom:
-                                                                            4),
-                                                                child: Row(
-                                                                  children: [
-                                                                    Image.asset(
-                                                                      "assets/Home/__location.png",
-                                                                      width: 15,
-                                                                      fit: BoxFit
-                                                                          .cover,
-                                                                      height:
-                                                                          15,
-                                                                    ),
-                                                                    SizedBox(
-                                                                      width: 5,
-                                                                    ),
-                                                                    Expanded(
-                                                                        child:
-                                                                            Text(
-                                                                      favProjectsList[index]['address']
-                                                                              ?.trim() ??
-                                                                          "",
-                                                                      maxLines:
-                                                                          1,
-                                                                      overflow:
-                                                                          TextOverflow
-                                                                              .ellipsis,
-                                                                      style: TextStyle(
-                                                                          color: Color(
-                                                                              0xffa2a2a2),
-                                                                          fontSize:
-                                                                              9,
-                                                                          fontWeight:
-                                                                              FontWeight.w400),
-                                                                    ))
-                                                                  ],
-                                                                ),
-                                                              ),
                                                             Text(
                                                               '${favProjectsList[index]['project_details'].length > 0 ? favProjectsList[index]['project_details'][0]['avg_price'] : 0}'
                                                                   .toString()
@@ -572,6 +516,54 @@ class _FavoritesScreenState extends State<FavoritesScreen> {
                                                                       FontWeight
                                                                           .w500),
                                                             ),
+                                                            SizedBox(
+                                                              height: 4,
+                                                            ),
+                                                            if (favProjectsList[
+                                                            index][
+                                                            'address'] !=
+                                                                "")
+                                                              Padding(
+                                                                padding:
+                                                                const EdgeInsets
+                                                                    .only(
+                                                                    bottom:
+                                                                    4),
+                                                                child: Row(
+                                                                  children: [
+                                                                    Image.asset(
+                                                                      "assets/Home/__location.png",
+                                                                      width: 15,
+                                                                      fit: BoxFit
+                                                                          .cover,
+                                                                      height:
+                                                                      15,
+                                                                    ),
+                                                                    SizedBox(
+                                                                      width: 5,
+                                                                    ),
+                                                                    Expanded(
+                                                                        child:
+                                                                        Text(
+                                                                          favProjectsList[index]['address']
+                                                                              ?.trim() ??
+                                                                              "",
+                                                                          maxLines:
+                                                                          1,
+                                                                          overflow:
+                                                                          TextOverflow
+                                                                              .ellipsis,
+                                                                          style: TextStyle(
+                                                                              color: Color(
+                                                                                  0xffa2a2a2),
+                                                                              fontSize:
+                                                                              9,
+                                                                              fontWeight:
+                                                                              FontWeight.w400),
+                                                                        ))
+                                                                  ],
+                                                                ),
+                                                              ),
                                                             SizedBox(
                                                               height: 4,
                                                             ),

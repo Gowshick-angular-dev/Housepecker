@@ -1,3 +1,4 @@
+import 'package:cached_network_image/cached_network_image.dart';
 import 'package:carousel_slider/carousel_slider.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
@@ -62,16 +63,34 @@ class _LoanDetailState extends State<LoanDetail> {
     }
   }
 
-  Future<void> saveRatting() async {
-    var response =
-    await Api.post(url: Api.addRatting, parameter: {
-      'advertisement_id': widget.id!,
-      'ratting': selectedStar!,
-    });
+  Future<void> saveRatting(String? message) async {
+
+    var parameters = {
+      'advertisement_id': widget.id!.toString(),
+      'ratting': selectedStar!.toString(),
+    };
+
+    if (message != null && message.isNotEmpty) {
+      parameters['comment'] = message;
+    }
+
+    var response = await Api.post(url: Api.addRatting, parameter: parameters);
+
     if (!response['error']) {
       getAgentDetails();
     }
   }
+
+  // Future<void> saveRatting() async {
+  //   var response =
+  //   await Api.post(url: Api.addRatting, parameter: {
+  //     'advertisement_id': widget.id!,
+  //     'ratting': selectedStar!,
+  //   });
+  //   if (!response['error']) {
+  //     getAgentDetails();
+  //   }
+  // }
 
   share(String slugId) {
     showModalBottomSheet(
@@ -112,58 +131,127 @@ class _LoanDetailState extends State<LoanDetail> {
       },
     );
   }
-
   void _showAlertDialog(BuildContext context) async {
+    TextEditingController feedbackController = TextEditingController();
+
     await UiUtils.showBlurredDialoge(
       context,
       dialoge: BlurredDialogBuilderBox(
-          title: "Add Ratting",
-          acceptButtonName: "submit".translate(context),
-          onAccept: saveRatting,
+          title: "Add Rating",
+          acceptButtonName: "Submit".translate(context),
+          onAccept: ()  async{
+            String feedback = feedbackController.text;
+            saveRatting(feedback);
+          },
           contentBuilder: (context, s) {
             return StatefulBuilder(
                 builder: (context, setState) {
-                  return FittedBox(
-                    fit: BoxFit.none,
-                    child: Row(
-                      // mainAxisAlignment: MainAxisAlignment.center,
-                      children: [
-                        for (int i = 0; i < 5; i++)
-                          CupertinoButton(
-                            onPressed: () {
-                              setState(() {
-                                selectedStar = i;
-                              });
-                            },
-                            minSize: 10,
-                            child: Image.asset(
-                              selectedStar! < i ?
-                              "assets/Loans/_-115.png" : "assets/Loans/_-114.png",
-                              width: selectedStar! < i ? 18 : 20,
-                              height: selectedStar! < i ? 18 : 20,
+                  return Column(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      Row(
+                        // Star Rating Section
+                        children: [
+                          for (int i = 0; i < 5; i++)
+                            CupertinoButton(
+                              onPressed: () {
+                                setState(() {
+                                  selectedStar = i;
+                                });
+                              },
+                              minSize: 10,
+                              child: Image.asset(
+                                selectedStar! < i
+                                    ? "assets/Loans/_-115.png"
+                                    : "assets/Loans/_-114.png",
+                                width: selectedStar! < i ? 18 : 20,
+                                height: selectedStar! < i ? 18 : 20,
+                              ),
                             ),
+                        ],
+                      ),
+                      const SizedBox(height: 10),
+                      Container(
+                        padding: EdgeInsets.symmetric(horizontal: 10),
+                        height: 45,
+                        decoration: BoxDecoration(
+                            borderRadius: BorderRadius.circular(10),
+                            color: Colors.white,
+                            border: Border.all( color: Colors.grey.withOpacity(0.5))
+                        ),
+                        child: TextFormField(
+                          style: TextStyle(fontSize: 14),
+                          controller: feedbackController,
+                          decoration: InputDecoration(
+                            hintText: 'Enter your feedback',
+                            hintStyle: TextStyle(fontSize: 14),
+                            border: InputBorder.none,
                           ),
-                      ],
-                    ),
+                          maxLines: 3,
+                        ),
+                      ),
+                    ],
                   );
-                }
-            );
+                });
           }),
     );
   }
+  // void _showAlertDialog(BuildContext context) async {
+  //   await UiUtils.showBlurredDialoge(
+  //     context,
+  //     dialoge: BlurredDialogBuilderBox(
+  //         title: "Add Ratting",
+  //         acceptButtonName: "submit".translate(context),
+  //         onAccept: saveRatting,
+  //         contentBuilder: (context, s) {
+  //           return StatefulBuilder(
+  //               builder: (context, setState) {
+  //                 return FittedBox(
+  //                   fit: BoxFit.none,
+  //                   child: Row(
+  //                     // mainAxisAlignment: MainAxisAlignment.center,
+  //                     children: [
+  //                       for (int i = 0; i < 5; i++)
+  //                         CupertinoButton(
+  //                           onPressed: () {
+  //                             setState(() {
+  //                               selectedStar = i;
+  //                             });
+  //                           },
+  //                           minSize: 10,
+  //                           child: Image.asset(
+  //                             selectedStar! < i ?
+  //                             "assets/Loans/_-115.png" : "assets/Loans/_-114.png",
+  //                             width: selectedStar! < i ? 18 : 20,
+  //                             height: selectedStar! < i ? 18 : 20,
+  //                           ),
+  //                         ),
+  //                     ],
+  //                   ),
+  //                 );
+  //               }
+  //           );
+  //         }),
+  //   );
+  // }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: Colors.white,
-      appBar: AppBar(
-        backgroundColor: tertiaryColor_,
-        title: Text('${loading ? '' : agentInfo!['title'] }',
-          style: TextStyle(
-              fontSize: 14,color: Colors.white
-          ),
-        ),
-      ),
+      appBar: UiUtils.buildAppBar(context,
+          showBackButton: true,
+          title:'${loading ? '' : agentInfo!['title'] }',
+          actions: [
+          ]),
+      // appBar: AppBar(
+      //   backgroundColor: tertiaryColor_,
+      //   title: Text('${loading ? '' : agentInfo!['title'] }',
+      //     style: TextStyle(
+      //         fontSize: 14,color: Colors.white
+      //     ),
+      //   ),
+      // ),
 
       body: loading ? Center(
         child: CircularProgressIndicator(
@@ -193,17 +281,19 @@ class _LoanDetailState extends State<LoanDetail> {
                               margin: EdgeInsets.only(right: 15, left: 15),
                               child: ClipRRect(
                                 borderRadius: BorderRadius.circular(15.0),
-                                child: Image.network(
-                                  img,
+                                child: CachedNetworkImage(
+                                  imageUrl: img,
                                   fit: BoxFit.cover,
                                   width: double.infinity,
+                                  placeholder: (context, url) => Image.asset("assets/profile/noimg.png", fit: BoxFit.cover),
+                                  errorWidget: (context, url, error) =>  Image.asset("assets/profile/noimg.png", fit: BoxFit.cover),
                                 ),
                               ),
                             )
                         ]
                     ),
                   Positioned(
-                    right: 8,
+                    right: 20,
                     top: 10,
                     child: InkWell(
                       onTap: () {
@@ -270,7 +360,7 @@ class _LoanDetailState extends State<LoanDetail> {
                 ],
               ),
               Padding(
-                padding: const EdgeInsets.all(15),
+                padding: const EdgeInsets.only(left: 15,bottom: 15,right: 15),
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
@@ -278,8 +368,16 @@ class _LoanDetailState extends State<LoanDetail> {
                     Container(
                       padding: EdgeInsets.all(8),
                       decoration: BoxDecoration(
-                          color: Color(0xfff9f9f9),
+                          color: Colors.white,
                           borderRadius: BorderRadius.circular(15),
+                        boxShadow: [
+                          BoxShadow(
+                            color: Color(0xfff0f0f0),
+                            offset: Offset(0, 2),
+                            blurRadius: 2.0,
+                            spreadRadius: 2.0,
+                          ),
+                        ],
                       ),
                       child: Row(
                         crossAxisAlignment: CrossAxisAlignment.center,
@@ -320,44 +418,39 @@ class _LoanDetailState extends State<LoanDetail> {
                                 ),
                                 SizedBox(height: 5,),
                                 Row(
+                                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
                                   children: [
-                                    Expanded(
-                                      child: Row(
-                                        children: [
-                                          Text('Bank   :',style: TextStyle(
-                                              fontSize: 11,
-                                              color: Color(0xff7d7d7d)
-                                          ),),
-                                          SizedBox(width: 8,),
-                                          Text('${agentInfo!['bank_name']}',
+                                    Row(
+                                      children: [
+                                        Text('Bank   :',style: TextStyle(
+                                            fontSize: 11,
+                                            color: Color(0xff7d7d7d)
+                                        ),),
+                                        SizedBox(width: 8,),
+                                        Container(
+                                          width: MediaQuery.of(context).size.width/2.5,
+                                          child: Text('${agentInfo!['bank_name']}',
+                                            maxLines: 1,overflow: TextOverflow.ellipsis,
                                             style: TextStyle(
                                               fontSize: 11,
                                               fontWeight: FontWeight.w600,
                                               color: Colors.black
                                             ),
                                           ),
-                                        ],
-                                      ),
+                                        ),
+                                      ],
                                     ),
-                                    SizedBox(width: 5,),
-                                    Expanded(
-                                      child: Row(
-                                        mainAxisAlignment: MainAxisAlignment.end,
-                                        children: [
-                                          // Text('Bank   :',style: TextStyle(
-                                          //     fontSize: 11,
-                                          //     color: Color(0xff7d7d7d)
-                                          // ),),
-                                          // SizedBox(width: 8,),
-                                          Text('${agentInfo!['agent_type'] ?? 'DST & DSA'}',
-                                            style: TextStyle(
-                                              fontSize: 11,
-                                              fontWeight: FontWeight.w600,
-                                              color: Colors.black
-                                            ),
-                                          )
-                                        ],
-                                      ),
+                                    Row(
+                                      mainAxisAlignment: MainAxisAlignment.end,
+                                      children: [
+                                        Text('${agentInfo!['agent_type'] ?? 'DST & DSA'}',
+                                          style: TextStyle(
+                                            fontSize: 11,
+                                            fontWeight: FontWeight.w600,
+                                            color: Colors.black
+                                          ),
+                                        )
+                                      ],
                                     ),
                                   ],
                                 ),
@@ -687,7 +780,7 @@ class _LoanDetailState extends State<LoanDetail> {
                         spreadRadius: 2.0,
                       ),
                     ],
-                  
+
                 ),
                 child: Row(
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
