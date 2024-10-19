@@ -1318,7 +1318,7 @@ class _ProjectFormFiveState extends State<ProjectFormFive> {
               onTap: () async {
                 if (!loading) {
                   // Check if coverImage and gallaryImages are empty
-                  if (coverImage == null || gallaryImages.isEmpty) {
+                  if (!widget.isEdit! && (coverImage == null || gallaryImages.isEmpty)) {
                     HelperUtils.showSnackBarMessage(
                       context,
                       UiUtils.getTranslatedLabel(context, "Title image and Gallery images cannot be empty"),

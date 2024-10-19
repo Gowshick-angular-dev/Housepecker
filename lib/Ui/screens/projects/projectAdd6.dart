@@ -69,122 +69,17 @@ class _ProjectFormSecondState extends State<ProjectFormsixth> {
 
   @override
   void initState() {
-    getMasters();
-    getPackages();
+    getUpdateProject();
     super.initState();
-  }
-
-  Future<void> getPackages() async {
-    try {
-      // Start loading
-      setState(() {
-        loading = true;
-      });
-
-      final SystemRepository _systemRepository = SystemRepository();
-      Map settings =
-          await _systemRepository.fetchSystemSettings(isAnonymouse: false);
-
-      print('hhhhhhhhhhhhhhhhhhhhhhhhhhh: ${settings['data']}');
-
-      List allPacks = settings['data']['package']['user_purchased_package'];
-      Map freepackage = settings['data']['free_package'];
-
-      if (freepackage != null) {
-        setState(() {
-          remainFreeProPost =
-              freepackage['project_limit'] - freepackage['used_project_limit'];
-        });
-      }
-
-      List temp = [];
-      if (settings['data']['package'] != null && allPacks != null) {
-        for (int i = 0; i < allPacks.length; i++) {
-          print(
-              'hhhhhhhhhhhhhhhhhhhhhhhhhhh2: ${allPacks[i]['used_limit_for_project']}, ${allPacks[i]['package']['project_limit']}');
-
-          if (((allPacks[i]['package']['project_limit'] ?? 0) -
-                  (allPacks[i]['used_limit_for_project'] ?? 0)) >
-              0) {
-            temp.add(allPacks[i]);
-          }
-        }
-      }
-      setState(() {
-        packages = temp;
-        print('fjbsdjfbdn${packages}');
-      });
-      // Update state with the filtered packages
-      // setState(() {
-      //   packages = temp;
-      // });
-    } catch (e, stacktrace) {
-      // Handle any error that occurs in the try block
-      print('An error occurred: $e');
-      print('Stacktrace: $stacktrace');
-
-      // Optionally, you can show an error message to the user using a Snackbar or AlertDialog
-    } finally {
-      // Stop loading, whether an error occurred or not
-      setState(() {
-        loading = false;
-      });
-    }
   }
 
   Future<void> getUpdateProject() async {
     locationControler.text = widget.data!['address'];
     cityControler.text = widget.data!['city'];
-    projectType = widget.data!['project_type']!.toString();
-    brokerage = widget.data!['project_details'][0]['brokerage'] ?? '';
-    propertyType = widget.data!['project_details'][0]['property_type'] ?? '';
-    status = widget.data!['project_details'][0]['project_status'].toString();
+    StateController.text = widget.data!['state'];
+    ContryControler.text = widget.data!['country'];
     lat = widget.data!['latitude'];
     lng = widget.data!['longitude'];
-
-    statusWidget = statusList
-        .where((element) =>
-            element['id'].toString() ==
-            widget.data!['project_details'][0]['project_status'].toString())
-        .toList()
-        .map((item) {
-      return ValueItem(label: item['name'], value: item['id'].toString());
-    }).toList();
-
-    if (widget.data!['project_details'][0]['brokerage'] == 'yes') {
-      brokerageWidget = [ValueItem(label: 'Yes', value: 'yes')];
-    } else {
-      brokerageWidget = [ValueItem(label: 'No', value: 'no')];
-    }
-
-    propertyTypeWidget = [
-      ValueItem(
-          label: widget.data!['project_details'][0]['property_type'],
-          value: widget.data!['project_details'][0]['property_type'])
-    ];
-
-    setState(() {
-      loading = false;
-    });
-  }
-
-  Future<void> getMasters() async {
-    setState(() {
-      loading = true;
-    });
-    var staResponse = await Api.get(url: Api.status);
-    if (!staResponse['error']) {
-      setState(() {
-        statusList = staResponse['data'];
-      });
-    }
-    if (widget.isEdit!) {
-      getUpdateProject();
-    } else {
-      setState(() {
-        loading = false;
-      });
-    }
   }
 
   String getAddress(Placemark place) {
@@ -359,6 +254,11 @@ class _ProjectFormSecondState extends State<ProjectFormsixth> {
                           cityControler.text = address[0];
                           StateController.text = address[0];
                           ContryControler.text = address[0];
+                          setState(() { });
+                        } else if(address.length == 0) {
+                          cityControler.text = '';
+                          StateController.text = '';
+                          ContryControler.text = '';
                           setState(() { });
                         }
                         // cityControler.text = place.locality ?? '';

@@ -142,8 +142,8 @@ class _ProjectFormSecondState extends State<ProjectFormSecond> {
     nameControler.text = widget.data!['title'];
     cityControler.text = widget.data!['city'];
     projectType = widget.data!['project_type']!.toString();
-    minPriceControler.text = widget.data!['price'].toString();
-    maxPriceControler.text = widget.data!['price'].toString();
+    minPriceControler.text = widget.data!['min_price'].toString();
+    maxPriceControler.text = widget.data!['max_price'].toString();
     offersControler.text = widget.data!['project_details'][0]['offers'] ?? '';
     avgPriceControler.text = widget.data!['project_details'][0]['avg_price'] ?? '';
     brokerage = widget.data!['project_details'][0]['brokerage'] ?? '';
@@ -172,7 +172,7 @@ class _ProjectFormSecondState extends State<ProjectFormSecond> {
     } else {
       brokerageWidget = [ValueItem(label: 'No', value: 'no')];
     }
-
+    propertyType = widget.data!['property_type'];
     propertyTypeWidget = [ValueItem(label: widget.data!['property_type'], value: widget.data!['property_type'])];
 
     setState(() {

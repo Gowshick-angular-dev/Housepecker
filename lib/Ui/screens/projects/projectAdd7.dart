@@ -57,6 +57,23 @@ class _ProjectFormThreeState extends State<ProjectFormSeven> {
         amenityList = responseAme['data'];
         loading = false;
       });
+      print('uuuuuuuuuuuuuuuuuuuuuuuuuu: ${widget.isEdit!}');
+      if(widget.isEdit!) {
+        List filteredData = [];
+        // List filteredData = responseAme['data']
+        //     .map((item) => widget.data!['amenity_id'].split(',').contains(item['id'].toString()))
+        //     .toList();
+
+        for(int i = 0; i < responseAme['data'].length; i++) {
+          if(widget.data!['amenity_id'].split(',').contains(responseAme['data'][i]['id'].toString())) {
+            filteredData.add(responseAme['data'][i]);
+          }
+        }
+        print('uuuuuuuuuuuuuuuuuuuuuuuuuu: ${filteredData}');
+        setState(() {
+          selectedAmenities = filteredData;
+        });
+      }
     }
   }
 

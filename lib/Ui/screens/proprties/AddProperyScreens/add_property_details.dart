@@ -7,6 +7,10 @@ import 'package:flutter/services.dart';
 import 'package:flutter_svg/svg.dart';
 import 'package:geocoding/geocoding.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
+import 'package:google_places_flutter/google_places_flutter.dart';
+import 'package:google_places_flutter/model/place_type.dart';
+import 'package:google_places_flutter/model/prediction.dart';
+import 'package:intl/intl.dart';
 import 'package:multi_dropdown/multiselect_dropdown.dart';
 
 import '../../../../app/routes.dart';
@@ -18,6 +22,7 @@ import '../../../../utils/AppIcon.dart';
 import '../../../../utils/Extensions/extensions.dart';
 import '../../../../utils/api.dart';
 import '../../../../utils/constant.dart';
+import '../../../../utils/guestChecker.dart';
 import '../../../../utils/helper_utils.dart';
 import '../../../../utils/hive_utils.dart';
 import '../../../../utils/imagePicker.dart';
@@ -33,20 +38,20 @@ class AddPropertyDetails extends StatefulWidget {
   final Map? propertyDetails;
   final int catid;
 
-
-  const AddPropertyDetails({super.key, this.propertyDetails,required this.catid});
+  const AddPropertyDetails(
+      {super.key, this.propertyDetails, required this.catid});
 
   static Route route(RouteSettings routeSettings) {
     Map? arguments = routeSettings.arguments as Map?;
     return BlurredRouter(
       builder: (context) {
         return AddPropertyDetails(
-          propertyDetails: arguments?['details'], catid: 1,
+          propertyDetails: arguments?['details'],
+          catid: 1,
         );
       },
     );
   }
-
 
   @override
   State<AddPropertyDetails> createState() => _AddPropertyDetailsState();
@@ -54,10 +59,16 @@ class AddPropertyDetails extends StatefulWidget {
 
 class _AddPropertyDetailsState extends State<AddPropertyDetails> {
   final GlobalKey<FormState> _formKey = GlobalKey();
-  String selectedRole = 'Free Listing';
+
   String PropertyTyperole = '';
   String? selectedDuration;
 
+  int remainFreeProPost = 0;
+  String selectedRole = 'Free Listing';
+  int? selectedPackage = 0;
+  int freeDuration = 0;
+
+  FocusNode placesFocusNode = FocusNode();
 
   late final TextEditingController _propertyNameController =
       TextEditingController(text: widget.propertyDetails?['name']);
@@ -114,8 +125,6 @@ class _AddPropertyDetailsState extends State<AddPropertyDetails> {
   List amenityList = [];
   List selectedAmenities = [];
   List amenities = [];
-  int remainFreeProPost = 0;
-  int? selectedPackage;
 
   bool loading = false;
   List packages = [];
@@ -127,7 +136,8 @@ class _AddPropertyDetailsState extends State<AddPropertyDetails> {
     print("dddddddd${widget.propertyDetails}");
     getAmenityList();
     getPackages();
-    print ('THe selected Property Details ................................................${widget.propertyDetails?['id']}');
+    print(
+        'THe selected Property Details ................................................${widget.propertyDetails?['id']}');
     titleImageURL = widget.propertyDetails?['titleImage'] ?? "";
     mixedPropertyImageList =
         List<dynamic>.from(widget.propertyDetails?['images'] ?? []);
@@ -176,7 +186,8 @@ class _AddPropertyDetailsState extends State<AddPropertyDetails> {
       List temp = [];
       if (settings['data']['package'] != null && allPacks != null) {
         for (int i = 0; i < allPacks.length; i++) {
-          print('hhhhhhhhhhhhhhhhhhhhhhhhhhh2: ${allPacks[i]['used_limit_for_project']}, ${allPacks[i]['package']['project_limit']}');
+          print(
+              'hhhhhhhhhhhhhhhhhhhhhhhhhhh2: ${allPacks[i]['used_limit_for_project']}, ${allPacks[i]['package']['project_limit']}');
 
           if (((allPacks[i]['package']['project_limit'] ?? 0) -
                   (allPacks[i]['used_limit_for_project'] ?? 0)) >
@@ -187,7 +198,7 @@ class _AddPropertyDetailsState extends State<AddPropertyDetails> {
       }
       setState(() {
         packages = temp;
-        print ('dfsdklgnsdlgnsdlkgn${packages}');
+        print('dfsdklgnsdlgnsdlkgn${packages}');
       });
 
       // Update state with the filtered packages
@@ -206,7 +217,9 @@ class _AddPropertyDetailsState extends State<AddPropertyDetails> {
   }
 
   Future<void> getAmenityList() async {
-    var response = await Api.get(url: Api.getAmenities);
+    var response = await Api.get(url: Api.getAmenities, queryParameters: {
+      'post': '1'
+    });
     if (!response['error']) {
       setState(() {
         amenityList = response['data'];
@@ -258,16 +271,10 @@ class _AddPropertyDetailsState extends State<AddPropertyDetails> {
     File? metaTitle;
 
     if (_pickTitleImage.pickedFile != null) {
-      // final mimeType = lookupMimeType(_pickTitleImage.pickedFile!.path);
-      // var extension = mimeType!.split("/");
-
       titleImage = _pickTitleImage.pickedFile;
     }
 
     if (_pick360deg.pickedFile != null) {
-      // final mimeType = lookupMimeType(_pick360deg.pickedFile!.path);
-      // var extension = mimeType!.split("/");
-
       v360Image = _pick360deg.pickedFile;
     }
 
@@ -275,7 +282,7 @@ class _AddPropertyDetailsState extends State<AddPropertyDetails> {
       metaTitle = _pickMetaTitle.pickedFile;
     }
 
-    if (_formKey.currentState!.validate()) {
+    // if (_formKey.currentState!.validate()) {
       _formKey.currentState?.save();
       bool check = _checkIfLocationIsChosen();
       if (check == false) {
@@ -317,27 +324,8 @@ class _AddPropertyDetailsState extends State<AddPropertyDetails> {
               ));
         });
         return;
-      } else if (metaTitle == null) {
-        Future.delayed(Duration.zero, () {
-          UiUtils.showBlurredDialoge(context,
-              sigmaX: 5,
-              sigmaY: 5,
-              dialoge: BlurredDialogBox(
-                svgImagePath: AppIcons.warning,
-                title: UiUtils.getTranslatedLabel(context, "incomplete"),
-                showCancleButton: false,
-                acceptTextColor: context.color.buttonColor,
-                onAccept: () async {
-                  // Navigator.pop(context);
-                },
-                content: Text(
-                  "uploadMetaTitleImage".translate(context),
-                ),
-              ));
-        });
-        return;
-      } else if(selectedRole != 'Free Listing') {
-        if(selectedPackage == null && remainFreeProPost ==0) {
+      } else if (selectedRole != 'Free Listing') {
+        if (selectedPackage == null && remainFreeProPost == 0) {
           Future.delayed(Duration.zero, () {
             UiUtils.showBlurredDialoge(context,
                 sigmaX: 5,
@@ -357,9 +345,31 @@ class _AddPropertyDetailsState extends State<AddPropertyDetails> {
           });
           return;
         }
+      } else if (_propertyNameController.text == '' || PropertyTyperole == '' ||  _priceController.text == ''
+          || _descriptionController.text == '' || _sqftController.text == '' || _priceController.text == '' ||
+          _FLoorController.text == '' || _cityNameController.text == '' || _stateNameController.text == '' ||
+          _countryNameController.text == '' || _latitudeController.text == '' || _longitudeController.text == ''
+          || _addressController.text == '') {
+        Future.delayed(Duration.zero, () {
+          UiUtils.showBlurredDialoge(context,
+              sigmaX: 5,
+              sigmaY: 5,
+              dialoge: BlurredDialogBox(
+                svgImagePath: AppIcons.warning,
+                title: UiUtils.getTranslatedLabel(context, "incomplete"),
+                showCancleButton: false,
+                acceptTextColor: context.color.buttonColor,
+                onAccept: () async {
+                  // Navigator.pop(context);
+                },
+                content: Text("",
+                ),
+              ));
+        });
+        return;
       }
 
-      var list = mixedPropertyImageList.map((e) {
+    var list = mixedPropertyImageList.map((e) {
         if (e is File) {
           return e;
         }
@@ -385,18 +395,15 @@ class _AddPropertyDetailsState extends State<AddPropertyDetails> {
         "address": _addressController.text,
         "client_address": _clientAddressController.text,
         "price": _priceController.text,
+        "floor": _FLoorController.text,
         "title_image": titleImage,
         "gallery_images": list,
         "remove_gallery_images": removedImageId,
-        // "category_id": 1,
-        'amenity_id': selectedAmenities.map((item) => item['id']).toList(),
+        "amenity_id": selectedAmenities.map((item) => item['id']).toList(),
         "category_id": widget.propertyDetails == null
             ? (Constant.addProperty['category'] as Category).id
             : widget.propertyDetails?['catId'],
         "property_type": PropertyTyperole == 'Rent/Lease' ? '1' : '0',
-        // "property_type": widget.propertyDetails == null
-        //     ? (Constant.addProperty['propertyType'] as PropertyType).value
-        //     : widget.propertyDetails?['propType'],
         "threeD_image": v360Image,
         "video_link": _videoLinkController.text,
         "meta_image": metaTitle,
@@ -407,7 +414,7 @@ class _AddPropertyDetailsState extends State<AddPropertyDetails> {
                 .toString()
                 .toLowerCase() ==
             "rent")
-          "rentduration": selectedRentType,
+        "rentduration": selectedRentType,
         "meta_title": metaTitleController.text,
         "meta_description": metaDescriptionController.text,
         "meta_keywords": metaKeywordController.text
@@ -439,7 +446,7 @@ class _AddPropertyDetailsState extends State<AddPropertyDetails> {
           });
         },
       );
-    }
+    // }
   }
 
   bool _checkIfLocationIsChosen() {
@@ -519,431 +526,850 @@ class _AddPropertyDetailsState extends State<AddPropertyDetails> {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  RichText(
-                    text: const TextSpan(
-                      children: [
-                        TextSpan(
-                          text: "Continue With",
-                          style: TextStyle(
-                              color: Colors.black,
-                              fontSize: 15,
-                              fontWeight: FontWeight.w400),
-                        ),
-                        TextSpan(
-                          text: " *",
-                          style: TextStyle(
-                              color: Colors.red), // Customize asterisk color
-                        ),
-                      ],
+                  const Text("Property Details",
+                    style: TextStyle(
+                      color: Colors.black54,
+                      fontSize: 17,
+                      fontWeight: FontWeight.w600,
                     ),
                   ),
-                  const SizedBox(height: 5),
+                  SizedBox(height: 15),
+                  // if(!widget.isEdit)
                   Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      // Display loader if data is being fetched
-                      if (loading) // Assuming 'isLoading' is a boolean to track the loading state
-                        Center(
-                          child: const CupertinoActivityIndicator(
-                            radius: 8, // You can adjust the size of the loader here
-                          ),
-                        )
-                      else ...[
-                        if (remainFreeProPost == 0)
-                          Padding(
-                            padding: const EdgeInsets.symmetric(vertical: 10),
-                            child: Text(
-                              "NOTE : You Don't have any Active Packages",
-                              style: TextStyle(color: Colors.red),
+                      RichText(
+                        text: const TextSpan(
+                          children: [
+                            TextSpan(
+                              text: "Continue With",
+                              style: TextStyle(
+                                  color: Colors.black,
+                                  fontSize: 15,
+                                  fontWeight: FontWeight.w600),
                             ),
-                          )
-                        else ...[
-                          Row(
-                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                            children: [
-                              Expanded(
-                                child: Container(
-                                  height: size.height * 0.06,
-                                  decoration: BoxDecoration(
-                                    color: Colors.grey.withOpacity(0.2),
-                                    borderRadius: BorderRadius.circular(15),
-                                  ),
-                                  child: Row(
-                                    children: [
-                                      Radio<String>(
-                                        activeColor: Colors.blue,
-                                        value: 'Free Listing',
-                                        groupValue: selectedRole,
-                                        onChanged: (value) {
-                                          setState(() {
-                                            selectedRole = value!;
-                                          });
-                                        },
-                                      ),
-                                      Text(
-                                        "Free Listing (${remainFreeProPost})",
-                                        style: const TextStyle(
-                                            fontSize: 12, fontWeight: FontWeight.bold),
-                                      ),
-                                    ],
-                                  ),
-                                ),
-                              ),
-                              const SizedBox(
-                                width: 10,
-                              ),
-                              Expanded(
-                                child: Container(
-                                  height: size.height * 0.06,
-                                  decoration: BoxDecoration(
-                                    color: Colors.grey.withOpacity(0.2),
-                                    borderRadius: BorderRadius.circular(15),
-                                  ),
-                                  child: Row(
-                                    children: [
-                                      Radio<String>(
-                                        activeColor: Colors.blue,
-                                        value: 'Package',
-                                        groupValue: selectedRole,
-                                        onChanged: (value) {
-                                          setState(() {
-                                            selectedRole = value!;
-                                          });
-                                        },
-                                      ),
-                                      const Text(
-                                        "Package",
-                                        style: TextStyle(
-                                            fontWeight: FontWeight.bold, fontSize: 12),
-                                      ),
-                                    ],
-                                  ),
-                                ),
-                              ),
-                            ],
-                          ),
-                          const SizedBox(height: 5),
-                          if (selectedRole == 'Free Listing')
-                            Padding(
-                              padding: const EdgeInsets.only(right: 80),
-                              child: Text(
-                                "Note: You can post up to ${remainFreeProPost} free listings",
-                                style: const TextStyle(color: Colors.red, fontSize: 12),
-                              ),
+                            TextSpan(
+                              text: " *",
+                              style: TextStyle(
+                                  color:
+                                      Colors.red), // Customize asterisk color
                             ),
-                          if (selectedRole == 'Package') ...[
-                            const SizedBox(height: 15),
-                            RichText(
-                              text: const TextSpan(
-                                children: [
-                                  TextSpan(
-                                    text: "Package",
-                                    style: TextStyle(
-                                        color: Colors.black,
-                                        fontSize: 15,
-                                        fontWeight: FontWeight.w400),
-                                  ),
-                                  TextSpan(
-                                    text: " *",
-                                    style: TextStyle(color: Colors.red),
-                                  ),
-                                ],
+                          ],
+                        ),
+                      ),
+                      if (selectedRole == 'Free Listing' && !loading)
+                        Text(
+                          remainFreeProPost > 0
+                              ? "Note: This post is valid for $freeDuration days from the date of posting."
+                              : "Free Listing limit exceeded.",
+                          style:
+                              const TextStyle(color: Colors.red, fontSize: 12),
+                        ),
+                      const SizedBox(height: 5),
+                      Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          // Display loader if data is being fetched
+                          if (loading) // Assuming 'isLoading' is a boolean to track the loading state
+                            Center(
+                              child: const CupertinoActivityIndicator(
+                                radius:
+                                    8, // You can adjust the size of the loader here
                               ),
-                            ),
-                            const SizedBox(height: 10),
+                            )
+                          else ...[
                             Row(
+                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
                               children: [
                                 Expanded(
-                                  child: MultiSelectDropDown(
-                                    onOptionSelected: (List<ValueItem> selectedOptions) {
-                                      setState(() {
-                                        selectedPackage = int.parse(selectedOptions[0].value!);
-                                      });
-                                    },
-                                    options: [
-                                      for (int i = 0; i < packages.length; i++)
-                                        ValueItem(
-                                          label: '${packages[i]['package']['name']}',
-                                          value: '${packages[i]['package']['id']}',
+                                  child: Container(
+                                    height: size.height * 0.06,
+                                    decoration: BoxDecoration(
+                                      color: Colors.grey.withOpacity(0.2),
+                                      borderRadius: BorderRadius.circular(15),
+                                    ),
+                                    child: Row(
+                                      children: [
+                                        Radio<String>(
+                                          activeColor: Colors.blue,
+                                          value: 'Free Listing',
+                                          groupValue: selectedRole,
+                                          onChanged: (value) {
+                                            setState(() {
+                                              selectedRole = value!;
+                                              selectedPackage = 0;
+                                            });
+                                          },
                                         ),
-                                    ],
-                                    selectionType: SelectionType.single,
-                                    chipConfig: const ChipConfig(wrapType: WrapType.wrap),
-                                    dropdownHeight: 300,
-                                    optionTextStyle: const TextStyle(fontSize: 16),
-                                    selectedOptionIcon: const Icon(Icons.check_circle),
+                                        Text(
+                                          "Free Listing (${remainFreeProPost})",
+                                          style: const TextStyle(
+                                              fontSize: 12,
+                                              fontWeight: FontWeight.bold),
+                                        ),
+                                      ],
+                                    ),
+                                  ),
+                                ),
+                                const SizedBox(
+                                  width: 10,
+                                ),
+                                Expanded(
+                                  child: Container(
+                                    height: size.height * 0.06,
+                                    decoration: BoxDecoration(
+                                      color: Colors.grey.withOpacity(0.2),
+                                      borderRadius: BorderRadius.circular(15),
+                                    ),
+                                    child: Row(
+                                      children: [
+                                        Radio<String>(
+                                          activeColor: Colors.blue,
+                                          value: 'Package',
+                                          groupValue: selectedRole,
+                                          onChanged: (value) {
+                                            setState(() {
+                                              selectedRole = value!;
+                                            });
+                                          },
+                                        ),
+                                        const Text(
+                                          "Package",
+                                          style: TextStyle(
+                                              fontWeight: FontWeight.bold,
+                                              fontSize: 12),
+                                        ),
+                                      ],
+                                    ),
                                   ),
                                 ),
                               ],
                             ),
-                            const SizedBox(height: 10),
-                          ],
-                        ]
-                      ]
+                            const SizedBox(height: 5),
+                            if (selectedRole == 'Package') ...[
+                              const SizedBox(height: 15),
+                              RichText(
+                                text: const TextSpan(
+                                  children: [
+                                    TextSpan(
+                                      text: "Package",
+                                      style: TextStyle(
+                                          color: Colors.black,
+                                          fontSize: 15,
+                                          fontWeight: FontWeight.w600),
+                                    ),
+                                    TextSpan(
+                                      text: " *",
+                                      style: TextStyle(color: Colors.red),
+                                    ),
+                                  ],
+                                ),
+                              ),
+                              const SizedBox(height: 10),
+                              if (packages.isNotEmpty)
+                                Container(
+                                  padding: EdgeInsets.only(
+                                      top: 10, right: 10, left: 10),
+                                  decoration: BoxDecoration(
+                                    border: Border.all(
+                                        color: Color(0xffe5e5e5), width: 1),
+                                    borderRadius: BorderRadius.circular(15),
+                                  ),
+                                  child: Column(
+                                    children: [
+                                      // Expanded(
+                                      //   child: MultiSelectDropDown(
+                                      //     onOptionSelected: (List<ValueItem> selectedOptions) {
+                                      //       setState(() {
+                                      //         selectedPackage = int.parse(selectedOptions[0].value!);
+                                      //       });
+                                      //     },
+                                      //     options: [
+                                      //       for (int i = 0; i < packages.length; i++)
+                                      //         ValueItem(
+                                      //           label: '${packages[i]['package']['name']}, Listing (${packages[i]['package']['project_limit']}), Units (${packages[i]['package']['no_of_units'] ?? 0}), Valid until (${DateFormat('dd MMM yyyy').format(DateTime.parse(packages[i]['end_date']))})',
+                                      //           value: '${packages[i]['package']['id']}',
+                                      //         ),
+                                      //     ],
+                                      //     selectionType: SelectionType.single,
+                                      //     chipConfig: const ChipConfig(wrapType: WrapType.wrap),
+                                      //     dropdownHeight: 300,
+                                      //     optionTextStyle: const TextStyle(fontSize: 16),
+                                      //     selectedOptionIcon: const Icon(Icons.check_circle),
+                                      //   ),
+                                      // ),
+                                      for (int i = 0; i < packages.length; i++)
+                                        InkWell(
+                                          onTap: () {
+                                            setState(() {
+                                              selectedPackage =
+                                                  packages[i]['package']['id'];
+                                            });
+                                          },
+                                          child: Padding(
+                                            padding: const EdgeInsets.only(
+                                                bottom: 10),
+                                            child: Container(
+                                              width: double.infinity,
+                                              padding: EdgeInsets.all(10),
+                                              decoration: BoxDecoration(
+                                                color: selectedPackage !=
+                                                        packages[i]['package']
+                                                            ['id']
+                                                    ? Color(0xfff9f9f9)
+                                                    : Color(0xfffffbf3),
+                                                border: Border.all(
+                                                    color: selectedPackage !=
+                                                            packages[i]
+                                                                    ['package']
+                                                                ['id']
+                                                        ? Color(0xffe5e5e5)
+                                                        : Color(0xffffa920),
+                                                    width: 1),
+                                                borderRadius:
+                                                    BorderRadius.circular(15),
+                                              ),
+                                              // alignment: Alignment.center,
+                                              child: Column(
+                                                crossAxisAlignment:
+                                                    CrossAxisAlignment.start,
+                                                children: [
+                                                  Row(
+                                                    children: [
+                                                      Container(
+                                                        height: 20,
+                                                        width: 20,
+                                                        decoration:
+                                                            BoxDecoration(
+                                                          border: Border.all(
+                                                              color: Color(
+                                                                  0xffe5e5e5),
+                                                              width: 1),
+                                                          borderRadius:
+                                                              BorderRadius
+                                                                  .circular(15),
+                                                        ),
+                                                        child: selectedPackage ==
+                                                                packages[i][
+                                                                        'package']
+                                                                    ['id']
+                                                            ? Container(
+                                                                height: 10,
+                                                                width: 10,
+                                                                decoration:
+                                                                    BoxDecoration(
+                                                                  color: Color(
+                                                                      0xffffa920),
+                                                                  border: Border.all(
+                                                                      color: Color(
+                                                                          0xffffffff),
+                                                                      width: 3),
+                                                                  borderRadius:
+                                                                      BorderRadius
+                                                                          .circular(
+                                                                              15),
+                                                                ),
+                                                              )
+                                                            : Container(),
+                                                      ),
+                                                      SizedBox(
+                                                        width: 10,
+                                                      ),
+                                                      Text(
+                                                        packages[i]['package']
+                                                            ['name'],
+                                                        style: TextStyle(
+                                                          fontSize: 14,
+                                                          color:
+                                                              Color(0xff646464),
+                                                          fontWeight:
+                                                              FontWeight.w600,
+                                                        ),
+                                                      ),
+                                                    ],
+                                                  ),
+                                                  SizedBox(
+                                                    height: 10,
+                                                  ),
+                                                  Row(
+                                                    children: [
+                                                      const Expanded(
+                                                        child: Text(
+                                                          'Total Listings',
+                                                          style: TextStyle(
+                                                            fontSize: 11,
+                                                            color: Color(
+                                                                0xff646464),
+                                                            fontWeight:
+                                                                FontWeight.w600,
+                                                          ),
+                                                        ),
+                                                      ),
+                                                      Expanded(
+                                                        child: Text(
+                                                          ':  ${packages[i]['package']['advertisement_limit']}',
+                                                          style:
+                                                              const TextStyle(
+                                                            fontSize: 11,
+                                                            color: Color(
+                                                                0xff646464),
+                                                            fontWeight:
+                                                                FontWeight.w400,
+                                                          ),
+                                                        ),
+                                                      ),
+                                                    ],
+                                                  ),
+                                                  Row(
+                                                    children: [
+                                                      const Expanded(
+                                                        child: Text(
+                                                          'Available Listings',
+                                                          style: TextStyle(
+                                                            fontSize: 11,
+                                                            color: Color(
+                                                                0xff646464),
+                                                            fontWeight:
+                                                                FontWeight.w600,
+                                                          ),
+                                                        ),
+                                                      ),
+                                                      Expanded(
+                                                        child: Text(
+                                                          ':  ${packages[i]['package']['advertisement_limit'] - packages[i]['used_limit_for_advertisement']}',
+                                                          style:
+                                                              const TextStyle(
+                                                            fontSize: 11,
+                                                            color: Color(
+                                                                0xff646464),
+                                                            fontWeight:
+                                                                FontWeight.w400,
+                                                          ),
+                                                        ),
+                                                      ),
+                                                    ],
+                                                  ),
+                                                  Row(
+                                                    children: [
+                                                      const Expanded(
+                                                        child: Text(
+                                                          'Valid until',
+                                                          style: TextStyle(
+                                                            fontSize: 11,
+                                                            color: Color(
+                                                                0xff646464),
+                                                            fontWeight:
+                                                                FontWeight.w600,
+                                                          ),
+                                                        ),
+                                                      ),
+                                                      Expanded(
+                                                        child: Text(
+                                                          ':  ${DateFormat('dd MMM yyyy').format(DateTime.parse(packages[i]['end_date']))}',
+                                                          style:
+                                                              const TextStyle(
+                                                            fontSize: 11,
+                                                            color: Color(
+                                                                0xff646464),
+                                                            fontWeight:
+                                                                FontWeight.w400,
+                                                          ),
+                                                        ),
+                                                      ),
+                                                    ],
+                                                  ),
+                                                ],
+                                              ),
+                                            ),
+                                          ),
+                                        )
+                                    ],
+                                  ),
+                                ),
+                              if (packages.isEmpty)
+                                Column(
+                                  children: [
+                                    Text(
+                                      'You dont have any active packages for post a project. If you want to buy click here!',
+                                      style: const TextStyle(
+                                          color: Colors.red, fontSize: 12),
+                                    ),
+                                    SizedBox(
+                                      height: 10,
+                                    ),
+                                    InkWell(
+                                      onTap: () {
+                                        GuestChecker.check(onNotGuest: () {
+                                          Navigator.pushNamed(
+                                              context,
+                                              Routes
+                                                  .subscriptionPackageListRoute);
+                                        });
+                                      },
+                                      child: Container(
+                                        margin: EdgeInsets.only(
+                                            bottom: 10, left: 15, right: 15),
+                                        width: double.infinity,
+                                        height: 40,
+                                        alignment: Alignment.center,
+                                        decoration: BoxDecoration(
+                                          borderRadius:
+                                              BorderRadius.circular(12),
+                                          color: Color(0xff117af9),
+                                        ),
+                                        child: Text(
+                                          'Buy Subscription Plan',
+                                          style: TextStyle(
+                                              color: Colors.white,
+                                              fontSize: 14,
+                                              fontWeight: FontWeight.w500),
+                                        ),
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                              if (packages.isEmpty) const SizedBox(height: 10),
+                            ],
+                          ]
+                        ],
+                      ),
+                      SizedBox(
+                        height: 15.rh(context),
+                      ),
                     ],
                   ),
-                  RichText(
-                    text: const TextSpan(
-                      children: [
-                        TextSpan(
-                          text: "Title",
-                          style: TextStyle(
-                              color: Colors.black,
-                              fontSize: 15,
-                              fontWeight: FontWeight.w400),
-                        ),
-                        TextSpan(
-                          text: " *",
-                          style: TextStyle(
-                              color: Colors.red), // Customize asterisk color
-                        ),
-                      ],
-                    ),
-                  ),
-                  SizedBox(
-                    height: 15.rh(context),
-                  ),
-
-                  CustomTextFormField1(
-                    controller: _propertyNameController,
-                    validator: CustomTextFieldValidator1.nullCheck,
-                    action: TextInputAction.next,
-                    hintText:
-                        UiUtils.getTranslatedLabel(context, "propertyNameLbl"),
-                  ),
-                  SizedBox(
-                    height: 15.rh(context),
-                  ),
-                  RichText(
-                    text: const TextSpan(
-                      children: [
-                        TextSpan(
-                          text: "Property Type",
-                          style: TextStyle(
-                              color: Colors.black,
-                              fontSize: 15,
-                              fontWeight: FontWeight.w400),
-                        ),
-                        TextSpan(
-                          text: " *",
-                          style: TextStyle(
-                              color: Colors.red), // Customize asterisk color
-                        ),
-                      ],
-                    ),
-                  ),
-                  SizedBox(height: 5,),
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      Expanded(
-                        child: Container(
-                          height: size.height * 0.06,
-                          decoration: BoxDecoration(
-                            color: Colors.grey.withOpacity(0.2),
-                            borderRadius: BorderRadius.circular(15),
-                          ),
-                          child: Row(
-                            children: [
-                              Radio<String>(
-                                activeColor: Colors.blue,
-                                value: 'Sell',
-                                groupValue: PropertyTyperole,
-                                onChanged: (value) {
-                                  setState(() {
-                                    PropertyTyperole = value!;
-                                  });
-                                },
-                              ),
-                              Text(
-                                "Sell",
-                                style: const TextStyle(
-                                    fontSize: 12, fontWeight: FontWeight.bold),
-                              ),
-                            ],
-                          ),
+                      RichText(
+                        text: const TextSpan(
+                          children: [
+                            TextSpan(
+                              text: "Property Type",
+                              style: TextStyle(
+                                  color: Colors.black,
+                                  fontSize: 15,
+                                  fontWeight: FontWeight.w600),
+                            ),
+                            TextSpan(
+                              text: " *",
+                              style: TextStyle(
+                                  color: Colors.red), // Customize asterisk color
+                            ),
+                          ],
                         ),
                       ),
-                      const SizedBox(
-                        width: 10,
+                      SizedBox(
+                        height: 10,
                       ),
-                      Expanded(
-                        child: Container(
-                          height: size.height * 0.06,
-                          decoration: BoxDecoration(
-                            color: Colors.grey.withOpacity(0.2),
-                            borderRadius: BorderRadius.circular(15),
-                          ),
-                          child: Row(
-                            children: [
-                              Radio<String>(
-                                activeColor: Colors.blue,
-                                value: 'Rent/Lease',
-                                groupValue: PropertyTyperole,
-                                onChanged: (value) {
-                                  setState(() {
-                                    PropertyTyperole = value!;
-                                  });
-                                },
+                      Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                        children: [
+                          Expanded(
+                            child: Container(
+                              height: size.height * 0.06,
+                              decoration: BoxDecoration(
+                                color: Colors.grey.withOpacity(0.2),
+                                borderRadius: BorderRadius.circular(15),
                               ),
-                              const Text(
-                                "Rent/Lease",
-                                style: TextStyle(
-                                    fontWeight: FontWeight.bold, fontSize: 12),
+                              child: Row(
+                                children: [
+                                  Radio<String>(
+                                    activeColor: Colors.blue,
+                                    value: 'Sell',
+                                    groupValue: PropertyTyperole,
+                                    onChanged: (value) {
+                                      setState(() {
+                                        PropertyTyperole = value!;
+                                      });
+                                    },
+                                  ),
+                                  Text(
+                                    "Sell",
+                                    style: const TextStyle(
+                                        fontSize: 12, fontWeight: FontWeight.bold),
+                                  ),
+                                ],
                               ),
-                            ],
+                            ),
                           ),
-                        ),
+                          const SizedBox(
+                            width: 10,
+                          ),
+                          Expanded(
+                            child: Container(
+                              height: size.height * 0.06,
+                              decoration: BoxDecoration(
+                                color: Colors.grey.withOpacity(0.2),
+                                borderRadius: BorderRadius.circular(15),
+                              ),
+                              child: Row(
+                                children: [
+                                  Radio<String>(
+                                    activeColor: Colors.blue,
+                                    value: 'Rent/Lease',
+                                    groupValue: PropertyTyperole,
+                                    onChanged: (value) {
+                                      setState(() {
+                                        PropertyTyperole = value!;
+                                      });
+                                    },
+                                  ),
+                                  const Text(
+                                    "Rent/Lease",
+                                    style: TextStyle(
+                                        fontWeight: FontWeight.bold, fontSize: 12),
+                                  ),
+                                ],
+                              ),
+                            ),
+                          ),
+                        ],
+                      ),
+                      SizedBox(
+                        height: 15.rh(context),
                       ),
                     ],
                   ),
-          if (PropertyTyperole == 'Rent/Lease')
-      Padding(
-        padding: const EdgeInsets.symmetric(vertical: 10),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-
-          RichText(
-            text: const TextSpan(
-              children: [
-                TextSpan(
-                  text: "Rent Duration",
-                  style: TextStyle(
-                    color: Colors.black,
-                    fontSize: 15,
-                    fontWeight: FontWeight.w400,
-                  ),
-                ),
-                TextSpan(
-                  text: " *",
-                  style: TextStyle(
-                    color: Colors.red, // Customize asterisk color
-                  ),
-                ),
-              ],
-            ),
-          ),
-          SizedBox(height: 5), // Add spacing between text and dropdown
-          Container(
-            width: size.width,
-            padding: EdgeInsets.symmetric(horizontal: 15), // Add horizontal padding
-            decoration: BoxDecoration(
-              color: Color(0xFFf4f5f4), // Background color for the container
-              borderRadius: BorderRadius.circular(8), // Rounded corners
-              // border: Border.all(color: Colors.grey), // Border styling
-            ),
-            child: DropdownButtonHideUnderline(
-              child: DropdownButton<String>(
-                hint: Text('Select duration'),
-                value: selectedDuration, // Store selected value in a variable
-                onChanged: (String? newValue) {
-                  setState(() {
-                    selectedDuration = newValue!;
-                  });
-                },
-                items: <String>['Daily', 'Monthly', 'Quarterly', 'Yearly']
-                    .map<DropdownMenuItem<String>>((String value) {
-                  return DropdownMenuItem<String>(
-                    value: value,
-                    child: Text(value),
-                  );
-                }).toList(),
-              ),
-            ),
-          ),
-        ],
-            ),
-      ),
-
-
-
-
-    SizedBox(
-                    height: 15.rh(context),
-                  ),
-                  const Text('RERA No.'),
-                  SizedBox(
-                    height: 15.rh(context),
-                  ),
-                  CustomTextFormField1(
-                    controller: _reraController,
-                    action: TextInputAction.next,
-                    hintText: 'RERA No.',
-                  ),
-                  SizedBox(
-                    height: 15.rh(context),
-                  ),
-                  RichText(
-                    text: const TextSpan(
-                      children: [
-                        TextSpan(
-                          text: "Property Size",
-                          style: TextStyle(
-                              color: Colors.black,
-                              fontSize: 15,
-                              fontWeight: FontWeight.w400),
+                  Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      RichText(
+                        text: const TextSpan(
+                          children: [
+                            TextSpan(
+                              text: "Title",
+                              style: TextStyle(
+                                  color: Colors.black,
+                                  fontSize: 15,
+                                  fontWeight: FontWeight.w600),
+                            ),
+                            TextSpan(
+                              text: " *",
+                              style: TextStyle(
+                                  color:
+                                  Colors.red), // Customize asterisk color
+                            ),
+                          ],
                         ),
-                        TextSpan(
-                          text: " *",
-                          style: TextStyle(
-                              color: Colors.red), // Customize asterisk color
+                      ),
+                      SizedBox(
+                        height: 15.rh(context),
+                      ),
+                      CustomTextFormField1(
+                        controller: _propertyNameController,
+                        // validator: CustomTextFieldValidator1.nullCheck,
+                        action: TextInputAction.next,
+                        hintText: UiUtils.getTranslatedLabel(
+                            context, "propertyNameLbl"),
+                      ),
+                      SizedBox(
+                        height: 15.rh(context),
+                      ),
+                    ],
+                  ),
+                  Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      if ((widget.propertyDetails == null
+                          ? (Constant.addProperty['propertyType']
+                      as PropertyType)
+                          .name
+                          : widget.propertyDetails?['propType'])
+                          .toString()
+                          .toLowerCase() ==
+                          "rent") ...[
+                        RichText(
+                          text: const TextSpan(
+                            children: [
+                              TextSpan(
+                                text: "Rent Price",
+                                style: TextStyle(
+                                    color: Colors.black,
+                                    fontSize: 15,
+                                    fontWeight: FontWeight.w600),
+                              ),
+                              TextSpan(
+                                text: " *",
+                                style: TextStyle(
+                                    color: Colors.red), // Customize asterisk color
+                              ),
+                            ],
+                          ),
+                        ),
+                      ] else ...[
+                        RichText(
+                          text: const TextSpan(
+                            children: [
+                              TextSpan(
+                                text: "Price",
+                                style: TextStyle(
+                                    color: Colors.black,
+                                    fontSize: 15,
+                                    fontWeight: FontWeight.w600),
+                              ),
+                              TextSpan(
+                                text: " *",
+                                style: TextStyle(
+                                    color: Colors.red), // Customize asterisk color
+                              ),
+                            ],
+                          ),
+                        ),
+                      ],
+                      SizedBox(
+                        height: 10.rh(context),
+                      ),
+                      Row(
+                        children: [
+                          Expanded(
+                            child: CustomTextFormField1(
+                              action: TextInputAction.next,
+                              prefix: Text("${Constant.currencySymbol} ",
+                              style: TextStyle(
+                                  color: Color(0xff929292),
+                                  fontSize: 13,
+                                  fontFamily: 'Roboto'),
+                              ),
+                              controller: _priceController,
+                              formaters: [
+                                FilteringTextInputFormatter.allow(
+                                    RegExp(r'^\d+\.?\d*')),
+                              ],
+                              isReadOnly: false,
+                              keyboard: TextInputType.number,
+                              // validator: CustomTextFieldValidator1.nullCheck,
+                              hintText: "Enter proprty price (₹)",
+                            ),
+                          ),
+                          if ((widget.propertyDetails == null
+                              ? (Constant.addProperty['propertyType']
+                          as PropertyType)
+                              .name
+                              : widget.propertyDetails?['propType'])
+                              .toString()
+                              .toLowerCase() ==
+                              "rent") ...[
+                            const SizedBox(
+                              width: 5,
+                            ),
+                            Container(
+                              decoration: BoxDecoration(
+                                  color: context.color.secondaryColor,
+                                  border: Border.all(
+                                      color: context.color.borderColor, width: 1.5),
+                                  borderRadius: BorderRadius.circular(10)),
+                              child: Padding(
+                                padding: const EdgeInsets.all(7.0),
+                                child: DropdownButton<String>(
+                                  value: selectedRentType,
+                                  dropdownColor: context.color.primaryColor,
+                                  underline: const SizedBox.shrink(),
+                                  items: [
+                                    DropdownMenuItem(
+                                      value: "Daily",
+                                      child: Text(
+                                        "Daily".translate(context),
+                                      ),
+                                    ),
+                                    DropdownMenuItem(
+                                      value: "Monthly",
+                                      child: Text("Monthly".translate(context)),
+                                    ),
+                                    DropdownMenuItem(
+                                      value: "Quarterly",
+                                      child: Text("Quarterly".translate(context)),
+                                    ),
+                                    DropdownMenuItem(
+                                      value: "Yearly",
+                                      child: Text("Yearly".translate(context)),
+                                    ),
+                                  ],
+                                  onChanged: (value) {
+                                    selectedRentType = value ?? "";
+                                    setState(() {});
+                                  },
+                                ),
+                              ),
+                            ),
+                          ]
+                        ],
+                      ),
+                      SizedBox(
+                        height: 15.rh(context),
+                      ),
+                    ],
+                  ),
+                  if (PropertyTyperole == 'Rent/Lease')
+                    Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        RichText(
+                          text: const TextSpan(
+                            children: [
+                              TextSpan(
+                                text: "Rent Duration",
+                                style: TextStyle(
+                                  color: Colors.black,
+                                  fontSize: 15,
+                                  fontWeight: FontWeight.w600,
+                                ),
+                              ),
+                              TextSpan(
+                                text: " *",
+                                style: TextStyle(
+                                  color:
+                                      Colors.red, // Customize asterisk color
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
+                        SizedBox(
+                            height: 10), // Add spacing between text and dropdown
+                        Container(
+                          width: size.width,
+                          height: 60,
+                          padding: EdgeInsets.symmetric(
+                              horizontal: 15), // Add horizontal padding
+                          decoration: BoxDecoration(
+                            color: Color(
+                                0xFFf4f5f4), // Background color for the container
+                            borderRadius:
+                                BorderRadius.circular(8), // Rounded corners
+                            // border: Border.all(color: Colors.grey), // Border styling
+                          ),
+                          child: DropdownButtonHideUnderline(
+                            child: DropdownButton<String>(
+                              hint: Text('Select duration'),
+                              value:
+                                  selectedDuration, // Store selected value in a variable
+                              onChanged: (String? newValue) {
+                                setState(() {
+                                  selectedDuration = newValue!;
+                                });
+                              },
+                              items: <String>[
+                                'Daily',
+                                'Monthly',
+                                'Quarterly',
+                                'Yearly'
+                              ].map<DropdownMenuItem<String>>((String value) {
+                                return DropdownMenuItem<String>(
+                                  value: value,
+                                  child: Text(value),
+                                );
+                              }).toList(),
+                            ),
+                          ),
+                        ),
+                        SizedBox(
+                          height: 15.rh(context),
                         ),
                       ],
                     ),
-                  ),
-                  SizedBox(
-                    height: 15.rh(context),
-                  ),
-                  CustomTextFormField1(
-                    controller: _sqftController,
-                    validator: CustomTextFieldValidator1.nullCheck,
-                    action: TextInputAction.next,
-                    hintText: 'Property Area',
-                  ),
-                  SizedBox(height: 5,),
-                  RichText(
-                    text: const TextSpan(
-                      children: [
-                        TextSpan(
-                          text: "Floor Number",
-                          style: TextStyle(
-                              color: Colors.black,
-                              fontSize: 15,
-                              fontWeight: FontWeight.w400),
+                  Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      RichText(
+                        text: const TextSpan(
+                          children: [
+                            TextSpan(
+                              text: "Description",
+                              style: TextStyle(
+                                  color: Colors.black,
+                                  fontSize: 15,
+                                  fontWeight: FontWeight.w600),
+                            ),
+                            TextSpan(
+                              text: " *",
+                              style: TextStyle(
+                                  color: Colors.red), // Customize asterisk color
+                            ),
+                          ],
                         ),
-                        TextSpan(
-                          text: " *",
-                          style: TextStyle(
-                              color: Colors.red), // Customize asterisk color
-                        ),
-                      ],
+                      ),
+                      SizedBox(
+                        height: 15.rh(context),
+                      ),
+                      CustomTextFormField1(
+                        action: TextInputAction.next,
+                        controller: _descriptionController,
+                        // validator: CustomTextFieldValidator1.nullCheck,
+                        hintText: UiUtils.getTranslatedLabel(context, "writeSomething"),
+                        maxLine: 100,
+                        minLine: 6,
+                      ),
+                      SizedBox(
+                        height: 15.rh(context),
+                      ),
+                    ],
+                  ),
+                  const SizedBox(height: 25),
+                  const Text("More Information",
+                    style: TextStyle(
+                      color: Colors.black54,
+                      fontSize: 17,
+                      fontWeight: FontWeight.w600,
                     ),
                   ),
-                  SizedBox(
-                    height: 15.rh(context),
+                  const SizedBox(height: 15),
+                  Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      const Text('RERA No.',
+                        style: TextStyle(
+                          color: Colors.black,
+                          fontSize: 15,
+                          fontWeight: FontWeight.w600,
+                        ),),
+                      SizedBox(
+                        height: 10,
+                      ),
+                      CustomTextFormField1(
+                        controller: _reraController,
+                        action: TextInputAction.next,
+                        hintText: 'RERA No.',
+                      ),
+                      SizedBox(
+                        height: 15.rh(context),
+                      ),
+                    ],
                   ),
-                  CustomTextFormField1(
-                    controller: _FLoorController,
-                    validator: CustomTextFieldValidator1.nullCheck,
-                    action: TextInputAction.next,
-                    hintText: '0',
-                  ),
-                  SizedBox(
-                    height: 15.rh(context),
-                  ),
-                  const Text('Highlights'),
-                  SizedBox(
-                    height: 15.rh(context),
-                  ),
-                  CustomTextFormField1(
-                    controller: _highlightController,
-                    validator: CustomTextFieldValidator1.nullCheck,
-                    action: TextInputAction.next,
-                    hintText: 'Highlights',
-                  ),
-                  SizedBox(
-                    height: 15.rh(context),
+                  Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      RichText(
+                        text: const TextSpan(
+                          children: [
+                            TextSpan(
+                              text: "Size(Sq.Ft)",
+                              style: TextStyle(
+                                  color: Colors.black,
+                                  fontSize: 15,
+                                  fontWeight: FontWeight.w600),
+                            ),
+                            TextSpan(
+                              text: " *",
+                              style: TextStyle(
+                                  color: Colors.red), // Customize asterisk color
+                            ),
+                          ],
+                        ),
+                      ),
+                      SizedBox(
+                        height: 10,
+                      ),
+                      CustomTextFormField1(
+                        controller: _sqftController,
+                        // validator: CustomTextFieldValidator1.nullCheck,
+                        action: TextInputAction.next,
+                        hintText: 'Property Area',
+                      ),
+                      SizedBox(
+                        height: 15.rh(context),
+                      ),
+                    ],
                   ),
                   Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
@@ -962,7 +1388,7 @@ class _AddPropertyDetailsState extends State<AddPropertyDetails> {
                               text: " *",
                               style: TextStyle(
                                   color:
-                                      Colors.red), // Customize asterisk color
+                                  Colors.red), // Customize asterisk color
                             ),
                           ],
                         ),
@@ -978,7 +1404,7 @@ class _AddPropertyDetailsState extends State<AddPropertyDetails> {
                                   (List<ValueItem> selectedOptions) {
                                 setState(() {
                                   _brokerageControler.text =
-                                      selectedOptions[0].value!;
+                                  selectedOptions[0].value!;
                                 });
                               },
                               options: [
@@ -987,11 +1413,11 @@ class _AddPropertyDetailsState extends State<AddPropertyDetails> {
                               ],
                               selectionType: SelectionType.single,
                               chipConfig:
-                                  const ChipConfig(wrapType: WrapType.wrap),
+                              const ChipConfig(wrapType: WrapType.wrap),
                               dropdownHeight: 300,
                               optionTextStyle: const TextStyle(fontSize: 16),
                               selectedOptionIcon:
-                                  const Icon(Icons.check_circle),
+                              const Icon(Icons.check_circle),
                             ),
                           ),
                         ],
@@ -1008,17 +1434,82 @@ class _AddPropertyDetailsState extends State<AddPropertyDetails> {
                         text: const TextSpan(
                           children: [
                             TextSpan(
-                              text: "Amenities",
+                              text: "Property Highlights",
                               style: TextStyle(
                                   color: Colors.black,
                                   fontSize: 15,
                                   fontWeight: FontWeight.w600),
                             ),
-                            // TextSpan(
-                            //   text: " *",
-                            //   style: TextStyle(color: Colors.red), // Customize asterisk color
-                            // ),
+                            TextSpan(
+                              text: '  (Note: Add highlights using commas ",")',
+                              style: TextStyle(color: Colors.red, fontSize: 11), // Customize asterisk color
+                            ),
                           ],
+                        ),
+                      ),
+                      SizedBox(
+                        height: 15.rh(context),
+                      ),
+                      CustomTextFormField1(
+                        controller: _highlightController,
+                        // validator: CustomTextFieldValidator1.nullCheck,
+                        action: TextInputAction.next,
+                        hintText: 'Highlights',
+                        minLine: 4,
+                        maxLine: 4,
+                      ),
+                      SizedBox(
+                        height: 15.rh(context),
+                      ),
+                    ],
+                  ),
+                  Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      RichText(
+                        text: const TextSpan(
+                          children: [
+                            TextSpan(
+                              text: "Floor No",
+                              style: TextStyle(
+                                  color: Colors.black,
+                                  fontSize: 15,
+                                  fontWeight: FontWeight.w600),
+                            ),
+                            TextSpan(
+                              text: " *",
+                              style: TextStyle(
+                                  color: Colors.red), // Customize asterisk color
+                            ),
+                          ],
+                        ),
+                      ),
+                      SizedBox(
+                        height: 15.rh(context),
+                      ),
+                      CustomTextFormField1(
+                        controller: _FLoorController,
+                        // validator: CustomTextFieldValidator1.nullCheck,
+                        action: TextInputAction.next,
+                        hintText: '0',
+                      ),
+                      SizedBox(
+                        height: 15.rh(context),
+                      ),
+                    ],
+                  ),
+
+
+
+                  Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      const SizedBox(height: 25),
+                      const Text("Amenities",
+                        style: TextStyle(
+                          color: Colors.black54,
+                          fontSize: 17,
+                          fontWeight: FontWeight.w600,
                         ),
                       ),
                       const SizedBox(
@@ -1056,6 +1547,7 @@ class _AddPropertyDetailsState extends State<AddPropertyDetails> {
                                       width: 18.0,
                                       height: 18.0,
                                       fit: BoxFit.cover,
+                                      color: context.color.tertiaryColor
                                     ),
                                   ),
                                   shape: StadiumBorder(
@@ -1091,15 +1583,121 @@ class _AddPropertyDetailsState extends State<AddPropertyDetails> {
                       ),
                     ],
                   ),
+                  
+                  
+
+                  // SizedBox(
+                  //   height: 35.rh(context),
+                  //   child: Row(
+                  //     mainAxisSize: MainAxisSize.max,
+                  //     mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  //     children: [
+                  //       Expanded(
+                  //         flex: 3,
+                  //         child: RichText(
+                  //           text: const TextSpan(
+                  //             children: [
+                  //               TextSpan(
+                  //                 text: "Address",
+                  //                 style: TextStyle(
+                  //                     color: Colors.black,
+                  //                     fontSize: 15,
+                  //                     fontWeight: FontWeight.w400),
+                  //               ),
+                  //               TextSpan(
+                  //                 text: " *",
+                  //                 style: TextStyle(
+                  //                     color: Colors
+                  //                         .red), // Customize asterisk color
+                  //               ),
+                  //             ],
+                  //           ),
+                  //         ),
+                  //       ),
+                  //       // const Spacer(),
+                  //       // Expanded(
+                  //       //   flex: 3,
+                  //       //   child: ChooseLocationFormField(
+                  //       //     initialValue: false,
+                  //       //     validator: (bool? value) {
+                  //       //       //Check if it has already data so we will not validate it.
+                  //       //       if ((widget.propertyDetails != null)) {
+                  //       //         return null;
+                  //       //       }
+                  //       //
+                  //       //       if (value == true) {
+                  //       //         return null;
+                  //       //       } else {
+                  //       //         return "Select location";
+                  //       //       }
+                  //       //     },
+                  //       //     build: (state) {
+                  //       //       return Container(
+                  //       //         decoration: BoxDecoration(
+                  //       //             // color: context.color.teritoryColor,
+                  //       //             border: Border.all(
+                  //       //                 width: 1.5,
+                  //       //                 color: state.hasError
+                  //       //                     ? Colors.red
+                  //       //                     : Colors.transparent),
+                  //       //             borderRadius: BorderRadius.circular(9)),
+                  //       //         child: MaterialButton(
+                  //       //             height: 30,
+                  //       //             onPressed: () {
+                  //       //               _onTapChooseLocation.call(state);
+                  //       //             },
+                  //       //             child: FittedBox(
+                  //       //               fit: BoxFit.fitWidth,
+                  //       //               child: Row(
+                  //       //                 mainAxisSize: MainAxisSize.min,
+                  //       //                 children: [
+                  //       //                   Image.asset(
+                  //       //                     "assets/AddPostforms/_-98.png",
+                  //       //                     width: 15,
+                  //       //                     height: 15,
+                  //       //                     fit: BoxFit.cover,
+                  //       //                   ),
+                  //       //                   // UiUtils.getSvg(AppIcons.location,
+                  //       //                   //     color:
+                  //       //                   //         context.color.textLightColor),
+                  //       //                   const SizedBox(
+                  //       //                     width: 3,
+                  //       //                   ),
+                  //       //                   Text(
+                  //       //                     UiUtils.getTranslatedLabel(
+                  //       //                         context, "chooseLocation"),
+                  //       //                   ).size(12).color(
+                  //       //                       context.color.tertiaryColor),
+                  //       //                 ],
+                  //       //               ),
+                  //       //             )),
+                  //       //       );
+                  //       //     },
+                  //       //   ),
+                  //       // )
+                  //     ],
+                  //   ),
+                  // ),
+                  const SizedBox(height: 25),
+                  const Text("Location",
+                    style: TextStyle(
+                      color: Colors.black54,
+                      fontSize: 17,
+                      fontWeight: FontWeight.w600,
+                    ),
+                  ),
+                  SizedBox(
+                    height: 15.rh(context),
+                  ),
                   RichText(
                     text: const TextSpan(
                       children: [
                         TextSpan(
-                          text: "Description",
+                          text: "Address",
                           style: TextStyle(
                               color: Colors.black,
                               fontSize: 15,
-                              fontWeight: FontWeight.w400),
+                              fontWeight: FontWeight.w600),
                         ),
                         TextSpan(
                           text: " *",
@@ -1112,106 +1710,95 @@ class _AddPropertyDetailsState extends State<AddPropertyDetails> {
                   SizedBox(
                     height: 15.rh(context),
                   ),
-                  CustomTextFormField1(
-                    action: TextInputAction.next,
-                    controller: _descriptionController,
-                    validator: CustomTextFieldValidator1.nullCheck,
-                    hintText:
-                        UiUtils.getTranslatedLabel(context, "writeSomething"),
-                    maxLine: 100,
-                    minLine: 6,
-                  ),
-                  SizedBox(
-                    height: 15.rh(context),
-                  ),
-                  SizedBox(
-                    height: 35.rh(context),
-                    child: Row(
-                      mainAxisSize: MainAxisSize.max,
-                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                      children: [
-                        Expanded(
-                            flex: 3,
-                            child: RichText(
-                              text: const TextSpan(
-                                children: [
-                                  TextSpan(
-                                    text: "Address",
-                                    style: TextStyle(
-                                        color: Colors.black,
-                                        fontSize: 15,
-                                        fontWeight: FontWeight.w400),
-                                  ),
-                                  TextSpan(
-                                    text: " *",
-                                    style: TextStyle(
-                                        color: Colors.red), // Customize asterisk color
-                                  ),
-                                ],
-                              ),
-                            ),),
-                        // const Spacer(),
-                        Expanded(
-                          flex: 3,
-                          child: ChooseLocationFormField(
-                            initialValue: false,
-                            validator: (bool? value) {
-                              //Check if it has already data so we will not validate it.
-                              if ((widget.propertyDetails != null)) {
-                                return null;
-                              }
-
-                              if (value == true) {
-                                return null;
-                              } else {
-                                return "Select location";
-                              }
-                            },
-                            build: (state) {
-                              return Container(
-                                decoration: BoxDecoration(
-                                    // color: context.color.teritoryColor,
-                                    border: Border.all(
-                                        width: 1.5,
-                                        color: state.hasError
-                                            ? Colors.red
-                                            : Colors.transparent),
-                                    borderRadius: BorderRadius.circular(9)),
-                                child: MaterialButton(
-                                    height: 30,
-                                    onPressed: () {
-                                      _onTapChooseLocation.call(state);
-                                    },
-                                    child: FittedBox(
-                                      fit: BoxFit.fitWidth,
-                                      child: Row(
-                                        mainAxisSize: MainAxisSize.min,
-                                        children: [
-                                          Image.asset(
-                                            "assets/AddPostforms/_-98.png",
-                                            width: 15,
-                                            height: 15,
-                                            fit: BoxFit.cover,
-                                          ),
-                                          // UiUtils.getSvg(AppIcons.location,
-                                          //     color:
-                                          //         context.color.textLightColor),
-                                          const SizedBox(
-                                            width: 3,
-                                          ),
-                                          Text(
-                                            UiUtils.getTranslatedLabel(
-                                                context, "chooseLocation"),
-                                          ).size(12).color(
-                                              context.color.tertiaryColor),
-                                        ],
-                                      ),
-                                    )),
-                              );
-                            },
+                  Container(
+                    height: 60,
+                    child: GooglePlaceAutoCompleteTextField(
+                      textEditingController: _addressController,
+                      focusNode: placesFocusNode,
+                      inputDecoration: const InputDecoration(
+                          hintText: 'Enter location..',
+                          hintStyle: TextStyle(
+                            fontFamily: 'Poppins',
+                            fontSize: 14.0,
+                            color: Color(0xff9c9c9c),
+                            fontWeight: FontWeight.w500,
+                            decoration: TextDecoration.none,
                           ),
-                        )
-                      ],
+                          enabledBorder: UnderlineInputBorder(
+                            borderSide: BorderSide(
+                              color: Colors.transparent,
+                            ),
+                          ),
+                          focusedBorder: UnderlineInputBorder(
+                              borderSide: BorderSide(
+                                color: Colors.transparent,
+                              )
+                          )
+                      ),
+                      googleAPIKey: "AIzaSyDDJ17OjVJ0TS2qYt7GMOnrMjAu1CYZFg8",
+                      debounceTime: 800,
+                      countries: ["in"],
+                      isLatLngRequired: true,
+                      getPlaceDetailWithLatLng: (Prediction prediction) {
+                        print("placeDetails" + prediction.lng.toString());
+                        _latitudeController.text = prediction.lat.toString();
+                        _longitudeController.text = prediction.lng.toString();
+                        setState(() { });
+                      },
+                      itemClick: (Prediction prediction) {
+                        _addressController.text = prediction.description!;
+                        _addressController.selection =
+                            TextSelection.fromPosition(TextPosition(
+                                offset: prediction.description!.length));
+                        print('yyyyyyyyyyyyyyyyyyyyyyyyyy: ${prediction.lat}, ${prediction.lng}');
+                        List address = prediction.description!.split(',').reversed.toList();
+                        if(address.length >= 3) {
+                          _cityNameController.text = address[2];
+                          _stateNameController.text = address[1];
+                          _countryNameController.text = address[0];
+                          setState(() { });
+                        } else if(address.length == 2) {
+                          _cityNameController.text = address[1];
+                          _stateNameController.text = address[1];
+                          _countryNameController.text = address[0];
+                          setState(() { });
+                        } else if(address.length == 1) {
+                          _cityNameController.text = address[0];
+                          _stateNameController.text = address[0];
+                          _countryNameController.text = address[0];
+                          setState(() { });
+                        } else if(address.length == 0) {
+                          _cityNameController.text = '';
+                          _stateNameController.text = '';
+                          _countryNameController.text = '';
+                          setState(() { });
+                        }
+                        // cityControler.text = place.locality ?? '';
+                        // StateController.text = place.administrativeArea ?? '';
+                        // ContryControler.text = place.country ?? '';
+                        // setState(() { });
+                        // getAddressFromLatLng(prediction.placeId);
+                      },
+                      itemBuilder: (context, index, Prediction prediction) {
+                        return Container(
+                          padding: EdgeInsets.all(10),
+                          child: Row(
+                            children: [
+                              Icon(Icons.location_on),
+                              SizedBox(
+                                width: 7,
+                              ),
+                              Expanded(
+                                  child:
+                                  Text("${prediction.description ?? ""}"))
+                            ],
+                          ),
+                        );
+                      },
+                      seperatedBuilder: Divider(),
+                      isCrossBtnShown: true,
+                      containerHorizontalPadding: 10,
+                      placeType: PlaceType.geocode,
                     ),
                   ),
                   SizedBox(
@@ -1220,8 +1807,8 @@ class _AddPropertyDetailsState extends State<AddPropertyDetails> {
                   CustomTextFormField1(
                     action: TextInputAction.next,
                     controller: _cityNameController,
-                    isReadOnly: false,
-                    validator: CustomTextFieldValidator1.nullCheck,
+                    isReadOnly: true,
+                    // validator: CustomTextFieldValidator1.nullCheck,
                     hintText: UiUtils.getTranslatedLabel(context, "city"),
                   ),
                   SizedBox(
@@ -1230,8 +1817,8 @@ class _AddPropertyDetailsState extends State<AddPropertyDetails> {
                   CustomTextFormField1(
                     action: TextInputAction.next,
                     controller: _stateNameController,
-                    isReadOnly: false,
-                    validator: CustomTextFieldValidator1.nullCheck,
+                    isReadOnly: true,
+                    // validator: CustomTextFieldValidator1.nullCheck,
                     hintText: UiUtils.getTranslatedLabel(context, "state"),
                   ),
                   SizedBox(
@@ -1240,8 +1827,8 @@ class _AddPropertyDetailsState extends State<AddPropertyDetails> {
                   CustomTextFormField1(
                     action: TextInputAction.next,
                     controller: _countryNameController,
-                    isReadOnly: false,
-                    validator: CustomTextFieldValidator1.nullCheck,
+                    isReadOnly: true,
+                    // validator: CustomTextFieldValidator1.nullCheck,
                     hintText: UiUtils.getTranslatedLabel(context, "country"),
                   ),
                   SizedBox(
@@ -1250,252 +1837,369 @@ class _AddPropertyDetailsState extends State<AddPropertyDetails> {
                   CustomTextFormField1(
                     action: TextInputAction.next,
                     controller: _addressController,
+                    isReadOnly: true,
                     hintText: UiUtils.getTranslatedLabel(context, "addressLbl"),
                     maxLine: 100,
-                    validator: CustomTextFieldValidator1.nullCheck,
+                    // validator: CustomTextFieldValidator1.nullCheck,
                     minLine: 4,
-                  ),
-                  SizedBox(
-                    height: 10.rh(context),
-                  ),
-                  Column(
-                    crossAxisAlignment: CrossAxisAlignment.end,
-                    children: [
-                      Row(
-                        mainAxisAlignment: MainAxisAlignment.end,
-                        children: [
-                          Image.asset(
-                            "assets/AddPostforms/_-98.png",
-                            width: 15,
-                            height: 15,
-                            fit: BoxFit.cover,
-                          ),
-                          TextButton(
-                              onPressed: () {
-                                _clientAddressController.clear();
-                                _clientAddressController.text =
-                                    HiveUtils.getUserDetails().address ?? "";
-                              },
-                              style: ButtonStyle(
-                                  overlayColor: MaterialStatePropertyAll(context
-                                      .color.tertiaryColor
-                                      .withOpacity(0.3))),
-                              child: Text("useYourLocation".translate(context))
-                                  .size(12)
-                                  .color(context.color.tertiaryColor)),
-                        ],
-                      ),
-                      CustomTextFormField1(
-                        action: TextInputAction.next,
-                        controller: _clientAddressController,
-                        validator: CustomTextFieldValidator1.nullCheck,
-                        hintText: UiUtils.getTranslatedLabel(
-                            context, "clientaddressLbl"),
-                        maxLine: 100,
-                        minLine: 4,
-                      ),
-                    ],
-                  ),
-                  SizedBox(
-                    height: 10.rh(context),
-                  ),
-                  if ((widget.propertyDetails == null
-                              ? (Constant.addProperty['propertyType']
-                                      as PropertyType)
-                                  .name
-                              : widget.propertyDetails?['propType'])
-                          .toString()
-                          .toLowerCase() ==
-                      "rent") ...[
-                    RichText(
-                      text: const TextSpan(
-                        children: [
-                          TextSpan(
-                            text: "Rent Price",
-                            style: TextStyle(
-                                color: Colors.black,
-                                fontSize: 15,
-                                fontWeight: FontWeight.w400),
-                          ),
-                          TextSpan(
-                            text: " *",
-                            style: TextStyle(
-                                color: Colors.red), // Customize asterisk color
-                          ),
-                        ],
-                      ),
-                    ),
-                  ] else ...[
-                    RichText(
-                      text: const TextSpan(
-                        children: [
-                          TextSpan(
-                            text: "Price",
-                            style: TextStyle(
-                                color: Colors.black,
-                                fontSize: 15,
-                                fontWeight: FontWeight.w400),
-                          ),
-                          TextSpan(
-                            text: " *",
-                            style: TextStyle(
-                                color: Colors.red), // Customize asterisk color
-                          ),
-                        ],
-                      ),
-                    ),
-                  ],
-                  SizedBox(
-                    height: 10.rh(context),
-                  ),
-                  Row(
-                    children: [
-                      Expanded(
-                        child: CustomTextFormField1(
-                          action: TextInputAction.next,
-                          prefix: Text("${Constant.currencySymbol} "),
-                          controller: _priceController,
-                          formaters: [
-                            FilteringTextInputFormatter.allow(
-                                RegExp(r'^\d+\.?\d*')),
-                          ],
-                          isReadOnly: false,
-                          keyboard: TextInputType.number,
-                          validator: CustomTextFieldValidator1.nullCheck,
-                          hintText: "00",
-                        ),
-                      ),
-                      if ((widget.propertyDetails == null
-                                  ? (Constant.addProperty['propertyType']
-                                          as PropertyType)
-                                      .name
-                                  : widget.propertyDetails?['propType'])
-                              .toString()
-                              .toLowerCase() ==
-                          "rent") ...[
-                        const SizedBox(
-                          width: 5,
-                        ),
-                        Container(
-                          decoration: BoxDecoration(
-                              color: context.color.secondaryColor,
-                              border: Border.all(
-                                  color: context.color.borderColor, width: 1.5),
-                              borderRadius: BorderRadius.circular(10)),
-                          child: Padding(
-                            padding: const EdgeInsets.all(7.0),
-                            child: DropdownButton<String>(
-                              value: selectedRentType,
-                              dropdownColor: context.color.primaryColor,
-                              underline: const SizedBox.shrink(),
-                              items: [
-                                DropdownMenuItem(
-                                  value: "Daily",
-                                  child: Text(
-                                    "Daily".translate(context),
-                                  ),
-                                ),
-                                DropdownMenuItem(
-                                  value: "Monthly",
-                                  child: Text("Monthly".translate(context)),
-                                ),
-                                DropdownMenuItem(
-                                  value: "Quarterly",
-                                  child: Text("Quarterly".translate(context)),
-                                ),
-                                DropdownMenuItem(
-                                  value: "Yearly",
-                                  child: Text("Yearly".translate(context)),
-                                ),
-                              ],
-                              onChanged: (value) {
-                                selectedRentType = value ?? "";
-                                setState(() {});
-                              },
-                            ),
-                          ),
-                        ),
-                      ]
-                    ],
-                  ),
-                  SizedBox(
-                    height: 10.rh(context),
-                  ),
-                  Row(
-                    children: [
-                      Text(UiUtils.getTranslatedLabel(
-                          context, "uploadPictures")),
-                      const SizedBox(
-                        width: 3,
-                      ),
-                      Text("(max.3MB)".translate(context))
-                          .italic()
-                          .size(context.font.small),
-                    ],
-                  ),
-                  SizedBox(
-                    height: 10.rh(context),
-                  ),
-                  Wrap(
-                    children: [
-                      if (_pickTitleImage.pickedFile != null) ...[] else ...[],
-                      titleImageListener(),
-                    ],
                   ),
                   SizedBox(
                     height: 15.rh(context),
                   ),
-                  Text(UiUtils.getTranslatedLabel(context, "Other Pictures")),
+                  // Column(
+                  //   crossAxisAlignment: CrossAxisAlignment.end,
+                  //   children: [
+                  //     Row(
+                  //       mainAxisAlignment: MainAxisAlignment.end,
+                  //       children: [
+                  //         Image.asset(
+                  //           "assets/AddPostforms/_-98.png",
+                  //           width: 15,
+                  //           height: 15,
+                  //           fit: BoxFit.cover,
+                  //         ),
+                  //         TextButton(
+                  //             onPressed: () {
+                  //               _clientAddressController.clear();
+                  //               _clientAddressController.text =
+                  //                   HiveUtils.getUserDetails().address ?? "";
+                  //             },
+                  //             style: ButtonStyle(
+                  //                 overlayColor: MaterialStatePropertyAll(context
+                  //                     .color.tertiaryColor
+                  //                     .withOpacity(0.3))),
+                  //             child: Text("useYourLocation".translate(context))
+                  //                 .size(12)
+                  //                 .color(context.color.tertiaryColor)),
+                  //       ],
+                  //     ),
+                  //     CustomTextFormField1(
+                  //       action: TextInputAction.next,
+                  //       controller: _clientAddressController,
+                  //       validator: CustomTextFieldValidator1.nullCheck,
+                  //       hintText: UiUtils.getTranslatedLabel(
+                  //           context, "clientaddressLbl"),
+                  //       maxLine: 100,
+                  //       minLine: 4,
+                  //     ),
+                  //   ],
+                  // ),
                   // SizedBox(
                   //   height: 10.rh(context),
                   // ),
-                  SizedBox(
-                    height: 10.rh(context),
-                  ),
-                  propertyImagesListener(),
-                  SizedBox(
-                    height: 10.rh(context),
-                  ),
-                  Text(UiUtils.getTranslatedLabel(context, "additionals")),
-                  SizedBox(
-                    height: 10.rh(context),
-                  ),
-                  CustomTextFormField1(
-                    // prefix: Text("${Constant.currencySymbol} "),
-                    controller: _videoLinkController,
-                    // isReadOnly: widget.properyDetails != null,
-                    hintText: "http://example.com/video.mp4",
-                  ),
-                  SizedBox(
-                    height: 10.rh(context),
-                  ),
-                  GestureDetector(
-                    onTap: () {
-                      _pick360deg.pick(pickMultiple: false);
-                    },
-                    child: Container(
-                      clipBehavior: Clip.antiAlias,
-                      decoration: BoxDecoration(
-                          borderRadius: BorderRadius.circular(10),
-                          color: const Color(0xfff8f9ff),
-                          border:
-                              Border.all(width: 1, color: const Color(0xff6aabfb))),
-                      alignment: Alignment.center,
-                      height: 65.rh(context),
-                      width: 65.rh(context),
-                      child: Center(
-                          child: Image.asset(
-                        "assets/AddPostforms/_-100.png",
-                        width: 25,
-                        height: 25,
-                      )),
+
+                  const SizedBox(height: 25),
+                  const Text("Images & Video",
+                    style: TextStyle(
+                      color: Colors.black54,
+                      fontSize: 17,
+                      fontWeight: FontWeight.w600,
                     ),
                   ),
-                  _pick360deg.listenChangesInUI((context, image) {
-                    if (image != null) {
-                      return Stack(
+                  SizedBox(
+                    height: 15.rh(context),
+                  ),
+                  Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      RichText(
+                        text: const TextSpan(
+                          children: [
+                            TextSpan(
+                              text: "Title Image",
+                              style: TextStyle(
+                                  color: Colors.black,
+                                  fontSize: 15,
+                                  fontWeight: FontWeight.w600),
+                            ),
+                            TextSpan(
+                              text: " *",
+                              style: TextStyle(
+                                  color: Colors.red), // Customize asterisk color
+                            ),
+                          ],
+                        ),
+                      ),
+                      SizedBox(
+                        height: 10.rh(context),
+                      ),
+                      Wrap(
                         children: [
-                          Container(
+                          if (_pickTitleImage.pickedFile != null) ...[] else ...[],
+                          titleImageListener(),
+                        ],
+                      ),
+                      SizedBox(
+                        height: 15.rh(context),
+                      ),
+                    ],
+                  ),
+                  Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      RichText(
+                        text: const TextSpan(
+                          children: [
+                            TextSpan(
+                              text: "Gallary",
+                              style: TextStyle(
+                                  color: Colors.black,
+                                  fontSize: 15,
+                                  fontWeight: FontWeight.w600),
+                            ),
+                            TextSpan(
+                              text: " *",
+                              style: TextStyle(
+                                  color: Colors.red), // Customize asterisk color
+                            ),
+                          ],
+                        ),
+                      ),
+                      SizedBox(
+                        height: 10.rh(context),
+                      ),
+                      propertyImagesListener(),
+                      SizedBox(
+                        height: 10.rh(context),
+                      ),
+                    ],
+                  ),
+                  Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text('Video Link',
+                          style: TextStyle(
+                          color: Colors.black,
+                          fontSize: 15,
+                          fontWeight: FontWeight.w600),
+                      ),
+                      SizedBox(
+                        height: 10.rh(context),
+                      ),
+                      CustomTextFormField1(
+                        controller: _videoLinkController,
+                        hintText: "http://example.com/video.mp4",
+                      ),
+                      SizedBox(
+                        height: 15.rh(context),
+                      ),
+                    ],
+                  ),
+                  // GestureDetector(
+                  //   onTap: () {
+                  //     _pick360deg.pick(pickMultiple: false);
+                  //   },
+                  //   child: Container(
+                  //     clipBehavior: Clip.antiAlias,
+                  //     decoration: BoxDecoration(
+                  //         borderRadius: BorderRadius.circular(10),
+                  //         color: const Color(0xfff8f9ff),
+                  //         border: Border.all(
+                  //             width: 1, color: const Color(0xff6aabfb))),
+                  //     alignment: Alignment.center,
+                  //     height: 65.rh(context),
+                  //     width: 65.rh(context),
+                  //     child: Center(
+                  //         child: Image.asset(
+                  //       "assets/AddPostforms/_-100.png",
+                  //       width: 25,
+                  //       height: 25,
+                  //     )),
+                  //   ),
+                  // ),
+                  // _pick360deg.listenChangesInUI((context, image) {
+                  //   if (image != null) {
+                  //     return Stack(
+                  //       children: [
+                  //         Container(
+                  //             width: 65,
+                  //             height: 65,
+                  //             margin: const EdgeInsets.only(right: 5, top: 5),
+                  //             clipBehavior: Clip.antiAlias,
+                  //             decoration: BoxDecoration(
+                  //                 borderRadius: BorderRadius.circular(10)),
+                  //             child: Image.file(
+                  //               image,
+                  //               fit: BoxFit.cover,
+                  //             )),
+                  //         Positioned.fill(
+                  //           child: GestureDetector(
+                  //             onTap: () {
+                  //               Navigator.push(context, BlurredRouter(
+                  //                 builder: (context) {
+                  //                   return PanaromaImageScreen(
+                  //                     imageUrl: image.path,
+                  //                     isFileImage: true,
+                  //                   );
+                  //                 },
+                  //               ));
+                  //             },
+                  //             child: Container(
+                  //               width: 65,
+                  //               margin: const EdgeInsets.only(right: 5, top: 5),
+                  //               height: 65,
+                  //               decoration: BoxDecoration(
+                  //                   color:
+                  //                       context.color.tertiaryColor.withOpacity(
+                  //                     0.68,
+                  //                   ),
+                  //                   borderRadius: BorderRadius.circular(10)),
+                  //               child: FittedBox(
+                  //                 fit: BoxFit.none,
+                  //                 child: Container(
+                  //                   decoration: BoxDecoration(
+                  //                     shape: BoxShape.circle,
+                  //                     color: context.color.secondaryColor,
+                  //                   ),
+                  //                   width: 60.rw(context),
+                  //                   height: 60.rh(context),
+                  //                   child: Center(
+                  //                     child: Column(
+                  //                       mainAxisSize: MainAxisSize.min,
+                  //                       children: [
+                  //                         SizedBox(
+                  //                             height: 30.rh(context),
+                  //                             width: 40.rw(context),
+                  //                             child: UiUtils.getSvg(
+                  //                                 AppIcons.v360Degree,
+                  //                                 color: context
+                  //                                     .color.textColorDark)),
+                  //                         Text(UiUtils.getTranslatedLabel(
+                  //                                 context, "view"))
+                  //                             .color(
+                  //                                 context.color.textColorDark)
+                  //                             .size(context.font.small)
+                  //                             .bold()
+                  //                       ],
+                  //                     ),
+                  //                   ),
+                  //                 ),
+                  //               ),
+                  //             ),
+                  //           ),
+                  //         ),
+                  //       ],
+                  //     );
+                  //   }
+                  //
+                  //   return Container();
+                  // }),
+                  // SizedBox(
+                  //   height: 15.rh(context),
+                  // ),
+
+
+
+
+
+                  const SizedBox(height: 25),
+                  const Text("SEO Settings",
+                    style: TextStyle(
+                      color: Colors.black54,
+                      fontSize: 17,
+                      fontWeight: FontWeight.w600,
+                    ),
+                  ),
+                  SizedBox(
+                    height: 15.rh(context),
+                  ),
+                  Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text('Meta Title',
+                        style: TextStyle(
+                            color: Colors.black,
+                            fontSize: 15,
+                            fontWeight: FontWeight.w600),
+                      ),
+                      SizedBox(
+                        height: 10.rh(context),
+                      ),
+                      CustomTextFormField1(
+                        controller: metaTitleController,
+                        validator: CustomTextFieldValidator1.nullCheck,
+                        hintText: "Title".translate(context),
+                      ),
+                      Padding(
+                        padding:
+                        const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                        child: Text("metaTitleLength".translate(context))
+                            .size(context.font.small - 1.5)
+                            .color(Colors.red),
+                      ),
+                      SizedBox(
+                        height: 15.rh(context),
+                      ),
+                    ],
+                  ),
+
+                  Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text('Meta Keyword',
+                        style: TextStyle(
+                            color: Colors.black,
+                            fontSize: 15,
+                            fontWeight: FontWeight.w600),
+                      ),
+                      SizedBox(
+                        height: 10.rh(context),
+                      ),
+                      CustomTextFormField1(
+                        controller: metaKeywordController,
+                        hintText: "Keywords".translate(context),
+                        validator: CustomTextFieldValidator1.nullCheck,
+                      ),
+                      Padding(
+                        padding:
+                        const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                        child: Text("metaKeywordsLength".translate(context))
+                            .size(context.font.small - 1.5)
+                            .color(Colors.red),
+                      ),
+                      SizedBox(
+                        height: 15.rh(context),
+                      ),
+                    ],
+                  ),
+
+                  Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text('Og Image',
+                        style: TextStyle(
+                            color: Colors.black,
+                            fontSize: 15,
+                            fontWeight: FontWeight.w600),
+                      ),
+                      SizedBox(
+                        height: 10.rh(context),
+                      ),
+                      GestureDetector(
+                        onTap: () {
+                          _pickMetaTitle.pick(pickMultiple: false);
+                        },
+                        child: Container(
+                          clipBehavior: Clip.antiAlias,
+                          decoration: BoxDecoration(
+                              borderRadius: BorderRadius.circular(10),
+                              color: const Color(0xfff8f9ff),
+                              border: Border.all(
+                                  width: 1, color: const Color(0xff6aabfb))),
+                          alignment: Alignment.center,
+                          height: 65.rh(context),
+                          width: 65.rh(context),
+                          child: Center(
+                              child: Image.asset(
+                                "assets/AddPostforms/_-100.png",
+                                width: 25,
+                                height: 25,
+                              )),
+                        ),
+                      ),
+                      _pickMetaTitle.listenChangesInUI((context, image) {
+                        if (image != null) {
+                          return Container(
                               width: 65,
                               height: 65,
                               margin: const EdgeInsets.only(right: 5, top: 5),
@@ -1505,160 +2209,47 @@ class _AddPropertyDetailsState extends State<AddPropertyDetails> {
                               child: Image.file(
                                 image,
                                 fit: BoxFit.cover,
-                              )),
-                          Positioned.fill(
-                            child: GestureDetector(
-                              onTap: () {
-                                Navigator.push(context, BlurredRouter(
-                                  builder: (context) {
-                                    return PanaromaImageScreen(
-                                      imageUrl: image.path,
-                                      isFileImage: true,
-                                    );
-                                  },
-                                ));
-                              },
-                              child: Container(
-                                width: 65,
-                                margin: const EdgeInsets.only(right: 5, top: 5),
-                                height: 65,
-                                decoration: BoxDecoration(
-                                    color:
-                                        context.color.tertiaryColor.withOpacity(
-                                      0.68,
-                                    ),
-                                    borderRadius: BorderRadius.circular(10)),
-                                child: FittedBox(
-                                  fit: BoxFit.none,
-                                  child: Container(
-                                    decoration: BoxDecoration(
-                                      shape: BoxShape.circle,
-                                      color: context.color.secondaryColor,
-                                    ),
-                                    width: 60.rw(context),
-                                    height: 60.rh(context),
-                                    child: Center(
-                                      child: Column(
-                                        mainAxisSize: MainAxisSize.min,
-                                        children: [
-                                          SizedBox(
-                                              height: 30.rh(context),
-                                              width: 40.rw(context),
-                                              child: UiUtils.getSvg(
-                                                  AppIcons.v360Degree,
-                                                  color: context
-                                                      .color.textColorDark)),
-                                          Text(UiUtils.getTranslatedLabel(
-                                                  context, "view"))
-                                              .color(
-                                                  context.color.textColorDark)
-                                              .size(context.font.small)
-                                              .bold()
-                                        ],
-                                      ),
-                                    ),
-                                  ),
-                                ),
-                              ),
-                            ),
-                          ),
-                        ],
-                      );
-                    }
+                              ));
+                        }
 
-                    return Container();
-                  }),
-                  SizedBox(
-                    height: 15.rh(context),
+                        return Container();
+                      }),
+                      SizedBox(
+                        height: 15.rh(context),
+                      ),
+                    ],
                   ),
-                  Text("Meta Details".translate(context)),
-                  SizedBox(
-                    height: 15.rh(context),
-                  ),
-                  CustomTextFormField1(
-                    controller: metaTitleController,
-                    validator: CustomTextFieldValidator1.nullCheck,
-                    hintText: "Title".translate(context),
-                  ),
-                  Padding(
-                    padding:
-                        const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-                    child: Text("metaTitleLength".translate(context))
-                        .size(context.font.small - 1.5)
-                        .color(context.color.textLightColor),
-                  ),
-                  SizedBox(
-                    height: 10.rh(context),
-                  ),
-                  CustomTextFormField1(
-                    controller: metaDescriptionController,
-                    validator: CustomTextFieldValidator1.nullCheck,
-                    hintText: "Description".translate(context),
-                  ),
-                  Padding(
-                    padding:
-                        const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-                    child: Text("metaDescriptionLength".translate(context))
-                        .size(context.font.small - 1.5)
-                        .color(context.color.textLightColor),
-                  ),
-                  SizedBox(
-                    height: 10.rh(context),
-                  ),
-                  CustomTextFormField1(
-                    controller: metaKeywordController,
-                    hintText: "Keywords".translate(context),
-                    validator: CustomTextFieldValidator1.nullCheck,
-                  ),
-                  Padding(
-                    padding:
-                        const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-                    child: Text("metaKeywordsLength".translate(context))
-                        .size(context.font.small - 1.5)
-                        .color(context.color.textLightColor),
-                  ),
-                  SizedBox(
-                    height: 10.rh(context),
-                  ),
-                  GestureDetector(
-                    onTap: () {
-                      _pickMetaTitle.pick( pickMultiple: false );
-                    },
-                    child: Container(
-                      clipBehavior: Clip.antiAlias,
-                      decoration: BoxDecoration(
-                          borderRadius: BorderRadius.circular(10),
-                          color: const Color(0xfff8f9ff),
-                          border:
-                              Border.all(width: 1, color: const Color(0xff6aabfb))),
-                      alignment: Alignment.center,
-                      height: 65.rh(context),
-                      width: 65.rh(context),
-                      child: Center(
-                          child: Image.asset(
-                        "assets/AddPostforms/_-100.png",
-                        width: 25,
-                        height: 25,
-                      )),
-                    ),
-                  ),
-                  _pickMetaTitle.listenChangesInUI((context, image) {
-                    if (image != null) {
-                      return Container(
-                          width: 65,
-                          height: 65,
-                          margin: const EdgeInsets.only(right: 5, top: 5),
-                          clipBehavior: Clip.antiAlias,
-                          decoration: BoxDecoration(
-                              borderRadius: BorderRadius.circular(10)),
-                          child: Image.file(
-                            image,
-                            fit: BoxFit.cover,
-                          ));
-                    }
 
-                    return Container();
-                  }),
+                  Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text('Meta Description',
+                        style: TextStyle(
+                            color: Colors.black,
+                            fontSize: 15,
+                            fontWeight: FontWeight.w600),
+                      ),
+                      SizedBox(
+                        height: 10.rh(context),
+                      ),
+                      CustomTextFormField1(
+                        controller: metaDescriptionController,
+                        validator: CustomTextFieldValidator1.nullCheck,
+                        hintText: "Description".translate(context),
+                      ),
+                      Padding(
+                        padding:
+                        const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                        child: Text("metaDescriptionLength".translate(context))
+                            .size(context.font.small - 1.5)
+                            .color(Colors.red),
+                      ),
+                      SizedBox(
+                        height: 15.rh(context),
+                      ),
+                    ],
+                  ),
+
                   const SizedBox(
                     height: 30,
                   ),
@@ -1846,7 +2437,8 @@ class _AddPropertyDetailsState extends State<AddPropertyDetails> {
                 decoration: BoxDecoration(
                     borderRadius: BorderRadius.circular(10),
                     color: const Color(0xfff8f9ff),
-                    border: Border.all(width: 1, color: const Color(0xff6aabfb))),
+                    border:
+                        Border.all(width: 1, color: const Color(0xff6aabfb))),
                 alignment: Alignment.center,
                 height: 65.rh(context),
                 width: 65.rh(context),
@@ -1929,7 +2521,8 @@ class _AddPropertyDetailsState extends State<AddPropertyDetails> {
                 decoration: BoxDecoration(
                     borderRadius: BorderRadius.circular(10),
                     color: const Color(0xfff8f9ff),
-                    border: Border.all(width: 1, color: const Color(0xff6aabfb))),
+                    border:
+                        Border.all(width: 1, color: const Color(0xff6aabfb))),
                 alignment: Alignment.center,
                 height: 65.rh(context),
                 width: 65.rh(context),

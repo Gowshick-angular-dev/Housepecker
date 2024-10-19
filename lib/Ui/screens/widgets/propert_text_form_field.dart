@@ -47,63 +47,69 @@ class CustomTextFormField1 extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return TextFormField(
-      controller: controller,
-      inputFormatters: formaters,
-      textInputAction: action,
-      keyboardAppearance: Brightness.light,
-      readOnly: isReadOnly ?? false,
-      style: TextStyle( color: Color(0xff929292),
-          fontSize: 14),
-      minLines: minLine ?? 1,
-      maxLines: maxLine ?? 1,
-      onChanged: onChange,
-      validator: (String? value) {
-        if (validator == CustomTextFieldValidator1.nullCheck) {
-          return Validator.nullCheckValidator(value);
-        }
-
-        if (validator == CustomTextFieldValidator1.maxFifty) {
-          if ((value ??= "").length > 50) {
-            return "You can enter 50 letters max";
-          } else {
-            return null;
+    return Container(
+      // height: minLine != null ? null : 50,
+      child: TextFormField(
+        controller: controller,
+        inputFormatters: formaters,
+        textInputAction: action,
+        keyboardAppearance: Brightness.light,
+        readOnly: isReadOnly ?? false,
+        style: TextStyle(
+            color: Colors.black87,
+            fontSize: 14,
+            fontWeight: FontWeight.w500),
+        minLines: minLine ?? 1,
+        maxLines: maxLine ?? 1,
+        onChanged: onChange,
+        validator: (String? value) {
+          if (validator == CustomTextFieldValidator1.nullCheck) {
+            return Validator.nullCheckValidator(value);
           }
-        }
-        if (validator == CustomTextFieldValidator1.email) {
-          return Validator.validateEmail(value);
-        }
-        if (validator == CustomTextFieldValidator1.phoneNumber) {
-          return Validator.validatePhoneNumber(value);
-        }
-        if (validator == CustomTextFieldValidator1.password) {
-          return Validator.validatePassword(value);
-        }
-        return null;
-      },
-      keyboardType: keyboard,
-      decoration: InputDecoration(
-          prefix: prefix,
-          isDense: dense,
-          suffixIcon: suffix,
-          hintText: hintText,
-          hintStyle: TextStyle(
-              color: Color(0xff929292),
-              fontSize: 13),
-          filled: true,
-          fillColor: fillColor ?? Color(0xfff5f5f5),
-          focusedBorder: OutlineInputBorder(
-              borderSide:
-              BorderSide(width: 1.5, color: context.color.tertiaryColor),
-              borderRadius: BorderRadius.circular(10)),
-          enabledBorder: OutlineInputBorder(
-              borderSide:
-              BorderSide(width: 1.5, color: Color(0xffededed)),
-              borderRadius: BorderRadius.circular(10)),
-          border: OutlineInputBorder(
-              borderSide:
-              BorderSide(width: 1.5, color: Color(0xffededed)),
-              borderRadius: BorderRadius.circular(10))),
+
+          if (validator == CustomTextFieldValidator1.maxFifty) {
+            if ((value ??= "").length > 50) {
+              return "You can enter 50 letters max";
+            } else {
+              return null;
+            }
+          }
+          if (validator == CustomTextFieldValidator1.email) {
+            return Validator.validateEmail(value);
+          }
+          if (validator == CustomTextFieldValidator1.phoneNumber) {
+            return Validator.validatePhoneNumber(value);
+          }
+          if (validator == CustomTextFieldValidator1.password) {
+            return Validator.validatePassword(value);
+          }
+          return null;
+        },
+        keyboardType: keyboard,
+        decoration: InputDecoration(
+            prefix: prefix,
+            isDense: dense,
+            suffixIcon: suffix,
+            hintText: hintText,
+            hintStyle: TextStyle(
+                color: Color(0xff929292),
+                fontSize: 13,
+                fontFamily: 'Roboto'),
+            filled: true,
+            fillColor: fillColor ?? Color(0xfff5f5f5),
+            focusedBorder: OutlineInputBorder(
+                borderSide:
+                BorderSide(width: 1.5, color: context.color.tertiaryColor),
+                borderRadius: BorderRadius.circular(10)),
+            enabledBorder: OutlineInputBorder(
+                borderSide:
+                BorderSide(width: 1.5, color: Color(0xffededed)),
+                borderRadius: BorderRadius.circular(10)),
+            border: OutlineInputBorder(
+                borderSide:
+                BorderSide(width: 1.5, color: Color(0xffededed)),
+                borderRadius: BorderRadius.circular(10))),
+      ),
     );
   }
 }

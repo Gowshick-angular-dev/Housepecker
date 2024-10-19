@@ -96,6 +96,8 @@ class _ProjectFormTwoState extends State<ProjectFormTwo> {
     totalUnitsControler.text = widget.data!['project_details'][0]['total_units'] ?? '';
     projectAreaControler.text = widget.data!['project_details'][0]['total_project'] ?? '';
     sizeControler.text = widget.data!['project_details'][0]['size'].toString();
+    Minsf.text = widget.data!['min_size'].toString();
+    MAxsf.text = widget.data!['max_size'].toString();
     configurationsControler.text = widget.data!['project_details'][0]['configuration'] ?? '';
     reraControler.text = widget.data!['project_details'][0]['rera_no'] ?? '';
     totalFloorsControler.text = widget.data!['project_details'][0]['floors'].toString();
@@ -106,7 +108,7 @@ class _ProjectFormTwoState extends State<ProjectFormTwo> {
     projectFacing = widget.data!['project_details'][0]['facing'].toString();
     projectFurnished = widget.data!['project_details'][0]['furniture'].toString();
     projectPlaced = widget.data!['project_details'][0]['project_placed'].toString();
-    nearByMetroControler = widget.data!['project_details'][0]['near_by_metro'] ?? '';
+    nearByMetroControler.text = widget.data!['project_details'][0]['near_by_metro'] ?? '';
     vegOnly = widget.data!['project_details'][0]['veg_only'] ?? '';
     coveredParking = widget.data!['project_details'][0]['covered_parking'] ?? '';
     openParking = widget.data!['project_details'][0]['open_parking'] ?? '';
@@ -145,6 +147,24 @@ class _ProjectFormTwoState extends State<ProjectFormTwo> {
       vegOnlyWidget = [ValueItem(label: 'Yes', value: 'yes')];
     } else {
       vegOnlyWidget = [ValueItem(label: 'No', value: 'no')];
+    }
+
+    if (widget.data!['project_details'][0]['facing'] == '0') {
+      projectFacingWidget = [ValueItem(label: 'North', value: '0')];
+    } else if(widget.data!['project_details'][0]['facing'] == '1') {
+      projectFacingWidget = [ValueItem(label: 'East', value: '1')];
+    } else if(widget.data!['project_details'][0]['facing'] == '2') {
+      projectFacingWidget = [ValueItem(label: 'South', value: '2')];
+    } else {
+      projectFacingWidget = [ValueItem(label: 'West', value: '3')];
+    }
+
+    if (widget.data!['project_details'][0]['furniture'] == '0') {
+      projectFurnishedWidget = [ValueItem(label: 'Furnished', value: '0')];
+    } else if(widget.data!['project_details'][0]['furniture'] == '1') {
+      projectFurnishedWidget = [ValueItem(label: 'Unfurnished', value: '1')];
+    } else {
+      projectFurnishedWidget = [ValueItem(label: 'Semi-Furnished', value: '2')];
     }
 
     if (widget.data!['project_details'][0]['covered_parking'] == 'yes') {
