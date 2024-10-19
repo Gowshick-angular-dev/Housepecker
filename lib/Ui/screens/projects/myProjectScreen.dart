@@ -707,8 +707,11 @@ class _MyProjectScreenState extends State<MyProjectScreen> {
                                                               });
                                                               if(!response['error']) {
                                                                 HelperUtils.showSnackBarMessage(
-                                                                    context, UiUtils.getTranslatedLabel(context, "${response['message']}"),
-                                                                    type: MessageType.warning, messageDuration: 3);
+                                                                  context,
+                                                                  UiUtils.getTranslatedLabel(context, response['message']),
+                                                                  type: MessageType.success,
+                                                                  messageDuration: 3,
+                                                                );
                                                                 Navigator.pop(context);
                                                                 getMyprojects();
                                                               }

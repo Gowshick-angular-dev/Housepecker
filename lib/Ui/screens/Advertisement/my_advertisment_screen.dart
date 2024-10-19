@@ -1,5 +1,6 @@
 import 'dart:ui';
 
+import 'package:flutter/cupertino.dart';
 import 'package:flutter_svg/svg.dart';
 import 'package:Housepecker/utils/api.dart';
 import 'package:flutter/material.dart';
@@ -92,232 +93,422 @@ class _MyAdvertismentScreenState extends State<MyAdvertismentScreen> {
                             color: Color(0xffe0e0e0)
                         )
                     ),
-                    child: Padding(
-                      padding: const EdgeInsets.all(8.0),
-                      child: Row(
-                        children: [
-                          ClipRRect(
-                            borderRadius: BorderRadius.all(Radius.circular(15)),
-                            child: Container(
-                              height: 130,
-                              width: 130,
-                              child: UiUtils.getImage(
-                                item['image'][0] ?? "",
-                                width: double.infinity,fit: BoxFit.cover,height: 103,
-                              ),
-                            ),
-                          ),
-                          SizedBox(width: 15,),
-                          Expanded(
-                            child: Column(
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              children: [
-                                Row(
-                                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                                  children: [
-                                    Text('${item['category']['name']}',
-                                      style: TextStyle(
+                    child: Stack(
+                      children: [
+                        Padding(
+                          padding: const EdgeInsets.all(8.0),
+                          child: Row(
+                            children: [
+                              Stack(
+                                children: [
+                                  ClipRRect(
+                                    borderRadius: BorderRadius.all(Radius.circular(15)),
+                                    child: Container(
+                                      height: 130,
+                                      width: 130,
+                                      child: UiUtils.getImage(
+                                        item['image'][0] ?? "",
+                                        width: double.infinity,fit: BoxFit.cover,height: 103,
+                                      ),
+                                    ),
+                                  ),
+                                  Positioned(
+                                    top: 10,
+                                    left: 0,
+                                    child: Container(
+                                      padding: EdgeInsets.symmetric(horizontal: 5,),
+                                      height: 20,
+                                      decoration: const BoxDecoration(
+                                        color: Colors.black54,
+                                        borderRadius: BorderRadius.only(
+                                          topRight: Radius.circular(20),
+                                          bottomRight: Radius.circular(20),
+                                        ),
+                                      ),
+                                      alignment: Alignment.centerLeft,
+                                      child: Text(
+                                        item['category']['name'] ?? "",
+                                        style: const TextStyle(
+                                          color: Colors.white,
                                           fontSize: 10,
+                                          fontWeight: FontWeight.w500,
+                                        ),
+                                      ),
+                                    ),
+                                  ),
+                                ],
+                              ),
+                              SizedBox(width: 15,),
+                              Expanded(
+                                child: Column(
+                                  mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                  children: [
+                                    // Row(
+                                    //   mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                                    //   children: [
+                                    //     Container(
+                                    //       padding: EdgeInsets.only(left: 5, right: 5),
+                                    //       decoration: BoxDecoration(
+                                    //           color: item['status'] == 0 ? Colors.redAccent : Colors.green,
+                                    //           borderRadius: BorderRadius.circular(15),
+                                    //           // border: Border.all(
+                                    //           //     width: 1,
+                                    //           //     color: Color(0xffe0e0e0)
+                                    //           // )
+                                    //       ),
+                                    //       child: Text('${item['status'] == 0 ? 'InActive' : 'Active'}',
+                                    //         style: TextStyle(
+                                    //             fontSize: 9,
+                                    //             color: Colors.white,
+                                    //             fontWeight: FontWeight.w500),
+                                    //       ),
+                                    //     ),
+                                    //   ],
+                                    // ),
+                                    Text(item['title']??'',
+                                      maxLines: 2,overflow: TextOverflow.ellipsis,
+                                      style: TextStyle(
+                                          fontSize: 13,
+                                          color: Color(0xff333333),
+                                          fontWeight: FontWeight.w600),
+                                    ),
+                                    Row(
+                                      children: [
+                                        Image.asset("assets/Home/__location.png",width:12,fit: BoxFit.cover,height: 12,),
+                                        SizedBox(width: 2,),
+                                        Text('${item['post_details'][0]['location']}',style: TextStyle(
+                                            fontSize: 9,
+                                            color: Color(0xff333333),
+                                            fontWeight: FontWeight.w500),
+                                        )
+                                      ],
+                                    ),
+                                    Text('Posted On : ${item['post_time']}',
+                                      maxLines: 2,overflow:TextOverflow.ellipsis,
+                                      style: TextStyle(
+                                          fontSize: 9,
                                           color: Color(0xff333333),
                                           fontWeight: FontWeight.w500),
                                     ),
-                                    Container(
-                                      padding: EdgeInsets.only(left: 5, right: 5),
-                                      decoration: BoxDecoration(
-                                          color: item['status'] == 0 ? Colors.redAccent : Colors.green,
-                                          borderRadius: BorderRadius.circular(15),
-                                          // border: Border.all(
-                                          //     width: 1,
-                                          //     color: Color(0xffe0e0e0)
-                                          // )
-                                      ),
-                                      child: Text('${item['status'] == 0 ? 'InActive' : 'Active'}',
+                                    if (item['post_details'] != null &&
+                                        item['post_details'].isNotEmpty &&
+                                        item['post_details'][0]['brokerage'] != null)
+                                      Text(
+                                        'Brokerage :   ${item['post_details'][0]['brokerage']}',
                                         style: TextStyle(
-                                            fontSize: 9,
-                                            color: Colors.white,
-                                            fontWeight: FontWeight.w500),
-                                      ),
-                                    ),
-                                  ],
-                                ),
-                                SizedBox(height: 6,),
-                                Text('${item['category']['name']}',
-                                  style: TextStyle(
-                                      fontSize: 13,
-                                      color: Color(0xff333333),
-                                      fontWeight: FontWeight.w600),
-                                ),
-                                SizedBox(height: 3,),
-                                Row(
-                                  children: [
-                                    Image.asset("assets/Home/__location.png",width:12,fit: BoxFit.cover,height: 12,),
-                                    SizedBox(width: 2,),
-                                    Text('${item['post_details'][0]['location']}',style: TextStyle(
-                                        fontSize: 9,
-                                        color: Color(0xff333333),
-                                        fontWeight: FontWeight.w500),
-                                    )
-                                  ],
-                                ),
-                                SizedBox(height: 3,),
-                                Row(
-                                  children: [
-                                    Text('Brokerage :   ${item['post_details'][0]['brokerage']}',style: TextStyle(
-                                        fontSize: 9,
-                                        color: Color(0xff333333),
-                                        fontWeight: FontWeight.w500),
-                                    )
-                                  ],
-                                ),
-                                SizedBox(height: 11,),
-                                Row(
-                                  children: [
-                                    InkWell(
-                                      onTap: () {
-                                        Navigator.push(
-                                          context,
-                                          MaterialPageRoute(builder: (context) => LoanAdForm(cat: item['category'], isEdit: true, id: item['id'])),
-                                        );
-                                      },
-                                      child: Container(
-                                        padding: EdgeInsets.only(left: 10, right: 10, top: 5, bottom: 5),
-                                        decoration: BoxDecoration(
-                                          color: Colors.green,
-                                          borderRadius: BorderRadius.circular(15),
+                                          fontSize: 9,
+                                          color: Color(0xff333333),
+                                          fontWeight: FontWeight.w500,
                                         ),
-                                        child: Row(
-                                          children: [
-                                            Text('Edit',style: TextStyle(
-                                                fontSize: 12,
-                                                color: Colors.white,
-                                                fontWeight: FontWeight.w500),
+                                      ),
+
+                                          /*              Row(
+                                      children: [
+                                        InkWell(
+                                          onTap: () {
+                                            Navigator.push(
+                                              context,
+                                              MaterialPageRoute(builder: (context) => LoanAdForm(cat: item['category'], isEdit: true, id: item['id'])),
+                                            );
+                                          },
+                                          child: Container(
+                                            padding: EdgeInsets.only(left: 10, right: 10, top: 5, bottom: 5),
+                                            decoration: BoxDecoration(
+                                              color: Colors.green,
+                                              borderRadius: BorderRadius.circular(15),
                                             ),
-                                            SizedBox(width: 5,),
-                                            Icon(Icons.edit,color:Colors.white,size: 13,),
-                                          ],
+                                            child: Row(
+                                              children: [
+                                                Text('Edit',style: TextStyle(
+                                                    fontSize: 12,
+                                                    color: Colors.white,
+                                                    fontWeight: FontWeight.w500),
+                                                ),
+                                                SizedBox(width: 5,),
+                                                Icon(Icons.edit,color:Colors.white,size: 13,),
+                                              ],
+                                            ),
+                                          ),
                                         ),
-                                      ),
-                                    ),
-                                    SizedBox(width: 10),
-                                    InkWell(
-                                      onTap: () {
-                                        showDialog(
-                                          context: context,
-                                          barrierDismissible: false,
-                                          builder: (BuildContext context) {
-                                            // return object of type Dialog
-                                            return Dialog(
-                                              elevation: 0.0,
-                                              shape:
-                                              RoundedRectangleBorder(borderRadius: BorderRadius.circular(20.0)),
-                                              child: Wrap(
-                                                children: [
-                                                  Container(
-                                                    padding: EdgeInsets.all(20.0),
-                                                    child: Column(
-                                                      mainAxisAlignment: MainAxisAlignment.center,
-                                                      crossAxisAlignment: CrossAxisAlignment.center,
-                                                      children: <Widget>[
-                                                        Text('Are You Sure',
-                                                          style: TextStyle(
-                                                              fontSize: 15,
-                                                              color: Color(0xff333333),
-                                                              fontWeight: FontWeight.w600
-                                                          ),
-                                                        ),
-                                                        SizedBox(height: 15,),
-                                                        Text('Do you want to delete this ?'),
-                                                        SizedBox(height: 15,),
-                                                        Row(
-                                                          mainAxisAlignment: MainAxisAlignment.end,
-                                                          children: [
-                                                            InkWell(
-                                                              onTap: () {
-                                                                Navigator.pop(context);
-                                                              },
-                                                              child: Container(
-                                                                padding: EdgeInsets.only(left: 10, right: 10, top: 5, bottom: 5),
-                                                                decoration: BoxDecoration(
-                                                                  color: Colors.green,
-                                                                  borderRadius: BorderRadius.circular(15),
-                                                                ),
-                                                                child: Row(
-                                                                  children: [
-                                                                    Text('Cancel',style: TextStyle(
-                                                                        fontSize: 13,
-                                                                        color: Colors.white,
-                                                                        fontWeight: FontWeight.w500),
-                                                                    ),
-                                                                  ],
-                                                                ),
+                                        SizedBox(width: 10),
+                                        InkWell(
+                                          onTap: () {
+                                            showDialog(
+                                              context: context,
+                                              barrierDismissible: false,
+                                              builder: (BuildContext context) {
+                                                // return object of type Dialog
+                                                return Dialog(
+                                                  elevation: 0.0,
+                                                  shape:
+                                                  RoundedRectangleBorder(borderRadius: BorderRadius.circular(20.0)),
+                                                  child: Wrap(
+                                                    children: [
+                                                      Container(
+                                                        padding: EdgeInsets.all(20.0),
+                                                        child: Column(
+                                                          mainAxisAlignment: MainAxisAlignment.center,
+                                                          crossAxisAlignment: CrossAxisAlignment.center,
+                                                          children: <Widget>[
+                                                            Text('Are You Sure',
+                                                              style: TextStyle(
+                                                                  fontSize: 15,
+                                                                  color: Color(0xff333333),
+                                                                  fontWeight: FontWeight.w600
                                                               ),
                                                             ),
-                                                            SizedBox(width: 10),
-                                                            InkWell(
-                                                              onTap: () async {
-                                                                var response = await Api.post(url: Api.advertisementDelete + '/${item['id']}', parameter: {});
-                                                                if(!response['error']) {
-                                                                  HelperUtils.showSnackBarMessage(
-                                                                      context, UiUtils.getTranslatedLabel(context, "${response['message']}"),
-                                                                      type: MessageType.warning, messageDuration: 3);
-                                                                  Navigator.pop(context);
-                                                                  getMyAdvertisements();
-                                                                }
-                                                              },
-                                                              child: Container(
-                                                                padding: EdgeInsets.only(left: 10, right: 10, top: 5, bottom: 5),
-                                                                decoration: BoxDecoration(
-                                                                  color: Colors.red,
-                                                                  borderRadius: BorderRadius.circular(15),
-                                                                ),
-                                                                child: Row(
-                                                                  children: [
-                                                                    Text('Delete',style: TextStyle(
-                                                                        fontSize: 13,
-                                                                        color: Colors.white,
-                                                                        fontWeight: FontWeight.w500),
+                                                            SizedBox(height: 15,),
+                                                            Text('Do you want to delete this ?'),
+                                                            SizedBox(height: 15,),
+                                                            Row(
+                                                              mainAxisAlignment: MainAxisAlignment.end,
+                                                              children: [
+                                                                InkWell(
+                                                                  onTap: () {
+                                                                    Navigator.pop(context);
+                                                                  },
+                                                                  child: Container(
+                                                                    padding: EdgeInsets.only(left: 10, right: 10, top: 5, bottom: 5),
+                                                                    decoration: BoxDecoration(
+                                                                      color: Colors.green,
+                                                                      borderRadius: BorderRadius.circular(15),
                                                                     ),
-                                                                  ],
+                                                                    child: Row(
+                                                                      children: [
+                                                                        Text('Cancel',style: TextStyle(
+                                                                            fontSize: 13,
+                                                                            color: Colors.white,
+                                                                            fontWeight: FontWeight.w500),
+                                                                        ),
+                                                                      ],
+                                                                    ),
+                                                                  ),
                                                                 ),
-                                                              ),
+                                                                SizedBox(width: 10),
+                                                                InkWell(
+                                                                  onTap: () async {
+                                                                    var response = await Api.post(url: Api.advertisementDelete + '/${item['id']}', parameter: {});
+                                                                    if(!response['error']) {
+                                                                      HelperUtils.showSnackBarMessage(
+                                                                          context, UiUtils.getTranslatedLabel(context, "${response['message']}"),
+                                                                          type: MessageType.warning, messageDuration: 3);
+                                                                      Navigator.pop(context);
+                                                                      getMyAdvertisements();
+                                                                    }
+                                                                  },
+                                                                  child: Container(
+                                                                    padding: EdgeInsets.only(left: 10, right: 10, top: 5, bottom: 5),
+                                                                    decoration: BoxDecoration(
+                                                                      color: Colors.red,
+                                                                      borderRadius: BorderRadius.circular(15),
+                                                                    ),
+                                                                    child: Row(
+                                                                      children: [
+                                                                        Text('Delete',style: TextStyle(
+                                                                            fontSize: 13,
+                                                                            color: Colors.white,
+                                                                            fontWeight: FontWeight.w500),
+                                                                        ),
+                                                                      ],
+                                                                    ),
+                                                                  ),
+                                                                ),
+                                                              ],
                                                             ),
                                                           ],
                                                         ),
-                                                      ],
-                                                    ),
+                                                      ),
+                                                    ],
                                                   ),
-                                                ],
-                                              ),
+                                                );
+                                              },
                                             );
                                           },
-                                        );
-                                      },
-                                      child: Container(
-                                        padding: EdgeInsets.only(left: 10, right: 10, top: 5, bottom: 5),
-                                        decoration: BoxDecoration(
-                                          color: Colors.red,
-                                          borderRadius: BorderRadius.circular(15),
-                                        ),
-                                        child: Row(
-                                          children: [
-                                            Text('Delete',style: TextStyle(
-                                                fontSize: 12,
-                                                color: Colors.white,
-                                                fontWeight: FontWeight.w500),
+                                          child: Container(
+                                            padding: EdgeInsets.only(left: 10, right: 10, top: 5, bottom: 5),
+                                            decoration: BoxDecoration(
+                                              color: Colors.red,
+                                              borderRadius: BorderRadius.circular(15),
                                             ),
-                                            SizedBox(width: 5,),
-                                            Icon(Icons.delete, color:Colors.white, size: 13,),
-                                          ],
+                                            child: Row(
+                                              children: [
+                                                Text('Delete',style: TextStyle(
+                                                    fontSize: 12,
+                                                    color: Colors.white,
+                                                    fontWeight: FontWeight.w500),
+                                                ),
+                                                SizedBox(width: 5,),
+                                                Icon(Icons.delete, color:Colors.white, size: 13,),
+                                              ],
+                                            ),
+                                          ),
                                         ),
-                                      ),
+                                      ],
+                                    ),*/
+                                    Container(
+                                      height: 28,
+                                      padding: EdgeInsets.symmetric(horizontal: 15),
+                                      decoration: BoxDecoration(
+                                          borderRadius: BorderRadius.circular(6),
+                                          color: item['status'] == 0 ?Color(0xfffff1f1):Color(0xffd9efcf),
+                                          border: Border.all(color:   item['status'] == 0 ?Colors.red:Colors.green)
+                                      ),child: Row(
+                                      mainAxisSize: MainAxisSize.min,
+                                      mainAxisAlignment: MainAxisAlignment.center,
+                                      children: [
+                                        Text(  item['status'] == 0 ? "InActive" : "Active",style: TextStyle(fontSize: 12,color: item['status'] == 0 ?Colors.red: Colors.green),)
+                                      ],
+                                    ),
                                     ),
                                   ],
                                 ),
-                              ],
-                            ),
+                              ),
+                            ],
                           ),
-                        ],
-                      ),
+                        ),
+                        Positioned(
+                            top: 0,
+                            right: 0,
+                            child:  PopupMenuButton<int>(
+                              icon: const Icon(
+                                Icons.more_vert,
+                                size: 20,
+                                color: Colors.black,
+                              ),
+                              itemBuilder: (context) => [
+                                PopupMenuItem<int>(
+                                  onTap: () async {
+                                    Navigator.push(
+                                      context,
+                                      MaterialPageRoute(builder: (context) => LoanAdForm(cat: item['category'], isEdit: true, id: item['id'])),
+                                    );
+                                  },
+                                  value: 1,
+                                  child:  const Row(
+                                    children: [
+                                      Icon(Icons.edit,color:Color(0xff117af9),size: 17,),
+                                      SizedBox(width: 8,),
+                                      Text("Edit", style: TextStyle(color: Colors.black, fontWeight: FontWeight.w500,fontSize: 12),),
+
+
+                                    ],
+                                  ),
+                                ),
+                                PopupMenuItem<int>(
+                                  onTap: () async {
+                                    showDialog(
+                                      context: context,
+                                      barrierDismissible: false,
+                                      builder: (BuildContext context) {
+                                        // return object of type Dialog
+                                        return Dialog(
+                                          elevation: 0.0,
+                                          shape:
+                                          RoundedRectangleBorder(borderRadius: BorderRadius.circular(20.0)),
+                                          child: Wrap(
+                                            children: [
+                                              Container(
+                                                padding: EdgeInsets.all(20.0),
+                                                child: Column(
+                                                  mainAxisAlignment: MainAxisAlignment.center,
+                                                  crossAxisAlignment: CrossAxisAlignment.center,
+                                                  children: <Widget>[
+                                                    Text('Are You Sure',
+                                                      style: TextStyle(
+                                                          fontSize: 15,
+                                                          color: Color(0xff333333),
+                                                          fontWeight: FontWeight.w600
+                                                      ),
+                                                    ),
+                                                    SizedBox(height: 15,),
+                                                    Text('Do you want to delete this ?'),
+                                                    SizedBox(height: 15,),
+                                                    Row(
+                                                      mainAxisAlignment: MainAxisAlignment.end,
+                                                      children: [
+                                                        InkWell(
+                                                          onTap: () {
+
+                                                            Navigator.pop(context);
+                                                          },
+                                                          child: Container(
+                                                            padding: EdgeInsets.only(left: 10, right: 10, top: 5, bottom: 5),
+                                                            decoration: BoxDecoration(
+                                                              color: Colors.green,
+                                                              borderRadius: BorderRadius.circular(6),
+                                                            ),
+                                                            child: Row(
+                                                              children: [
+                                                                Text('Cancel',style: TextStyle(
+                                                                    fontSize: 13,
+                                                                    color: Colors.white,
+                                                                    fontWeight: FontWeight.w500),
+                                                                ),
+                                                              ],
+                                                            ),
+                                                          ),
+                                                        ),
+                                                        SizedBox(width: 10),
+                                                        InkWell(
+                                                          onTap: () async {
+                                                            var response = await Api.post(url: Api.advertisementDelete + '/${item['id']}', parameter: {});
+                                                            if(!response['error']) {
+                                                              HelperUtils.showSnackBarMessage(
+                                                                context,
+                                                                UiUtils.getTranslatedLabel(context, response['message']),
+                                                                type: MessageType.success,
+                                                                messageDuration: 3,
+                                                              );
+                                                              Navigator.pop(context);
+                                                              getMyAdvertisements();
+                                                            }
+                                                          },
+                                                          child: Container(
+                                                            padding: EdgeInsets.only(left: 10, right: 10, top: 5, bottom: 5),
+                                                            decoration: BoxDecoration(
+                                                              color: Colors.red,
+                                                              borderRadius: BorderRadius.circular(6),
+                                                            ),
+                                                            child: Row(
+                                                              children: [
+                                                                Text('Delete',style: TextStyle(
+                                                                    fontSize: 13,
+                                                                    color: Colors.white,
+                                                                    fontWeight: FontWeight.w500),
+                                                                ),
+                                                              ],
+                                                            ),
+                                                          ),
+                                                        ),
+                                                      ],
+                                                    ),
+                                                  ],
+                                                ),
+                                              ),
+                                            ],
+                                          ),
+                                        );
+                                      },
+                                    );
+                                  },
+                                  value: 2,
+                                  child: const Row(
+                                    children: [
+
+                                      Icon(Icons.delete, color:Colors.red, size: 17,),
+                                      SizedBox(width: 8,),
+                                      Text("Delete", style: TextStyle(color: Colors.black, fontWeight: FontWeight.w500,fontSize: 12),),
+
+                                    ],
+                                  ),
+                                ),
+                              ],
+
+                              color: Color(0xFFFFFFFF),
+                            )
+                        )
+                      ],
                     ),
                   ),
                 );
@@ -325,65 +516,67 @@ class _MyAdvertismentScreenState extends State<MyAdvertismentScreen> {
             ),
           ),
           if(loading)
-            SingleChildScrollView(
-              child: Column(
-                children: [
-                  Padding(
-                    padding: const EdgeInsets.only(left: 15, top: 10, right: 15),
-                    child: ClipRRect(
-                      clipBehavior: Clip.antiAlias,
-                      borderRadius: BorderRadius.circular(15),
-                      child: CustomShimmer(
-                        width: double.infinity,
-                        height: 160,
+            Expanded(
+              child: SingleChildScrollView(
+                child: Column(
+                  children: [
+                    Padding(
+                      padding: const EdgeInsets.only(left: 15, top: 10, right: 15),
+                      child: ClipRRect(
+                        clipBehavior: Clip.antiAlias,
+                        borderRadius: BorderRadius.circular(15),
+                        child: CustomShimmer(
+                          width: double.infinity,
+                          height: 160,
+                        ),
                       ),
                     ),
-                  ),
-                  Padding(
-                    padding: const EdgeInsets.only(left: 15, top: 10, right: 15),
-                    child: ClipRRect(
-                      clipBehavior: Clip.antiAlias,
-                      borderRadius: BorderRadius.circular(15),
-                      child: CustomShimmer(
-                        width: double.infinity,
-                        height: 160,
+                    Padding(
+                      padding: const EdgeInsets.only(left: 15, top: 10, right: 15),
+                      child: ClipRRect(
+                        clipBehavior: Clip.antiAlias,
+                        borderRadius: BorderRadius.circular(15),
+                        child: CustomShimmer(
+                          width: double.infinity,
+                          height: 160,
+                        ),
                       ),
                     ),
-                  ),
-                  Padding(
-                    padding: const EdgeInsets.only(left: 15, top: 10, right: 15),
-                    child: ClipRRect(
-                      clipBehavior: Clip.antiAlias,
-                      borderRadius: BorderRadius.circular(15),
-                      child: CustomShimmer(
-                        width: double.infinity,
-                        height: 160,
+                    Padding(
+                      padding: const EdgeInsets.only(left: 15, top: 10, right: 15),
+                      child: ClipRRect(
+                        clipBehavior: Clip.antiAlias,
+                        borderRadius: BorderRadius.circular(15),
+                        child: CustomShimmer(
+                          width: double.infinity,
+                          height: 160,
+                        ),
                       ),
                     ),
-                  ),
-                  Padding(
-                    padding: const EdgeInsets.only(left: 15, top: 10, right: 15),
-                    child: ClipRRect(
-                      clipBehavior: Clip.antiAlias,
-                      borderRadius: BorderRadius.circular(15),
-                      child: CustomShimmer(
-                        width: double.infinity,
-                        height: 160,
+                    Padding(
+                      padding: const EdgeInsets.only(left: 15, top: 10, right: 15),
+                      child: ClipRRect(
+                        clipBehavior: Clip.antiAlias,
+                        borderRadius: BorderRadius.circular(15),
+                        child: CustomShimmer(
+                          width: double.infinity,
+                          height: 160,
+                        ),
                       ),
                     ),
-                  ),
-                  Padding(
-                    padding: const EdgeInsets.only(left: 15, top: 10, right: 15),
-                    child: ClipRRect(
-                      clipBehavior: Clip.antiAlias,
-                      borderRadius: BorderRadius.circular(15),
-                      child: CustomShimmer(
-                        width: double.infinity,
-                        height: 160,
+                    Padding(
+                      padding: const EdgeInsets.only(left: 15, top: 10, right: 15),
+                      child: ClipRRect(
+                        clipBehavior: Clip.antiAlias,
+                        borderRadius: BorderRadius.circular(15),
+                        child: CustomShimmer(
+                          width: double.infinity,
+                          height: 160,
+                        ),
                       ),
                     ),
-                  ),
-                ],
+                  ],
+                ),
               ),
             ),
           if(myAdvertisementList.length == 0 && !loading)

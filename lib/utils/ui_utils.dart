@@ -241,7 +241,7 @@ class UiUtils {
               borderColor: context.color.borderColor,
               borderRadius: 0,
               borderWidth:0,
-              contentBackgroundColor: Color(0xff117af9),
+              contentBackgroundColor: const Color(0xff117af9),
               bottomLeft: true,
               bottomRight: true,
               topLeft: false,

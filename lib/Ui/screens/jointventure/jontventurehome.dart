@@ -3,9 +3,13 @@ import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
 import 'package:geocoding/geocoding.dart';
 import 'package:geolocator/geolocator.dart';
+import 'package:google_places_flutter/google_places_flutter.dart';
+import 'package:google_places_flutter/model/place_type.dart';
+import 'package:google_places_flutter/model/prediction.dart';
 
 import '../../../app/routes.dart';
 import '../../../utils/api.dart';
+import '../../../utils/helper_utils.dart';
 import '../../../utils/ui_utils.dart';
 import '../../Theme/theme.dart';
 import '../widgets/Erros/no_data_found.dart';
@@ -24,11 +28,22 @@ class _JointVentureState extends State<JointVenture> {
 
   bool Loading = false;
   List venturesList = [];
+
+  List jointVenturTypeList = [];
+
   String currentAddress = '';
   String currentPlace = '';
   String currentCity = '';
   String currentMainCity = '';
   TextEditingController searchControler = TextEditingController();
+  TextEditingController locationControler = TextEditingController();
+
+  final List<String> _items = ['Item 1', 'Item 2', 'Item 3', 'Item 4'];
+
+
+  String? _selectedItemID;
+
+
   String dropdownvalue6 = 'Chennai';
   var items6 =  ['Chennai','Madurai'];
   String dropdownvalue5 = 'Select Locality';
@@ -46,8 +61,8 @@ class _JointVentureState extends State<JointVenture> {
 
   @override
   void initState() {
-    _getCurrentLocation();
-    getVentures('');
+    getVentures();
+    getjointVentureTypes();
     super.initState();
   }
 
@@ -59,46 +74,37 @@ class _JointVentureState extends State<JointVenture> {
     return permission;
   }
 
-  Future<void> _getCurrentLocation() async {
-    setState(() {
-      Loading = true;
-    });
-    bool serviceEnabled = await Geolocator.isLocationServiceEnabled();
-    if (!serviceEnabled) {
-      return Future.error('Location services are disabled.');
-    }
+  Future<void> getjointVentureTypes() async {
 
-    LocationPermission permission = await _requestLocationPermission();
-    if (permission != LocationPermission.always && permission != LocationPermission.whileInUse) {
-      return Future.error('Location permission denied');
-    }
-
-    Position position = await Geolocator.getCurrentPosition(desiredAccuracy: LocationAccuracy.high);
-    try {
-      List<Placemark> placemarks = await placemarkFromCoordinates(position.latitude, position.longitude);
-      Placemark place = placemarks.first;
-      String address = '${place.street}, ${place.thoroughfare}, ${place.subLocality}, ${place.locality}, ${place.administrativeArea}, ${place.postalCode}';
+    var response = await Api.get(url: Api.getVenturetype, );
+    if(!response['error']) {
       setState(() {
-        currentAddress = address;
-        currentPlace = '${place.locality}, ${place.administrativeArea}, ${place.postalCode}';
-        currentCity = '${place.subLocality}';
-        currentMainCity = '${place.locality}';
+        jointVenturTypeList = response['data'];
       });
-      getVentures('');
-    } catch (e) {
-      print("Error fetching address: $e");
     }
   }
 
-  Future<void> getVentures(String? search) async {
+
+
+  Future<void> getVentures({String? location, String? jointType}) async {
     setState(() {
       Loading = true;
     });
-    var response = await Api.get(url: Api.venturesList, queryParameters: {
-      'search': search!,
-      'city': currentMainCity,
-    });
-    if(!response['error']) {
+
+
+    Map<String, String> queryParameters = {};
+
+    if (jointType != null) {
+      queryParameters['type'] = jointType;
+    }
+
+    if (location != null) {
+      queryParameters['city'] = location;
+    }
+
+    var response = await Api.get(url: Api.venturesList, queryParameters: queryParameters);
+
+    if (!response['error']) {
       setState(() {
         venturesList = response['data'];
         Loading = false;
@@ -109,8 +115,13 @@ class _JointVentureState extends State<JointVenture> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: Colors.white,
-      appBar: AppBar(
+      backgroundColor:const Color(0xFFFAF9F6),
+      appBar: UiUtils.buildAppBar(context,
+          showBackButton: true,
+          title:'Joint Ventures',
+          actions: [
+          ]),
+ /*     appBar: AppBar(
         title: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
@@ -184,75 +195,187 @@ class _JointVentureState extends State<JointVenture> {
           ],
         ),
         backgroundColor: tertiaryColor_,
-      ),
+      ),*/
       body: SingleChildScrollView(
         child: Padding(
           padding: const EdgeInsets.all(15),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              Container(
-                width: double.infinity,
-                decoration: BoxDecoration(
-                    borderRadius: BorderRadius.circular(30.0),
-                    border: Border.all(
-                        color: Color(0xffebebeb),
-                        width: 1
-                    )
-                ),
-                padding: EdgeInsets.fromLTRB(15, 0, 6, 0),
-                child: Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  crossAxisAlignment: CrossAxisAlignment.center,
+
+             Container(
+               padding: EdgeInsets.only(left: 8,top: 8,bottom: 8),
+               decoration: BoxDecoration(
+                 //border: Border.all(  color: Color(0xffebebeb),),
+                 borderRadius: BorderRadius.circular(10),
+                 color: Colors.white,
+                 boxShadow: [
+                   BoxShadow(
+                     offset: const Offset(0, 1),
+                     blurRadius: 5,
+                     color: Colors.black.withOpacity(0.1),
+                   ),
+                 ],
+               ),
+               child: Column(
+                 children: [
+                   Container(
+                     padding: EdgeInsets.only(left: 10),
+                     width: double.infinity,
+                     // decoration: BoxDecoration(
+                     //     borderRadius: BorderRadius.circular(10.0),
+                     //     border: Border.all(
+                     //         color: Color(0xffebebeb),
+                     //         width: 1
+                     //     )
+                     // ),
+                     child: Row(
+                       children: [
+                         Image.asset("assets/Home/__location.png",width: 17,height: 17,color:  const Color(0xff117af9),),
+                         SizedBox(width: 10,),
+                         Expanded(
+                           child: GooglePlaceAutoCompleteTextField(
+                             boxDecoration: BoxDecoration(
+                                 border: Border.all(color: Colors.transparent)
+                             ),
+                             textEditingController: locationControler,
+                             textStyle: TextStyle(fontSize: 14),
+                             inputDecoration:   const InputDecoration(
+                               hintText: 'Enter City,Locality...',
+                               hintStyle: TextStyle(
+                                 fontSize: 14.0,
+                                 color: Color(0xff9c9c9c),
+                                 fontWeight: FontWeight.w400,
+                                 decoration: TextDecoration.none,
+                               ),
+                               border: InputBorder.none,
+                               enabledBorder: InputBorder.none,
+                               focusedBorder: InputBorder.none,
+                             ),
+
+                             googleAPIKey: "AIzaSyDDJ17OjVJ0TS2qYt7GMOnrMjAu1CYZFg8",
+                             debounceTime: 800,
+                             countries: ["in"],
+                             isLatLngRequired: true,
+                             getPlaceDetailWithLatLng: (Prediction prediction) {
+                               print("placeDetails" + prediction.lng.toString());
+                               // lat = prediction.lat.toString();
+                               // lng = prediction.lng.toString();
+                               setState(() { });
+                             },
+                             itemClick: (Prediction prediction) {
+                               locationControler.text = prediction.description!;
+                               locationControler.selection =
+                                   TextSelection.fromPosition(TextPosition(
+                                       offset: prediction.description!.length));
+                             },
+                             itemBuilder: (context, index, Prediction prediction) {
+                               return Container(
+                                 padding: const EdgeInsets.all(10),
+                                 child: Row(
+                                   children: [
+                                     Image.asset("assets/Home/__location.png",width: 17,height: 17,color:  const Color(0xff117af9),),
+                                     const SizedBox(width: 7,),
+                                     Expanded(
+                                         child:
+                                         Text("${prediction.description ?? ""}",style: TextStyle(fontSize: 14,color: Colors.black),))
+                                   ],
+                                 ),
+                               );
+                             },
+                             seperatedBuilder: Divider(),
+                             isCrossBtnShown: true,
+                             placeType: PlaceType.geocode,
+                           ),
+                         ),
+                       ],
+                     ),
+                   ),
+                   SizedBox(height: 0,),
+                   const Padding(
+                     padding: EdgeInsets.symmetric(horizontal: 15),
+                     child: Divider(thickness: 1.5,),
+                   ),
+                   SizedBox(height: 0,),
+                   Container(
+                     padding: EdgeInsets.only(left: 10,right: 10),
+                     width: double.infinity,
+                     // decoration: BoxDecoration(
+                     //     borderRadius: BorderRadius.circular(10.0),
+                     //     border: Border.all(
+                     //         color: Color(0xffebebeb),
+                     //         width: 1
+                     //     )
+                     // ),
+                     child: Row(
+                       children: [
+                         Image.asset("assets/assets/Images/advertisement.png",height: 20,width: 20,),
+                         SizedBox(width: 10,),
+                         Expanded(
+                           child: DropdownButton<String>(
+                             underline: const SizedBox(),
+                             value: _selectedItemID,
+                             isExpanded: true,
+                             icon: _selectedItemID != null
+                                 ? GestureDetector(
+                               onTap: () {
+                                 setState(() {
+                                   _selectedItemID = null;
+                                 });
+                               },
+                               child: Icon(Icons.close,size: 25,color: Colors.black,),
+                             )
+                                 : Icon(Icons.keyboard_arrow_down_outlined,color: Colors.black,),
+                             hint: const Text(
+                               'Joint Venture Type...',
+                               style: TextStyle(
+                                 fontSize: 14,
+                                 fontWeight: FontWeight.w400,
+                                 color: Color(0xff9c9c9c),
+                               ),
+                             ),
+                             items: jointVenturTypeList.map<DropdownMenuItem<String>>((dynamic item) {
+                                 return DropdownMenuItem<String>(
+                                   value: item['id'].toString(),
+                                   child: Text(item['name'] ?? '', style: TextStyle(fontSize: 14)),
+                                 );
+                               }).toList(),
+                             onChanged: (String? newValue) {
+                               setState(() {
+                                 _selectedItemID = newValue;
+                               });
+                             },
+                           ),
+                         )
+                       ],
+                     ),
+                   ),
+             
+                 ],
+               ),
+             ),
+              SizedBox(height: 10,),
+              InkWell(
+                onTap: (){
+                  getVentures(location: locationControler.text,jointType:_selectedItemID );
+                },
+                child: Container(
+                  height: 45,
+                  decoration: BoxDecoration(
+                    color: const Color(0xff117af9),
+                    borderRadius: BorderRadius.circular(30),
+                  ),child: Row(
+                  mainAxisAlignment: MainAxisAlignment.center,
                   children: [
-
-                    Expanded(
-                      child: TextFormField(
-                        controller: searchControler,
-                        onChanged: (val) {
-                          getVentures(searchControler.text);
-                        },
-                        decoration: const InputDecoration(
-                            hintText: 'Search Here',
-                            hintStyle: TextStyle(
-                              fontFamily: 'Poppins',
-                              fontSize: 14.0,
-                              color: Color(0xff9c9c9c),
-                              fontWeight: FontWeight.w500,
-                              decoration: TextDecoration.none,
-                            ),
-                            enabledBorder: UnderlineInputBorder(
-                              borderSide: BorderSide(
-                                color: Colors.transparent, // Remove the border
-                              ),
-                            ),
-                            focusedBorder: UnderlineInputBorder(
-                                borderSide: BorderSide(
-                                  color: Colors.transparent,
-                                ))
-                        ),
-                      ),
-                    ),
-
-                    Container(
-                      width: 35,
-                      height: 35,
-                      decoration: BoxDecoration(
-                        borderRadius: BorderRadius.circular(50),
-                        color: Color(0xff117af9),
-                      ),
-                      child: Center(
-                        child: Image.asset(
-                          'assets/Home/__Search.png',
-                          width: 20,
-                          height: 20.0,
-                          fit: BoxFit.cover,
-                        ),
-                      ),
-                    ),
+                    Image.asset("assets/assets/Images/search.png",height: 30,width: 30,),
+                    Text(Loading?"Loading...":"Search",style: TextStyle(fontSize: 15,color: Colors.white,fontWeight: FontWeight.w500),)
                   ],
                 ),
+                ),
               ),
+              SizedBox(height: 5,),
+
+
               SizedBox(height: 10,),
               if(Loading)
                 Column(
