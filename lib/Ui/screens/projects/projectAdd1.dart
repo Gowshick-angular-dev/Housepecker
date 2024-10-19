@@ -255,7 +255,8 @@ class _ProjectFormSecondState extends State<ProjectFormSecond> {
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    Column(
+                    if(!widget.isEdit!)
+                      Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
                         RichText(
@@ -805,8 +806,8 @@ class _ProjectFormSecondState extends State<ProjectFormSecond> {
                                 selectedOptions:
                                 widget.isEdit! ? brokerageWidget : [],
                                 options: [
-                                  ValueItem(label: "Yes", value: "Yes"),
-                                  ValueItem(label: "No", value: "No")
+                                  ValueItem(label: "Yes", value: "yes"),
+                                  ValueItem(label: "No", value: "no")
                                 ],
                                 selectionType: SelectionType.single,
                                 chipConfig:
@@ -1251,7 +1252,7 @@ class _ProjectFormSecondState extends State<ProjectFormSecond> {
                     status != '' &&
                     propertyType != '' &&
                     descriptionControler.text != '' &&
-                    ((remainFreeProPost > 0 && selectedPackage == 0 && selectedRole == 'Free Listing') || selectedPackage != 0)) {
+                    (!widget.isEdit! && (remainFreeProPost > 0 && selectedPackage == 0 && selectedRole == 'Free Listing') || selectedPackage != 0)) {
                   var body = {
                     'package_id': selectedPackage,
                     'title': nameControler.text,

@@ -47,6 +47,8 @@ class _LoanHomeState extends State<LoanAdForm> {
   List packages = [];
   dynamic freepackage = [];
 
+  FocusNode locationFocusnode = FocusNode();
+
   TextEditingController searchControler = TextEditingController();
   TextEditingController locationControler = TextEditingController();
   TextEditingController branchControler = TextEditingController();
@@ -117,17 +119,17 @@ class _LoanHomeState extends State<LoanAdForm> {
     if (widget.cat!['id'] == 4) {
       getBanks();
       getLoanTypes();
-      getRoles();
     } else if (widget.cat!['id'] == 2) {
       getPropertyTypes();
     } else if (widget.cat!['id'] == 3) {
       getServiceTypes();
     } else {
       getVentureCategories();
+      getRoles();
     }
 
     if (widget.isEdit && widget.id != null) {
-      Timer(const Duration(seconds: 1), () {
+      Timer(const Duration(seconds: 2), () {
         getEditDetails();
       });
     }
@@ -302,7 +304,6 @@ class _LoanHomeState extends State<LoanAdForm> {
         } else {
           landSizeControler.text = response['data']['land_size'] ?? '';
           companyControler.text = response['data']['company_name'] ?? '';
-          urlControler.text = response['data']['website_link'] ?? '';
           for (int i = 0; i < ventureCategoryList.length; i++) {
             if (ventureCategoryList[i]['id'] ==
                 response['data']['subcategory_id']) {
@@ -319,15 +320,22 @@ class _LoanHomeState extends State<LoanAdForm> {
         locationControler.text = response['data']['location'] ?? '';
         nameControler.text = response['data']['title'] ?? '';
         phoneControler.text = response['data']['phone'] ?? '';
-        whatsappControler.text = response['data']['whatsapp_number'] ?? '';
         emailControler.text = response['data']['email'] ?? '';
-        descriptionControler.text = response['data']['description'] ?? '';
         cityControler.text = response['data']['city'] ?? '';
-        addressControler.text = response['data']['address'] ?? '';
-        timingControler.text = response['data']['timing'] ?? '';
-        gallaryEdit = response['data']['image'] ?? [];
-        documentEdit = response['data']['documents'] ?? [];
-        photoEdit = response['data']['photo'] ?? [];
+
+        for (int i = 0; i < roleList.length; i++) {
+            print('iiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiii: ${roleList[i]['id'] == response['data']['role']}');
+          if (roleList[i]['id'] ==
+              response['data']['role']) {
+            myRoleWidget = [
+              ValueItem(
+                  label: roleList[i]['name'],
+                  value: roleList[i]['id'].toString())
+            ];
+            myRole = roleList[i]['id'].toString();
+            setState(() {});
+          }
+        }
 
         brokerage = response['data']['brokerage'];
         if (response['data']['brokerage'] == 'yes') {
@@ -335,6 +343,16 @@ class _LoanHomeState extends State<LoanAdForm> {
         } else {
           brokerageWidget = [ValueItem(label: 'No', value: 'no')];
         }
+
+        addressControler.text = response['data']['address'] ?? '';
+        experienceControler.text = response['data']['experience'] ?? '';
+        timingControler.text = response['data']['timing'] ?? '';
+        descriptionControler.text = response['data']['description'] ?? '';
+        whatsappControler.text = response['data']['whatsapp_number'] ?? '';
+        urlControler.text = response['data']['website_link'] ?? '';
+        gallaryEdit = response['data']['image'] ?? [];
+        documentEdit = response['data']['documents'] ?? [];
+        photoEdit = response['data']['photo'] ?? [];
 
         setState(() {});
         Widgets.hideLoder(context);
@@ -486,7 +504,8 @@ class _LoanHomeState extends State<LoanAdForm> {
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    Column(
+                    if(!widget.isEdit)
+                      Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
                         RichText(
@@ -612,7 +631,7 @@ class _LoanHomeState extends State<LoanAdForm> {
                                 const SizedBox(height: 10),
                                 if(packages.isNotEmpty)
                                   Container(
-                                    padding: EdgeInsets.all(10),
+                                    padding: EdgeInsets.only(top: 10, right: 10, left: 10),
                                     decoration: BoxDecoration(
                                       border: Border.all(
                                           color: Color(0xffe5e5e5),
@@ -650,124 +669,127 @@ class _LoanHomeState extends State<LoanAdForm> {
                                                 selectedPackage = packages[i]['package']['id'];
                                               });
                                             },
-                                            child: Container(
-                                              width: double.infinity,
-                                              padding: EdgeInsets.all(10),
-                                              decoration: BoxDecoration(
-                                                color: selectedPackage != packages[i]['package']['id'] ? Color(0xfff9f9f9) : Color(0xfffffbf3),
-                                                border: Border.all(
-                                                    color: selectedPackage != packages[i]['package']['id'] ? Color(0xffe5e5e5) : Color(0xffffa920),
-                                                    width: 1
+                                            child: Padding(
+                                              padding: const EdgeInsets.only(bottom: 10),
+                                              child: Container(
+                                                width: double.infinity,
+                                                padding: EdgeInsets.all(10),
+                                                decoration: BoxDecoration(
+                                                  color: selectedPackage != packages[i]['package']['id'] ? Color(0xfff9f9f9) : Color(0xfffffbf3),
+                                                  border: Border.all(
+                                                      color: selectedPackage != packages[i]['package']['id'] ? Color(0xffe5e5e5) : Color(0xffffa920),
+                                                      width: 1
+                                                  ),
+                                                  borderRadius: BorderRadius.circular(15),
                                                 ),
-                                                borderRadius: BorderRadius.circular(15),
-                                              ),
-                                              // alignment: Alignment.center,
-                                              child: Column(
-                                                crossAxisAlignment: CrossAxisAlignment.start,
-                                                children: [
-                                                  Row(
-                                                    children: [
-                                                      Container(
-                                                        height: 20,
-                                                        width: 20,
-                                                        decoration: BoxDecoration(
-                                                          border: Border.all(
-                                                              color: Color(0xffe5e5e5),
-                                                              width: 1
-                                                          ),
-                                                          borderRadius: BorderRadius.circular(15),
-                                                        ),
-                                                        child: selectedPackage == packages[i]['package']['id'] ? Container(
-                                                          height: 10,
-                                                          width: 10,
+                                                // alignment: Alignment.center,
+                                                child: Column(
+                                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                                  children: [
+                                                    Row(
+                                                      children: [
+                                                        Container(
+                                                          height: 20,
+                                                          width: 20,
                                                           decoration: BoxDecoration(
-                                                            color: Color(0xffffa920),
                                                             border: Border.all(
-                                                                color: Color(0xffffffff),
-                                                                width: 3
+                                                                color: Color(0xffe5e5e5),
+                                                                width: 1
                                                             ),
                                                             borderRadius: BorderRadius.circular(15),
                                                           ),
-                                                        ) : Container(),
-                                                      ),
-                                                      SizedBox(width: 10,),
-                                                      Text(packages[i]['package']['name'],
-                                                        style: TextStyle(
-                                                          fontSize: 14,
-                                                          color: Color(0xff646464),
-                                                          fontWeight: FontWeight.w600,
+                                                          child: selectedPackage == packages[i]['package']['id'] ? Container(
+                                                            height: 10,
+                                                            width: 10,
+                                                            decoration: BoxDecoration(
+                                                              color: Color(0xffffa920),
+                                                              border: Border.all(
+                                                                  color: Color(0xffffffff),
+                                                                  width: 3
+                                                              ),
+                                                              borderRadius: BorderRadius.circular(15),
+                                                            ),
+                                                          ) : Container(),
                                                         ),
-                                                      ),
-                                                    ],
-                                                  ),
-                                                  SizedBox(height: 10,),
-                                                  Row(
-                                                    children: [
-                                                      const Expanded(
-                                                        child: Text('Total Listings',
+                                                        SizedBox(width: 10,),
+                                                        Text(packages[i]['package']['name'],
                                                           style: TextStyle(
-                                                            fontSize: 11,
+                                                            fontSize: 14,
                                                             color: Color(0xff646464),
                                                             fontWeight: FontWeight.w600,
                                                           ),
                                                         ),
-                                                      ),
-                                                      Expanded(
-                                                        child: Text(':  ${packages[i]['package']['advertisement_limit']}',
-                                                          style: const TextStyle(
-                                                            fontSize: 11,
-                                                            color: Color(0xff646464),
-                                                            fontWeight: FontWeight.w400,
+                                                      ],
+                                                    ),
+                                                    SizedBox(height: 10,),
+                                                    Row(
+                                                      children: [
+                                                        const Expanded(
+                                                          child: Text('Total Listings',
+                                                            style: TextStyle(
+                                                              fontSize: 11,
+                                                              color: Color(0xff646464),
+                                                              fontWeight: FontWeight.w600,
+                                                            ),
                                                           ),
                                                         ),
-                                                      ),
-                                                    ],
-                                                  ),
-                                                  Row(
-                                                    children: [
-                                                      const Expanded(
-                                                        child: Text('Available Listings',
-                                                          style: TextStyle(
-                                                            fontSize: 11,
-                                                            color: Color(0xff646464),
-                                                            fontWeight: FontWeight.w600,
+                                                        Expanded(
+                                                          child: Text(':  ${packages[i]['package']['advertisement_limit']}',
+                                                            style: const TextStyle(
+                                                              fontSize: 11,
+                                                              color: Color(0xff646464),
+                                                              fontWeight: FontWeight.w400,
+                                                            ),
                                                           ),
                                                         ),
-                                                      ),
-                                                      Expanded(
-                                                        child: Text(':  ${packages[i]['package']['advertisement_limit'] - packages[i]['used_limit_for_advertisement']}',
-                                                          style: const TextStyle(
-                                                            fontSize: 11,
-                                                            color: Color(0xff646464),
-                                                            fontWeight: FontWeight.w400,
+                                                      ],
+                                                    ),
+                                                    Row(
+                                                      children: [
+                                                        const Expanded(
+                                                          child: Text('Available Listings',
+                                                            style: TextStyle(
+                                                              fontSize: 11,
+                                                              color: Color(0xff646464),
+                                                              fontWeight: FontWeight.w600,
+                                                            ),
                                                           ),
                                                         ),
-                                                      ),
-                                                    ],
-                                                  ),
-                                                  Row(
-                                                    children: [
-                                                      const Expanded(
-                                                        child: Text('Valid until',
-                                                          style: TextStyle(
-                                                            fontSize: 11,
-                                                            color: Color(0xff646464),
-                                                            fontWeight: FontWeight.w600,
+                                                        Expanded(
+                                                          child: Text(':  ${packages[i]['package']['advertisement_limit'] - packages[i]['used_limit_for_advertisement']}',
+                                                            style: const TextStyle(
+                                                              fontSize: 11,
+                                                              color: Color(0xff646464),
+                                                              fontWeight: FontWeight.w400,
+                                                            ),
                                                           ),
                                                         ),
-                                                      ),
-                                                      Expanded(
-                                                        child: Text(':  ${DateFormat('dd MMM yyyy').format(DateTime.parse(packages[i]['end_date']))}',
-                                                          style: const TextStyle(
-                                                            fontSize: 11,
-                                                            color: Color(0xff646464),
-                                                            fontWeight: FontWeight.w400,
+                                                      ],
+                                                    ),
+                                                    Row(
+                                                      children: [
+                                                        const Expanded(
+                                                          child: Text('Valid until',
+                                                            style: TextStyle(
+                                                              fontSize: 11,
+                                                              color: Color(0xff646464),
+                                                              fontWeight: FontWeight.w600,
+                                                            ),
                                                           ),
                                                         ),
-                                                      ),
-                                                    ],
-                                                  ),
-                                                ],
+                                                        Expanded(
+                                                          child: Text(':  ${DateFormat('dd MMM yyyy').format(DateTime.parse(packages[i]['end_date']))}',
+                                                            style: const TextStyle(
+                                                              fontSize: 11,
+                                                              color: Color(0xff646464),
+                                                              fontWeight: FontWeight.w400,
+                                                            ),
+                                                          ),
+                                                        ),
+                                                      ],
+                                                    ),
+                                                  ],
+                                                ),
                                               ),
                                             ),
                                           )
@@ -825,7 +847,7 @@ class _LoanHomeState extends State<LoanAdForm> {
                             text: TextSpan(
                               children: [
                                 TextSpan(
-                                  text: "Construnction Role",
+                                  text: "Construction Role",
                                   style: TextStyle(
                                       color: Colors.black,
                                       fontSize: 15,
@@ -861,6 +883,7 @@ class _LoanHomeState extends State<LoanAdForm> {
                                     ValueItem(label: "Constructor", value: "2"),
                                     ValueItem(label: "Builder", value: "3"),
                                     ValueItem(label: "Supplier", value: "4"),
+                                    ValueItem(label: "Dealer", value: "5"),
                                   ],
                                   selectionType: SelectionType.single,
                                   chipConfig:
@@ -1830,8 +1853,8 @@ class _LoanHomeState extends State<LoanAdForm> {
                                 selectedOptions:
                                 widget.isEdit ? brokerageWidget : [],
                                 options: [
-                                  ValueItem(label: "Yes", value: "Yes"),
-                                  ValueItem(label: "No", value: "No")
+                                  ValueItem(label: "Yes", value: "yes"),
+                                  ValueItem(label: "No", value: "no")
                                 ],
                                 selectionType: SelectionType.single,
                                 chipConfig:
@@ -1886,8 +1909,7 @@ class _LoanHomeState extends State<LoanAdForm> {
                                     myRoleWidget = selectedOptions;
                                   });
                                 },
-                                selectedOptions:
-                                widget.isEdit ? myRoleWidget : [],
+                                selectedOptions: widget.isEdit ? myRoleWidget : [],
                                 options: [
                                   for(int i = 0; i < roleList.length; i++)
                                     ValueItem(label: "${roleList[i]['name']}", value: "${roleList[i]['id']}"),
@@ -1994,12 +2016,6 @@ class _LoanHomeState extends State<LoanAdForm> {
                                       color: Colors.black,
                                       fontSize: 15,
                                       fontWeight: FontWeight.w600),
-                                ),
-                                TextSpan(
-                                  text: " *",
-                                  style: TextStyle(
-                                      color: Colors
-                                          .red), // Customize asterisk color
                                 ),
                               ],
                             ),
@@ -2597,6 +2613,7 @@ class _LoanHomeState extends State<LoanAdForm> {
                                 ),
                                 child: GooglePlaceAutoCompleteTextField(
                                   textEditingController: locationControler,
+                                  focusNode: locationFocusnode,
                                   inputDecoration: const InputDecoration(
                                       hintText: 'Enter location..',
                                       hintStyle: TextStyle(
@@ -2676,10 +2693,11 @@ class _LoanHomeState extends State<LoanAdForm> {
                                     fontSize: 15,
                                     fontWeight: FontWeight.w600),
                               ),
-                              // TextSpan(
-                              //   text: " *",
-                              //   style: TextStyle(color: Colors.red), // Customize asterisk color
-                              // ),
+                              if (widget.cat!['id'] == 2)
+                                TextSpan(
+                                  text: " *",
+                                  style: TextStyle(color: Colors.red), // Customize asterisk color
+                                ),
                             ],
                           ),
                         ),
@@ -2828,6 +2846,22 @@ class _LoanHomeState extends State<LoanAdForm> {
                         SizedBox(
                           height: 20,
                         ),
+                        if(widget.isEdit && photoEdit != null)
+                          Container(
+                            height: 100,
+                            width: 100,
+                            decoration: BoxDecoration(
+                              border: Border.all(
+                                  width: 1, color: Color(0xffe1e1e1)),
+                              color: Color(0xfff5f5f5),
+                              borderRadius: BorderRadius.circular(
+                                  15.0), // Optional: Add border radius
+                            ),
+                            child: Image.network(photoEdit ?? '')
+                          ),
+                        SizedBox(
+                          height: 15,
+                        ),
                       ],
                     ),
                     Column(
@@ -2837,7 +2871,7 @@ class _LoanHomeState extends State<LoanAdForm> {
                           text: TextSpan(
                             children: [
                               TextSpan(
-                                text: "Galary Images",
+                                text: "Gallary Images",
                                 style: TextStyle(
                                     color: Colors.black,
                                     fontSize: 15,
@@ -2899,6 +2933,154 @@ class _LoanHomeState extends State<LoanAdForm> {
                               ),
                             ),
                           ],
+                        ),
+                        SizedBox(
+                          height: 10,
+                        ),
+                        GridView.builder(
+                          shrinkWrap: true,
+                          padding: const EdgeInsets.symmetric(
+                            horizontal: 5,
+                          ),
+                          physics: const NeverScrollableScrollPhysics(),
+                          gridDelegate:
+                          const SliverGridDelegateWithFixedCrossAxisCountAndFixedHeight(
+                              mainAxisSpacing: 10,
+                              crossAxisCount: 3,
+                              height: 100,
+                              crossAxisSpacing: 10),
+                          itemCount: gallary.length,
+                          itemBuilder: (context, index) {
+                            return Stack(
+                              children: [
+                                GestureDetector(
+                                  child: Container(
+                                    width: double.infinity,
+                                    height: 100,
+                                    decoration: BoxDecoration(
+                                      border: Border.all(
+                                          width: 1, color: Color(0xffe1e1e1)),
+                                      color: Color(0xfff5f5f5),
+                                      borderRadius: BorderRadius.circular(
+                                          15.0), // Optional: Add border radius
+                                    ),
+                                    child: ClipRRect(
+                                      borderRadius:
+                                      BorderRadius.all(Radius.circular(15)),
+                                      child: Image.file(gallary[index]),
+                                    ),
+                                  ),
+                                ),
+                                Positioned(
+                                  top: 0,
+                                  right: 0,
+                                  child: InkWell(
+                                    onTap: () {
+                                      setState(() {
+                                        gallary.removeAt(index);
+                                      });
+                                    },
+                                    child: Icon(
+                                      Icons.delete,
+                                      color: Colors.red,
+                                    ),
+                                  ),
+                                ),
+                              ],
+                            );
+                          },
+                        ),
+                        SizedBox(
+                          height: 10,
+                        ),
+                        GridView.builder(
+                          shrinkWrap: true,
+                          padding: const EdgeInsets.symmetric(
+                            horizontal: 5,
+                          ),
+                          physics: const NeverScrollableScrollPhysics(),
+                          gridDelegate:
+                          const SliverGridDelegateWithFixedCrossAxisCountAndFixedHeight(
+                              mainAxisSpacing: 10,
+                              crossAxisCount: 3,
+                              height: 100,
+                              crossAxisSpacing: 10),
+                          itemCount: gallaryEdit.length,
+                          itemBuilder: (context, index) {
+                            return Stack(
+                              children: [
+                                GestureDetector(
+                                  child: Container(
+                                    width: double.infinity,
+                                    height: 100,
+                                    decoration: BoxDecoration(
+                                      border: Border.all(
+                                          width: 1, color: Color(0xffe1e1e1)),
+                                      color: Color(0xfff5f5f5),
+                                      borderRadius: BorderRadius.circular(
+                                          15.0), // Optional: Add border radius
+                                    ),
+                                    child: ClipRRect(
+                                      borderRadius:
+                                      BorderRadius.all(Radius.circular(15)),
+                                      child: Image.network(gallaryEdit[index]),
+                                    ),
+                                  ),
+                                ),
+                                Positioned(
+                                  top: 0,
+                                  right: 0,
+                                  child: InkWell(
+                                    onTap: () async {
+                                      showDialog(
+                                          context: context,
+                                          barrierDismissible: false,
+                                          useSafeArea: true,
+                                          builder: (BuildContext context) {
+                                            return AnnotatedRegion(
+                                              value: SystemUiOverlayStyle(
+                                                statusBarColor:
+                                                Colors.black.withOpacity(0),
+                                              ),
+                                              child: SafeArea(
+                                                child: PopScope(
+                                                  child: Center(
+                                                    child: UiUtils.progress(
+                                                      normalProgressColor: context
+                                                          .color.tertiaryColor,
+                                                    ),
+                                                  ),
+                                                  canPop: false,
+                                                ),
+                                              ),
+                                            );
+                                          });
+                                      var responseAgent = await Api.get(
+                                          url: Api.advertisementGetById +
+                                              '/${widget.id}',
+                                          queryParameters: {
+                                            'remove_images[${index}]':
+                                            gallaryEdit[index]
+                                                .split['/']
+                                                .toList()
+                                                .last,
+                                          });
+                                      if (!responseAgent['error']) {
+                                        setState(() {
+                                          gallaryEdit.removeAt(index);
+                                        });
+                                        Widgets.hideLoder(context);
+                                      }
+                                    },
+                                    child: Icon(
+                                      Icons.delete,
+                                      color: Colors.red,
+                                    ),
+                                  ),
+                                ),
+                              ],
+                            );
+                          },
                         ),
                         SizedBox(
                           height: 20,
@@ -3316,152 +3498,6 @@ class _LoanHomeState extends State<LoanAdForm> {
                         ),
                       ],
                     ),
-
-                    GridView.builder(
-                      shrinkWrap: true,
-                      padding: const EdgeInsets.symmetric(
-                        horizontal: 5,
-                      ),
-                      physics: const NeverScrollableScrollPhysics(),
-                      gridDelegate:
-                          const SliverGridDelegateWithFixedCrossAxisCountAndFixedHeight(
-                              mainAxisSpacing: 10,
-                              crossAxisCount: 3,
-                              height: 100,
-                              crossAxisSpacing: 10),
-                      itemCount: gallary.length,
-                      itemBuilder: (context, index) {
-                        return Stack(
-                          children: [
-                            GestureDetector(
-                              child: Container(
-                                width: double.infinity,
-                                height: 100,
-                                decoration: BoxDecoration(
-                                  border: Border.all(
-                                      width: 1, color: Color(0xffe1e1e1)),
-                                  color: Color(0xfff5f5f5),
-                                  borderRadius: BorderRadius.circular(
-                                      15.0), // Optional: Add border radius
-                                ),
-                                child: ClipRRect(
-                                  borderRadius:
-                                      BorderRadius.all(Radius.circular(15)),
-                                  child: Image.file(gallary[index]),
-                                ),
-                              ),
-                            ),
-                            Positioned(
-                              top: 0,
-                              right: 0,
-                              child: InkWell(
-                                onTap: () {
-                                  setState(() {
-                                    gallary.removeAt(index);
-                                  });
-                                },
-                                child: Icon(
-                                  Icons.delete,
-                                  color: Colors.red,
-                                ),
-                              ),
-                            ),
-                          ],
-                        );
-                      },
-                    ),
-                    SizedBox(
-                      height: 10,
-                    ),
-                    GridView.builder(
-                      shrinkWrap: true,
-                      padding: const EdgeInsets.symmetric(
-                        horizontal: 5,
-                      ),
-                      physics: const NeverScrollableScrollPhysics(),
-                      gridDelegate:
-                          const SliverGridDelegateWithFixedCrossAxisCountAndFixedHeight(
-                              mainAxisSpacing: 10,
-                              crossAxisCount: 3,
-                              height: 100,
-                              crossAxisSpacing: 10),
-                      itemCount: gallaryEdit.length,
-                      itemBuilder: (context, index) {
-                        return Stack(
-                          children: [
-                            GestureDetector(
-                              child: Container(
-                                width: double.infinity,
-                                height: 100,
-                                decoration: BoxDecoration(
-                                  border: Border.all(
-                                      width: 1, color: Color(0xffe1e1e1)),
-                                  color: Color(0xfff5f5f5),
-                                  borderRadius: BorderRadius.circular(
-                                      15.0), // Optional: Add border radius
-                                ),
-                                child: ClipRRect(
-                                  borderRadius:
-                                      BorderRadius.all(Radius.circular(15)),
-                                  child: Image.network(gallaryEdit[index]),
-                                ),
-                              ),
-                            ),
-                            Positioned(
-                              top: 0,
-                              right: 0,
-                              child: InkWell(
-                                onTap: () async {
-                                  showDialog(
-                                      context: context,
-                                      barrierDismissible: false,
-                                      useSafeArea: true,
-                                      builder: (BuildContext context) {
-                                        return AnnotatedRegion(
-                                          value: SystemUiOverlayStyle(
-                                            statusBarColor:
-                                                Colors.black.withOpacity(0),
-                                          ),
-                                          child: SafeArea(
-                                            child: PopScope(
-                                              child: Center(
-                                                child: UiUtils.progress(
-                                                  normalProgressColor: context
-                                                      .color.tertiaryColor,
-                                                ),
-                                              ),
-                                              canPop: false,
-                                            ),
-                                          ),
-                                        );
-                                      });
-                                  var responseAgent = await Api.get(
-                                      url: Api.advertisementGetById +
-                                          '/${widget.id}',
-                                      queryParameters: {
-                                        'remove_images[${index}]':
-                                            gallaryEdit[index]
-                                                .split['/']
-                                                .toList()
-                                                .last,
-                                      });
-                                  if (!responseAgent['error']) {
-                                    setState(() {
-                                      gallaryEdit.removeAt(index);
-                                    });
-                                    Widgets.hideLoder(context);
-                                  }
-                                },
-                                child: Icon(
-                                  Icons.delete,
-                                  color: Colors.red,
-                                ),
-                              ),
-                            ),
-                          ],
-                        );
-                      },
-                    ),
                     SizedBox(
                       height: 25,
                     ),
@@ -3485,10 +3521,12 @@ class _LoanHomeState extends State<LoanAdForm> {
                       companyControler.text != '' &&
                       landSizeControler.text != '' &&
                       selectedVenture != '' &&
-                      addressControler.text != '' &&
+                      myRole != '' &&
                       cityControler.text != '' &&
-                      emailControler.text != '') {
+                      emailControler.text != '' &&
+                      (widget.isEdit || ((remainFreeProPost > 0 && selectedPackage == 0 && selectedRole == 'Free Listing') || selectedPackage != 0))) {
                     body = {
+                      'package_id': selectedPackage,
                       'category': widget.cat!['id'],
                       'subcategory': selectedVenture,
                       'title': nameControler.text,
@@ -3498,7 +3536,9 @@ class _LoanHomeState extends State<LoanAdForm> {
                       'description': descriptionControler.text,
                       'image': gallaryImages,
                       'photo': photoFiles,
+                      'role': myRole,
                       'brokerage': brokerage,
+                      'experience': experienceControler.text,
                       'location': locationControler.text,
                       'land_size': landSizeControler.text,
                       'company_name': companyControler.text,
@@ -3527,12 +3567,10 @@ class _LoanHomeState extends State<LoanAdForm> {
                       emailControler.text != ''&&
                       addressControler.text != '' &&
                       cityControler.text != '' &&
-                      // timingControler.text != '' &&
-                      documentFiles.length > 0 &&
-                      // experienceControler.text != '' &&
-                      projectControler.text != '' &&
-                      constRole != '') {
+                      constRole != '' &&
+                      (!widget.isEdit && (remainFreeProPost > 0 && selectedPackage == 0 && selectedRole == 'Free Listing') || selectedPackage != 0)) {
                     body = {
+                      'package_id': selectedPackage,
                       'category': widget.cat!['id'],
                       'title': nameControler.text,
                       'phone': phoneControler.text,
@@ -3568,18 +3606,16 @@ class _LoanHomeState extends State<LoanAdForm> {
                 } else if (widget.cat!['id'] == 3) {
                   if (nameControler.text != '' &&
                       phoneControler.text != '' &&
-                      // brokerage != '' &&
                       locationControler.text != '' &&
                       emailControler.text != ''&&
                       companyControler.text != '' &&
-                      serviceType.length > 0 &&
-                      // priceControler.text != '' &&
-                      addressControler.text != '' &&
+                      mainService != '' &&
                       cityControler.text != '' &&
-                      // timingControler.text != '' &&
-                      documentFiles.length > 0) {
+                      (!widget.isEdit && (remainFreeProPost > 0 && selectedPackage == 0 && selectedRole == 'Free Listing') || selectedPackage != 0)) {
                     body = {
+                      'package_id': selectedPackage,
                       'category': widget.cat!['id'],
+                      'subcategory': mainService,
                       'title': nameControler.text,
                       'phone': phoneControler.text,
                       'email': emailControler.text,
@@ -3613,16 +3649,16 @@ class _LoanHomeState extends State<LoanAdForm> {
                   if (nameControler.text != '' &&
                       phoneControler.text != '' &&
                       brokerage != '' &&
+                      selectedBank != '' &&
+                      agentType != '' &&
                       locationControler.text != '' &&
                       branchControler.text != '' &&
                       loanType.length > 0 &&
-                      addressControler.text != '' &&
                       cityControler.text != '' &&
-                      timingControler.text != '' &&
-                      documentFiles.length > 0 &&
-                      cityControler.text != '' &&
-                      emailControler != "") {
+                      emailControler.text != "" &&
+                      (!widget.isEdit && (remainFreeProPost > 0 && selectedPackage == 0 && selectedRole == 'Free Listing') || selectedPackage != 0)) {
                     body = {
+                      'package_id': selectedPackage,
                       'category': widget.cat!['id'],
                       'subcategory': selectedBank,
                       'title': nameControler.text,
@@ -3632,7 +3668,7 @@ class _LoanHomeState extends State<LoanAdForm> {
                       'description': descriptionControler.text,
                       'image': gallaryImages,
                       'photo': photoFiles,
-                      'agent_type': agentType ?? '',
+                      'agent_type': agentType,
                       'branch': branchControler.text,
                       'brokerage': brokerage,
                       'location': locationControler.text,
@@ -3655,59 +3691,64 @@ class _LoanHomeState extends State<LoanAdForm> {
                   }
                 }
                 try {
-                  if (widget.isEdit) {
-                    var responseAgent = await Api.post(
-                        url: Api.advertisementUpdate + '?post_id=${widget.id}',
-                        parameter: body);
-                    if (!responseAgent['error']) {
-                      setState(() {
-                        tapped = false;
-                      });
-                      HelperUtils.showSnackBarMessage(
-                          context,
-                          UiUtils.getTranslatedLabel(
-                              context, "${responseAgent['message']}"),
-                          type: MessageType.success,
-                          messageDuration: 3);
-                      Navigator.pop(context);
+                  if(body != null) {
+                    print('pppppppppppp: ${body}');
+                    if (widget.isEdit) {
+                      var responseAgent = await Api.post(
+                          url: Api.advertisementUpdate +
+                              '?post_id=${widget.id}',
+                          parameter: body);
+                      if (!responseAgent['error']) {
+                        setState(() {
+                          tapped = false;
+                        });
+                        HelperUtils.showSnackBarMessage(
+                            context,
+                            UiUtils.getTranslatedLabel(
+                                context, "${responseAgent['message']}"),
+                            type: MessageType.success,
+                            messageDuration: 3);
+                        Navigator.pop(context);
+                      } else {
+                        setState(() {
+                          tapped = false;
+                        });
+                        HelperUtils.showSnackBarMessage(
+                            context,
+                            UiUtils.getTranslatedLabel(
+                                context, "${responseAgent['message']}"),
+                            type: MessageType.error,
+                            messageDuration: 3);
+                      }
                     } else {
-                      setState(() {
-                        tapped = false;
-                      });
-                      HelperUtils.showSnackBarMessage(
-                          context,
-                          UiUtils.getTranslatedLabel(
-                              context, "${responseAgent['message']}"),
-                          type: MessageType.error,
-                          messageDuration: 3);
-                    }
-                  } else {
-                    var responseAgent = await Api.post(
-                        url: Api.advertisementPost, parameter: body);
-                    if (!responseAgent['error']) {
-                      setState(() {
-                        tapped = false;
-                      });
-                      HelperUtils.showSnackBarMessage(
-                          context,
-                          UiUtils.getTranslatedLabel(
-                              context, "${responseAgent['message']}"),
-                          type: MessageType.success,
-                          messageDuration: 3);
-                      Future.delayed(Duration.zero, () {
-                        Navigator.of(context).pushReplacementNamed(Routes.main,
-                            arguments: {'from': "main"});
-                      });
-                    } else {
-                      setState(() {
-                        tapped = false;
-                      });
-                      HelperUtils.showSnackBarMessage(
-                          context,
-                          UiUtils.getTranslatedLabel(
-                              context, "${responseAgent['message']}"),
-                          type: MessageType.error,
-                          messageDuration: 3);
+                      var responseAgent = await Api.post(
+                          url: Api.advertisementPost, parameter: body);
+                      if (!responseAgent['error']) {
+                        setState(() {
+                          tapped = false;
+                        });
+                        HelperUtils.showSnackBarMessage(
+                            context,
+                            UiUtils.getTranslatedLabel(
+                                context, "${responseAgent['message']}"),
+                            type: MessageType.success,
+                            messageDuration: 3);
+                        Future.delayed(Duration.zero, () {
+                          Navigator.of(context).pushReplacementNamed(Routes
+                              .main,
+                              arguments: {'from': "main"});
+                        });
+                      } else {
+                        setState(() {
+                          tapped = false;
+                        });
+                        HelperUtils.showSnackBarMessage(
+                            context,
+                            UiUtils.getTranslatedLabel(
+                                context, "${responseAgent['message']}"),
+                            type: MessageType.error,
+                            messageDuration: 3);
+                      }
                     }
                   }
                 } catch (err) {
