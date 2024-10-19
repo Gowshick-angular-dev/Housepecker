@@ -295,6 +295,7 @@ class _ProjectFormFourState extends State<ProjectFormFour> {
                 'facilities': facilities,
                 ...widget.body!
               };
+              print('ffffffffffffffff: ${body}');
               Navigator.push(
                 context,
                 MaterialPageRoute(builder: (context) =>

@@ -54,6 +54,7 @@ class _ProjectFormSecondState extends State<ProjectFormSecond> {
   String brokerage = '';
   int remainFreeProPost = 0;
   int freeDuration = 0;
+  int maxUnits = 0;
   List<ValueItem> brokerageWidget = [];
   String propertyType = '';
   List<ValueItem> propertyTypeWidget = [];
@@ -95,6 +96,7 @@ class _ProjectFormSecondState extends State<ProjectFormSecond> {
         setState(() {
           remainFreeProPost = freepackage['project_limit'] -
               freepackage['used_project_limit'];
+          maxUnits = freepackage['project_units'];
           freeDuration = freepackage['duration'] ?? 0;
         });
       }
@@ -171,7 +173,7 @@ class _ProjectFormSecondState extends State<ProjectFormSecond> {
       brokerageWidget = [ValueItem(label: 'No', value: 'no')];
     }
 
-    propertyTypeWidget = [ValueItem(label: widget.data!['project_details'][0]['property_type'], value: widget.data!['project_details'][0]['property_type'])];
+    propertyTypeWidget = [ValueItem(label: widget.data!['property_type'], value: widget.data!['property_type'])];
 
     setState(() {
       loading = false;
@@ -382,7 +384,7 @@ class _ProjectFormSecondState extends State<ProjectFormSecond> {
                                 const SizedBox(height: 10),
                                 if(packages.isNotEmpty)
                                   Container(
-                                    padding: EdgeInsets.all(10),
+                                    padding: EdgeInsets.only(top: 10, right: 10, left: 10),
                                     decoration: BoxDecoration(
                                       border: Border.all(
                                           color: Color(0xffe5e5e5),
@@ -392,174 +394,157 @@ class _ProjectFormSecondState extends State<ProjectFormSecond> {
                                     ),
                                     child: Column(
                                       children: [
-                                        // Expanded(
-                                        //   child: MultiSelectDropDown(
-                                        //     onOptionSelected: (List<ValueItem> selectedOptions) {
-                                        //       setState(() {
-                                        //         selectedPackage = int.parse(selectedOptions[0].value!);
-                                        //       });
-                                        //     },
-                                        //     options: [
-                                        //       for (int i = 0; i < packages.length; i++)
-                                        //         ValueItem(
-                                        //           label: '${packages[i]['package']['name']}, Listing (${packages[i]['package']['project_limit']}), Units (${packages[i]['package']['no_of_units'] ?? 0}), Valid until (${DateFormat('dd MMM yyyy').format(DateTime.parse(packages[i]['end_date']))})',
-                                        //           value: '${packages[i]['package']['id']}',
-                                        //         ),
-                                        //     ],
-                                        //     selectionType: SelectionType.single,
-                                        //     chipConfig: const ChipConfig(wrapType: WrapType.wrap),
-                                        //     dropdownHeight: 300,
-                                        //     optionTextStyle: const TextStyle(fontSize: 16),
-                                        //     selectedOptionIcon: const Icon(Icons.check_circle),
-                                        //   ),
-                                        // ),
                                         for (int i = 0; i < packages.length; i++)
                                         InkWell(
                                           onTap: () {
                                             setState(() {
                                               selectedPackage = packages[i]['package']['id'];
+                                              maxUnits = packages[i]['package']['no_of_units'] ?? 0;
                                             });
                                           },
-                                          child: Container(
-                                            width: double.infinity,
-                                            padding: EdgeInsets.all(10),
-                                            decoration: BoxDecoration(
-                                              color: selectedPackage != packages[i]['package']['id'] ? Color(0xfff9f9f9) : Color(0xfffffbf3),
-                                              border: Border.all(
-                                                  color: selectedPackage != packages[i]['package']['id'] ? Color(0xffe5e5e5) : Color(0xffffa920),
-                                                  width: 1
+                                          child: Padding(
+                                            padding: const EdgeInsets.only(bottom: 10),
+                                            child: Container(
+                                              width: double.infinity,
+                                              padding: EdgeInsets.all(10),
+                                              decoration: BoxDecoration(
+                                                color: selectedPackage != packages[i]['package']['id'] ? Color(0xfff9f9f9) : Color(0xfffffbf3),
+                                                border: Border.all(
+                                                    color: selectedPackage != packages[i]['package']['id'] ? Color(0xffe5e5e5) : Color(0xffffa920),
+                                                    width: 1
+                                                ),
+                                                borderRadius: BorderRadius.circular(15),
                                               ),
-                                              borderRadius: BorderRadius.circular(15),
-                                            ),
-                                            // alignment: Alignment.center,
-                                            child: Column(
-                                              crossAxisAlignment: CrossAxisAlignment.start,
-                                              children: [
-                                                Row(
-                                                  children: [
-                                                    Container(
-                                                      height: 20,
-                                                      width: 20,
-                                                      decoration: BoxDecoration(
-                                                        border: Border.all(
-                                                            color: Color(0xffe5e5e5),
-                                                            width: 1
-                                                        ),
-                                                        borderRadius: BorderRadius.circular(15),
-                                                      ),
-                                                      child: selectedPackage == packages[i]['package']['id'] ? Container(
-                                                        height: 10,
-                                                        width: 10,
+                                              // alignment: Alignment.center,
+                                              child: Column(
+                                                crossAxisAlignment: CrossAxisAlignment.start,
+                                                children: [
+                                                  Row(
+                                                    children: [
+                                                      Container(
+                                                        height: 20,
+                                                        width: 20,
                                                         decoration: BoxDecoration(
-                                                          color: Color(0xffffa920),
                                                           border: Border.all(
-                                                              color: Color(0xffffffff),
-                                                              width: 3
+                                                              color: Color(0xffe5e5e5),
+                                                              width: 1
                                                           ),
                                                           borderRadius: BorderRadius.circular(15),
                                                         ),
-                                                      ) : Container(),
-                                                    ),
-                                                    SizedBox(width: 10,),
-                                                    Text(packages[i]['package']['name'],
-                                                      style: TextStyle(
-                                                        fontSize: 14,
-                                                        color: Color(0xff646464),
-                                                        fontWeight: FontWeight.w600,
+                                                        child: selectedPackage == packages[i]['package']['id'] ? Container(
+                                                          height: 10,
+                                                          width: 10,
+                                                          decoration: BoxDecoration(
+                                                            color: Color(0xffffa920),
+                                                            border: Border.all(
+                                                                color: Color(0xffffffff),
+                                                                width: 3
+                                                            ),
+                                                            borderRadius: BorderRadius.circular(15),
+                                                          ),
+                                                        ) : Container(),
                                                       ),
-                                                    ),
-                                                  ],
-                                                ),
-                                                SizedBox(height: 10,),
-                                                Row(
-                                                  children: [
-                                                    Expanded(
-                                                      child: Text('Total Listings',
+                                                      SizedBox(width: 10,),
+                                                      Text(packages[i]['package']['name'],
                                                         style: TextStyle(
-                                                          fontSize: 11,
+                                                          fontSize: 14,
                                                           color: Color(0xff646464),
                                                           fontWeight: FontWeight.w600,
                                                         ),
                                                       ),
-                                                    ),
-                                                    Expanded(
-                                                      child: Text(':  ${packages[i]['package']['project_limit']}',
-                                                        style: TextStyle(
-                                                          fontSize: 11,
-                                                          color: Color(0xff646464),
-                                                          fontWeight: FontWeight.w400,
+                                                    ],
+                                                  ),
+                                                  SizedBox(height: 10,),
+                                                  Row(
+                                                    children: [
+                                                      Expanded(
+                                                        child: Text('Total Listings',
+                                                          style: TextStyle(
+                                                            fontSize: 11,
+                                                            color: Color(0xff646464),
+                                                            fontWeight: FontWeight.w600,
+                                                          ),
                                                         ),
                                                       ),
-                                                    ),
-                                                  ],
-                                                ),
-                                                Row(
-                                                  children: [
-                                                    const Expanded(
-                                                      child: Text('Available Listings',
-                                                        style: TextStyle(
-                                                          fontSize: 11,
-                                                          color: Color(0xff646464),
-                                                          fontWeight: FontWeight.w600,
+                                                      Expanded(
+                                                        child: Text(':  ${packages[i]['package']['project_limit']}',
+                                                          style: TextStyle(
+                                                            fontSize: 11,
+                                                            color: Color(0xff646464),
+                                                            fontWeight: FontWeight.w400,
+                                                          ),
                                                         ),
                                                       ),
-                                                    ),
-                                                    Expanded(
-                                                      child: Text(':  ${packages[i]['package']['project_limit'] - packages[i]['used_limit_for_project']}',
-                                                        style: const TextStyle(
-                                                          fontSize: 11,
-                                                          color: Color(0xff646464),
-                                                          fontWeight: FontWeight.w400,
+                                                    ],
+                                                  ),
+                                                  Row(
+                                                    children: [
+                                                      const Expanded(
+                                                        child: Text('Available Listings',
+                                                          style: TextStyle(
+                                                            fontSize: 11,
+                                                            color: Color(0xff646464),
+                                                            fontWeight: FontWeight.w600,
+                                                          ),
                                                         ),
                                                       ),
-                                                    ),
-                                                  ],
-                                                ),
-                                                Row(
-                                                  children: [
-                                                    Expanded(
-                                                      child: Text('Total Units',
-                                                        style: TextStyle(
-                                                          fontSize: 11,
-                                                          color: Color(0xff646464),
-                                                          fontWeight: FontWeight.w600,
+                                                      Expanded(
+                                                        child: Text(':  ${packages[i]['package']['project_limit'] - packages[i]['used_limit_for_project']}',
+                                                          style: const TextStyle(
+                                                            fontSize: 11,
+                                                            color: Color(0xff646464),
+                                                            fontWeight: FontWeight.w400,
+                                                          ),
                                                         ),
                                                       ),
-                                                    ),
-                                                    Expanded(
-                                                      child: Text(':  ${packages[i]['package']['no_of_units'] ?? "Unlimited"}',
-                                                        style: TextStyle(
-                                                          fontSize: 11,
-                                                          color: Color(0xff646464),
-                                                          fontWeight: FontWeight.w400,
+                                                    ],
+                                                  ),
+                                                  Row(
+                                                    children: [
+                                                      Expanded(
+                                                        child: Text('Total Units',
+                                                          style: TextStyle(
+                                                            fontSize: 11,
+                                                            color: Color(0xff646464),
+                                                            fontWeight: FontWeight.w600,
+                                                          ),
                                                         ),
                                                       ),
-                                                    ),
-                                                  ],
-                                                ),
-                                                Row(
-                                                  children: [
-                                                    Expanded(
-                                                      child: Text('Valid until',
-                                                        style: TextStyle(
-                                                          fontSize: 11,
-                                                          color: Color(0xff646464),
-                                                          fontWeight: FontWeight.w600,
+                                                      Expanded(
+                                                        child: Text(':  ${packages[i]['package']['no_of_units'] ?? "Unlimited"}',
+                                                          style: TextStyle(
+                                                            fontSize: 11,
+                                                            color: Color(0xff646464),
+                                                            fontWeight: FontWeight.w400,
+                                                          ),
                                                         ),
                                                       ),
-                                                    ),
-                                                    Expanded(
-                                                      child: Text(':  ${DateFormat('dd MMM yyyy').format(DateTime.parse(packages[i]['end_date']))}',
-                                                        style: TextStyle(
-                                                          fontSize: 11,
-                                                          color: Color(0xff646464),
-                                                          fontWeight: FontWeight.w400,
+                                                    ],
+                                                  ),
+                                                  Row(
+                                                    children: [
+                                                      Expanded(
+                                                        child: Text('Valid until',
+                                                          style: TextStyle(
+                                                            fontSize: 11,
+                                                            color: Color(0xff646464),
+                                                            fontWeight: FontWeight.w600,
+                                                          ),
                                                         ),
                                                       ),
-                                                    ),
-                                                  ],
-                                                ),
-                                              ],
+                                                      Expanded(
+                                                        child: Text(':  ${DateFormat('dd MMM yyyy').format(DateTime.parse(packages[i]['end_date']))}',
+                                                          style: TextStyle(
+                                                            fontSize: 11,
+                                                            color: Color(0xff646464),
+                                                            fontWeight: FontWeight.w400,
+                                                          ),
+                                                        ),
+                                                      ),
+                                                    ],
+                                                  ),
+                                                ],
+                                              ),
                                             ),
                                           ),
                                         )
@@ -1252,29 +1237,38 @@ class _ProjectFormSecondState extends State<ProjectFormSecond> {
                     status != '' &&
                     propertyType != '' &&
                     descriptionControler.text != '' &&
-                    (!widget.isEdit! && (remainFreeProPost > 0 && selectedPackage == 0 && selectedRole == 'Free Listing') || selectedPackage != 0)) {
-                  var body = {
-                    'package_id': selectedPackage,
-                    'title': nameControler.text,
-                    'min_price': minPriceControler.text,
-                    'max_price': maxPriceControler.text,
-                    'avg_price': avgPriceControler.text,
-                    'property_type': propertyType,
-                    'project_status': status,
-                    'brokerage': brokerage,
-                    'project_status': status,
-                    'offers': offersControler.text,
-                    'description': descriptionControler.text,
-                    ...widget.body!
-                  };
-                  Navigator.push(
-                    context,
-                    MaterialPageRoute(
-                        builder: (context) => ProjectFormTwo(
-                            body: body,
-                            isEdit: widget.isEdit,
-                            data: widget.data)),
-                  );
+                    (widget.isEdit! || ((remainFreeProPost > 0 && selectedPackage == 0 && selectedRole == 'Free Listing') || selectedPackage != 0))) {
+                  if(int.parse(minPriceControler.text) < int.parse(maxPriceControler.text)) {
+                    var body = {
+                      'package_id': selectedPackage,
+                      'title': nameControler.text,
+                      'min_price': minPriceControler.text,
+                      'max_price': maxPriceControler.text,
+                      'avg_price': avgPriceControler.text,
+                      'property_type': propertyType,
+                      'project_status': status,
+                      'brokerage': brokerage,
+                      'offers': offersControler.text,
+                      'unit_limit': maxUnits,
+                      'description': descriptionControler.text,
+                      ...widget.body!
+                    };
+                    print('ffffffffffffffff: ${body}');
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                          builder: (context) =>
+                              ProjectFormTwo(
+                                  body: body,
+                                  isEdit: widget.isEdit,
+                                  data: widget.data)),
+                    );
+                  } else {
+                    HelperUtils.showSnackBarMessage(
+                        context, UiUtils.getTranslatedLabel(
+                        context, "Max price should be greater than min price!"),
+                        type: MessageType.warning, messageDuration: 5);
+                  }
                 } else {
                   HelperUtils.showSnackBarMessage(
                       context,

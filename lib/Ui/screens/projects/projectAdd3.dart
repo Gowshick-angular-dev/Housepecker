@@ -326,15 +326,13 @@ class _ProjectFormThreeState extends State<ProjectFormThree> {
           InkWell(
             onTap: () {
               if(!loading) {
-                if(
-                // ageControler.text != '' &&
-                    highlightsControler.text != '') {
+                if(highlightsControler.text != '') {
                   var body = {
                     'approved_banks': selectedLoans,
                     'highlights': highlightsControler.text,
-                    // 'amenity_id': selectedAmenities.map((item) => item['id']).toList(),
                     ...widget.body!
                   };
+                  print('ffffffffffffffff: ${body}');
                   Navigator.push(
                     context,
                     MaterialPageRoute(builder: (context) =>

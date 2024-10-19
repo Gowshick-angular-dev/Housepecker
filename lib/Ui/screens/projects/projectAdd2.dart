@@ -228,10 +228,16 @@ class _ProjectFormTwoState extends State<ProjectFormTwo> {
                         RichText(
                           text: TextSpan(
                             children: [
-                              TextSpan(text: "Total Units",
+                              TextSpan(text: "Total Units ",
                                 style: TextStyle(
                                     color: Colors.black,
                                     fontSize: 15,
+                                    fontWeight: FontWeight.w600
+                                ),),
+                              TextSpan(text: "(Max ${widget.body!['unit_limit'] ?? 0} Units)",
+                                style: TextStyle(
+                                    color: Colors.black,
+                                    fontSize: 12,
                                     fontWeight: FontWeight.w600
                                 ),),
                               TextSpan(
@@ -1718,36 +1724,56 @@ class _ProjectFormTwoState extends State<ProjectFormTwo> {
                     approvedControler.text != '' &&
                     configurationsControler.text != ''
                 ) {
-                  var body = {
-                    'total_units': totalUnitsControler.text,
-                    'total_project': projectAreaControler.text,
-                    'launch_date': selectedDate,
-                    'possession_start': possessionDate,
-                    'size': sizeControler.text,
-                    'configuration': configurationsControler.text,
-                    'rera_no': reraControler.text,
-                    'floors': totalFloorsControler.text,
-                    'approved_by': approvedControler.text,
-                    'gated_community': gatedCommunity,
-                    'high_rise': highRiseApartment,
-                    'lake_view': lakeView,
-                    'min_size': Minsf.text,
-                    'max_size': MAxsf.text,
-                    'near_by_metro': nearByMetroControler.text,
-                    'veg_only': vegOnly,
-                    'covered_parking': coveredParking,
-                    'open_parking': openParking,
-                    'road_width': roadWidthControler.text,
-                    'project_completed': projectCompletedControler.text,
-                    ...widget.body!
-                  };
-                  Navigator.push(
-                    context,
-                    MaterialPageRoute(builder: (context) =>
-                        ProjectFormThree(body: body,
-                            isEdit: widget.isEdit,
-                            data: widget.data)),
-                  );
+                  if(widget.body!['unit_limit'] >= int.parse(totalUnitsControler.text)) {
+                    if(int.parse(Minsf.text) < int.parse(MAxsf.text)) {
+                      var body = {
+                        'total_units': totalUnitsControler.text,
+                        'total_project': projectAreaControler.text,
+                        'launch_date': selectedDate,
+                        'possession_start': possessionDate,
+                        'size': sizeControler.text,
+                        'configuration': configurationsControler.text,
+                        'rera_no': reraControler.text,
+                        'floors': totalFloorsControler.text,
+                        'approved_by': approvedControler.text,
+                        'gated_community': gatedCommunity,
+                        'high_rise': highRiseApartment,
+                        'lake_view': lakeView,
+                        'min_size': Minsf.text,
+                        'max_size': MAxsf.text,
+                        'near_by_metro': nearByMetroControler.text,
+                        'veg_only': vegOnly,
+                        'covered_parking': coveredParking,
+                        'open_parking': openParking,
+                        'rate_per_sqft': sqftRateControler.text,
+                        'furniture': projectFurnished,
+                        'facing': projectFacing,
+                        'road_width': roadWidthControler.text,
+                        'project_completed': projectCompletedControler.text,
+                        ...widget.body!
+                      };
+                      print('ffffffffffffffff: ${body}');
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(builder: (context) =>
+                            ProjectFormThree(body: body,
+                                isEdit: widget.isEdit,
+                                data: widget.data
+                            )
+                        ),
+                      );
+                    } else {
+                      HelperUtils.showSnackBarMessage(
+                          context, UiUtils.getTranslatedLabel(
+                          context, "Max size should be greater than min size!"),
+                          type: MessageType.warning, messageDuration: 5);
+                    }
+                  } else {
+                    HelperUtils.showSnackBarMessage(
+                        context, UiUtils.getTranslatedLabel(
+                        context, "Max units limit exceeded!"),
+                        type: MessageType.warning, messageDuration: 5);
+                  }
                 } else {
                   HelperUtils.showSnackBarMessage(
                       context, UiUtils.getTranslatedLabel(
@@ -1765,37 +1791,52 @@ class _ProjectFormTwoState extends State<ProjectFormTwo> {
                     approvedControler.text != '' &&
                     configurationsControler.text != ''
                 ) {
-
-                  var body = {
-                    'total_units': totalUnitsControler.text,
-                    'total_project': projectAreaControler.text,
-                    'launch_date': selectedDate,
-                    'configuration': configurationsControler.text,
-                    'rera_no': reraControler.text,
-                    'floors': totalFloorsControler.text,
-                    'min_size': Minsf.text,
-                    'max_size': MAxsf.text,
-                    'approved_by': approvedControler.text,
-                    'rate_per_sqft': sqftRateControler.text,
-                    'suitable_for': suitableFor,
-                    'furniture': projectFurnished,
-                    'facing': projectFacing,
-                    'project_placed': projectPlaced,
-                    'near_by_metro': nearByMetroControler.text,
-                    'veg_only': vegOnly,
-                    'covered_parking': coveredParking,
-                    'open_parking': openParking,
-                    'road_width': roadWidthControler.text,
-                    'project_completed': projectCompletedControler.text,
-                    ...widget.body!
-                  };
-                  Navigator.push(
-                    context,
-                    MaterialPageRoute(builder: (context) =>
-                        ProjectFormThree(body: body,
-                            isEdit: widget.isEdit,
-                            data: widget.data)),
-                  );
+                  if(widget.body!['unit_limit'] >= int.parse(totalUnitsControler.text)) {
+                    if(int.parse(Minsf.text) < int.parse(MAxsf.text)) {
+                      var body = {
+                        'total_units': totalUnitsControler.text,
+                        'total_project': projectAreaControler.text,
+                        'launch_date': selectedDate,
+                        'configuration': configurationsControler.text,
+                        'rera_no': reraControler.text,
+                        'floors': totalFloorsControler.text,
+                        'min_size': Minsf.text,
+                        'max_size': MAxsf.text,
+                        'approved_by': approvedControler.text,
+                        'rate_per_sqft': sqftRateControler.text,
+                        'suitable_for': suitableFor,
+                        'furniture': projectFurnished,
+                        'facing': projectFacing,
+                        'project_placed': projectPlaced,
+                        'near_by_metro': nearByMetroControler.text,
+                        'veg_only': vegOnly,
+                        'gated_community': gatedCommunity,
+                        'covered_parking': coveredParking,
+                        'open_parking': openParking,
+                        'road_width': roadWidthControler.text,
+                        'project_completed': projectCompletedControler.text,
+                        ...widget.body!
+                      };
+                      print('ffffffffffffffff: ${body}');
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(builder: (context) =>
+                            ProjectFormThree(body: body,
+                                isEdit: widget.isEdit,
+                                data: widget.data)),
+                      );
+                    } else {
+                      HelperUtils.showSnackBarMessage(
+                          context, UiUtils.getTranslatedLabel(
+                          context, "Max units limit exceeded!"),
+                          type: MessageType.warning, messageDuration: 5);
+                    }
+                  } else {
+                    HelperUtils.showSnackBarMessage(
+                        context, UiUtils.getTranslatedLabel(
+                        context, "Max size should be greater than min size!"),
+                        type: MessageType.warning, messageDuration: 5);
+                  }
                 } else {
                   HelperUtils.showSnackBarMessage(
                       context, UiUtils.getTranslatedLabel(

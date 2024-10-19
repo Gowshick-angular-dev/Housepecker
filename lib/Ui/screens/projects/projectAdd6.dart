@@ -613,76 +613,6 @@ class _ProjectFormSecondState extends State<ProjectFormsixth> {
                         ),
                       ],
                     ),
-                    // Column(
-                    //   crossAxisAlignment: CrossAxisAlignment.start,
-                    //   children: [
-                    //     RichText(
-                    //       text: TextSpan(
-                    //         children: [
-                    //           TextSpan(
-                    //             text: "Address",
-                    //             style: TextStyle(
-                    //                 color: Colors.black,
-                    //                 fontSize: 15,
-                    //                 fontWeight: FontWeight.w600),
-                    //           ),
-                    //           TextSpan(
-                    //             text: " *",
-                    //             style: TextStyle(
-                    //                 color:
-                    //                 Colors.red), // Customize asterisk color
-                    //           ),
-                    //         ],
-                    //       ),
-                    //     ),
-                    //     SizedBox(
-                    //       height: 10,
-                    //     ),
-                    //     Row(
-                    //       children: [
-                    //         Expanded(
-                    //           child: Container(
-                    //             decoration: BoxDecoration(
-                    //               border: Border.all(
-                    //                   width: 1, color: Color(0xffe1e1e1)),
-                    //               color: Color(0xfff5f5f5),
-                    //               borderRadius: BorderRadius.circular(
-                    //                   10.0), // Optional: Add border radius
-                    //             ),
-                    //             child: Padding(
-                    //               padding: const EdgeInsets.only(
-                    //                   left: 8.0, right: 5),
-                    //               child: TextFormField(
-                    //                 controller: AdresssController,
-                    //                 decoration: const InputDecoration(
-                    //                     hintText: 'Enter Address..',
-                    //                     hintStyle: TextStyle(
-                    //                       fontFamily: 'Poppins',
-                    //                       fontSize: 14.0,
-                    //                       color: Color(0xff9c9c9c),
-                    //                       fontWeight: FontWeight.w500,
-                    //                       decoration: TextDecoration.none,
-                    //                     ),
-                    //                     enabledBorder: UnderlineInputBorder(
-                    //                       borderSide: BorderSide(
-                    //                         color: Colors.transparent,
-                    //                       ),
-                    //                     ),
-                    //                     focusedBorder: UnderlineInputBorder(
-                    //                         borderSide: BorderSide(
-                    //                           color: Colors.transparent,
-                    //                         ))),
-                    //               ),
-                    //             ),
-                    //           ),
-                    //         ),
-                    //       ],
-                    //     ),
-                    //     SizedBox(
-                    //       height: 25,
-                    //     ),
-                    //   ],
-                    // ),
                     Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
@@ -708,30 +638,6 @@ class _ProjectFormSecondState extends State<ProjectFormsixth> {
                                 ],
                               ),
                             ),
-                            // InkWell(
-                            //   onTap: () async {
-                            //     FocusManager.instance.primaryFocus?.unfocus();
-                            //     Map? placeMark = await Navigator.pushNamed(
-                            //         context, Routes.chooseLocaitonMap) as Map?;
-                            //     var latlng = placeMark!['latlng'];
-                            //     if (latlng != null) {
-                            //       var address = await getAddressFromLatLng(
-                            //           latlng.latitude, latlng.longitude);
-                            //       setState(() {
-                            //         locationControler.text = address as String;
-                            //         lat = '${latlng.latitude}';
-                            //         lng = '${latlng.longitude}';
-                            //       });
-                            //     }
-                            //   },
-                            //   child: Text(
-                            //     'Choose on map',
-                            //     style: TextStyle(
-                            //         color: Colors.blue,
-                            //         fontSize: 12,
-                            //         fontWeight: FontWeight.w600),
-                            //   ),
-                            // )
                           ],
                         ),
                         SizedBox(
@@ -755,26 +661,6 @@ class _ProjectFormSecondState extends State<ProjectFormsixth> {
                                     maxLines: 4,
                                     controller: locationControler,
                                     readOnly: true,
-                                    // onTap: () async {
-                                    //   FocusManager.instance.primaryFocus
-                                    //       ?.unfocus();
-                                    //   Map? placeMark =
-                                    //       await Navigator.pushNamed(context,
-                                    //           Routes.chooseLocaitonMap) as Map?;
-                                    //   var latlng = placeMark!['latlng'];
-                                    //   if (latlng != null) {
-                                    //     var address =
-                                    //         await getAddressFromLatLng(
-                                    //             latlng.latitude,
-                                    //             latlng.longitude);
-                                    //     setState(() {
-                                    //       locationControler.text =
-                                    //           address as String;
-                                    //       lat = '${latlng.latitude}';
-                                    //       lng = '${latlng.longitude}';
-                                    //     });
-                                    //   }
-                                    // },
                                     onTap: () {
                                       placesFocusNode.requestFocus();
                                     },
@@ -853,7 +739,7 @@ class _ProjectFormSecondState extends State<ProjectFormsixth> {
                   'longitude': lng,
                   ...widget.body!
                 };
-                print('uuuuuuuuuuuuuuuuuuuuuuuu: ${body}');
+                print('ffffffffffffffff: ${body}');
                 if (cityControler.text != '' &&
                     StateController.text != '' &&
                     ContryControler.text != '' &&

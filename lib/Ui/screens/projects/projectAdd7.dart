@@ -174,6 +174,7 @@ class _ProjectFormThreeState extends State<ProjectFormSeven> {
                     'amenity_id': selectedAmenities.map((item) => item['id']).toList(),
                     ...widget.body!
                   };
+                  print('ffffffffffffffff: ${body}');
                   Navigator.push(
                     context,
                     MaterialPageRoute(builder: (context) =>

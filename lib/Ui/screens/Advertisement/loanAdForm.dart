@@ -3568,7 +3568,7 @@ class _LoanHomeState extends State<LoanAdForm> {
                       addressControler.text != '' &&
                       cityControler.text != '' &&
                       constRole != '' &&
-                      (!widget.isEdit && (remainFreeProPost > 0 && selectedPackage == 0 && selectedRole == 'Free Listing') || selectedPackage != 0)) {
+                      (widget.isEdit || ((remainFreeProPost > 0 && selectedPackage == 0 && selectedRole == 'Free Listing') || selectedPackage != 0))) {
                     body = {
                       'package_id': selectedPackage,
                       'category': widget.cat!['id'],
@@ -3611,7 +3611,7 @@ class _LoanHomeState extends State<LoanAdForm> {
                       companyControler.text != '' &&
                       mainService != '' &&
                       cityControler.text != '' &&
-                      (!widget.isEdit && (remainFreeProPost > 0 && selectedPackage == 0 && selectedRole == 'Free Listing') || selectedPackage != 0)) {
+                      (widget.isEdit || ((remainFreeProPost > 0 && selectedPackage == 0 && selectedRole == 'Free Listing') || selectedPackage != 0))) {
                     body = {
                       'package_id': selectedPackage,
                       'category': widget.cat!['id'],
@@ -3656,7 +3656,7 @@ class _LoanHomeState extends State<LoanAdForm> {
                       loanType.length > 0 &&
                       cityControler.text != '' &&
                       emailControler.text != "" &&
-                      (!widget.isEdit && (remainFreeProPost > 0 && selectedPackage == 0 && selectedRole == 'Free Listing') || selectedPackage != 0)) {
+                      (widget.isEdit || ((remainFreeProPost > 0 && selectedPackage == 0 && selectedRole == 'Free Listing') || selectedPackage != 0))) {
                     body = {
                       'package_id': selectedPackage,
                       'category': widget.cat!['id'],
