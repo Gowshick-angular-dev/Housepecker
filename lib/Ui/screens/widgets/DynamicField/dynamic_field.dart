@@ -1226,16 +1226,16 @@ class _CustomDropdownStateState extends State<CustomDropdownState>
               Row(
                 children: [
                   Container(
-                    width: 48.rw(context),
-                    height: 48.rh(context),
-                    decoration: BoxDecoration(
-                      color: context.color.tertiaryColor.withOpacity(
-                        0.1,
-                      ),
-                      borderRadius: BorderRadius.circular(
-                        10,
-                      ),
-                    ),
+                    width: 20,
+                    height: 20,
+                    // decoration: BoxDecoration(
+                    //   color: context.color.tertiaryColor.withOpacity(
+                    //     0.1,
+                    //   ),
+                    //   borderRadius: BorderRadius.circular(
+                    //     10,
+                    //   ),
+                    // ),
                     child: Container(
                       height: 24,
                       width: 24,
@@ -1245,8 +1245,8 @@ class _CustomDropdownStateState extends State<CustomDropdownState>
                             color: Constant.adaptThemeColorSvg
                                 ? context.color.tertiaryColor
                                 : null,
-                            width: 24,
-                            height: 24,
+                            width: 15,
+                            height: 15,
                             fit: BoxFit.cover),
                       ),
                     ),
@@ -1260,7 +1260,7 @@ class _CustomDropdownStateState extends State<CustomDropdownState>
                     widget.parameters['name'],
                   )
                       .size(
-                        context.font.large,
+                        context.font.normal,
                       )
                       .bold(weight: FontWeight.w500)
                       .color(
@@ -1269,7 +1269,7 @@ class _CustomDropdownStateState extends State<CustomDropdownState>
                 ],
               ),
               SizedBox(
-                height: 14.rh(context),
+                height: 10.rh(context),
               ),
               Padding(
                 padding: const EdgeInsets.symmetric(
@@ -1293,16 +1293,17 @@ class _CustomDropdownStateState extends State<CustomDropdownState>
                       width: double.infinity,
                       child: DropdownButton(
                         value: value,
-                        dropdownColor: context.color.secondaryColor,
+                        hint: Text('Select rektehrtiugert'),
+                        // dropdownColor: context.color.secondaryColor,
                         isExpanded: true,
                         padding: const EdgeInsets.symmetric(vertical: 5),
-                        icon: SvgPicture.asset(AppIcons.downArrow),
+                        // icon: SvgPicture.asset(AppIcons.downArrow),
                         isDense: true,
                         borderRadius: BorderRadius.circular(
                           10,
                         ),
                         style: TextStyle(
-                            color: context.color.textLightColor,
+                            color: context.color.textColorDark,
                             fontSize: context.font.large),
                         underline: const SizedBox.shrink(),
                         items: wid,

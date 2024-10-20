@@ -4,6 +4,9 @@ import 'package:dio/dio.dart';
 import 'package:file_picker/file_picker.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter/widgets.dart';
+import 'package:google_places_flutter/google_places_flutter.dart';
+import 'package:google_places_flutter/model/place_type.dart';
+import 'package:google_places_flutter/model/prediction.dart';
 import 'package:multi_dropdown/multiselect_dropdown.dart';
 import 'package:Housepecker/Ui/screens/Personalized/personalized_property_screen.dart';
 import 'package:Housepecker/Ui/screens/widgets/custom_text_form_field.dart';
@@ -88,6 +91,9 @@ class UserProfileScreenState extends State<UserProfileScreen> {
   final TextEditingController experienceController = TextEditingController();
   final TextEditingController rentNumberController = TextEditingController();
   final TextEditingController saleNumberController = TextEditingController();
+
+  final FocusNode placesFocusNode = FocusNode();
+
   dynamic size;
   dynamic city, _state, country, placeid;
   String? name, email, address;
@@ -327,7 +333,7 @@ class UserProfileScreenState extends State<UserProfileScreen> {
                                     children: [
                                       buildTextField(
                                         context,
-                                        title: "fullName",
+                                        title: "Name",
                                         controller: nameController,
                                         validator: CustomTextFieldValidator.nullCheck,
                                       ),
@@ -344,6 +350,60 @@ class UserProfileScreenState extends State<UserProfileScreen> {
                                         validator: CustomTextFieldValidator.nullCheck,
                                         readOnly: true,
                                       ),
+                                      if(selectedRole == '1')
+                                        Column(
+                                        crossAxisAlignment: CrossAxisAlignment.start,
+                                        children: [
+                                          SizedBox(
+                                            height: 10.rh(context),
+                                          ),
+                                          Text(UiUtils.getTranslatedLabel(context, 'Resident Type'),
+                                            style: TextStyle(
+                                                color: Colors.black,
+                                                fontSize: 15,
+                                                fontWeight: FontWeight.w600),
+                                          ),
+                                          SizedBox(
+                                            height: 10.rh(context),
+                                          ),
+                                          Row(
+                                            children: [
+                                              Expanded(
+                                                child: MultiSelectDropDown(
+                                                  backgroundColor: Color(0xfff5f5f5),
+                                                  borderColor: Color(0xffededed),
+                                                  borderWidth: 1.3,
+                                                  padding: EdgeInsets.all(15),
+                                                  onOptionSelected: (List<ValueItem> selectedOptions) {
+                                                    setState(() {
+                                                      selectedResidentType = selectedOptions[0].value!;
+                                                      selectedResidentTypeWidget = selectedOptions[0];
+                                                    });
+                                                  },
+                                                  selectedOptions: selectedResidentTypeWidget == null ? [] : [selectedResidentTypeWidget!],
+                                                  options: [
+                                                    ValueItem(label: 'RI', value: 'RI'),
+                                                    ValueItem(label: 'NRI', value: 'NRI'),
+                                                  ],
+                                                  selectionType: SelectionType.single,
+                                                  chipConfig: const ChipConfig(wrapType: WrapType.wrap),
+                                                  dropdownHeight: 300,
+                                                  optionTextStyle: const TextStyle(fontSize: 16),
+                                                  selectedOptionIcon: const Icon(Icons.check_circle),
+                                                ),
+                                              ),
+                                            ],
+                                          ),
+                                          SizedBox(height: 15,),
+                                        ],
+                                      ),
+                                      if(selectedRole == '3' || selectedRole == '2')
+                                        buildTextField(
+                                          context,
+                                          title: "Company Name",
+                                          controller: companyController,
+                                          // validator: selectedRole == '3' ? CustomTextFieldValidator.nullCheck : null,
+                                        ),
                                       // Column(
                                       //   crossAxisAlignment: CrossAxisAlignment.start,
                                       //   children: [
@@ -409,126 +469,172 @@ class UserProfileScreenState extends State<UserProfileScreen> {
                                       //     SizedBox(height: 15,),
                                       //   ],
                                       // ),
-                                      Column(
-                                        crossAxisAlignment: CrossAxisAlignment.start,
-                                        children: [
-                                          SizedBox(
-                                            height: 10.rh(context),
-                                          ),
-                                          Text(UiUtils.getTranslatedLabel(context, 'Resident Type')),
-                                          SizedBox(
-                                            height: 10.rh(context),
-                                          ),
-                                          Row(
-                                            children: [
-                                              Expanded(
-                                                child: MultiSelectDropDown(
-                                                  backgroundColor: Color(0xfff5f5f5),
-                                                  borderColor: Color(0xffededed),
-                                                  borderWidth: 1.3,
-                                                  padding: EdgeInsets.all(15),
-                                                  onOptionSelected: (List<ValueItem> selectedOptions) {
-                                                    setState(() {
-                                                      selectedResidentType = selectedOptions[0].value!;
-                                                      selectedResidentTypeWidget = selectedOptions[0];
-                                                    });
-                                                  },
-                                                  selectedOptions: selectedResidentTypeWidget == null ? [] : [selectedResidentTypeWidget!],
-                                                  options: [
-                                                    ValueItem(label: 'RI', value: 'RI'),
-                                                    ValueItem(label: 'NRI', value: 'NRI'),
-                                                  ],
-                                                  selectionType: SelectionType.single,
-                                                  chipConfig: const ChipConfig(wrapType: WrapType.wrap),
-                                                  dropdownHeight: 300,
-                                                  optionTextStyle: const TextStyle(fontSize: 16),
-                                                  selectedOptionIcon: const Icon(Icons.check_circle),
-                                                ),
-                                              ),
-                                            ],
-                                          ),
-                                          SizedBox(height: 15,),
-                                        ],
-                                      ),
                                       if(selectedRole == '2' || selectedRole == '3')
                                         buildTextField(
                                           context,
-                                          title: "RERA",
+                                          title: "RERA Number",
                                           controller: reraController,
-                                          validator: selectedRole == '2' || selectedRole == '3' ?
-                                          CustomTextFieldValidator.nullCheck : null,
+                                          // validator: selectedRole == '2' || selectedRole == '3' ?
+                                          // CustomTextFieldValidator.nullCheck : null,
                                         ),
                                       if(selectedRole == '3')
                                         buildTextField(
                                           context,
-                                          title: "Company Name",
-                                          controller: companyController,
-                                          validator: selectedRole == '3' ? CustomTextFieldValidator.nullCheck : null,
-                                        ),
-                                      if(selectedRole == '3')
-                                        buildTextField(
-                                          context,
-                                          title: "Completed Project",
-                                          controller: completedProjectController,
-                                          validator: selectedRole == '3' ?
-                                          CustomTextFieldValidator.nullCheck : null,
-                                        ),
-                                      if(selectedRole == '3')
-                                        buildTextField(
-                                          context,
-                                          title: "Current Project",
-                                          controller: currentProjectController,
-                                          validator: selectedRole == '3' ? CustomTextFieldValidator.nullCheck : null,
+                                          title: "Web Site",
+                                          controller: webLinkController,
+                                          // validator: selectedRole == '3' ? CustomTextFieldValidator.nullCheck : null,
                                         ),
                                       if(selectedRole == '2' || selectedRole == '3')
                                         buildTextField(
                                           context,
                                           title: "Office Timing",
                                           controller: officeTimingController,
-                                          validator: selectedRole == '2' || selectedRole == '3' ?
-                                          CustomTextFieldValidator.nullCheck : null,
-                                        ),
-                                      if(selectedRole == '3')
-                                        buildTextField(
-                                          context,
-                                          title: "Web Link",
-                                          controller: webLinkController,
-                                          validator: selectedRole == '3' ? CustomTextFieldValidator.nullCheck : null,
-                                        ),
-                                      if(selectedRole == '2' || selectedRole == '3')
-                                        buildTextField(
-                                          context,
-                                          title: "GST No.",
-                                          controller: gstController,
-                                          validator: selectedRole == '2' || selectedRole == '3' ? CustomTextFieldValidator.nullCheck : null,
+                                          // validator: selectedRole == '2' || selectedRole == '3' ?
+                                          // CustomTextFieldValidator.nullCheck : null,
                                         ),
                                       if(selectedRole == '2' || selectedRole == '3')
                                         buildTextField(
                                           context,
                                           title: "Since",
                                           controller: experienceController,
-                                          validator: selectedRole == '2' || selectedRole == '3' ?
-                                          CustomTextFieldValidator.nullCheck : null,
+                                          // validator: selectedRole == '2' || selectedRole == '3' ?
+                                          // CustomTextFieldValidator.nullCheck : null,
                                         ),
                                       if(selectedRole == '2')
                                         buildTextField(
                                           context,
-                                          title: "Rent Number",
+                                          title: "Rent No",
                                           controller: rentNumberController,
-                                          validator: selectedRole == '2' ? CustomTextFieldValidator.nullCheck : null,
+                                          // validator: selectedRole == '2' ? CustomTextFieldValidator.nullCheck : null,
                                         ),
                                       if(selectedRole == '2')
                                         buildTextField(
                                           context,
-                                          title: "Sale Number",
+                                          title: "Sale No",
                                           controller: saleNumberController,
-                                          validator: selectedRole == '2' ? CustomTextFieldValidator.nullCheck : null,
+                                          // validator: selectedRole == '2' ? CustomTextFieldValidator.nullCheck : null,
                                         ),
-                                      buildAddressTextField(
-                                        context,
-                                        title: "About Me",
-                                        controller: aboutController,
-                                        validator: CustomTextFieldValidator.nullCheck,
+                                        buildTextField(
+                                          context,
+                                          title: "GST No.",
+                                          controller: gstController,
+                                          // validator: selectedRole == '2' || selectedRole == '3' ? CustomTextFieldValidator.nullCheck : null,
+                                        ),
+                                      Column(
+                                        crossAxisAlignment: CrossAxisAlignment.start,
+                                        children: [
+                                          SizedBox(height: 10,),
+                                          RichText(
+                                            text: const TextSpan(
+                                              children: [
+                                                TextSpan(
+                                                  text: "Location",
+                                                  style: TextStyle(
+                                                      color: Colors.black,
+                                                      fontSize: 15,
+                                                      fontWeight: FontWeight.w600),
+                                                ),
+                                                // TextSpan(
+                                                //   text: " *",
+                                                //   style: TextStyle(
+                                                //       color: Colors.red), // Customize asterisk color
+                                                // ),
+                                              ],
+                                            ),
+                                          ),
+                                          SizedBox(height: 10,),
+                                          GooglePlaceAutoCompleteTextField(
+                                            // boxDecoration: BoxDecoration(),
+                                            textEditingController: addressController,
+                                            focusNode: placesFocusNode,
+                                            inputDecoration: const InputDecoration(
+                                                hintText: 'Enter location..',
+                                                // filled: true,
+                                                // fillColor: Color(0xfff5f5f5),
+                                                hintStyle: TextStyle(
+                                                  fontFamily: 'Poppins',
+                                                  fontSize: 14.0,
+                                                  color: Color(0xff9c9c9c),
+                                                  fontWeight: FontWeight.w500,
+                                                  decoration: TextDecoration.none,
+                                                ),
+                                                enabledBorder: UnderlineInputBorder(
+                                                  borderSide: BorderSide(
+                                                    color: Colors.transparent,
+                                                  ),
+                                                ),
+                                                focusedBorder: UnderlineInputBorder(
+                                                    borderSide: BorderSide(
+                                                      color: Colors.transparent,
+                                                    )
+                                                )
+                                            ),
+                                            googleAPIKey: "AIzaSyDDJ17OjVJ0TS2qYt7GMOnrMjAu1CYZFg8",
+                                            debounceTime: 800,
+                                            countries: ["in"],
+                                            isLatLngRequired: true,
+                                            getPlaceDetailWithLatLng: (Prediction prediction) {
+                                              print("placeDetails" + prediction.lng.toString());
+                                              // lat = prediction.lat.toString();
+                                              // lng = prediction.lng.toString();
+                                              setState(() { });
+                                            },
+                                            itemClick: (Prediction prediction) {
+                                              addressController.text = prediction.description!;
+                                              addressController.selection =
+                                                  TextSelection.fromPosition(TextPosition(
+                                                      offset: prediction.description!.length));
+                                              print('yyyyyyyyyyyyyyyyyyyyyyyyyy: ${prediction.lat}, ${prediction.lng}');
+                                              List address = prediction.description!.split(',').reversed.toList();
+                                              // if(address.length >= 3) {
+                                              //   cityControler.text = address[2];
+                                              //   StateController.text = address[1];
+                                              //   ContryControler.text = address[0];
+                                              //   setState(() { });
+                                              // } else if(address.length == 2) {
+                                              //   cityControler.text = address[1];
+                                              //   StateController.text = address[1];
+                                              //   ContryControler.text = address[0];
+                                              //   setState(() { });
+                                              // } else if(address.length == 1) {
+                                              //   cityControler.text = address[0];
+                                              //   StateController.text = address[0];
+                                              //   ContryControler.text = address[0];
+                                              //   setState(() { });
+                                              // } else if(address.length == 0) {
+                                              //   cityControler.text = '';
+                                              //   StateController.text = '';
+                                              //   ContryControler.text = '';
+                                              //   setState(() { });
+                                              // }
+                                              // cityControler.text = place.locality ?? '';
+                                              // StateController.text = place.administrativeArea ?? '';
+                                              // ContryControler.text = place.country ?? '';
+                                              // setState(() { });
+                                              // getAddressFromLatLng(prediction.placeId);
+                                            },
+                                            itemBuilder: (context, index, Prediction prediction) {
+                                              return Container(
+                                                padding: EdgeInsets.all(10),
+                                                child: Row(
+                                                  children: [
+                                                    Icon(Icons.location_on),
+                                                    SizedBox(
+                                                      width: 7,
+                                                    ),
+                                                    Expanded(
+                                                        child:
+                                                        Text("${prediction.description ?? ""}"))
+                                                  ],
+                                                ),
+                                              );
+                                            },
+                                            seperatedBuilder: Divider(),
+                                            isCrossBtnShown: true,
+                                            containerHorizontalPadding: 10,
+                                            placeType: PlaceType.geocode,
+                                          ),
+                                        ],
                                       ),
                                       buildAddressTextField(
                                         context,
@@ -536,34 +642,63 @@ class UserProfileScreenState extends State<UserProfileScreen> {
                                         controller: addressController,
                                         validator: CustomTextFieldValidator.nullCheck,
                                       ),
-                                      buildTextField(
+                                      buildAddressTextField(
                                         context,
-                                        title: "Facebook",
-                                        controller: facebookController,
-                                        validator: null,
+                                        title: "About Me",
+                                        controller: aboutController,
+                                        // validator: CustomTextFieldValidator.nullCheck,
                                       ),
-                                      buildTextField(
-                                        context,
-                                        title: "Twitter",
-                                        controller: twitterController,
-                                        validator: null,
-                                      ),
-                                      buildTextField(
-                                        context,
-                                        title: "Instagram",
-                                        controller: instagramController,
-                                        validator: null,
-                                      ),
-                                      buildTextField(
-                                        context,
-                                        title: "Pintrest",
-                                        controller: pintrestController,
-                                        validator: null,
-                                      ),
+
+
+
+
+
+                                      // if(selectedRole == '3')
+                                      //   buildTextField(
+                                      //     context,
+                                      //     title: "Completed Project",
+                                      //     controller: completedProjectController,
+                                      //     validator: selectedRole == '3' ?
+                                      //     CustomTextFieldValidator.nullCheck : null,
+                                      //   ),
+                                      // if(selectedRole == '3')
+                                      //   buildTextField(
+                                      //     context,
+                                      //     title: "Current Project",
+                                      //     controller: currentProjectController,
+                                      //     validator: selectedRole == '3' ? CustomTextFieldValidator.nullCheck : null,
+                                      //   ),
+                                      // buildTextField(
+                                      //   context,
+                                      //   title: "Facebook",
+                                      //   controller: facebookController,
+                                      //   validator: null,
+                                      // ),
+                                      // buildTextField(
+                                      //   context,
+                                      //   title: "Twitter",
+                                      //   controller: twitterController,
+                                      //   validator: null,
+                                      // ),
+                                      // buildTextField(
+                                      //   context,
+                                      //   title: "Instagram",
+                                      //   controller: instagramController,
+                                      //   validator: null,
+                                      // ),
+                                      // buildTextField(
+                                      //   context,
+                                      //   title: "Pintrest",
+                                      //   controller: pintrestController,
+                                      //   validator: null,
+                                      // ),
+
+
                                       const SizedBox(
-                                        height: 10,
+                                        height: 15,
                                       ),
-                                      Column(
+                                      if(selectedRole == '2' || selectedRole == '3')
+                                        Column(
                                         crossAxisAlignment: CrossAxisAlignment.start,
                                         children: [
                                           RichText(
@@ -572,9 +707,9 @@ class UserProfileScreenState extends State<UserProfileScreen> {
                                                 TextSpan(text: "Galary Images",
                                                   style: TextStyle(
                                                       color: Colors.black,
-                                                      fontSize: 14,
-                                                      fontWeight: FontWeight.w400
-                                                  ),),
+                                                      fontSize: 15,
+                                                      fontWeight: FontWeight.w600),
+                                                ),
                                               ],
                                             ),
                                           ),
@@ -617,16 +752,16 @@ class UserProfileScreenState extends State<UserProfileScreen> {
                                                           fontSize: 10,
                                                           fontWeight: FontWeight.w400
                                                       ),),
-                                                    TextSpan(
-                                                      text: " *",
-                                                      style: TextStyle(color: Colors.red), // Customize asterisk color
-                                                    ),
+                                                    // TextSpan(
+                                                    //   text: " *",
+                                                    //   style: TextStyle(color: Colors.red), // Customize asterisk color
+                                                    // ),
                                                   ],
                                                 ),
                                               ),
                                             ],
                                           ),
-                                          SizedBox(height: 20,),
+                                          SizedBox(height: 15,),
                                           GridView.builder(
                                             shrinkWrap: true,
                                             padding: const EdgeInsets.symmetric(
@@ -764,12 +899,19 @@ class UserProfileScreenState extends State<UserProfileScreen> {
                                           RichText(
                                             text: TextSpan(
                                               children: [
-                                                TextSpan(text: "Documents",
+                                                TextSpan(text: "Verified",
                                                   style: TextStyle(
                                                       color: Colors.black,
-                                                      fontSize: 14,
+                                                      fontSize: 15,
+                                                      fontWeight: FontWeight.w600),
+                                                ),
+                                                TextSpan(text: "  (Note: GST, PAN, Aadhar, Company Registation copy)",
+                                                  style: TextStyle(
+                                                      color: Colors.red,
+                                                      fontSize: 11,
                                                       fontWeight: FontWeight.w400
-                                                  ),),
+                                                  ),
+                                                ),
                                               ],
                                             ),
                                           ),
@@ -812,10 +954,10 @@ class UserProfileScreenState extends State<UserProfileScreen> {
                                                           fontSize: 10,
                                                           fontWeight: FontWeight.w400
                                                       ),),
-                                                    TextSpan(
-                                                      text: " *",
-                                                      style: TextStyle(color: Colors.red), // Customize asterisk color
-                                                    ),
+                                                    // TextSpan(
+                                                    //   text: " *",
+                                                    //   style: TextStyle(color: Colors.red), // Customize asterisk color
+                                                    // ),
                                                   ],
                                                 ),
                                               ),
@@ -919,6 +1061,10 @@ class UserProfileScreenState extends State<UserProfileScreen> {
                                       Text(
                                         UiUtils.getTranslatedLabel(
                                             context, "notification"),
+                                        style: TextStyle(
+                                            color: Colors.black,
+                                            fontSize: 15,
+                                            fontWeight: FontWeight.w600),
                                       ),
                                       SizedBox(
                                         height: 10.rh(context),
@@ -1133,7 +1279,26 @@ class UserProfileScreenState extends State<UserProfileScreen> {
         SizedBox(
           height: 10.rh(context),
         ),
-        Text(UiUtils.getTranslatedLabel(context, title)),
+        RichText(
+          text: TextSpan(
+            children: [
+              TextSpan(
+                text: UiUtils.getTranslatedLabel(context, title),
+                style: TextStyle(
+                    color: Colors.black,
+                    fontSize: 15,
+                    fontWeight: FontWeight.w600),
+              ),
+              if(validator == CustomTextFieldValidator.nullCheck || validator == CustomTextFieldValidator.password
+              || validator == CustomTextFieldValidator.phoneNumber || validator == CustomTextFieldValidator.email)
+                TextSpan(
+                  text: " *",
+                  style: TextStyle(
+                      color: Colors.red), // Customize asterisk color
+                ),
+            ],
+          ),
+        ),
         SizedBox(
           height: 10.rh(context),
         ),
@@ -1159,7 +1324,26 @@ class UserProfileScreenState extends State<UserProfileScreen> {
         SizedBox(
           height: 10.rh(context),
         ),
-        Text(UiUtils.getTranslatedLabel(context, title)),
+        RichText(
+          text: TextSpan(
+            children: [
+              TextSpan(
+                text: UiUtils.getTranslatedLabel(context, title),
+                style: TextStyle(
+                    color: Colors.black,
+                    fontSize: 15,
+                    fontWeight: FontWeight.w600),
+              ),
+              if(validator == CustomTextFieldValidator.nullCheck || validator == CustomTextFieldValidator.password
+                  || validator == CustomTextFieldValidator.phoneNumber || validator == CustomTextFieldValidator.email)
+                TextSpan(
+                  text: " *",
+                  style: TextStyle(
+                      color: Colors.red), // Customize asterisk color
+                ),
+            ],
+          ),
+        ),
         SizedBox(
           height: 10.rh(context),
         ),

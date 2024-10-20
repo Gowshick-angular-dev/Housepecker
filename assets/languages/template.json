@@ -27,7 +27,6 @@
 	"chooseTheBudeget": "Choose the budget for the\n property you're interested in.",
 	"getRecommandation": "Get recommendations for properties that are close to these locations.",
 	"selectCityYouWantToSee":"Select the city\n you want to see\n property for",
-
 	"selectPlaces": "Select Places",
 	"selectedItems": "Selected Items",
 	"outdoorFacilities": "Outdoor facilities",
@@ -86,7 +85,6 @@
 	"addOtherPicture":"Add Other Pictures",
 	"price":"Price",
 	"paypal":"Paypal",
-
 	"purchaseFailed":"Purchase package failed",
 	"packageNotValid":"Package is not for Property",
 	"additionals":"Additional",
@@ -121,7 +119,7 @@
 	"deleteProfileMessageTitle": "Deleting Account?",
 	"deletepropertywarning": "Are you sure, you want to delete this property ?",
 	"descriptionLbl": "Description",
-		"adLimitIs":"Advertisement limit is",
+	"adLimitIs":"Advertisement limit is",
 	"propertyLimit":"Property limit  is",
 	"lifetime":"Lifetime",
 	"interestedUserCount":"Interested User count:",
@@ -184,7 +182,6 @@
 	"forRent":"For Rent",
 	"sell":"Sell",
 	"Sell":"Sell",
-
 	"Rent":"Rent",
 	"Sold":"Sold",
 	"Rented":"Rented",
@@ -333,5 +330,4 @@
 	"writeReasonHere": "Write your reason here",
 	"notReally": "Not really",
 	"yes": "Yes"
-
 }

@@ -152,21 +152,21 @@ class _SellRentScreenState extends State<SellRentScreen>
 
                   return GestureDetector(
                     onTap: () {
-                      cubitReference = context.read<FetchMyPropertiesCubit>();
-                      Navigator.pushNamed(
-                        context,
-                        Routes.propertyDetails,
-                        arguments: {
-                          'propertyData': property,
-                          'fromMyProperty': true
-                        },
-                      ).then((value) {
-                        if (value == true) {
-                          context
-                              .read<FetchMyPropertiesCubit>()
-                              .fetchMyProperties(type: widget.type);
-                        }
-                      });
+                      // cubitReference = context.read<FetchMyPropertiesCubit>();
+                      // Navigator.pushNamed(
+                      //   context,
+                      //   Routes.propertyDetails,
+                      //   arguments: {
+                      //     'propertyData': property,
+                      //     'fromMyProperty': true
+                      //   },
+                      // ).then((value) {
+                      //   if (value == true) {
+                      //     context
+                      //         .read<FetchMyPropertiesCubit>()
+                      //         .fetchMyProperties(type: widget.type);
+                      //   }
+                      // });
                     },
                     child: BlocProvider(
                       create: (context) => AddToFavoriteCubitCubit(),

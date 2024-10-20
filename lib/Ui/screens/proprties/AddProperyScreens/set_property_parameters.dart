@@ -85,10 +85,10 @@ class _SetProeprtyParametersScreenState
       },
     );
 
-    _timer = Timer.periodic(Duration(seconds: 1), (timer) {
-      // Code to be executed every second
-      print('Timer tick!');
-    });
+    // _timer = Timer.periodic(Duration(seconds: 1), (timer) {
+    //   // Code to be executed every second
+    //   print('Timer tick!');
+    // });
     super.initState();
   }
 
@@ -119,7 +119,7 @@ class _SetProeprtyParametersScreenState
           }
           dynamicField = field
               .setItems(['', ...parameter['type_values']])
-              .setSelectedItem(selected)
+              // .setSelectedItem(selected)
               .createField(
             parameter,
           );
@@ -132,7 +132,7 @@ class _SetProeprtyParametersScreenState
             }
             dynamicField = field
                 .setItems(['', ...parameter['type_values']])
-                .setSelectedItem(selected)
+                // .setSelectedItem(selected)
                 .createField(
               parameter,
             );
@@ -143,7 +143,7 @@ class _SetProeprtyParametersScreenState
             }
             dynamicField = field
                 .setItems(['', ...parameter['type_values']])
-                .setSelectedItem(selected)
+                // .setSelectedItem(selected)
                 .createField(
               parameter,
             );
@@ -157,7 +157,7 @@ class _SetProeprtyParametersScreenState
           }
           dynamicField = field
               .setItems(['', ...parameter['type_values']])
-              .setSelectedItem(selected)
+              // .setSelectedItem(selected)
               .createField(
             parameter,
           );
@@ -170,7 +170,7 @@ class _SetProeprtyParametersScreenState
             }
             dynamicField = field
                 .setItems(['', ...parameter['type_values']])
-                .setSelectedItem(selected)
+                // .setSelectedItem(selected)
                 .createField(
               parameter,
             );
@@ -181,7 +181,7 @@ class _SetProeprtyParametersScreenState
             }
             dynamicField = field
                 .setItems(['', ...parameter['type_values']])
-                .setSelectedItem(selected)
+                // .setSelectedItem(selected)
                 .createField(
               parameter,
             );
@@ -235,9 +235,9 @@ class _SetProeprtyParametersScreenState
   }
 
   List<Widget> buildFields() {
-    if (Constant.addProperty['category'] == null) {
-      return [Container()];
-    }
+    // if (Constant.addProperty['category'] == null) {
+    //   return [Container()];
+    // }
 
     ///Loop parameters
     return paramaeterUI.cast();
@@ -264,7 +264,7 @@ class _SetProeprtyParametersScreenState
         context,
         showBackButton: true,
         actions: const [
-          Text("3/4"),
+          Text("3/5"),
           SizedBox(
             width: 14,
           ),
@@ -413,7 +413,12 @@ class _SetProeprtyParametersScreenState
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Text(UiUtils.getTranslatedLabel(context, "addvalues")),
+                  Text("Overview",
+                    style: TextStyle(
+                      color: Colors.black54,
+                      fontSize: 17,
+                      fontWeight: FontWeight.w600,
+                    ),),
                   SizedBox(
                     height: 18,
                   ),

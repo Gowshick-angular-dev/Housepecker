@@ -17,6 +17,7 @@ import '../../../../app/routes.dart';
 import '../../../../data/cubits/property/delete_property_cubit.dart';
 import '../../../../data/model/category.dart';
 import '../../../../data/model/property_model.dart';
+import '../../../../utils/api.dart';
 import '../../../../utils/constant.dart';
 import '../../../../utils/helper_utils.dart';
 import '../../../../utils/hive_utils.dart';
@@ -255,7 +256,7 @@ class PropertyHorizontalCard1 extends StatelessWidget {
                                       SizedBox(width: 5,),
                                       Expanded(
                                           child: Text(
-                                            property.city?.trim() ?? "",  maxLines: 1,
+                                            property.city?.trim() ?? "", maxLines: 1,
                                             overflow: TextOverflow.ellipsis,
                                             style: TextStyle(
                                                 color: Color(0xffa2a2a2),
@@ -477,7 +478,7 @@ class PropertyHorizontalCard1 extends StatelessWidget {
                               "propType": property?.properyType,
                               "name": property?.title,
                               "desc": property?.description,
-                               "city": property?.city,
+                              "city": property?.city,
                               "state": property?.state,
                               "country": property?.country,
                               "latitude": property?.latitude,
@@ -531,7 +532,13 @@ class PropertyHorizontalCard1 extends StatelessWidget {
                   ),
                   PopupMenuItem<int>(
                     onTap: () async {
+                      var staResponse = await Api.post(url: Api.updatePropertyStatus, parameter: {
+                        'property_id': property?.id,
+                        'status': 2
+                      });
+                      if (!staResponse['error']) {
 
+                      }
                     },
                     value: 2,
                     child:  Row(

@@ -132,14 +132,14 @@ class _SelectOutdoorFacilityState extends State<SelectOutdoorFacility> {
       child: Scaffold(
         backgroundColor: Colors.white,
         appBar: UiUtils.buildAppBar(context,
-            showBackButton: true,
-            actions: const [
-              Text("4/4",style: TextStyle(color: Colors.white),),
-              SizedBox(
-                width: 14,
-              ),
-            ],
-            title: "Add Post".translate(context)),
+          showBackButton: true,
+          actions: const [
+            Text("4/5",style: TextStyle(color: Colors.white),),
+            SizedBox(
+              width: 14,
+            ),
+          ],
+          title: "Add Post".translate(context)),
         bottomNavigationBar: BottomAppBar(
           child: GestureDetector(
             onTap: () {
@@ -166,8 +166,8 @@ class _SelectOutdoorFacilityState extends State<SelectOutdoorFacility> {
                   }
                 },
                 buttonTitle: widget.apiParameters?['action_type'] == "0"
-                    ? UiUtils.getTranslatedLabel(context, "update")
-                    : UiUtils.getTranslatedLabel(context, "Submit"),
+                    ? UiUtils.getTranslatedLabel(context, "Next")
+                    : UiUtils.getTranslatedLabel(context, "Next"),
               ),
             ),
           ),
@@ -366,11 +366,11 @@ class _SelectOutdoorFacilityState extends State<SelectOutdoorFacility> {
               height: 20.rh(context),
               width: 20.rw(context),
               child: UiUtils.imageType(facility.image!,
-                  color: isSelected
-                      ? context.color.secondaryColor
-                      : (Constant.adaptThemeColorSvg
-                          ? context.color.tertiaryColor
-                          : null)),
+                  color: context.color.tertiaryColor,)
+                      // ? context.color.secondaryColor
+                      // : (Constant.adaptThemeColorSvg
+                      //     ? context.color.tertiaryColor
+                      //     : null)),
             ),
             SizedBox(width: 5,),
             Expanded(

@@ -216,6 +216,7 @@ class _AddPropertyDetailsState extends State<AddPropertyDetails> {
     }
   }
 
+
   Future<void> getAmenityList() async {
     var response = await Api.get(url: Api.getAmenities, queryParameters: {
       'post': '1'
@@ -283,29 +284,23 @@ class _AddPropertyDetailsState extends State<AddPropertyDetails> {
     }
 
     // if (_formKey.currentState!.validate()) {
+    bool check = _checkIfLocationIsChosen();
       _formKey.currentState?.save();
-      bool check = _checkIfLocationIsChosen();
-      if (check == false) {
-        Future.delayed(Duration.zero, () {
-          UiUtils.showBlurredDialoge(
-            context,
-            sigmaX: 5,
-            sigmaY: 5,
-            dialoge: BlurredDialogBox(
-              svgImagePath: AppIcons.warning,
-              title: UiUtils.getTranslatedLabel(context, "incomplete"),
-              showCancleButton: false,
-              onAccept: () async {},
-              acceptTextColor: context.color.buttonColor,
-              content: Text(
-                UiUtils.getTranslatedLabel(context, "addressError"),
-              ),
-            ),
-          );
-        });
+      print('iiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiii: ${[_propertyNameController.text == '' , PropertyTyperole == '' ,  _priceController.text == '',
+           _descriptionController.text == '' , _sqftController.text == '' , _FLoorController.text == '',
+           _cityNameController.text == '' , _stateNameController.text == '' , _countryNameController.text == '',
+           _latitudeController.text == '' , _longitudeController.text == '' , _addressController.text == '',
+           (titleImage == null && titleImageURL == "") , check == false,
+           !(widget.propertyDetails == null && ((remainFreeProPost > 0 && selectedPackage == 0 && selectedRole == 'Free Listing') || selectedPackage != 0))
+      ]}');
 
-        return;
-      } else if (titleImage == null && titleImageURL == "") {
+      if (_propertyNameController.text == '' || PropertyTyperole == '' ||  _priceController.text == ''
+          || _descriptionController.text == '' || _sqftController.text == '' || _FLoorController.text == ''
+          || _cityNameController.text == '' || _stateNameController.text == '' || _countryNameController.text == ''
+          || _latitudeController.text == '' || _longitudeController.text == '' || _addressController.text == ''
+          || (titleImage == null && titleImageURL == "") || check == false
+          || !(widget.propertyDetails == null && ((remainFreeProPost > 0 && selectedPackage == 0 && selectedRole == 'Free Listing') || selectedPackage != 0))
+      ) {
         Future.delayed(Duration.zero, () {
           UiUtils.showBlurredDialoge(context,
               sigmaX: 5,
@@ -318,51 +313,31 @@ class _AddPropertyDetailsState extends State<AddPropertyDetails> {
                 onAccept: () async {
                   // Navigator.pop(context);
                 },
-                content: Text(
-                  UiUtils.getTranslatedLabel(context, "uploadImgMsgLbl"),
-                ),
-              ));
-        });
-        return;
-      } else if (selectedRole != 'Free Listing') {
-        if (selectedPackage == null && remainFreeProPost == 0) {
-          Future.delayed(Duration.zero, () {
-            UiUtils.showBlurredDialoge(context,
-                sigmaX: 5,
-                sigmaY: 5,
-                dialoge: BlurredDialogBox(
-                  svgImagePath: AppIcons.warning,
-                  title: UiUtils.getTranslatedLabel(context, "incomplete"),
-                  showCancleButton: false,
-                  acceptTextColor: context.color.buttonColor,
-                  onAccept: () async {
-                    // Navigator.pop(context);
-                  },
-                  content: const Text(
-                    "Select a package to continue",
+                content: RichText(
+                  text: const TextSpan(
+                    children: [
+                      TextSpan(
+                        text: 'Please fill all the "',
+                        style: TextStyle(
+                            color: Colors.black,
+                            fontSize: 15,
+                            fontWeight: FontWeight.w600),
+                      ),
+                      TextSpan(
+                        text: "*",
+                        style: TextStyle(
+                            color:
+                            Colors.red), // Customize asterisk color
+                      ),
+                      TextSpan(
+                        text: '" fields!',
+                        style: TextStyle(
+                            color: Colors.black,
+                            fontSize: 15,
+                            fontWeight: FontWeight.w600),
+                      ),
+                    ],
                   ),
-                ));
-          });
-          return;
-        }
-      } else if (_propertyNameController.text == '' || PropertyTyperole == '' ||  _priceController.text == ''
-          || _descriptionController.text == '' || _sqftController.text == '' || _priceController.text == '' ||
-          _FLoorController.text == '' || _cityNameController.text == '' || _stateNameController.text == '' ||
-          _countryNameController.text == '' || _latitudeController.text == '' || _longitudeController.text == ''
-          || _addressController.text == '') {
-        Future.delayed(Duration.zero, () {
-          UiUtils.showBlurredDialoge(context,
-              sigmaX: 5,
-              sigmaY: 5,
-              dialoge: BlurredDialogBox(
-                svgImagePath: AppIcons.warning,
-                title: UiUtils.getTranslatedLabel(context, "incomplete"),
-                showCancleButton: false,
-                acceptTextColor: context.color.buttonColor,
-                onAccept: () async {
-                  // Navigator.pop(context);
-                },
-                content: Text("",
                 ),
               ));
         });
@@ -507,7 +482,7 @@ class _AddPropertyDetailsState extends State<AddPropertyDetails> {
             : UiUtils.getTranslatedLabel(context, "updateProperty"),
         actions: const [
           Text(
-            "2/4",
+            "2/5",
             style: TextStyle(color: Colors.white),
           ),
           SizedBox(
@@ -534,8 +509,8 @@ class _AddPropertyDetailsState extends State<AddPropertyDetails> {
                     ),
                   ),
                   SizedBox(height: 15),
-                  // if(!widget.isEdit)
-                  Column(
+                  if(widget.propertyDetails == null)
+                    Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       RichText(
@@ -1889,6 +1864,161 @@ class _AddPropertyDetailsState extends State<AddPropertyDetails> {
                   // ),
 
                   const SizedBox(height: 25),
+                  const Text("SEO Settings",
+                    style: TextStyle(
+                      color: Colors.black54,
+                      fontSize: 17,
+                      fontWeight: FontWeight.w600,
+                    ),
+                  ),
+                  SizedBox(
+                    height: 15.rh(context),
+                  ),
+                  Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text('Meta Title',
+                        style: TextStyle(
+                            color: Colors.black,
+                            fontSize: 15,
+                            fontWeight: FontWeight.w600),
+                      ),
+                      SizedBox(
+                        height: 10.rh(context),
+                      ),
+                      CustomTextFormField1(
+                        controller: metaTitleController,
+                        validator: CustomTextFieldValidator1.nullCheck,
+                        hintText: "Title".translate(context),
+                      ),
+                      Padding(
+                        padding:
+                        const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                        child: Text("metaTitleLength".translate(context))
+                            .size(context.font.small - 1.5)
+                            .color(Colors.red),
+                      ),
+                      SizedBox(
+                        height: 15.rh(context),
+                      ),
+                    ],
+                  ),
+                  Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text('Meta Keyword',
+                        style: TextStyle(
+                            color: Colors.black,
+                            fontSize: 15,
+                            fontWeight: FontWeight.w600),
+                      ),
+                      SizedBox(
+                        height: 10.rh(context),
+                      ),
+                      CustomTextFormField1(
+                        controller: metaKeywordController,
+                        hintText: "Keywords".translate(context),
+                        validator: CustomTextFieldValidator1.nullCheck,
+                      ),
+                      Padding(
+                        padding:
+                        const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                        child: Text("metaKeywordsLength".translate(context))
+                            .size(context.font.small - 1.5)
+                            .color(Colors.red),
+                      ),
+                      SizedBox(
+                        height: 15.rh(context),
+                      ),
+                    ],
+                  ),
+                  Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text('Og Image',
+                        style: TextStyle(
+                            color: Colors.black,
+                            fontSize: 15,
+                            fontWeight: FontWeight.w600),
+                      ),
+                      SizedBox(
+                        height: 10.rh(context),
+                      ),
+                      GestureDetector(
+                        onTap: () {
+                          _pickMetaTitle.pick(pickMultiple: false);
+                        },
+                        child: Container(
+                          clipBehavior: Clip.antiAlias,
+                          decoration: BoxDecoration(
+                              borderRadius: BorderRadius.circular(10),
+                              color: const Color(0xfff8f9ff),
+                              border: Border.all(
+                                  width: 1, color: const Color(0xff6aabfb))),
+                          alignment: Alignment.center,
+                          height: 65.rh(context),
+                          width: 65.rh(context),
+                          child: Center(
+                              child: Image.asset(
+                                "assets/AddPostforms/_-100.png",
+                                width: 25,
+                                height: 25,
+                              )),
+                        ),
+                      ),
+                      _pickMetaTitle.listenChangesInUI((context, image) {
+                        if (image != null) {
+                          return Container(
+                              width: 65,
+                              height: 65,
+                              margin: const EdgeInsets.only(right: 5, top: 5),
+                              clipBehavior: Clip.antiAlias,
+                              decoration: BoxDecoration(
+                                  borderRadius: BorderRadius.circular(10)),
+                              child: Image.file(
+                                image,
+                                fit: BoxFit.cover,
+                              ));
+                        }
+
+                        return Container();
+                      }),
+                      SizedBox(
+                        height: 15.rh(context),
+                      ),
+                    ],
+                  ),
+                  Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text('Meta Description',
+                        style: TextStyle(
+                            color: Colors.black,
+                            fontSize: 15,
+                            fontWeight: FontWeight.w600),
+                      ),
+                      SizedBox(
+                        height: 10.rh(context),
+                      ),
+                      CustomTextFormField1(
+                        controller: metaDescriptionController,
+                        validator: CustomTextFieldValidator1.nullCheck,
+                        hintText: "Description".translate(context),
+                      ),
+                      Padding(
+                        padding:
+                        const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                        child: Text("metaDescriptionLength".translate(context))
+                            .size(context.font.small - 1.5)
+                            .color(Colors.red),
+                      ),
+                      SizedBox(
+                        height: 15.rh(context),
+                      ),
+                    ],
+                  ),
+
+                  const SizedBox(height: 25),
                   const Text("Images & Video",
                     style: TextStyle(
                       color: Colors.black54,
@@ -2087,168 +2217,6 @@ class _AddPropertyDetailsState extends State<AddPropertyDetails> {
                   // SizedBox(
                   //   height: 15.rh(context),
                   // ),
-
-
-
-
-
-                  const SizedBox(height: 25),
-                  const Text("SEO Settings",
-                    style: TextStyle(
-                      color: Colors.black54,
-                      fontSize: 17,
-                      fontWeight: FontWeight.w600,
-                    ),
-                  ),
-                  SizedBox(
-                    height: 15.rh(context),
-                  ),
-                  Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text('Meta Title',
-                        style: TextStyle(
-                            color: Colors.black,
-                            fontSize: 15,
-                            fontWeight: FontWeight.w600),
-                      ),
-                      SizedBox(
-                        height: 10.rh(context),
-                      ),
-                      CustomTextFormField1(
-                        controller: metaTitleController,
-                        validator: CustomTextFieldValidator1.nullCheck,
-                        hintText: "Title".translate(context),
-                      ),
-                      Padding(
-                        padding:
-                        const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-                        child: Text("metaTitleLength".translate(context))
-                            .size(context.font.small - 1.5)
-                            .color(Colors.red),
-                      ),
-                      SizedBox(
-                        height: 15.rh(context),
-                      ),
-                    ],
-                  ),
-
-                  Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text('Meta Keyword',
-                        style: TextStyle(
-                            color: Colors.black,
-                            fontSize: 15,
-                            fontWeight: FontWeight.w600),
-                      ),
-                      SizedBox(
-                        height: 10.rh(context),
-                      ),
-                      CustomTextFormField1(
-                        controller: metaKeywordController,
-                        hintText: "Keywords".translate(context),
-                        validator: CustomTextFieldValidator1.nullCheck,
-                      ),
-                      Padding(
-                        padding:
-                        const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-                        child: Text("metaKeywordsLength".translate(context))
-                            .size(context.font.small - 1.5)
-                            .color(Colors.red),
-                      ),
-                      SizedBox(
-                        height: 15.rh(context),
-                      ),
-                    ],
-                  ),
-
-                  Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text('Og Image',
-                        style: TextStyle(
-                            color: Colors.black,
-                            fontSize: 15,
-                            fontWeight: FontWeight.w600),
-                      ),
-                      SizedBox(
-                        height: 10.rh(context),
-                      ),
-                      GestureDetector(
-                        onTap: () {
-                          _pickMetaTitle.pick(pickMultiple: false);
-                        },
-                        child: Container(
-                          clipBehavior: Clip.antiAlias,
-                          decoration: BoxDecoration(
-                              borderRadius: BorderRadius.circular(10),
-                              color: const Color(0xfff8f9ff),
-                              border: Border.all(
-                                  width: 1, color: const Color(0xff6aabfb))),
-                          alignment: Alignment.center,
-                          height: 65.rh(context),
-                          width: 65.rh(context),
-                          child: Center(
-                              child: Image.asset(
-                                "assets/AddPostforms/_-100.png",
-                                width: 25,
-                                height: 25,
-                              )),
-                        ),
-                      ),
-                      _pickMetaTitle.listenChangesInUI((context, image) {
-                        if (image != null) {
-                          return Container(
-                              width: 65,
-                              height: 65,
-                              margin: const EdgeInsets.only(right: 5, top: 5),
-                              clipBehavior: Clip.antiAlias,
-                              decoration: BoxDecoration(
-                                  borderRadius: BorderRadius.circular(10)),
-                              child: Image.file(
-                                image,
-                                fit: BoxFit.cover,
-                              ));
-                        }
-
-                        return Container();
-                      }),
-                      SizedBox(
-                        height: 15.rh(context),
-                      ),
-                    ],
-                  ),
-
-                  Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text('Meta Description',
-                        style: TextStyle(
-                            color: Colors.black,
-                            fontSize: 15,
-                            fontWeight: FontWeight.w600),
-                      ),
-                      SizedBox(
-                        height: 10.rh(context),
-                      ),
-                      CustomTextFormField1(
-                        controller: metaDescriptionController,
-                        validator: CustomTextFieldValidator1.nullCheck,
-                        hintText: "Description".translate(context),
-                      ),
-                      Padding(
-                        padding:
-                        const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-                        child: Text("metaDescriptionLength".translate(context))
-                            .size(context.font.small - 1.5)
-                            .color(Colors.red),
-                      ),
-                      SizedBox(
-                        height: 15.rh(context),
-                      ),
-                    ],
-                  ),
 
                   const SizedBox(
                     height: 30,
