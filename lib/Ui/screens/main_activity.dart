@@ -559,7 +559,7 @@ class MainActivityState extends State<MainActivity>
   }
 
   late List<Widget> pages = [
-    HomeScreen(from: widget.from, openDrawer: isReverse!.value),
+    HomeScreen(from: widget.from, /*openDrawer: isReverse!.value*/),
     const PropertiesScreen(),
     const Text(""),
     const FavoritesScreen(),
@@ -644,15 +644,15 @@ class MainActivityState extends State<MainActivity>
                                       color: context.color.borderColor,
                                       width: 1.5,
                                     ),
-                                    boxShadow: [
-                                      BoxShadow(
-                                        color: context.color.tertiaryColor
-                                            .withOpacity(0.4),
-                                        offset: const Offset(0, 3),
-                                        blurRadius: 10,
-                                        spreadRadius: 0,
-                                      )
-                                    ],
+                                    // boxShadow: [
+                                    //   BoxShadow(
+                                    //     color: context.color.tertiaryColor
+                                    //         .withOpacity(0.4),
+                                    //     offset: const Offset(0, 3),
+                                    //     blurRadius: 10,
+                                    //     spreadRadius: 0,
+                                    //   )
+                                    // ],
                                     color: context.color.tertiaryColor,
                                     borderRadius: BorderRadius.circular(22)),
                                 alignment: Alignment.center,
@@ -708,15 +708,15 @@ class MainActivityState extends State<MainActivity>
                                         color: context.color.borderColor,
                                         width: 1.5,
                                       ),
-                                      boxShadow: [
-                                        BoxShadow(
-                                          color: context.color.tertiaryColor
-                                              .withOpacity(0.4),
-                                          offset: const Offset(0, 3),
-                                          blurRadius: 10,
-                                          spreadRadius: 0,
-                                        )
-                                      ],
+                                      // boxShadow: [
+                                      //   BoxShadow(
+                                      //     color: context.color.tertiaryColor
+                                      //         .withOpacity(0.4),
+                                      //     offset: const Offset(0, 3),
+                                      //     blurRadius: 10,
+                                      //     spreadRadius: 0,
+                                      //   )
+                                      // ],
                                       color: context.color.tertiaryColor,
                                       borderRadius: BorderRadius.circular(22)),
                                   alignment: Alignment.center,
@@ -765,15 +765,15 @@ class MainActivityState extends State<MainActivity>
                                       color: context.color.borderColor,
                                       width: 1.5,
                                     ),
-                                    boxShadow: [
-                                      BoxShadow(
-                                        color: context.color.tertiaryColor
-                                            .withOpacity(0.4),
-                                        offset: const Offset(0, 3),
-                                        blurRadius: 10,
-                                        spreadRadius: 0,
-                                      )
-                                    ],
+                                    // boxShadow: [
+                                    //   BoxShadow(
+                                    //     color: context.color.tertiaryColor
+                                    //         .withOpacity(0.4),
+                                    //     offset: const Offset(0, 3),
+                                    //     blurRadius: 10,
+                                    //     spreadRadius: 0,
+                                    //   )
+                                    // ],
                                     color: context.color.tertiaryColor,
                                     borderRadius: BorderRadius.circular(22)),
                                 alignment: Alignment.center,
@@ -924,7 +924,7 @@ class MainActivityState extends State<MainActivity>
                   buildBottomNavigationbarItem(
                     1,
                     "assets/Home/__Explore.png",
-                    UiUtils.getTranslatedLabel(context, "Explore"),
+                    UiUtils.getTranslatedLabel(context, "My Post"),
                     currtab == 1,
                   ),
                   // const SizedBox(

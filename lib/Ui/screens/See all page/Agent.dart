@@ -167,7 +167,6 @@ class _seeallAgentState extends State<seeallAgent> {
     );
   }
 
-  // Build agent card widget dynamically from data
   Widget buildAgentCard(Size size, dynamic agent) {
     return Container(
       height: size.height * 0.28,
@@ -175,6 +174,7 @@ class _seeallAgentState extends State<seeallAgent> {
       decoration: BoxDecoration(
         border: Border.all(color: Color(0xFF9ea1a7)),
         borderRadius: BorderRadius.circular(12),
+        color: Colors.white
       ),
       child: Padding(
         padding: const EdgeInsets.all(8.0),

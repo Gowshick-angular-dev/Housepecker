@@ -29,6 +29,9 @@ import 'package:firebase_analytics/firebase_analytics.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_staggered_grid_view/flutter_staggered_grid_view.dart';
+import 'package:google_places_flutter/google_places_flutter.dart';
+import 'package:google_places_flutter/model/place_type.dart';
+import 'package:google_places_flutter/model/prediction.dart';
 import 'package:intl/intl.dart';
 import 'package:permission_handler/permission_handler.dart';
 import 'package:rive/components.dart';
@@ -106,9 +109,8 @@ const double sidePadding = 3;
 
 class HomeScreen extends StatefulWidget {
   final String? from;
-  final bool openDrawer;
   final Function(FavoriteType type)? onLikeChange;
-  const HomeScreen({Key? key, this.from, this.onLikeChange, this.openDrawer = false}) : super(key: key);
+  const HomeScreen({Key? key, this.from, this.onLikeChange,}) : super(key: key);
   @override
   HomeScreenState createState() => HomeScreenState();
 }
@@ -128,6 +130,9 @@ class HomeScreenState extends State<HomeScreen>
   bool isCategoryEmpty = false;
   bool blogLoading = false;
   HomePageStateListener homeStateListener = HomePageStateListener();
+  TextEditingController locationController = TextEditingController();
+  bool showLocationBox = false;
+  String? locationValue='';
   SMIBool? isReverse;
   Artboard? artboard;
   bool showSellRentButton = false;
@@ -240,20 +245,23 @@ class HomeScreenState extends State<HomeScreen>
         currentMainCity = '${place.locality}';
       });
 
-      // HiveUtils.setLocation(
-      //   city: place.locality ?? '',
-      //   state: place.administrativeArea ?? '',
-      //   country: place.country ?? '',
-      //   placeId: place.postalCode??'',
-      // );
+      HiveUtils.setLocation(
+        city: place.locality ?? '',
+        state: place.administrativeArea ?? '',
+        country: place.country ?? '',
+        placeId: place.postalCode??'',
+      );
 
       getBanners(address);
+
       getProjects();
       getProperties();
       getAdTypes();
       getSystemSetting();
       initializeSettings();
       addPageScrollListener();
+      gettop_Agents ();
+      getTopBuilder();
       notificationPermissionChecker();
       fetchApiKeys();
       loadInitialData(context);
@@ -355,7 +363,56 @@ class HomeScreenState extends State<HomeScreen>
     }
   }
 
+  bool AgentLOading = false;
+  List Top_agenylist = [];
+  Future<void> gettop_Agents () async {
+    setState(() {
+      AgentLOading = true;
+    });
+    var response = await Api.get(url: Api.gettop_agent, queryParameters: {
+      'offset': 0,
+      'limit': 10,
+      'city': currentMainCity,
+      // 'current_user': HiveUtils.getUserId()
+    });
+    if(!response['error']) {
+      setState(() {
+        Top_agenylist  = response['data'];
+        AgentLOading = false;
+      });
+    }
+  }
+  bool builderLoading = false;
+  List topBuilderList = [];
 
+  Future<void> getTopBuilder() async {
+    setState(() {
+      builderLoading = true;
+    });
+
+    try {
+      var response = await Api.get(url: Api.gettop_builder, queryParameters: {
+        'offset': 0,
+        'limit': 10,
+        'city': currentMainCity,
+        // 'current_user': HiveUtils.getUserId()
+      });
+
+      if (!response['error']) {
+        setState(() {
+          topBuilderList = response['data'] ?? [];
+          builderLoading = false;
+        });
+      }
+    } catch (e) {
+      // Handle API fetch error
+      setState(() {
+        builderLoading = false;
+        topBuilderList = [];
+      });
+      print('Error fetching agents: $e');
+    }
+  }
 
   Future<void> getProperties() async {
     setState(() {
@@ -428,8 +485,13 @@ class HomeScreenState extends State<HomeScreen>
   }
 
   List<Map<String,dynamic>> allPropertyData = [];
+    bool isSystemLoading = false;
+
 
   Future<void> getSystemSetting() async {
+    setState(() {
+      isSystemLoading = true;
+    });
     var response = await Api.post(url: Api.apiGetSystemSettings, parameter: {
       'city': currentMainCity,
     });
@@ -457,7 +519,7 @@ class HomeScreenState extends State<HomeScreen>
             "name": "Project"
           }
         ];
-
+        isSystemLoading = false;
       });
     }
   }
@@ -603,10 +665,13 @@ class HomeScreenState extends State<HomeScreen>
   }
 
   void _onRefresh() {
+    getSystemSetting();
     getProjects();
     getProperties();
     getBlogs();
     getAdTypes();
+    gettop_Agents();
+    getTopBuilder();
     context.read<FetchMostViewedPropertiesCubit>().fetch(forceRefresh: true);
     context.read<SliderCubit>().fetchSlider(context, forceRefresh: true);
     context.read<FetchCategoryCubit>().fetchCategories(forceRefresh: true,locationName: currentMainCity);
@@ -664,6 +729,43 @@ class HomeScreenState extends State<HomeScreen>
                           ),
                           InkWell(
                             onTap: () async {
+                              setState(() {
+                                showLocationBox = !showLocationBox;
+                              });
+                            },
+                            child: Row(
+                              children: [
+                                Image.asset(
+                                  'assets/AddPostforms/__White location.png',
+                                  width: 10,
+                                  height: 10,
+                                  fit: BoxFit.cover,
+                                ),
+                                const SizedBox(width: 5,),
+                                Container(
+                                  width: 70,
+                                  child: Text(
+                                   "${ currentMainCity.isNotEmpty ? currentMainCity : "Location not available..."}...",
+                                    overflow: TextOverflow.ellipsis,
+                                    style: const TextStyle(
+                                      fontSize: 12,
+                                      fontWeight: FontWeight.w500,
+                                      color: Colors.white,
+                                    ),
+                                  ),
+                                ),
+                                const SizedBox(width: 5,),
+                                Image.asset(
+                                  'assets/AddPostforms/__Down white.png',
+                                  width: 10,
+                                  height: 10,
+                                  fit: BoxFit.cover,
+                                ),
+                              ],
+                            ),
+                          ),
+                      /*    InkWell(
+                            onTap: () async {
                               FocusManager.instance.primaryFocus?.unfocus();
                               Map? placeMark =
                               await Navigator.pushNamed(context, Routes.chooseLocaitonMap) as Map?;
@@ -695,11 +797,10 @@ class HomeScreenState extends State<HomeScreen>
                                 ),
                                 const SizedBox(width: 5,),
                                 Container(
-                                  width: 80,
                                   child: Text('${currentMainCity}',
                                     overflow: TextOverflow.ellipsis,
                                     style: const TextStyle(
-                                        fontSize: 12,
+                                        fontSize: 11,
                                         fontWeight: FontWeight.w500,
                                         color: Colors.white
                                     ),
@@ -714,7 +815,7 @@ class HomeScreenState extends State<HomeScreen>
                                 ),
                               ],
                             ),
-                          ),
+                          ),*/
                         ],
                       ),
                       Row(
@@ -879,164 +980,289 @@ class HomeScreenState extends State<HomeScreen>
                 //   )
                 // ],
               ),
-              body: Builder(builder: (context) {
-                // if (homeScreenState.state == HomeScreenDataState.fail) {
-                //   return const SomethingWentWrong();
-                // }
+              body: Stack(
+                children: [
+                  Builder(builder: (context) {
+                    // if (homeScreenState.state == HomeScreenDataState.fail) {
+                    //   return const SomethingWentWrong();
+                    // }
 
-                return BlocConsumer<FetchSystemSettingsCubit,
-                    FetchSystemSettingsState>(
-                  listener: (context, state) {
-                    if (state is FetchCategoryInProgress) {
-                      homeStateListener.setNetworkState(setState, true);
-                      setState(() {});
-                    }
-                    if (state is FetchSystemSettingsSuccess) {
-                      homeStateListener.setNetworkState(setState, true);
+                    return BlocConsumer<FetchSystemSettingsCubit,
+                        FetchSystemSettingsState>(
+                      listener: (context, state) {
+                        if (state is FetchCategoryInProgress) {
+                          homeStateListener.setNetworkState(setState, true);
+                          setState(() {});
+                        }
+                        if (state is FetchSystemSettingsSuccess) {
+                          homeStateListener.setNetworkState(setState, true);
 
-                      setState(() {});
-                      var setting = context
-                          .read<FetchSystemSettingsCubit>()
-                          .getSetting(SystemSetting.subscription);
-                      if (setting.length != 0) {
-                        String packageId = setting[0]['package_id'].toString();
-                        Constant.subscriptionPackageId = packageId;
-                      }
-                    }
-                  },
-                  builder: (context, state) {
-                    if (homeScreenState.state == HomeScreenDataState.success) {
-                    } else if (homeScreenState.state ==
-                        HomeScreenDataState.nointernet) {
-                      return NoInternet(
-                        onRetry: () {
-                          context.read<SliderCubit>().fetchSlider(context);
-                          context.read<FetchCategoryCubit>().fetchCategories();
-                          context.read<FetchMostViewedPropertiesCubit>().fetch();
-                          context.read<FetchPromotedPropertiesCubit>().fetch();
-                          context.read<FetchHomePropertiesCubit>().fetchProperty();
-                        },
-                      );
-                    }
-
-                    if (homeScreenState.state == HomeScreenDataState.nodata) {
-                      return Center(
-                        child: NoDataFound(
-                          onTap: () {
-                            context.read<SliderCubit>().fetchSlider(context);
-                            context.read<FetchCategoryCubit>().fetchCategories();
-
-                            context.read<FetchMostViewedPropertiesCubit>().fetch();
-                            context.read<FetchPromotedPropertiesCubit>().fetch();
-                            context
-                                .read<FetchHomePropertiesCubit>()
-                                .fetchProperty();
-                          },
-                        ),
-                      );
-                    }
-
-                    return SingleChildScrollView(
-                      controller: homeScreenController,
-                      // physics: const BouncingScrollPhysics(),
-                      // padding: EdgeInsets.symmetric(
-                      //   vertical: MediaQuery.of(context).padding.top,
-                      // ),
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: <Widget>[
-                          ///Looping through sections so arrange it
-                          ...List.generate(
-                            AppSettings.sections.length,
-                            (index) {
-                              HomeScreenSections section = AppSettings.sections[index];
-
-                              if (section == HomeScreenSections.Search) {
-                                return HomeSearchField(banner: systemSetting != null ? systemSetting : null);
-                              }
-
-                              // else if (section == HomeScreenSections.Slider) {
-                              //   return sliderWidget();
-                              // }
-
-                              else if (section == HomeScreenSections.Category) {
-                                return categoryWidget();
-                              }
-
-                              else if (section == HomeScreenSections.banner) {
-                                return isBannerLoading?const Padding(
-                                  padding: EdgeInsets.symmetric(horizontal: 15),
-                                  child: SliderShimmer(),
-                                ):bannerWidget();
-                              }
-
-                              // else if (section == HomeScreenSections.RecentlyAdded) {
-                              //   return  const RecentPropertiesSectionWidget();
-                              // }
-
-                              else if (section == HomeScreenSections.Premiumpropertiesforsale) {
-                                return PremiumpropertiesforsaleWidget();
-                              }
-
-                              else if (section == HomeScreenSections.NearbyProperties) {
-                                return buildNearByProperties();
-                              }
-
-                              // else if (section == HomeScreenSections.FeaturedProperties) {
-                              //   return  featuredProperties(homeScreenState, context);
-                              // }
-
-                              // else if (section == HomeScreenSections.PersonalizedFeed) {
-                              //   return const PersonalizedPropertyWidget();
-                              // }
-
-
-
-                              // else if (section == HomeScreenSections.MostLikedProperties) {
-                              //   return mostLikedProperties(
-                              //       homeScreenState, context);
-                              // }
-                              //
-                              // else if (section == HomeScreenSections.MostViewed) {
-                              //   return mostViewedProperties( homeScreenState, context);
-                              // }
-                              //
-                              // else if (section == HomeScreenSections.PopularCities) {
-                              //   return Padding(
-                              //     padding: const EdgeInsets.symmetric(
-                              //       vertical: 10,
-                              //     ),
-                              //     child: Column(
-                              //       children: [
-                              //         const BannerAdWidget(),
-                              //         const SizedBox(
-                              //           height: 10,
-                              //         ),
-                              //         popularCityProperties(),
-                              //       ],
-                              //     ),
-                              //   );
-                              // }
-
-                              else {
-                                return const SizedBox.shrink();
-                              }
-
+                          setState(() {});
+                          var setting = context
+                              .read<FetchSystemSettingsCubit>()
+                              .getSetting(SystemSetting.subscription);
+                          if (setting.length != 0) {
+                            String packageId = setting[0]['package_id'].toString();
+                            Constant.subscriptionPackageId = packageId;
+                          }
+                        }
+                      },
+                      builder: (context, state) {
+                        if (homeScreenState.state == HomeScreenDataState.success) {
+                        } else if (homeScreenState.state ==
+                            HomeScreenDataState.nointernet) {
+                          return NoInternet(
+                            onRetry: () {
+                              context.read<SliderCubit>().fetchSlider(context);
+                              context.read<FetchCategoryCubit>().fetchCategories();
+                              context.read<FetchMostViewedPropertiesCubit>().fetch();
+                              context.read<FetchPromotedPropertiesCubit>().fetch();
+                              context.read<FetchHomePropertiesCubit>().fetchProperty();
                             },
+                          );
+                        }
+
+                        if (homeScreenState.state == HomeScreenDataState.nodata) {
+                          return Center(
+                            child: NoDataFound(
+                              onTap: () {
+                                context.read<SliderCubit>().fetchSlider(context);
+                                context.read<FetchCategoryCubit>().fetchCategories();
+
+                                context.read<FetchMostViewedPropertiesCubit>().fetch();
+                                context.read<FetchPromotedPropertiesCubit>().fetch();
+                                context
+                                    .read<FetchHomePropertiesCubit>()
+                                    .fetchProperty();
+                              },
+                            ),
+                          );
+                        }
+
+                        return SingleChildScrollView(
+                          controller: homeScreenController,
+                          // physics: const BouncingScrollPhysics(),
+                          // padding: EdgeInsets.symmetric(
+                          //   vertical: MediaQuery.of(context).padding.top,
+                          // ),
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: <Widget>[
+                              ///Looping through sections so arrange it
+                              ...List.generate(
+                                AppSettings.sections.length,
+                                (index) {
+                                  HomeScreenSections section = AppSettings.sections[index];
+
+                                  if (section == HomeScreenSections.Search) {
+                                    return HomeSearchField(banner: systemSetting != null ? systemSetting : null);
+                                  }
+
+                                  // else if (section == HomeScreenSections.Slider) {
+                                  //   return sliderWidget();
+                                  // }
+
+                                  else if (section == HomeScreenSections.Category) {
+                                    return categoryWidget();
+                                  }
+
+                                  else if (section == HomeScreenSections.banner) {
+                                    return isBannerLoading?const Padding(
+                                      padding: EdgeInsets.symmetric(horizontal: 15),
+                                      child: SliderShimmer(),
+                                    ):bannerWidget();
+                                  }
+
+                                  // else if (section == HomeScreenSections.RecentlyAdded) {
+                                  //   return  const RecentPropertiesSectionWidget();
+                                  // }
+
+                                  else if (section == HomeScreenSections.Premiumpropertiesforsale) {
+                                    return PremiumpropertiesforsaleWidget();
+                                  }
+
+                                  // else if (section == HomeScreenSections.NearbyProperties) {
+                                  //   return buildNearByProperties();
+                                  // }
+
+                                  // else if (section == HomeScreenSections.FeaturedProperties) {
+                                  //   return  featuredProperties(homeScreenState, context);
+                                  // }
+
+                                  // else if (section == HomeScreenSections.PersonalizedFeed) {
+                                  //   return const PersonalizedPropertyWidget();
+                                  // }
+
+
+
+                                  // else if (section == HomeScreenSections.MostLikedProperties) {
+                                  //   return mostLikedProperties(
+                                  //       homeScreenState, context);
+                                  // }
+                                  //
+                                  // else if (section == HomeScreenSections.MostViewed) {
+                                  //   return mostViewedProperties( homeScreenState, context);
+                                  // }
+                                  //
+                                  // else if (section == HomeScreenSections.PopularCities) {
+                                  //   return Padding(
+                                  //     padding: const EdgeInsets.symmetric(
+                                  //       vertical: 10,
+                                  //     ),
+                                  //     child: Column(
+                                  //       children: [
+                                  //         const BannerAdWidget(),
+                                  //         const SizedBox(
+                                  //           height: 10,
+                                  //         ),
+                                  //         popularCityProperties(),
+                                  //       ],
+                                  //     ),
+                                  //   );
+                                  // }
+
+                                  else {
+                                    return const SizedBox.shrink();
+                                  }
+
+                                },
+                              ),
+                              const SizedBox(
+                                height: 30,
+                              ),
+                            ],
                           ),
-                          const SizedBox(
-                            height: 30,
-                          ),
-                        ],
-                      ),
+                        );
+                      },
                     );
-                  },
-                );
-              }),
+                  }),
+                  AnimatedSize(
+                      duration: const Duration(milliseconds: 300),
+                      curve: Curves.easeInOut,
+                      child: showLocationBox?Container(
+                        margin: const EdgeInsets.only(left: 15, right: 15, top: 5),
+                        height: 40,
+                        width: MediaQuery.of(context).size.width / 1.5,
+                        decoration: BoxDecoration(
+                          color: Colors.white,
+                          boxShadow: [
+                            BoxShadow(
+                              offset: const Offset(0, 1),
+                              blurRadius: 5,
+                              color: Colors.black.withOpacity(0.1),
+                            ),
+                          ],
+                          borderRadius: BorderRadius.circular(5),
+                        ),
+                        padding: const EdgeInsets.symmetric(horizontal: 10),
+                        child: Row(
+                          children: [
+                            Image.asset(
+                              "assets/Home/__location.png",
+                              width: 17,
+                              height: 17,
+                              color: const Color(0xff9c9c9c),
+                            ),
+                            const SizedBox(width: 5,),
+                            Expanded(
+                              child: GooglePlaceAutoCompleteTextField(
+                                boxDecoration: BoxDecoration(
+                                  border: Border.all(color: Colors.transparent),
+                                ),
+                                textEditingController: locationController,
+                                textStyle: const TextStyle(fontSize: 13),
+                                inputDecoration: const InputDecoration(
+                                  hintText: 'Enter City, Locality...',
+                                  hintStyle: TextStyle(
+                                    fontSize: 13.0,
+                                    color: Color(0xff9c9c9c),
+                                    fontWeight: FontWeight.w400,
+                                    decoration: TextDecoration.none,
+                                  ),
+                                  border: InputBorder.none,
+                                  enabledBorder: InputBorder.none,
+                                  focusedBorder: InputBorder.none,
+                                ),
+                                googleAPIKey: "AIzaSyDDJ17OjVJ0TS2qYt7GMOnrMjAu1CYZFg8",
+                                debounceTime: 800,
+                                countries: ["in"],
+                                isLatLngRequired: true,
+                                getPlaceDetailWithLatLng: (Prediction prediction) {
+                                  print("placeDetails: ${prediction.lng}");
+                                  setState(() {});
+                                },
+                                itemClick: (Prediction prediction) {
+                                  locationController.text = prediction.description!;
+                                  locationController.selection =
+                                      TextSelection.fromPosition(TextPosition(offset: prediction.description!.length));
+                                  List<String> address = prediction.description!.split(',').reversed.toList();
+                                  if (address.length >= 3) {
+                                    currentMainCity = address[2];
+                                    locationValue = address[2];
+                                  } else if (address.length == 2) {
+                                    currentMainCity = address[1];
+                                    locationValue = address[1];
+                                  } else if (address.length == 1) {
+                                    currentMainCity = address[1];
+                                    locationValue = address[1];
+                                  }
+                                  showLocationBox = false;
+                                  _onRefresh();
+                                  HiveUtils.setLocation(
+                                    city: currentMainCity,
+                                    state:  '',
+                                    country:'',
+                                    placeId: '',
+                                  );
+                                  setState(() {});
+                                },
+                                itemBuilder: (context, index, Prediction prediction) {
+                                  return Container(
+                                    padding: const EdgeInsets.all(10),
+                                    child: Row(
+                                      children: [
+                                        Image.asset(
+                                          "assets/Home/__location.png",
+                                          width: 17,
+                                          height: 17,
+                                          color: const Color(0xff117af9),
+                                        ),
+                                        const SizedBox(width: 7),
+                                        Expanded(
+                                          child: Text(
+                                            prediction.description ?? "",
+                                            style: const TextStyle(fontSize: 13, color: Colors.black),
+                                          ),
+                                        ),
+                                      ],
+                                    ),
+                                  );
+                                },
+                                seperatedBuilder: const Divider(),
+                                isCrossBtnShown: false,
+                                placeType: PlaceType.geocode,
+                              ),
+                            ),
+                            const SizedBox(width: 5,),
+                            InkWell(
+                                onTap: (){
+                                  setState(() {
+                                    showLocationBox = false;
+                                    locationController.text = "";
+                                  });
+                                },
+                                child: const Icon(Icons.close,color: Colors.black,size: 18,))
+                            
+                          ],
+                        ),
+                      ):const SizedBox.shrink()
+                  ),
+                ],
+              ),
             ),
           ),
         ),
-        if(widget.openDrawer)
+        // if(widget.openDrawer)
           SizedBox(
           width: double.infinity,
           height: context.screenHeight,
@@ -1078,15 +1304,15 @@ class HomeScreenState extends State<HomeScreen>
                                   color: context.color.borderColor,
                                   width: 1.5,
                                 ),
-                                boxShadow: [
-                                  BoxShadow(
-                                    color: context.color.tertiaryColor
-                                        .withOpacity(0.4),
-                                    offset: const Offset(0, 3),
-                                    blurRadius: 10,
-                                    spreadRadius: 0,
-                                  )
-                                ],
+                                // boxShadow: [
+                                //   BoxShadow(
+                                //     color: context.color.tertiaryColor
+                                //         .withOpacity(0.4),
+                                //     offset: const Offset(0, 3),
+                                //     blurRadius: 10,
+                                //     spreadRadius: 0,
+                                //   )
+                                // ],
                                 color: context.color.tertiaryColor,
                                 borderRadius: BorderRadius.circular(22)),
                             alignment: Alignment.center,
@@ -1131,15 +1357,15 @@ class HomeScreenState extends State<HomeScreen>
                                 color: context.color.borderColor,
                                 width: 1.5,
                               ),
-                              boxShadow: [
-                                BoxShadow(
-                                  color: context.color.tertiaryColor
-                                      .withOpacity(0.4),
-                                  offset: const Offset(0, 3),
-                                  blurRadius: 10,
-                                  spreadRadius: 0,
-                                )
-                              ],
+                              // boxShadow: [
+                              //   BoxShadow(
+                              //     color: context.color.tertiaryColor
+                              //         .withOpacity(0.4),
+                              //     offset: const Offset(0, 3),
+                              //     blurRadius: 10,
+                              //     spreadRadius: 0,
+                              //   )
+                              // ],
                               color: context.color.tertiaryColor,
                               borderRadius: BorderRadius.circular(22)),
                           alignment: Alignment.center,
@@ -1189,15 +1415,15 @@ class HomeScreenState extends State<HomeScreen>
                                 color: context.color.borderColor,
                                 width: 1.5,
                               ),
-                              boxShadow: [
-                                BoxShadow(
-                                  color: context.color.tertiaryColor
-                                      .withOpacity(0.4),
-                                  offset: const Offset(0, 3),
-                                  blurRadius: 10,
-                                  spreadRadius: 0,
-                                )
-                              ],
+                              // boxShadow: [
+                              //   BoxShadow(
+                              //     color: context.color.tertiaryColor
+                              //         .withOpacity(0.4),
+                              //     offset: const Offset(0, 3),
+                              //     blurRadius: 10,
+                              //     spreadRadius: 0,
+                              //   )
+                              // ],
                               color: context.color.tertiaryColor,
                               borderRadius: BorderRadius.circular(22)),
                           alignment: Alignment.center,
@@ -1605,7 +1831,7 @@ class HomeScreenState extends State<HomeScreen>
                   title: "${UiUtils.getTranslatedLabel(
                     context,
                     "nearByProperties",
-                  )} (${currentCity})",
+                  )} (${currentMainCity})",
                 ),
                 const NearbyPropertiesShimmer(),
               ],
@@ -1616,7 +1842,7 @@ class HomeScreenState extends State<HomeScreen>
           final errorMessage = state.error is String
               ? state.error
               : state.error.error;
-          return Center();
+          return const Center();
         }
         // if (state is FetchNearbyPropertiesFailure) {
         //   final errorMessage = state.error is String
@@ -1626,7 +1852,26 @@ class HomeScreenState extends State<HomeScreen>
         // }
         if (state is FetchNearbyPropertiesSuccess) {
           if (state.properties.isEmpty) {
-            return Container();
+            return Column(
+              children: [
+                Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 10),
+                  child: TitleHeader(
+                    onSeeAll: _onTapNearByPropertiesAll,
+                    title: "${UiUtils.getTranslatedLabel(
+                      context,
+                      "nearByProperties",
+                    )} (${currentCity})",
+                  ),
+                ),
+                Container(
+                  height: 200,
+                  child: const Center(
+                    child: Text("No data available for this city"),
+                  ),
+                ),
+              ],
+            );
           }
 
           return Column(
@@ -1645,7 +1890,7 @@ class HomeScreenState extends State<HomeScreen>
               SizedBox(
                 height: 200,
                 child: ListView.separated(
-                  separatorBuilder: (context,i)=>SizedBox(width: 10,),
+                  separatorBuilder: (context,i)=>const SizedBox(width: 10,),
                     padding: const EdgeInsets.symmetric(horizontal: 15),
                     shrinkWrap: true,
                     physics: const BouncingScrollPhysics(),
@@ -2402,8 +2647,8 @@ class HomeScreenState extends State<HomeScreen>
         const SizedBox(height: 20,),
         Container(
           width: MediaQuery.of(context).size.width,
-          padding: EdgeInsets.only(bottom: 20),
-          decoration: BoxDecoration(
+          padding: const EdgeInsets.only(bottom: 20),
+          decoration: const BoxDecoration(
             image: DecorationImage(image: AssetImage("assets/Home/bg.png"),fit: BoxFit.cover)
           ),
           child: Column(
@@ -2479,7 +2724,7 @@ class HomeScreenState extends State<HomeScreen>
                         ),
                       );
                     },
-                  ):Container(height: 200,child: Center(child: Text("No data available for this city",),),),
+                  ):Container(height: 200,child: const Center(child: Text("No data available for this city",),),),
                 ),
             ],
           ),
@@ -2560,8 +2805,8 @@ class HomeScreenState extends State<HomeScreen>
                 }
             ):const Center(child: Text( "No data available for this city",)),
           ),
-        TopAgents(city: currentMainCity),
-        TopBuilders(city: currentMainCity),
+        buildMeetOutTopAgent(context,AgentLOading,Top_agenylist),
+        buildMeetOurTopBuildes(context,builderLoading,topBuilderList),
 
         Padding(
           padding: const EdgeInsets.only(right: 10, left: 10),
@@ -2707,7 +2952,7 @@ class HomeScreenState extends State<HomeScreen>
 
   Widget buildAllPropertyNeeds(){
     return Container(
-      color: const Color(0xffebf4ff),
+      color:  const Color(0xffebf4ff),
       child: Column(
         children: [
           Padding(
@@ -2721,7 +2966,8 @@ class HomeScreenState extends State<HomeScreen>
               },
             ),
           ),
-          Container(
+           if(!isSystemLoading)
+           Container(
             height: 220,
             child: ListView.separated(
               physics: const BouncingScrollPhysics(),
@@ -2807,6 +3053,34 @@ class HomeScreenState extends State<HomeScreen>
                 ),
               );
             }),
+          ),
+          if(isSystemLoading)
+          const SingleChildScrollView(
+            scrollDirection: Axis.horizontal,
+            child: Padding(
+              padding: EdgeInsets.symmetric(horizontal: 15),
+              child: Row(
+                children: [
+                  ClipRRect(
+                    clipBehavior: Clip.antiAliasWithSaveLayer,
+                    borderRadius: BorderRadius.all(Radius.circular(15)),
+                    child: CustomShimmer(height: 190, width: 190),
+                  ),
+                  SizedBox(width: 10,),
+                  ClipRRect(
+                    clipBehavior: Clip.antiAliasWithSaveLayer,
+                    borderRadius: BorderRadius.all(Radius.circular(15)),
+                    child: CustomShimmer(height: 190, width: 190),
+                  ),
+                  SizedBox(width: 10,),
+                  ClipRRect(
+                    clipBehavior: Clip.antiAliasWithSaveLayer,
+                    borderRadius: BorderRadius.all(Radius.circular(15)),
+                    child: CustomShimmer(height: 190, width: 190),
+                  ),
+                ],
+              ),
+            ),
           ),
         ],
       ),
@@ -3108,8 +3382,8 @@ class _RecentPropertiesSectionWidgetState
           return SizedBox(
             height: 210,
             child:  widget.projectList!.isNotEmpty?ListView.separated(
-              padding: EdgeInsets.symmetric(horizontal: 15),
-              separatorBuilder: (context,index)=>SizedBox(width: 10,),
+              padding: const EdgeInsets.symmetric(horizontal: 15),
+              separatorBuilder: (context,index)=>const SizedBox(width: 10,),
               shrinkWrap: true,
               scrollDirection: Axis.horizontal,
               itemCount: widget.projectLoading! ? 10 : widget.projectList!.length,
@@ -3397,7 +3671,7 @@ class _RecentPropertiesSectionWidgetState
                   );
                 }
               },
-            ):Center(child: Text(  "No data available for this city"),),
+            ):const Center(child: Text(  "No data available for this city"),),
           );
         })
 
@@ -3553,85 +3827,51 @@ extension mMap on Map {
   }
 }
 
-class TopAgents extends StatefulWidget {
-  final String? city;
-  const TopAgents({super.key, this.city});
+Widget buildMeetOutTopAgent(BuildContext context,bool AgentLOading,List Top_agenylist){
+  Size size = MediaQuery.of(context).size;
+  return Column(
+    children: [
+      Padding(
+        padding: const EdgeInsets.symmetric(horizontal: 10),
+        child: TitleHeader(
+          enableShowAll: true,
+          title: "Meet Our Top Agents!".translate(context),
+          subTitle: "Get some Inspirations",
+          onSeeAll: () {
+            Navigator.push(
+              context,
+              MaterialPageRoute(
+                builder: (context) => const seeallAgent(),
+              ),
+            );
 
-  @override
-  State<TopAgents> createState() => _TopAgentsState();
+          },
+        ),
+      ),
+      // SizedBox(height: 10),
+      SizedBox(
+        height: size.height * 0.26,
+        child: AgentLOading
+            ? buildShimmerList(size)
+            : Top_agenylist.isEmpty
+            ? const Center(child: Text('No data available for this city'))
+            : ListView.builder(
+          scrollDirection: Axis.horizontal,
+          itemCount: Top_agenylist.length,
+          itemBuilder: (context, index) {
+            return Padding(
+              padding: EdgeInsets.only(left: index == 0 ? 10 : 0, right: 10),
+              child: buildAgentCard(size, Top_agenylist[index],context),
+            );
+          },
+        ),
+      ),
+    ],
+  );
 }
 
-class _TopAgentsState extends State<TopAgents> {
-  bool AgentLOading = false;
-  List Top_agenylist = [];
-  Future<void> gettop_Agents () async {
-    setState(() {
-      AgentLOading = true;
-    });
-    var response = await Api.get(url: Api.gettop_agent, queryParameters: {
-      'offset': 0,
-      'limit': 10,
-      'city': widget.city,
-      // 'current_user': HiveUtils.getUserId()
-    });
-    if(!response['error']) {
-      setState(() {
-        Top_agenylist  = response['data'];
-        AgentLOading = false;
-      });
-    }
-  }
-
-  @override
-  void initState() {
-    gettop_Agents();
-    super.initState();
-  }
-  @override
-  Widget build(BuildContext context) {
-    Size size = MediaQuery.sizeOf(context);
-
-    return Column(
-      children: [
-        Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 10),
-          child: TitleHeader(
-            enableShowAll: true,
-            title: "Meet Our Top Agents!".translate(context),
-            subTitle: "Get some Inspirations",
-            onSeeAll: () {
-              Navigator.push(
-                context,
-                MaterialPageRoute(
-                  builder: (context) => const seeallAgent(), // Assuming SeeAllAgent is a widget.
-                ),
-              );
-
-            },
-          ),
-        ),
-        // SizedBox(height: 10),
-        SizedBox(
-          height: size.height * 0.26,
-          child: AgentLOading
-              ? buildShimmerList(size)
-              : ListView.builder(
-            scrollDirection: Axis.horizontal,
-            itemCount: Top_agenylist.length,
-            itemBuilder: (context, index) {
-              return Padding(
-                padding: EdgeInsets.only(left: index == 0 ? 10 : 0, right: 10),
-                child: buildAgentCard(size, Top_agenylist[index]),
-              );
-            },
-          ),
-        ),
-      ],
-    );
-  }
-
   // Build agent card widget dynamically from data
-  Widget buildAgentCard(Size size, dynamic agent) {
+  Widget buildAgentCard(Size size, dynamic agent,BuildContext context) {
     return Container(
       width: size.width * 0.75,
       decoration: BoxDecoration(
@@ -3797,156 +4037,82 @@ class _TopAgentsState extends State<TopAgents> {
 
   // Build shimmer effect for loading
   Widget buildShimmerList(Size size) {
-    return ListView.builder(
+    return ListView.separated(
+      separatorBuilder: (context,i)=>SizedBox(width: 10,),
+      padding: EdgeInsets.symmetric(horizontal: 15),
       scrollDirection: Axis.horizontal,
       itemCount: 5,  // Arbitrary number of shimmer items
       itemBuilder: (context, index) {
-        return Padding(
-          padding: const EdgeInsets.only(left: 10, right: 2),
-          child: Shimmer.fromColors(
-            baseColor: Colors.grey[300]!,
-            highlightColor: Colors.grey[100]!,
-            child: Container(
-              height: size.height * 0.3,
-              width: size.width * 0.7,
-              decoration: BoxDecoration(
-                color: Colors.grey[300],
-                borderRadius: BorderRadius.circular(12),
-              ),
+        return Shimmer.fromColors(
+          baseColor: Colors.grey[300]!,
+          highlightColor: Colors.grey[100]!,
+          child: Container(
+            height: size.height * 0.3,
+            width: size.width * 0.7,
+            decoration: BoxDecoration(
+              color: Colors.grey[300],
+              borderRadius: BorderRadius.circular(12),
             ),
           ),
         );
       },
     );
   }
-}
 
 
 
-class TopBuilders extends StatefulWidget {
-  final String? city;
-  const TopBuilders({super.key, this.city});
 
-  @override
-  State<TopBuilders> createState() => _TopBuildersState();
-}
-
-class _TopBuildersState extends State<TopBuilders> {
-  bool builderLoading = false;
-  List topBuilderList = [];
-
-  Future<void> getTopBuilder() async {
-    setState(() {
-      builderLoading = true;
-    });
-
-    try {
-      var response = await Api.get(url: Api.gettop_builder, queryParameters: {
-        'offset': 0,
-        'limit': 10,
-        'city': widget.city,
-        // 'current_user': HiveUtils.getUserId()
-      });
-
-      if (!response['error']) {
-        setState(() {
-          topBuilderList = response['data'] ?? [];
-          builderLoading = false;
-        });
-      }
-    } catch (e) {
-      // Handle API fetch error
-      setState(() {
-        builderLoading = false;
-        topBuilderList = [];
-      });
-      print('Error fetching agents: $e');
-    }
-  }
-
-  @override
-  void initState() {
-    getTopBuilder();
-    super.initState();
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    Size size = MediaQuery.sizeOf(context);
-
-    return Column(
-      children: [
-        Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 10),
-          child: TitleHeader(
-            enableShowAll: true,
-            title: "Meet Our Top Builders!".translate(context),
-            subTitle: "Get some Inspirations",
-            onSeeAll: () {
-              Navigator.push(
-                context,
-                MaterialPageRoute(
-                  builder: (context) => const see_allBuilders(), // Assuming SeeAllAgent is a widget.
-                ),
-              );
-            },
-          ),
-        ),
-        SizedBox(
-          height: size.width/2,
-          child: builderLoading
-              ? _buildShimmerList(size) // Show shimmer when loading
-              : topBuilderList.isEmpty
-              ? const Center(child: Text('No Builders Found')) // Show message if list is empty
-              : ListView.builder(
-                scrollDirection: Axis.horizontal,
-                itemCount: topBuilderList.length,
-                itemBuilder: (context, index) {
-                  return Padding(
-                    padding: EdgeInsets.only(left: index == 0 ? 10 : 0, right: 10),
-                    child: InkWell(
-                      onTap: () {
-                        Navigator.push(context,
-                          MaterialPageRoute(builder: (context) =>
-                              UserDetailProfileScreen(id: topBuilderList[index]['id'] )),
-                        );
-                      },
-                      child: buildBuilderCard(size, topBuilderList[index])),
-                  );
-                },
-          ),
-        ),
-      ],
-    );
-  }
-
-  // Build shimmer effect for loading state
-  Widget _buildShimmerList(Size size) {
-    return ListView.builder(
-      scrollDirection: Axis.horizontal,
-      itemCount: 10, // Placeholder for 5 shimmer cards
-      itemBuilder: (context, index) {
-        return Padding(
-          padding: const EdgeInsets.only(left: 10, right: 2),
-          child: Shimmer.fromColors(
-            baseColor: Colors.grey[300]!,
-            highlightColor: Colors.grey[100]!,
-            child: Container(
-              height: size.height * 0.23,
-              width: size.width * 0.7,
-              decoration: BoxDecoration(
-                color: Colors.white,
-                borderRadius: BorderRadius.circular(12),
+Widget buildMeetOurTopBuildes(BuildContext context,bool builderLoading,List topBuilderList){
+  Size size = MediaQuery.of(context).size;
+  return Column(
+    children: [
+      Padding(
+        padding: const EdgeInsets.symmetric(horizontal: 10),
+        child: TitleHeader(
+          enableShowAll: true,
+          title: "Meet Our Top Builders!".translate(context),
+          subTitle: "Get some Inspirations",
+          onSeeAll: () {
+            Navigator.push(
+              context,
+              MaterialPageRoute(
+                builder: (context) => const see_allBuilders(), // Assuming SeeAllAgent is a widget.
               ),
-            ),
-          ),
-        );
-      },
-    );
-  }
+            );
+          },
+        ),
+      ),
+      SizedBox(
+        height: size.width/2,
+        child: builderLoading
+            ? buildShimmerList(size)
+            : topBuilderList.isEmpty
+            ? const Center(child: Text('No data available for this city')) // Show message if list is empty
+            : ListView.builder(
+          scrollDirection: Axis.horizontal,
+          itemCount: topBuilderList.length,
+          itemBuilder: (context, index) {
+            return Padding(
+              padding: EdgeInsets.only(left: index == 0 ? 10 : 0, right: 10),
+              child: InkWell(
+                  onTap: () {
+                    Navigator.push(context,
+                      MaterialPageRoute(builder: (context) =>
+                          UserDetailProfileScreen(id: topBuilderList[index]['id'] )),
+                    );
+                  },
+                  child: buildBuilderCard(size, topBuilderList[index],context)),
+            );
+          },
+        ),
+      ),
+    ],
+  );
+}
+
 
   // Build the agent card as a reusable widget
-  Widget buildBuilderCard(Size size, dynamic agent) {
+  Widget buildBuilderCard(Size size, dynamic agent,BuildContext context) {
     return Container(
       width: size.width * 0.7,
       decoration: BoxDecoration(
@@ -4048,26 +4214,6 @@ class _TopBuildersState extends State<TopBuilders> {
     );
   }
 
-  // Build a column for property stats
-  Widget buildPropertyColumn(String count, String label) {
-    return Column(
-      children: [
-        const SizedBox(height: 5),
-        Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 5),
-          child: Text(
-            count,
-            style: const TextStyle(fontSize: 24, fontWeight: FontWeight.w500),
-          ),
-        ),
-        Text(
-          label,
-          textAlign: TextAlign.start,
-          style: const TextStyle(
-              fontSize: 13, fontWeight: FontWeight.w500, color: Color(0xFF9ea1a7)),
-        ),
-      ],
-    );
-  }
-}
+
+
 

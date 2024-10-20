@@ -270,16 +270,11 @@ class _FavoritesScreenState extends State<FavoritesScreen> {
                                                 MaterialPageRoute(
                                                     builder:
                                                         (context) => ProjectDetails(
-                                                            property:
-                                                                favProjectsList[
-                                                                    index],
-                                                            fromMyProperty:
-                                                                true,
-                                                            fromCompleteEnquiry:
-                                                                true,
+                                                            property: favProjectsList[index],
+                                                            fromMyProperty: true,
+                                                            fromCompleteEnquiry: true,
                                                             fromSlider: false,
-                                                            fromPropertyAddSuccess:
-                                                                true)),
+                                                            fromPropertyAddSuccess: true)),
                                               );
                                             },
                                             child: Container(
