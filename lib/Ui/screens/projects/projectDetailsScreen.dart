@@ -2889,7 +2889,7 @@ class PropertyDetailsState extends State<ProjectDetails> {
                                  },
                                ),
                              ],
-                            if(property?['documents'].length > 0)
+                            if (property != null && property?['documents'] != null && property?['documents'].length > 0)
                               Padding(
                               padding: const EdgeInsets.only( left: 15,right: 15,top: 15),
                               child: Row(
@@ -2982,7 +2982,7 @@ class PropertyDetailsState extends State<ProjectDetails> {
                             SizedBox(
                               height: 10.rh(context),
                             ),
-                            if(property?['plans']?.isNotEmpty)
+                            if(property != null && property?['plans'] != null &&property?['plans']?.isNotEmpty)
                               ...[
                                 Padding(
                                   padding: const EdgeInsets.only( left: 15,right: 15),
@@ -3165,7 +3165,10 @@ class PropertyDetailsState extends State<ProjectDetails> {
                                 height: 15,
                               ),
                             ],
-                            if(property?['project_details'] != null && property?['project_details'][0]['approved_banks'].length > 0)
+                            if (property?['project_details'] != null &&
+                                property!['project_details'].isNotEmpty &&
+                                property!['project_details'][0]['approved_banks'] != null &&
+                                property!['project_details'][0]['approved_banks'].isNotEmpty)
                               Column(
                               crossAxisAlignment: CrossAxisAlignment.start,
                               children: [

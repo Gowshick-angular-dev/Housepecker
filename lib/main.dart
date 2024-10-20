@@ -37,7 +37,6 @@ class EntryPointState extends State<EntryPoint> {
   Widget build(BuildContext context) {
     return MultiBlocProvider(
         providers: [
-
           BlocProvider(create: (context) => AuthCubit()),
           BlocProvider(create: (context) => LoginCubit()),
           BlocProvider(create: (context) => SliderCubit()),

@@ -5,8 +5,10 @@ import 'package:shimmer/shimmer.dart';
 import '../../../app/routes.dart';
 import '../../../utils/api.dart';
 import '../../../utils/hive_utils.dart';
+import '../../../utils/ui_utils.dart';
 import '../../Theme/theme.dart';
 import '../filter_screen.dart';
+import '../userprofile/userProfileScreen.dart';
 
 
 class see_allBuilders extends StatefulWidget {
@@ -67,7 +69,12 @@ class _TopBuildersState extends State<see_allBuilders> {
     Size size = MediaQuery.sizeOf(context);
 
     return Scaffold(
-      appBar:  AppBar(
+      appBar: UiUtils.buildAppBar(context,
+          showBackButton: true,
+          title:'Top Agents',
+          actions: [
+          ]),
+     /* appBar:  AppBar(
 
         backgroundColor: tertiaryColor_,
         leadingWidth: 40, // Adjust the width to decrease the space between back icon and title
@@ -135,7 +142,7 @@ class _TopBuildersState extends State<see_allBuilders> {
             ),
           ],
         ),
-      ),
+      ),*/
       body: SingleChildScrollView(
         child: Column(
           children: [
@@ -152,9 +159,17 @@ class _TopBuildersState extends State<see_allBuilders> {
                 scrollDirection: Axis.vertical,
                 itemCount: topBuilderList.length,
                 itemBuilder: (context, index) {
-                  return Padding(
-                    padding: const EdgeInsets.only(left: 10, right: 10,bottom: 5),
-                    child: buildAgentCard(size, topBuilderList[index]),
+                  return InkWell(
+                    onTap: (){
+                      Navigator.push(context,
+                        MaterialPageRoute(builder: (context) =>
+                            UserDetailProfileScreen(id: topBuilderList[index]['id'] )),
+                      );
+                    },
+                    child: Padding(
+                      padding: const EdgeInsets.only(left: 10, right: 10,bottom: 5),
+                      child: buildAgentCard(size, topBuilderList[index]),
+                    ),
                   );
                 },
               ),
@@ -198,6 +213,7 @@ class _TopBuildersState extends State<see_allBuilders> {
       decoration: BoxDecoration(
         border: Border.all(color: Color(0xFF9ea1a7)),
         borderRadius: BorderRadius.circular(12),
+        color: Colors.white
       ),
       child: Padding(
         padding: const EdgeInsets.all(8.0),
@@ -265,18 +281,25 @@ class _TopBuildersState extends State<see_allBuilders> {
               child: Row(
                 mainAxisAlignment: MainAxisAlignment.start,
                 children: [
-                  SizedBox(width: 10),
+              Expanded(
+              child: Column(
+              children: [
                   buildPropertyColumn(agent['project_count']?.toString() ?? '0',
-                      "Total\nProjects"),
-                  // Fallback to '0'
-                  // Spacer(),
-                  // Padding(
-                  //   padding: const EdgeInsets.symmetric(vertical: 10),
-                  //   child: VerticalDivider(color: Colors.grey, thickness: 2),
-                  // ),
-                  // Spacer(),
-                  // buildPropertyColumn(agent['city'] ?? 'Unknown', "City"), // Fallback to 'Unknown'
-                  // SizedBox(width: 50),
+                "Total \nProjects"),
+                    ],
+                  ),),
+                            const Padding(
+                    padding: EdgeInsets.symmetric(vertical: 10),
+                    child: VerticalDivider(color: Colors.grey, thickness: 2),
+                  ),
+                  Expanded(
+                    child: Column(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        buildPropertyColumn(agent['city_count']?.toString() ?? '0', "City"),
+                      ],
+                    ),
+                  ),
                 ],
               ),
             ),
