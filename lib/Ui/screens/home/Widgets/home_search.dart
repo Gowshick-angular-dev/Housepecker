@@ -77,7 +77,6 @@ class HomeSearchField extends StatelessWidget {
                     ),
                   ),
                 ),
-                SizedBox(height: 3,),
                 Padding(
                   padding: const EdgeInsets.symmetric(horizontal: 15),
                   child: Text(banner != null ? banner!['home_banner_subtitle'] : '',
@@ -85,7 +84,7 @@ class HomeSearchField extends StatelessWidget {
                     style: TextStyle(
                       color: Colors.black45,
                       fontWeight: FontWeight.w300,
-                      fontSize: 11,
+                      fontSize: 10,
                     ),
                   ),
                 ),

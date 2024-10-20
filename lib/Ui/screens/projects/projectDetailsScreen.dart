@@ -4171,24 +4171,80 @@ class PropertyDetailsState extends State<ProjectDetails> {
                                                         fontSize: 12.5,
                                                         fontWeight: FontWeight.w500),
                                                   ),
-
                                                   const SizedBox(height: 6),
-                                                  Row(
-                                                    children: [
-                                                      Text(
-                                                        formatAmount(agentProjectsList[i]['project_details'][0]['avg_price']).formatAmount(prefix: true,),
-                                                        maxLines: 1,
-                                                        overflow: TextOverflow.ellipsis,
-                                                        style: const TextStyle(
-                                                            color: Color(0xff333333),
-                                                            fontSize: 11,
-                                                            fontFamily: 'Robato',
-                                                            fontWeight: FontWeight.w500),
+                                                  if(agentProjectsList[i]['min_price'] == null)
+                                                    Row(
+                                                      children: [
+                                                        Text(
+                                                          '₹${agentProjectsList[i]['project_details'].length > 0 ? formatAmount(agentProjectsList[i]['project_details'][0]['avg_price'] ?? 0) : 0}'
+                                                              .toString(),
+                                                          maxLines: 1,
+                                                          overflow: TextOverflow.ellipsis,
+                                                          style: const TextStyle(
+                                                              color: Color(0xff333333),
+                                                              fontSize: 12,
+                                                              fontFamily: 'Robato',
+                                                              fontWeight: FontWeight.w500
+                                                          ),
+                                                        ),
+                                                        Padding(
+                                                          padding: const EdgeInsets.symmetric(horizontal: 8.0),
+                                                          child: Container(
+                                                            height: 12,
+                                                            width: 2,
+                                                            color: Colors.black54,
+                                                          ),
+                                                        ),
+                                                        Text(
+                                                          '${agentProjectsList[i]['project_details'].length > 0 ? formatAmount(agentProjectsList[i]['project_details'][0]['size'] ?? 0) : 0} Sq.ft'
+                                                              .toString(),
+                                                          maxLines: 1,
+                                                          overflow: TextOverflow.ellipsis,
+                                                          style: const TextStyle(
+                                                              color: Color(0xffa2a2a2),
+                                                              fontSize: 9,
+                                                              fontWeight: FontWeight.w500
+                                                          ),
+                                                        ),
+                                                      ],
+                                                    ),
+                                                  if(agentProjectsList[i]['min_price'] != null)
+                                                    ...[
+                                                      Row(
+                                                        children: [
+                                                          Text(
+                                                            '₹${formatAmount(agentProjectsList[i]['min_price'] ?? 0)} - ${formatAmount(agentProjectsList[i]['max_price'] ?? 0)}'
+                                                                .toString(),
+                                                            maxLines: 1,
+                                                            overflow: TextOverflow.ellipsis,
+                                                            style: const TextStyle(
+                                                                color: Color(0xff333333),
+                                                                fontSize: 12,
+                                                                fontFamily: 'Robato',
+                                                                fontWeight: FontWeight.w500
+                                                            ),
+                                                          ),
+                                                        ],
                                                       ),
-                                                      const SizedBox(width: 15),
                                                     ],
-                                                  ),
                                                   const SizedBox(height: 6),
+                                                  // const SizedBox(height: 6),
+                                                  // Row(
+                                                  //   children: [
+                                                  //     Text(
+                                                  //       formatAmount(agentProjectsList[i]['project_details'][0]['avg_price']).formatAmount(prefix: true,),
+                                                  //       maxLines: 1,
+                                                  //       overflow: TextOverflow.ellipsis,
+                                                  //       style: const TextStyle(
+                                                  //           color: Color(0xff333333),
+                                                  //           fontSize: 11,
+                                                  //           fontFamily: 'Robato',
+                                                  //           fontWeight: FontWeight.w500),
+                                                  //     ),
+                                                  //     const SizedBox(width: 15),
+                                                  //   ],
+                                                  // ),
+                                                  // const SizedBox(height: 6),
                                                   Row(
                                                     children: [
                                                       Image.asset(

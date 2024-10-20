@@ -2,6 +2,7 @@
 import 'dart:async';
 import 'dart:ui';
 import 'package:carousel_slider/carousel_slider.dart';
+import 'package:flutter/painting.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
@@ -2373,10 +2374,10 @@ class HomeScreenState extends State<HomeScreen>
             padding: const EdgeInsets.symmetric(horizontal: 15),
             child: buildPropertiesShimmer(context, 2),
           ),
-        if(!premiumLoading )
+        if(!premiumLoading)
           Container(
             height: 230,
-            child: ListView.builder(
+            child:premiumPropertiesList.isNotEmpty? ListView.builder(
               itemCount: premiumPropertiesList.length,
               scrollDirection: Axis.horizontal,
               // shrinkWrap: true,
@@ -2396,91 +2397,92 @@ class HomeScreenState extends State<HomeScreen>
                   ),
                 );
               }
-            ),
+            ): const Center(child: Text("No data available for this city",style: TextStyle(fontSize: 14),),),
           ),
         const SizedBox(height: 20,),
-
-        Stack(
-          children: [
-            Image.asset("assets/Home/bg.png",width: double.infinity,fit: BoxFit.cover,height: (propertyDealList.length > 2 ? 450 : propertyDealList.length == 0 ? 450 : 250),),
-            Column(
-              children: [
-                const SizedBox(height: 15,),
-                Padding(
-                  padding: const EdgeInsets.only(left: 15,right: 15),
-                  child: Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                    children: [
-                      const Text("Deal Of The Month",
-                        style: TextStyle(
-                            color: Color(0xff333333),
-                            fontSize: 16,
-                            fontWeight: FontWeight.w500
-                        ),
+        Container(
+          width: MediaQuery.of(context).size.width,
+          padding: EdgeInsets.only(bottom: 20),
+          decoration: BoxDecoration(
+            image: DecorationImage(image: AssetImage("assets/Home/bg.png"),fit: BoxFit.cover)
+          ),
+          child: Column(
+            children: [
+              const SizedBox(height: 15,),
+              Padding(
+                padding: const EdgeInsets.only(left: 15,right: 15),
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    const Text("Deal Of The Month",
+                      style: TextStyle(
+                          color: Color(0xff333333),
+                          fontSize: 16,
+                          fontWeight: FontWeight.w500
                       ),
-                      InkWell(
-                        onTap: () {
-                          Navigator.push(
-                            context,
-                            MaterialPageRoute(builder: (context) =>
-                                const PropertiesListWidget(typeName: "Deal Of The Month"),
-                            ),
-                          );
-                        },
-                        child: const Text("See All",
-                          style: TextStyle(
-                              color: Color(0xff117af9),
-                              fontSize: 13,
-                              fontWeight: FontWeight.w500
-                          ),
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
-                const SizedBox(height: 10,),
-                if(dealLoading)
-                  Padding(
-                    padding: const EdgeInsets.symmetric(horizontal: 15),
-                    child: buildPropertiesShimmer(context, 4),
-                  ),
-                if(!dealLoading)
-                  Padding(
-                    padding: const EdgeInsets.only(left: 15,right: 15),
-                    child: GridView.builder(
-                      shrinkWrap: true,
-                      itemCount: propertyDealList.length,
-                      physics: const NeverScrollableScrollPhysics(),
-                      gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
-                        crossAxisCount: 2,
-                        crossAxisSpacing: 8,
-                        mainAxisSpacing: 8,
-                        childAspectRatio: MediaQuery.sizeOf(context).height / 950,
-                      ),
-                      itemBuilder: (BuildContext context, int index) {
-                        final PropertyModel data = PropertyModel.fromMap(propertyDealList[index]);
-                        return Padding(
-                          padding: const EdgeInsets.symmetric(
-                            horizontal: 0,
-                            vertical: 0,
-                          ),
-                          child: GestureDetector(
-                            onTap: () {
-                              FocusScope.of(context).unfocus();
-                              HelperUtils.goToNextPage(
-                                  Routes.propertyDetails, context, false, args: {
-                                'propertyData': data,
-                              });
-                            },
-                            child: PropertyHorizontalCard(property: data),
+                    ),
+                    InkWell(
+                      onTap: () {
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(builder: (context) =>
+                              const PropertiesListWidget(typeName: "Deal Of The Month"),
                           ),
                         );
                       },
+                      child: const Text("See All",
+                        style: TextStyle(
+                            color: Color(0xff117af9),
+                            fontSize: 13,
+                            fontWeight: FontWeight.w500
+                        ),
+                      ),
                     ),
-                  ),
-              ],
-            ),
-          ],
+                  ],
+                ),
+              ),
+              const SizedBox(height: 10,),
+              if(dealLoading)
+                Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 15),
+                  child: buildPropertiesShimmer(context, 4),
+                ),
+              if(!dealLoading)
+                Padding(
+                  padding: const EdgeInsets.only(left: 15,right: 15),
+                  child: propertyDealList.isNotEmpty? GridView.builder(
+                    shrinkWrap: true,
+                    itemCount: propertyDealList.length,
+                    physics: const NeverScrollableScrollPhysics(),
+                    gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+                      crossAxisCount: 2,
+                      crossAxisSpacing: 8,
+                      mainAxisSpacing: 8,
+                      childAspectRatio: MediaQuery.of(context).size.width / (MediaQuery.of(context).size.height / 2),
+                    ),
+                    itemBuilder: (BuildContext context, int index) {
+                      final PropertyModel data = PropertyModel.fromMap(propertyDealList[index]);
+                      return Padding(
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: 0,
+                          vertical: 0,
+                        ),
+                        child: GestureDetector(
+                          onTap: () {
+                            FocusScope.of(context).unfocus();
+                            HelperUtils.goToNextPage(
+                                Routes.propertyDetails, context, false, args: {
+                              'propertyData': data,
+                            });
+                          },
+                          child: PropertyHorizontalCard(property: data),
+                        ),
+                      );
+                    },
+                  ):Container(height: 200,child: Center(child: Text("No data available for this city",),),),
+                ),
+            ],
+          ),
         ),
         const SizedBox(height: 20,),
         buildExpolerPropertiesType(),
@@ -2533,10 +2535,10 @@ class HomeScreenState extends State<HomeScreen>
             padding: const EdgeInsets.symmetric(horizontal: 15),
             child: buildPropertiesShimmer(context, 2),
           ),
-        if(!recentLoading )
+        if(!recentLoading)
           Container(
             height: 230,
-            child: ListView.builder(
+            child:recentPropertiesList.isNotEmpty? ListView.builder(
                 itemCount: recentPropertiesList.length,
                 scrollDirection: Axis.horizontal,
                 // shrinkWrap: true,
@@ -2556,7 +2558,7 @@ class HomeScreenState extends State<HomeScreen>
                     ),
                   );
                 }
-            ),
+            ):const Center(child: Text( "No data available for this city",)),
           ),
         TopAgents(city: currentMainCity),
         TopBuilders(city: currentMainCity),
@@ -3101,332 +3103,289 @@ class _RecentPropertiesSectionWidgetState
           ),
         ),
         LayoutBuilder(builder: (context, c) {
+          final screenWidth = MediaQuery.of(context).size.width;
+          final cardWidth = screenWidth * 0.45;
           return SizedBox(
-            height: 200,
-            child: GridView.builder(
+            height: 210,
+            child:  widget.projectList!.isNotEmpty?ListView.separated(
+              padding: EdgeInsets.symmetric(horizontal: 15),
+              separatorBuilder: (context,index)=>SizedBox(width: 10,),
               shrinkWrap: true,
               scrollDirection: Axis.horizontal,
               itemCount: widget.projectLoading! ? 10 : widget.projectList!.length,
-              gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
-                crossAxisCount: 1,
-                crossAxisSpacing: 8,
-                mainAxisSpacing: 8,
-                // mainAxisExtent: 200,
-                childAspectRatio: MediaQuery.sizeOf(context).height / 950
-              ),
               itemBuilder: (context, index) {
-                if(!widget.projectLoading!) {
-                  return Padding(
-                    padding: EdgeInsets.only(left: (index == 0 ? 10 : 0), right: (widget.projectLoading! ? 10 : widget.projectList!.length) == (index + 1) ? 10 : 0),
-                    child: Container(
-                      width: 200,
-                      child: GestureDetector(
-                          onTap: () {
-                            Navigator.push(
-                              context,
-                              MaterialPageRoute(builder: (context) =>
-                                  ProjectDetails(property: widget.projectList![index], fromMyProperty: true,
-                                      fromCompleteEnquiry: true, fromSlider: false, fromPropertyAddSuccess: true
-                                  )),
-                            );
-                          },
-                          child: Container(
-                            // height: addBottom == null ? 124 : (124 + (additionalHeight ?? 0)),
-                            decoration: BoxDecoration(
-                                color: Colors.white,
-                                borderRadius: BorderRadius.circular(15),
-                                border: Border.all(
-                                    width: 1,
-                                    color: const Color(0xffe0e0e0)
-                                )
+                if (!widget.projectLoading!) {
+                  return Container(
+                    width: cardWidth,
+                    child: GestureDetector(
+                      onTap: () {
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                            builder: (context) => ProjectDetails(
+                              property: widget.projectList![index],
+                              fromMyProperty: true,
+                              fromCompleteEnquiry: true,
+                              fromSlider: false,
+                              fromPropertyAddSuccess: true,
                             ),
-                            child: Stack(
-                              fit: StackFit.expand,
+                          ),
+                        );
+                      },
+                      child: Container(
+                        decoration: BoxDecoration(
+                          color: Colors.white,
+                          borderRadius: BorderRadius.circular(15),
+                          border: Border.all(
+                            width: 1,
+                            color: const Color(0xffe0e0e0),
+                          ),
+                        ),
+                        child: Stack(
+                          fit: StackFit.expand,
+                          children: [
+                            Column(
+                              mainAxisSize: MainAxisSize.min,
                               children: [
-                                Column(
-                                  mainAxisSize: MainAxisSize.min,
-                                  children: [
-                                    Column(
-                                      children: [
-                                        ClipRRect(
-                                          borderRadius: const BorderRadius.only(
-                                            topRight: Radius.circular(15),
-                                            topLeft:Radius.circular(15),
-                                          ),
-                                          child: Stack(
-                                            children: [
-                                              UiUtils.getImage(
-                                                widget.projectList![index]['image'] ?? "",
-                                                width: double.infinity,fit: BoxFit.cover,height: 103,
-                                              ),
-                                              Positioned(
-                                                right: 8,
-                                                top: 8,
-                                                child: Row(
-                                                  children: [
-                                                    if(widget.projectList![index]['gallary_images'] != null)
-                                                      ...[
-                                                        InkWell(
-                                                          onTap: () {
-                                                            Navigator.push(context,
-                                                                BlurredRouter(
-                                                                  builder: (context) {
-                                                                    return AllGallaryImages(
-                                                                        images: widget.projectList![index]['gallary_images'] ?? [],
-                                                                        isProject: true);
-                                                                  },
-                                                                ));
-                                                          },
-                                                          child: Container(
-                                                            width: 35,
-                                                            height: 28,
-                                                            decoration: BoxDecoration(
-                                                              color: const Color(0xff000000).withOpacity(0.35),
-                                                              borderRadius: BorderRadius.circular(8),
-                                                              border: Border.all(width: 1, color: const Color(0xffe0e0e0)),
-                                                              boxShadow: const [
-                                                                BoxShadow(
-                                                                  color: Color.fromARGB(12, 0, 0, 0),
-                                                                  offset: Offset(0, 2),
-                                                                  blurRadius: 15,
-                                                                  spreadRadius: 0,
-                                                                )
-                                                              ],
-                                                            ),
-                                                            child: Row(
-                                                              mainAxisAlignment: MainAxisAlignment.center,
-                                                              children: [
-                                                                const Icon(
-                                                                    Icons.image,
-                                                                    color: Color(0xffe0e0e0),
-                                                                    size: 15
-                                                                ),
-                                                                const SizedBox(width: 3,),
-                                                                Text('${widget.projectList![index]['gallary_images']!.length}',
-                                                                  style: const TextStyle(
-                                                                      color: Color(0xffe0e0e0),
-                                                                      fontSize: 10
-                                                                  ),),
-                                                              ],
-                                                            ),
-                                                          ),
-                                                        ),
-                                                        const SizedBox(width: 8,),
-                                                      ],
-                                                    InkWell(
-                                                      onTap: () {
-                                                        GuestChecker.check(onNotGuest: () async {
-                                                          setState(() {
-                                                            widget.likeLoading![index] = true;
-                                                          });
-                                                          var body = {
-                                                            "type": widget.projectList![index]['is_favourite'] == 1 ? 0 : 1,
-                                                            "project_id": widget.projectList![index]['id']
-                                                          };
-                                                          var response = await Api.post(
-                                                              url: Api.addFavProject, parameter: body);
-                                                          if (!response['error']) {
-                                                            widget.projectList![index]['is_favourite'] = (widget.projectList![index]['is_favourite'] == 1 ? 0 : 1);
-                                                            setState(() {
-                                                              widget.likeLoading![index] = false;
-                                                            });
-
-                                                          }
-                                                        });
+                                ClipRRect(
+                                  borderRadius: const BorderRadius.only(
+                                    topRight: Radius.circular(15),
+                                    topLeft: Radius.circular(15),
+                                  ),
+                                  child: Stack(
+                                    children: [
+                                      UiUtils.getImage(
+                                        widget.projectList![index]['image'] ?? "",
+                                        width: double.infinity,
+                                        fit: BoxFit.cover,
+                                        height: 103,
+                                      ),
+                                      Positioned(
+                                        right: 8,
+                                        top: 8,
+                                        child: Row(
+                                          children: [
+                                            if (widget.projectList![index]['gallary_images'] != null)
+                                              InkWell(
+                                                onTap: () {
+                                                  Navigator.push(
+                                                    context,
+                                                    BlurredRouter(
+                                                      builder: (context) {
+                                                        return AllGallaryImages(
+                                                          images: widget.projectList![index]['gallary_images'] ?? [],
+                                                          isProject: true,
+                                                        );
                                                       },
-                                                      child: Container(
-                                                        width: 32,
-                                                        height: 30,
-                                                        decoration: BoxDecoration(
-                                                          color: context.color.secondaryColor,
-                                                          shape: BoxShape.circle,
-                                                          boxShadow: const [
-                                                            BoxShadow(
-                                                              color:
-                                                              Color.fromARGB(12, 0, 0, 0),
-                                                              offset: Offset(0, 2),
-                                                              blurRadius: 15,
-                                                              spreadRadius: 0,
-                                                            )
-                                                          ],
-                                                        ),
-                                                        child: Container(
-                                                          width: 32,
-                                                          height: 32,
-                                                          decoration: BoxDecoration(
-                                                            color: context.color.primaryColor,
-                                                            shape: BoxShape.circle,
-                                                            boxShadow: const [
-                                                              BoxShadow(
-                                                                  color: Color.fromARGB(33, 0, 0, 0),
-                                                                  offset: Offset(0, 2),
-                                                                  blurRadius: 15,
-                                                                  spreadRadius: 0)
-                                                            ],
-                                                          ),
-                                                          child: Center(
-                                                              child:
-                                                              (widget.likeLoading![index])
-                                                                  ? UiUtils.progress(width: 20, height: 20)
-                                                                  : widget.projectList![index]['is_favourite'] == 1
-                                                                  ?
-                                                                  UiUtils.getSvg(
-                                                                    AppIcons.like_fill,
-                                                                    color: context.color.tertiaryColor,
-                                                                  )
-                                                                  : UiUtils.getSvg(AppIcons.like,
-                                                                  color: context.color.tertiaryColor)
-                                                        ),
-                                                        ),
-                                                      ),
                                                     ),
-
-                                                  ],
+                                                  );
+                                                },
+                                                child: Container(
+                                                  width: 35,
+                                                  height: 28,
+                                                  decoration: BoxDecoration(
+                                                    color: const Color(0xff000000).withOpacity(0.35),
+                                                    borderRadius: BorderRadius.circular(8),
+                                                    border: Border.all(width: 1, color: const Color(0xffe0e0e0)),
+                                                    boxShadow: const [
+                                                      BoxShadow(
+                                                        color: Color.fromARGB(12, 0, 0, 0),
+                                                        offset: Offset(0, 2),
+                                                        blurRadius: 15,
+                                                        spreadRadius: 0,
+                                                      ),
+                                                    ],
+                                                  ),
+                                                  child: Row(
+                                                    mainAxisAlignment: MainAxisAlignment.center,
+                                                    children: [
+                                                      const Icon(Icons.image, color: Color(0xffe0e0e0), size: 15),
+                                                      const SizedBox(width: 3),
+                                                      Text('${widget.projectList![index]['gallary_images']!.length}',
+                                                        style: const TextStyle(color: Color(0xffe0e0e0), fontSize: 10),
+                                                      ),
+                                                    ],
+                                                  ),
                                                 ),
                                               ),
-
-                                            ],
+                                            const SizedBox(width: 8),
+                                            InkWell(
+                                              onTap: () {
+                                                GuestChecker.check(onNotGuest: () async {
+                                                  setState(() {
+                                                    widget.likeLoading![index] = true;
+                                                  });
+                                                  var body = {
+                                                    "type": widget.projectList![index]['is_favourite'] == 1 ? 0 : 1,
+                                                    "project_id": widget.projectList![index]['id'],
+                                                  };
+                                                  var response = await Api.post(
+                                                    url: Api.addFavProject,
+                                                    parameter: body,
+                                                  );
+                                                  if (!response['error']) {
+                                                    widget.projectList![index]['is_favourite'] =
+                                                    (widget.projectList![index]['is_favourite'] == 1 ? 0 : 1);
+                                                    setState(() {
+                                                      widget.likeLoading![index] = false;
+                                                    });
+                                                  }
+                                                });
+                                              },
+                                              child: Container(
+                                                width: 32,
+                                                height: 30,
+                                                decoration: BoxDecoration(
+                                                  color: context.color.secondaryColor,
+                                                  shape: BoxShape.circle,
+                                                  boxShadow: const [
+                                                    BoxShadow(
+                                                      color: Color.fromARGB(12, 0, 0, 0),
+                                                      offset: Offset(0, 2),
+                                                      blurRadius: 15,
+                                                      spreadRadius: 0,
+                                                    ),
+                                                  ],
+                                                ),
+                                                child: Container(
+                                                  width: 32,
+                                                  height: 32,
+                                                  decoration: BoxDecoration(
+                                                    color: context.color.primaryColor,
+                                                    shape: BoxShape.circle,
+                                                    boxShadow: const [
+                                                      BoxShadow(
+                                                        color: Color.fromARGB(33, 0, 0, 0),
+                                                        offset: Offset(0, 2),
+                                                        blurRadius: 15,
+                                                        spreadRadius: 0,
+                                                      ),
+                                                    ],
+                                                  ),
+                                                  child: Center(
+                                                    child: (widget.likeLoading![index])
+                                                        ? UiUtils.progress(width: 20, height: 20)
+                                                        : widget.projectList![index]['is_favourite'] == 1
+                                                        ? UiUtils.getSvg(AppIcons.like_fill, color: context.color.tertiaryColor)
+                                                        : UiUtils.getSvg(AppIcons.like, color: context.color.tertiaryColor),
+                                                  ),
+                                                ),
+                                              ),
+                                            ),
+                                          ],
+                                        ),
+                                      ),
+                                    ],
+                                  ),
+                                ),
+                                Expanded(
+                                  child: Padding(
+                                    padding: const EdgeInsets.symmetric(horizontal: 10),
+                                    child: Column(
+                                      crossAxisAlignment: CrossAxisAlignment.start,
+                                      mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                                      children: [
+                                        Text(
+                                          widget.projectList![index]['title'],
+                                          maxLines: 1,
+                                          overflow: TextOverflow.ellipsis,
+                                          style: const TextStyle(
+                                            color: Color(0xff333333),
+                                            fontSize: 12.5,
+                                            fontWeight: FontWeight.w500,
                                           ),
                                         ),
-                                      ],
-                                    ),
-                                    Padding(
-                                      padding: const EdgeInsets.only(left:10,right: 10),
-                                      child: Column(
-                                        crossAxisAlignment: CrossAxisAlignment.start,
-                                        mainAxisAlignment:
-                                        MainAxisAlignment.spaceEvenly,
-                                        children: [
-                                          const SizedBox(height: 6,),
-                                          Text(
-                                            widget.projectList![index]['title'],
-                                            maxLines: 1,
-                                            overflow: TextOverflow.ellipsis,
-                                            style: const TextStyle(
-                                                color: Color(0xff333333),
-                                                fontSize: 12.5,
-                                                fontWeight: FontWeight.w500
-                                            ),
-                                          ),
-                                          const SizedBox(height: 4,),
-                                        if(widget.projectList![index]['min_price'] == null)
+
+                                        if (widget.projectList![index]['min_price'] == null)
                                           Row(
                                             children: [
                                               Text(
-                                                '₹${widget.projectList![index]['project_details'].length > 0 ? formatAmount(widget.projectList![index]['project_details'][0]['avg_price'] ?? 0) : 0}'
-                                                    .toString(),
-                                                maxLines: 1,
-                                                overflow: TextOverflow.ellipsis,
+                                                '₹${widget.projectList![index]['project_details'].isNotEmpty
+                                                    ? formatAmount(widget.projectList![index]['project_details'][0]['avg_price'] ?? 0)
+                                                    : 0}',
                                                 style: const TextStyle(
-                                                    color: Color(0xff333333),
-                                                    fontSize: 12,
-                                                    fontFamily: 'Robato',
-                                                    fontWeight: FontWeight.w500
+                                                  color: Color(0xff333333),
+                                                  fontSize: 12,
+                                                  fontFamily: 'Robato',
+                                                  fontWeight: FontWeight.w500,
                                                 ),
                                               ),
                                               Padding(
                                                 padding: const EdgeInsets.symmetric(horizontal: 8.0),
-                                                child: Container(
-                                                  height: 12,
-                                                  width: 2,
-                                                  color: Colors.black54,
-                                                ),
+                                                child: Container(height: 12, width: 2, color: Colors.black54),
                                               ),
                                               Text(
-                                                '${widget.projectList![index]['project_details'].length > 0 ? formatAmount(widget.projectList![index]['project_details'][0]['size'] ?? 0) : 0} Sq.ft'
-                                                    .toString(),
-                                                maxLines: 1,
-                                                overflow: TextOverflow.ellipsis,
+                                                '${widget.projectList![index]['project_details'].isNotEmpty
+                                                    ? formatAmount(widget.projectList![index]['project_details'][0]['size'] ?? 0)
+                                                    : 0} Sq.ft',
                                                 style: const TextStyle(
-                                                    color: Color(0xffa2a2a2),
-                                                    fontSize: 9,
-                                                    fontWeight: FontWeight.w500
+                                                  color: Color(0xffa2a2a2),
+                                                  fontSize: 9,
+                                                  fontWeight: FontWeight.w500,
                                                 ),
                                               ),
                                             ],
                                           ),
-                                        if(widget.projectList![index]['min_price'] != null)
-                                          ...[
-                                            Row(
-                                              children: [
-                                                Text(
-                                                  '₹${formatAmount(widget.projectList![index]['min_price'] ?? 0)} - ${formatAmount(widget.projectList![index]['max_price'] ?? 0)}'
-                                                      .toString(),
-                                                  maxLines: 1,
-                                                  overflow: TextOverflow.ellipsis,
-                                                  style: const TextStyle(
-                                                      color: Color(0xff333333),
-                                                      fontSize: 12,
-                                                      fontFamily: 'Robato',
-                                                      fontWeight: FontWeight.w500
-                                                  ),
-                                                ),
-                                              ],
-                                            ),
-                                          ],
-                                        if(widget.projectList![index]['min_price'] != null)
-                                          ...[
-                                            const SizedBox(height: 5,),
-                                            Row(
-                                              children: [
-                                                Text(
-                                                  '${widget.projectList![index]['min_size']} - ${widget.projectList![index]['max_size']} Sq.ft'
-                                                      .toString(),
-                                                  maxLines: 1,
-                                                  overflow: TextOverflow.ellipsis,
-                                                  style: const TextStyle(
-                                                      color: Color(0xffa2a2a2),
-                                                      fontSize: 10,
-                                                      fontWeight: FontWeight.w500
-                                                  ),
-                                                ),
-                                              ],
-                                            ),
-                                          ],
-                                          const SizedBox(height: 4,),
-                                          if (widget.projectList![index]['address'] != "")
-                                            Padding(
-                                              padding: const EdgeInsets.only(bottom: 4),
-                                              child: Row(
-                                                children: [
-                                                  Image.asset("assets/Home/__location.png",width:15,fit: BoxFit.cover,height: 15,),
-                                                  const SizedBox(width: 5,),
-                                                  Expanded(
-                                                      child: Text(
-                                                        widget.projectList![index]['address']?.trim() ?? "",  maxLines: 1,
-                                                        overflow: TextOverflow.ellipsis,
-                                                        style: const TextStyle(
-                                                            color: Color(0xffa2a2a2),
-                                                            fontSize: 9,
-                                                            fontWeight: FontWeight.w400
-                                                        ),)
-                                                  )
-                                                ],
-                                              ),
-                                            ),
-                                          const SizedBox(height: 4,),
-                                          const Row(
-                                            mainAxisAlignment: MainAxisAlignment.end,
+                                        if (widget.projectList![index]['min_price'] != null)
+                                          Row(
                                             children: [
-                                              // Text("Posted By ${premiumPropertiesList[i]['role'] == 1 ? 'Owner' : premiumPropertiesList[i]['role'] == 2 ? 'Agent' : premiumPropertiesList[i]['role'] == 3 ? 'Builder' : 'Housepecker'}",
-                                              //   maxLines: 1,
-                                              //   overflow: TextOverflow.ellipsis,
-                                              //   style: TextStyle(
-                                              //       color: Color(0xffa2a2a2),
-                                              //       fontSize: 8,
-                                              //       fontWeight: FontWeight.w400
-                                              //   ),
-                                              // ),
+                                              Text(
+                                                '₹${formatAmount(widget.projectList![index]['min_price'] ?? 0)} - ${formatAmount(widget.projectList![index]['max_price'] ?? 0)}',
+                                                style: const TextStyle(
+                                                  color: Color(0xff333333),
+                                                  fontSize: 12,
+                                                  fontFamily: 'Robato',
+                                                  fontWeight: FontWeight.w500,
+                                                ),
+                                              ),
                                             ],
                                           ),
-                                        ],
-                                      ),
+                                        if (widget.projectList![index]['min_price'] != null)
+
+                                        if (widget.projectList![index]['min_price'] != null)
+                                          Row(
+                                            children: [
+                                              Text(
+                                                '${widget.projectList![index]['min_size']} - ${widget.projectList![index]['max_size']} Sq.ft',
+                                                style: const TextStyle(
+                                                  color: Color(0xffa2a2a2),
+                                                  fontSize: 10,
+                                                  fontWeight: FontWeight.w500,
+                                                ),
+                                              ),
+                                            ],
+                                          ),
+
+                                        if (widget.projectList![index]['address'] != "")
+                                          Padding(
+                                            padding: const EdgeInsets.only(bottom: 4),
+                                            child: Row(
+                                              children: [
+                                                Image.asset("assets/Home/__location.png", width: 15, height: 15),
+                                                const SizedBox(width: 5),
+                                                Expanded(
+                                                  child: Text(
+                                                    widget.projectList![index]['address']?.trim() ?? "",
+                                                    maxLines: 1,
+                                                    overflow: TextOverflow.ellipsis,
+                                                    style: const TextStyle(
+                                                      color: Color(0xffa2a2a2),
+                                                      fontSize: 9,
+                                                      fontWeight: FontWeight.w500,
+                                                    ),
+                                                  ),
+                                                ),
+                                              ],
+                                            ),
+                                          ),
+                                      ],
                                     ),
-                                  ],
+                                  ),
                                 ),
                               ],
                             ),
-                          )
+                          ],
+                        ),
                       ),
                     ),
                   );
@@ -3434,13 +3393,14 @@ class _RecentPropertiesSectionWidgetState
                   return const ClipRRect(
                     clipBehavior: Clip.antiAliasWithSaveLayer,
                     borderRadius: BorderRadius.all(Radius.circular(15)),
-                    child: CustomShimmer(height: 90, width: 90),
+                    child: CustomShimmer(height: 190, width: 170),
                   );
                 }
               },
-            ),
+            ):Center(child: Text(  "No data available for this city"),),
           );
-        }),
+        })
+
       ],
     );
   }

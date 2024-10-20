@@ -297,142 +297,143 @@ class PropertyHorizontalCard extends StatelessWidget {
                         )
                     ],
                   ),
-                  Padding(
-                    padding: const EdgeInsets.only(left:10,right: 10),
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      mainAxisAlignment:
-                          MainAxisAlignment.spaceEvenly,
-                      children: [
-                        SizedBox(height: 6,),
-                        Text(
-                          property.title!.firstUpperCase(),
-                          maxLines: 1,
-                          overflow: TextOverflow.ellipsis,
-                          style: TextStyle(
-                              color: Color(0xff333333),
-                              fontSize: 12.5,
-                              fontWeight: FontWeight.w500
+                  Expanded(
+                    child: Padding(
+                      padding: const EdgeInsets.only(left:10,right: 10),
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        mainAxisAlignment:
+                            MainAxisAlignment.spaceEvenly,
+                        children: [
+                        
+                          Text(
+                            property.title!.firstUpperCase(),
+                            maxLines: 1,
+                            overflow: TextOverflow.ellipsis,
+                            style: TextStyle(
+                                color: Color(0xff333333),
+                                fontSize: 12.5,
+                                fontWeight: FontWeight.w500
+                            ),
                           ),
-                        ),
-                        SizedBox(height: 4,),
-                        Row(
-                          children: [
-                            if (property.properyType
-                                .toString()
-                                .toLowerCase() ==
-                                "rent") ...[
-                              Text(
-                                '₹${rentPrice}',
-                                maxLines: 1,
-                                overflow: TextOverflow.ellipsis,
-                                style: TextStyle(
-                                    color: Color(0xff333333),
-                                    fontSize: 12,
-                                    fontFamily: 'Roboto',
-                                    fontWeight: FontWeight.w500
+                         
+                          Row(
+                            children: [
+                              if (property.properyType
+                                  .toString()
+                                  .toLowerCase() ==
+                                  "rent") ...[
+                                Text(
+                                  '₹${rentPrice}',
+                                  maxLines: 1,
+                                  overflow: TextOverflow.ellipsis,
+                                  style: TextStyle(
+                                      color: Color(0xff333333),
+                                      fontSize: 12,
+                                      fontFamily: 'Roboto',
+                                      fontWeight: FontWeight.w500
+                                  ),
                                 ),
-                              ),
-                            ] else ...[
-                              Text(
-                                '₹${formatAmount(int.parse(property.price!))}',
-                                // // .priceFormate(
-                                // //     disabled:
-                                // //         Constant.isNumberWithSuffix ==
-                                // //             false)
-                                //     .toString()
-                                //     .formatAmount(
-                                //   prefix: true,
-                                // ),
-                                maxLines: 1,
-                                overflow: TextOverflow.ellipsis,
-                                style: TextStyle(
-                                    color: Color(0xff333333),
-                                    fontSize: 12,
-                                    fontFamily: 'Roboto',
-                                    fontWeight: FontWeight.w500
-                                ),
-                              )
-                            ],
-                            Padding(
-                              padding: const EdgeInsets.symmetric(horizontal: 4),
-                              child: Container(
-                                height: 12,
-                                width: 2,
-                                color: Colors.black54,
-                              ),
-                            ),
-                            Text("${property.sqft} Sq.ft",
-                              maxLines: 1,
-                              overflow: TextOverflow.ellipsis,
-                              style: TextStyle(
-                                  color: Color(0xffa2a2a2),
-                                  fontSize: 9,
-                                  fontWeight: FontWeight.w400
-                              ),
-                            ),
-                          ],
-                        ),
-                        SizedBox(height: 4,),
-                        if (property.city != "")
-                          Padding(
-                            padding: const EdgeInsets.only(bottom: 4),
-                            child: Row(
-                              children: [
-                                Image.asset("assets/Home/__location.png",width:15,fit: BoxFit.cover,height: 15,),
-                                SizedBox(width: 5,),
-                                Expanded(
-                                  child: Text(
-                                      property.address?.trim() ?? "",  maxLines: 1,
-                                    overflow: TextOverflow.ellipsis,
-                                    style: TextStyle(
-                                        color: Color(0xffa2a2a2),
-                                        fontSize: 9,
-                                        fontWeight: FontWeight.w400
-                                    ),)
+                              ] else ...[
+                                Text(
+                                  '₹${formatAmount(int.parse(property.price!))}',
+                                  // // .priceFormate(
+                                  // //     disabled:
+                                  // //         Constant.isNumberWithSuffix ==
+                                  // //             false)
+                                  //     .toString()
+                                  //     .formatAmount(
+                                  //   prefix: true,
+                                  // ),
+                                  maxLines: 1,
+                                  overflow: TextOverflow.ellipsis,
+                                  style: TextStyle(
+                                      color: Color(0xff333333),
+                                      fontSize: 12,
+                                      fontFamily: 'Roboto',
+                                      fontWeight: FontWeight.w500
+                                  ),
                                 )
                               ],
-                            ),
+                              Padding(
+                                padding: const EdgeInsets.symmetric(horizontal: 4),
+                                child: Container(
+                                  height: 12,
+                                  width: 2,
+                                  color: Colors.black54,
+                                ),
+                              ),
+                              Text("${property.sqft} Sq.ft",
+                                maxLines: 1,
+                                overflow: TextOverflow.ellipsis,
+                                style: TextStyle(
+                                    color: Color(0xffa2a2a2),
+                                    fontSize: 9,
+                                    fontWeight: FontWeight.w400
+                                ),
+                              ),
+                            ],
                           ),
-                        // UiUtils.imageType(
-                        //     property.category!.image ?? "",
-                        //     width: 18,
-                        //     height: 18,
-                        //     color: Constant.adaptThemeColorSvg
-                        //         ? context.color.tertiaryColor
-                        //         : null),
-                        // const SizedBox(
-                        //   width: 5,
-                        // ),
-                        // Text(property.category!.category!)
-                        //     .setMaxLines(lines: 1)
-                        //     .size(
-                        //       context.font.small
-                        //           .rf(context),
-                        //     )
-                        //     .bold(
-                        //       weight: FontWeight.w400,
-                        //     )
-                        //     .color(
-                        //       context.color.textLightColor,
-                        //     ),
-
-                        SizedBox(height: 5,),
-                        Row(
-                          mainAxisAlignment: MainAxisAlignment.end,
-                          children: [
-                            Text("Posted By ${property.customerRole == 1 ? 'Owner' : property.customerRole == 2 ? 'Agent' : property.customerRole == 3 ? 'Builder' : 'Housepecker'}",
-                              maxLines: 1,
-                              overflow: TextOverflow.ellipsis,
-                              style: TextStyle(
-                                  color: Color(0xffa2a2a2),
-                                  fontSize: 8,
-                                  fontWeight: FontWeight.w400
+                                    
+                          if (property.city != "")
+                            Padding(
+                              padding: const EdgeInsets.only(bottom: 4),
+                              child: Row(
+                                children: [
+                                  Image.asset("assets/Home/__location.png",width:15,fit: BoxFit.cover,height: 15,),
+                                  SizedBox(width: 5,),
+                                  Expanded(
+                                    child: Text(
+                                        property.address?.trim() ?? "",  maxLines: 1,
+                                      overflow: TextOverflow.ellipsis,
+                                      style: TextStyle(
+                                          color: Color(0xffa2a2a2),
+                                          fontSize: 9,
+                                          fontWeight: FontWeight.w400
+                                      ),)
+                                  )
+                                ],
                               ),
                             ),
-                          ],
-                        ),
-                      ],
+                          // UiUtils.imageType(
+                          //     property.category!.image ?? "",
+                          //     width: 18,
+                          //     height: 18,
+                          //     color: Constant.adaptThemeColorSvg
+                          //         ? context.color.tertiaryColor
+                          //         : null),
+                          // const SizedBox(
+                          //   width: 5,
+                          // ),
+                          // Text(property.category!.category!)
+                          //     .setMaxLines(lines: 1)
+                          //     .size(
+                          //       context.font.small
+                          //           .rf(context),
+                          //     )
+                          //     .bold(
+                          //       weight: FontWeight.w400,
+                          //     )
+                          //     .color(
+                          //       context.color.textLightColor,
+                          //     ),
+                          
+                          Row(
+                            mainAxisAlignment: MainAxisAlignment.end,
+                            children: [
+                              Text("Posted By ${property.customerRole == 1 ? 'Owner' : property.customerRole == 2 ? 'Agent' : property.customerRole == 3 ? 'Builder' : 'Housepecker'}",
+                                maxLines: 1,
+                                overflow: TextOverflow.ellipsis,
+                                style: TextStyle(
+                                    color: Color(0xffa2a2a2),
+                                    fontSize: 8,
+                                    fontWeight: FontWeight.w400
+                                ),
+                              ),
+                            ],
+                          ),
+                        ],
+                      ),
                     ),
                   ),
 
