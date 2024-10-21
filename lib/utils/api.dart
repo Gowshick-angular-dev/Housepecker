@@ -110,6 +110,7 @@ class Api {
   static String getUserDetails = "get_users";
   static String reportReason = "add_reports";
   static String getVenturetype = "get_post_type";
+  static String propertyAddOn = "addon";
 
   ///
   static String createPaymentIntent = "createPaymentIntent";

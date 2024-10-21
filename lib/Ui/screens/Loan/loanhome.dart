@@ -206,13 +206,13 @@ class _LoanHomeState extends State<LoanHome> {
                             child: Padding(
                               padding: const EdgeInsets.only(left: 8.0,right: 5),
                               child: TextFormField(
-                                controller: locationControler,
+                                controller: searchControler,
                                 onChanged: (String? val) {
-                                  getBanks(loanType, searchControler.text, val!, branchControler.text);
+                                  getBanks(loanType, val!, locationControler.text, branchControler.text);
                                 },
                                 style: TextStyle(fontSize: 12),
                                 decoration: const InputDecoration(
-                                    hintText: 'Location..',
+                                    hintText: 'search Bank..',
                                     hintStyle: TextStyle(
                                       fontFamily: 'Manrope',
                                       fontSize: 12.0,
@@ -234,94 +234,141 @@ class _LoanHomeState extends State<LoanHome> {
                             ),
                           ),
                         ),
-                        SizedBox(width: 10,),
-                        // Expanded(
-                        //   child: Container(
-                        //     decoration: BoxDecoration(
-                        //       border: Border.all(
-                        //           width: 1,
-                        //           color: Color(0xffe1e1e1)
-                        //       ),
-                        //       color: Color(0xfff5f5f5),
-                        //       borderRadius: BorderRadius.circular(10.0), // Optional: Add border radius
+                        // SizedBox(width: 10,),
+                        // // Expanded(
+                        // //   child: Container(
+                        // //     decoration: BoxDecoration(
+                        // //       border: Border.all(
+                        // //           width: 1,
+                        // //           color: Color(0xffe1e1e1)
+                        // //       ),
+                        // //       color: Color(0xfff5f5f5),
+                        // //       borderRadius: BorderRadius.circular(10.0), // Optional: Add border radius
+                        // //     ),
+                        // //     child: Padding(
+                        // //       padding: const EdgeInsets.only(left: 8.0,right: 5),
+                        // //       child: TextFormField(
+                        // //         controller: branchControler,
+                        // //         onChanged: (String? val) {
+                        // //           getBanks(loanType, searchControler.text, locationControler.text, val!);
+                        // //         },
+                        // //         decoration: const InputDecoration(
+                        // //             hintText: 'Branch..',
+                        // //             hintStyle: TextStyle(
+                        // //               fontFamily: 'Poppins',
+                        // //               fontSize: 14.0,
+                        // //               color: Color(0xff9c9c9c),
+                        // //               fontWeight: FontWeight.w500,
+                        // //               decoration: TextDecoration.none,
+                        // //             ),
+                        // //             enabledBorder: UnderlineInputBorder(
+                        // //               borderSide: BorderSide(
+                        // //                 color: Colors.transparent,
+                        // //               ),
+                        // //             ),
+                        // //             focusedBorder: UnderlineInputBorder(
+                        // //                 borderSide: BorderSide(
+                        // //                   color: Colors.transparent,
+                        // //                 ))
+                        // //         ),
+                        // //       ),
+                        // //     ),
+                        // //   ),
+                        // // ),
+                        // // SizedBox(width: 5,),
+                        // Container(
+                        //   decoration: BoxDecoration(
+                        //     border: Border.all(
+                        //         width: 1,
+                        //         color: Color(0xffe1e1e1)
                         //     ),
-                        //     child: Padding(
-                        //       padding: const EdgeInsets.only(left: 8.0,right: 5),
-                        //       child: TextFormField(
-                        //         controller: branchControler,
-                        //         onChanged: (String? val) {
-                        //           getBanks(loanType, searchControler.text, locationControler.text, val!);
-                        //         },
-                        //         decoration: const InputDecoration(
-                        //             hintText: 'Branch..',
-                        //             hintStyle: TextStyle(
-                        //               fontFamily: 'Poppins',
-                        //               fontSize: 14.0,
-                        //               color: Color(0xff9c9c9c),
-                        //               fontWeight: FontWeight.w500,
-                        //               decoration: TextDecoration.none,
-                        //             ),
-                        //             enabledBorder: UnderlineInputBorder(
-                        //               borderSide: BorderSide(
-                        //                 color: Colors.transparent,
-                        //               ),
-                        //             ),
-                        //             focusedBorder: UnderlineInputBorder(
-                        //                 borderSide: BorderSide(
-                        //                   color: Colors.transparent,
-                        //                 ))
+                        //     color: Color(0xfff5f5f5),
+                        //     borderRadius: BorderRadius.circular(10.0), // Optional: Add border radius
+                        //   ),
+                        //   child: Padding(
+                        //     padding: const EdgeInsets.only(left: 8.0,right: 5),
+                        //     child: DropdownButtonHideUnderline(
+                        //       child: DropdownButton(
+                        //         borderRadius: BorderRadius.circular(8),
+                        //         elevation: 1,
+                        //         dropdownColor:Colors.white,
+                        //         value: loanType,
+                        //         style: TextStyle(
+                        //           color: Color(0xff848484),
+                        //           fontSize: 11,
+                        //           fontWeight: FontWeight.w400,
+                        //           decoration: TextDecoration.none,
                         //         ),
+                        //         // icon: Icon(Icons.keyboard_arrow_down,color:Colors.black,size: 15,),
+                        //         items: [DropdownMenuItem(
+                        //             value: '',
+                        //             child: Text('Loan Type', maxLines: 1,style: TextStyle(fontFamily: 'Manrope',fontSize: 12),),
+                        //             enabled: true,
+                        //         ), ...loanList.map((items) {
+                        //           return DropdownMenuItem(
+                        //               value: items['id'].toString(),
+                        //               child: Text(items['name'], maxLines: 1,style: TextStyle(fontSize: 13, color: Colors.black87),)
+                        //           );
+                        //         }
+                        //         ).toList()],
+                        //         onChanged: (String? newValue){
+                        //           setState(() {
+                        //             loanType = newValue!;
+                        //           });
+                        //           getBanks(newValue!, searchControler.text, locationControler.text, branchControler.text);
+                        //         },
                         //       ),
                         //     ),
                         //   ),
                         // ),
-                        // SizedBox(width: 5,),
-                        Container(
-                          decoration: BoxDecoration(
-                            border: Border.all(
-                                width: 1,
-                                color: Color(0xffe1e1e1)
+                      ],
+                    ),
+                    SizedBox(height: 15,),
+                    Container(
+                      width: double.infinity,
+                      decoration: BoxDecoration(
+                        border: Border.all(
+                            width: 1,
+                            color: Color(0xffe1e1e1)
+                        ),
+                        color: Color(0xfff5f5f5),
+                        borderRadius: BorderRadius.circular(10.0), // Optional: Add border radius
+                      ),
+                      child: Padding(
+                        padding: const EdgeInsets.only(left: 8.0,right: 5),
+                        child: DropdownButtonHideUnderline(
+                          child: DropdownButton(
+                            borderRadius: BorderRadius.circular(8),
+                            elevation: 1,
+                            dropdownColor:Colors.white,
+                            value: loanType,
+                            style: TextStyle(
+                              color: Color(0xff848484),
+                              fontSize: 11,
+                              fontWeight: FontWeight.w400,
+                              decoration: TextDecoration.none,
                             ),
-                            color: Color(0xfff5f5f5),
-                            borderRadius: BorderRadius.circular(10.0), // Optional: Add border radius
-                          ),
-                          child: Padding(
-                            padding: const EdgeInsets.only(left: 8.0,right: 5),
-                            child: DropdownButtonHideUnderline(
-                              child: DropdownButton(
-                                borderRadius: BorderRadius.circular(8),
-                                elevation: 1,
-                                dropdownColor:Colors.white,
-                                value: loanType,
-                                style: TextStyle(
-                                  color: Color(0xff848484),
-                                  fontSize: 11,
-                                  fontWeight: FontWeight.w400,
-                                  decoration: TextDecoration.none,
-                                ),
-                                // icon: Icon(Icons.keyboard_arrow_down,color:Colors.black,size: 15,),
-                                items: [DropdownMenuItem(
-                                    value: '',
-                                    child: Text('Loan Type', maxLines: 1,style: TextStyle(  fontFamily: 'Manrope',fontSize: 12),),
-                                    enabled: false,
-                                ), ...loanList.map((items) {
-                                  return DropdownMenuItem(
-                                      value: items['id'].toString(),
-                                      child: Text(items['name'], maxLines: 1,style: TextStyle(fontSize: 12),)
-                                  );
-                                }
-                                ).toList()],
-                                onChanged: (String? newValue){
-                                  setState(() {
-                                    loanType = newValue!;
-                                  });
-                                  getBanks(newValue!, searchControler.text, locationControler.text, branchControler.text);
-                                },
-                              ),
-                            ),
+                            // icon: Icon(Icons.keyboard_arrow_down,color:Colors.black,size: 15,),
+                            items: [DropdownMenuItem(
+                              value: '',
+                              child: Text('Loan Type', maxLines: 1,style: TextStyle(fontFamily: 'Manrope',fontSize: 12),),
+                              enabled: true,
+                            ), ...loanList.map((items) {
+                              return DropdownMenuItem(
+                                  value: items['id'].toString(),
+                                  child: Text(items['name'], maxLines: 1,style: TextStyle(fontSize: 13, color: Colors.black87),)
+                              );
+                            }
+                            ).toList()],
+                            onChanged: (String? newValue){
+                              setState(() {
+                                loanType = newValue!;
+                              });
+                              getBanks(newValue!, searchControler.text, locationControler.text, branchControler.text);
+                            },
                           ),
                         ),
-                      ],
+                      ),
                     ),
                     SizedBox(height: 25,),
                     Text('Select Type',style: TextStyle(
@@ -460,13 +507,21 @@ class _LoanHomeState extends State<LoanHome> {
                           },
                           child: Container(
                             decoration: BoxDecoration(
-                              image: DecorationImage(image: NetworkImage(item['image']!),fit: BoxFit.contain),
+                              // image: DecorationImage(image: NetworkImage(item['image']!),fit: BoxFit.contain),
                               border: Border.all(
                                 color: item['id'].toString() == selectedBank ? Color(0xffffb239) : Color(0xffe5e5e5),
                                 width: item['id'].toString() == selectedBank ? 3 : 1
                               ),
                               borderRadius: BorderRadius.circular(15),
-                            ),alignment: Alignment.center,
+                            ),
+                            alignment: Alignment.center,
+                            child: Image.network(item['image']!,
+                                fit: BoxFit.contain
+                            ),
+                            // child: UiUtils.getImage(
+                            //   item['image']!,
+                            //   fit: BoxFit.contain,
+                            // ),
                           ),
                         );
                       },
@@ -550,7 +605,7 @@ class _LoanHomeState extends State<LoanHome> {
                 'search': '',
                 'location': '',
                 'branch': '',
-                'loan': '',
+                'loan': '${loanType}',
               });
               if(!responseAgent['error']) {
                 setState(() {
@@ -559,7 +614,7 @@ class _LoanHomeState extends State<LoanHome> {
                 });
                 Navigator.push(
                   context,
-                  MaterialPageRoute(builder: (context) => LoanList(agents: responseAgent['data'])),
+                  MaterialPageRoute(builder: (context) => LoanList(agents: responseAgent['data'], bank: selectedBank, agentType: agentType, loanType: loanType)),
                 );
               }
             },

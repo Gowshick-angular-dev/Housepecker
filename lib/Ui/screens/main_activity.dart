@@ -66,6 +66,7 @@ ScrollController homeScreenController = ScrollController();
 ScrollController chatScreenController = ScrollController();
 ScrollController sellScreenController = ScrollController();
 ScrollController rentScreenController = ScrollController();
+ScrollController allScreenController = ScrollController();
 ScrollController profileScreenController = ScrollController();
 
 List<ScrollController> controllerList = [

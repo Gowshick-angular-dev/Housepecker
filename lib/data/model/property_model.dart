@@ -22,7 +22,7 @@ class PropertyModel {
       this.customerRole,
       this.rera,
       this.price,
-        this.code,
+      this.code,
       this.category,
       this.builtUpArea,
       this.plotArea,
@@ -72,7 +72,8 @@ class PropertyModel {
       this.metaImage,
       this.viewContact,
       this.titleimagehash,
-      this.companyName
+      this.companyName,
+      this.addOn
       });
 
   final int? id;
@@ -137,6 +138,7 @@ class PropertyModel {
   final dynamic advertisment;
   final String? slugId;
   final String? companyName;
+  final dynamic addOn;
 
   PropertyModel copyWith(
           {int? id,
@@ -187,7 +189,8 @@ class PropertyModel {
           String? video,
           dynamic advertisment,
           String? rentduration,
-            String? companyName,
+          String? companyName,
+          dynamic addOn,
           String? titleImageHash}) =>
       PropertyModel(
           id: id ?? this.id,
@@ -232,15 +235,16 @@ class PropertyModel {
           favouriteUsers: favouriteUsers ?? this.favouriteUsers,
           interestedUsers: interestedUsers ?? this.interestedUsers,
           totalInterestedUsers:
-              totalInterestedUsers ?? this.totalInterestedUsers,
+          totalInterestedUsers ?? this.totalInterestedUsers,
           totalFavouriteUsers: totalFavouriteUsers ?? this.totalFavouriteUsers,
           parameters: parameters ?? this.parameters,
           amenity: amenity ?? this.amenity,
           threeDImage: threeDimage ?? threeDImage,
           video: video ?? this.video,
           companyName: customerName ?? this.companyName,
+          addOn: addOn ?? this.addOn,
           assignedOutdoorFacility:
-              assignedOutdoorFacility ?? this.assignedOutdoorFacility,
+          assignedOutdoorFacility ?? this.assignedOutdoorFacility,
           titleimagehash: titleImageHash ?? titleimagehash);
 
   factory PropertyModel.fromMap(Map<String, dynamic> rawjson) {
@@ -310,6 +314,7 @@ class PropertyModel {
         isPremium: Adapter.forceInt(rawjson["is_premium"]),
         isDeal: Adapter.forceInt(rawjson["is_deal"]),
         companyName: rawjson['company_name'],
+        addOn: rawjson['addon'],
         favouriteUsers: rawjson["favourite_users"] == null
             ? null
             : List<dynamic>.from(rawjson["favourite_users"].map((x) => x)),
@@ -389,6 +394,7 @@ class PropertyModel {
         "is_interested": isInterested,
         "is_premium": isPremium,
         "is_deal": isDeal,
+        "add_on": addOn,
         "favourite_users": favouriteUsers == null
             ? null
             : List<dynamic>.from(favouriteUsers?.map((x) => x) ?? []),

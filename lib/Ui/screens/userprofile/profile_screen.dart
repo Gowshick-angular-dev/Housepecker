@@ -417,7 +417,7 @@ class _ProfileScreenState extends State<ProfileScreen>
                                 Row(
                                   children: [
                                     // Icon(Icons.ads_click_sharp),
-                                    Text('${systemSetting != null ? systemSetting!['my_property_count'] : 0}',
+                                    Text('${systemSetting != null ? (int.parse(systemSetting!['property_view']) + int.parse(systemSetting!['project_view'])) : 0}',
                                       style: TextStyle(
                                           fontSize: 13,
                                           color: Colors.black54,

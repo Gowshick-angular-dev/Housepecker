@@ -229,9 +229,10 @@ class _MyProjectScreenState extends State<MyProjectScreen> {
                                         SizedBox(width: 2,),
                                         Expanded(
                                           child: Text('${item['address']}',
-                                            maxLines: 2,overflow:TextOverflow.ellipsis,
+                                            maxLines: 1,
+                                            overflow:TextOverflow.ellipsis,
                                             style: TextStyle(
-                                              fontSize: 9,
+                                              fontSize: 11,
                                               color: Color(0xff333333),
                                               fontWeight: FontWeight.w500),
                                           ),
@@ -242,10 +243,10 @@ class _MyProjectScreenState extends State<MyProjectScreen> {
                                       item['project_details'] != null && item['project_details'].isNotEmpty
                                           ? item['project_details'][0]['project_status_name'] ?? ''
                                           : '',
-                                      maxLines: 2,
+                                      maxLines: 1,
                                       overflow: TextOverflow.ellipsis,
                                       style: TextStyle(
-                                        fontSize: 9,
+                                        fontSize: 11,
                                         color: Color(0xff333333),
                                         fontWeight: FontWeight.w500,
                                       ),
@@ -253,10 +254,10 @@ class _MyProjectScreenState extends State<MyProjectScreen> {
                                     Row(
                                       children: [
                                         Text('${item['total_click']} Views',
-                                          maxLines: 2,overflow:TextOverflow.ellipsis,
+                                          maxLines: 1,overflow:TextOverflow.ellipsis,
                                           style: TextStyle(
-                                              fontSize: 9,
-                                              color: Color(0xff333333),
+                                              fontSize: 10,
+                                              color: Colors.black87,
                                               fontWeight: FontWeight.w500),
                                         ),
                                         SizedBox(width: 5,),
@@ -265,11 +266,11 @@ class _MyProjectScreenState extends State<MyProjectScreen> {
                                             color: Color(0xff333333),
                                             fontWeight: FontWeight.w500),),
                                         SizedBox(width: 5,),
-                                        Text('Posted On : ${item['post_created']}',
+                                        Text(' ${item['post_created']}',
                                           maxLines: 2,overflow:TextOverflow.ellipsis,
                                           style: TextStyle(
                                               fontSize: 9,
-                                              color: Color(0xff333333),
+                                              color: Color(0xffa2a2a2),
                                               fontWeight: FontWeight.w500),
                                         ),
 

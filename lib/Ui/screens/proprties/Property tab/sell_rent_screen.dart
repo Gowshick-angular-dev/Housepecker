@@ -42,7 +42,7 @@ class _SellRentScreenState extends State<SellRentScreen>
   void initState() {
     super.initState();
     controller = widget.controller..addListener(pageScrollListener);
-    context.read<FetchMyPropertiesCubit>().fetchMyProperties(type: widget.type);
+    context.read<FetchMyPropertiesCubit>().fetchMyProperties(type: widget.type == 'all' ? '' : widget.type);
   }
 
   void pageScrollListener() {
@@ -50,7 +50,7 @@ class _SellRentScreenState extends State<SellRentScreen>
       if (context.read<FetchMyPropertiesCubit>().hasMoreData()) {
         context
             .read<FetchMyPropertiesCubit>()
-            .fetchMoreProperties(type: widget.type);
+            .fetchMoreProperties(type: widget.type == 'all' ? '' : widget.type);
       }
     }
   }
@@ -87,7 +87,7 @@ class _SellRentScreenState extends State<SellRentScreen>
       onRefresh: () async {
         context
             .read<FetchMyPropertiesCubit>()
-            .fetchMyProperties(type: widget.type);
+            .fetchMyProperties(type: widget.type == 'all' ? '' : widget.type);
       },
       child: Scaffold(
        backgroundColor: Colors.white,
@@ -105,7 +105,7 @@ class _SellRentScreenState extends State<SellRentScreen>
                     onRetry: () {
                       context
                           .read<FetchMyPropertiesCubit>()
-                          .fetchMyProperties(type: widget.type);
+                          .fetchMyProperties(type: widget.type == 'all' ? '' : widget.type);
                     },
                   );
                 }
@@ -123,7 +123,7 @@ class _SellRentScreenState extends State<SellRentScreen>
                     onTap: () {
                       context
                           .read<FetchMyPropertiesCubit>()
-                          .fetchMyProperties(type: widget.type);
+                          .fetchMyProperties(type: widget.type == 'all' ? '' : widget.type);
                     },
                   ),
                 );

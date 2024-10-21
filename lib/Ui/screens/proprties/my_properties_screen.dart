@@ -117,6 +117,25 @@ class MyPropertyState extends State<PropertiesScreen>
                     onDoubleTap: () {},
                     name: UiUtils.getTranslatedLabel(context, "rent"),
                   ),
+                  const SizedBox(
+                    width: 5,
+                  ),
+                  customTab(
+                    context,
+                    isSelected: selectTab == 2,
+                    onTap: () {
+                      _pageController.jumpToPage(2);
+                      selectTab = 2;
+                      propertyScreenCurrentPage = 2;
+
+                      cubitReference = context.read<FetchMyPropertiesCubit>();
+                      propertyType = "all";
+
+                      setState(() {});
+                    },
+                    onDoubleTap: () {},
+                    name: "All",
+                  ),
                 ],
               ),
             )
@@ -201,6 +220,14 @@ class MyPropertyState extends State<PropertiesScreen>
                   controller: rentScreenController,
                 ),
               ),
+              BlocProvider(
+                create: (context) => FetchMyPropertiesCubit(),
+                child: SellRentScreen(
+                  type: "all",
+                  key: const Key("2"),
+                  controller: allScreenController,
+                ),
+              ),
             ],
           ),
         ),
@@ -220,7 +247,7 @@ class MyPropertyState extends State<PropertiesScreen>
       onDoubleTap: onDoubleTap,
       child: Container(
         constraints: const BoxConstraints(
-          minWidth: 110,
+          minWidth: 100,
         ),
         height: 40,
         decoration: BoxDecoration(

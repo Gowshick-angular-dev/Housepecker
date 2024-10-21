@@ -203,8 +203,7 @@ class _JointVentureState extends State<JointVenture> {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-
-             Container(
+              Container(
                padding: EdgeInsets.only(left: 8,top: 8,bottom: 8),
                decoration: BoxDecoration(
                  //border: Border.all(  color: Color(0xffebebeb),),
@@ -399,8 +398,6 @@ class _JointVentureState extends State<JointVenture> {
                 ),
               ),
               SizedBox(height: 5,),
-
-
               SizedBox(height: 10,),
               if(Loading)
                 Column(

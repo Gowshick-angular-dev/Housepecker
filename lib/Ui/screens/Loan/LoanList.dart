@@ -3,6 +3,9 @@ import 'package:carousel_slider/carousel_slider.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
+import 'package:google_places_flutter/google_places_flutter.dart';
+import 'package:google_places_flutter/model/place_type.dart';
+import 'package:google_places_flutter/model/prediction.dart';
 
 import '../../../utils/api.dart';
 import '../../../utils/ui_utils.dart';
@@ -13,7 +16,10 @@ import 'LoanDetail.dart';
 class LoanList extends StatefulWidget {
   final List? agents;
   final String? name;
-  const LoanList({super.key, this.agents,this.name});
+  final String? bank;
+  final String? agentType;
+  final String? loanType;
+  const LoanList({super.key, this.agents,this.name, this.bank, this.agentType, this.loanType});
 
   @override
   State<LoanList> createState() => _LoanListState();
@@ -22,11 +28,33 @@ class LoanList extends StatefulWidget {
 class _LoanListState extends State<LoanList> {
 
   List banners = [];
+  List loanList = [];
+  List agentList = [];
   int currentIndex = 0;
+  TextEditingController locationControler = TextEditingController();
+  String locationValue = '';
+  String loanType = '';
+  bool Loading = false;
 
   @override
   void initState() {
     getBanners();
+    getLoanTypes();
+    if(widget.agents != null && widget.agents!.length > 0) {
+      agentList = widget.agents!;
+    }
+    if(widget.loanType != null && widget.loanType != '') {
+      loanType = widget.loanType!;
+    }
+  }
+
+  Future<void> getLoanTypes() async {
+    var response = await Api.get(url: Api.loanTypes);
+    if(!response['error']) {
+      setState(() {
+        loanList = response['data'];
+      });
+    }
   }
 
   void getBanners() async {
@@ -81,6 +109,205 @@ class _LoanListState extends State<LoanList> {
             //   ],
             // ),
             // SizedBox(height: 20,),
+            Container(
+              padding: EdgeInsets.only(left: 8,top: 8,bottom: 8),
+              decoration: BoxDecoration(
+                //border: Border.all(  color: Color(0xffebebeb),),
+                borderRadius: BorderRadius.circular(10),
+                color: Colors.white,
+                boxShadow: [
+                  BoxShadow(
+                    offset: const Offset(0, 1),
+                    blurRadius: 5,
+                    color: Colors.black.withOpacity(0.1),
+                  ),
+                ],
+              ),
+              child: Column(
+                children: [
+                  Container(
+                    padding: EdgeInsets.only(left: 10),
+                    width: double.infinity,
+                    // decoration: BoxDecoration(
+                    //     borderRadius: BorderRadius.circular(10.0),
+                    //     border: Border.all(
+                    //         color: Color(0xffebebeb),
+                    //         width: 1
+                    //     )
+                    // ),
+                    child: Row(
+                      children: [
+                        Image.asset("assets/Home/__location.png",width: 17,height: 17,color:  const Color(0xff117af9),),
+                        SizedBox(width: 10,),
+                        Expanded(
+                          child: GooglePlaceAutoCompleteTextField(
+                            boxDecoration: BoxDecoration(
+                                border: Border.all(color: Colors.transparent)
+                            ),
+                            textEditingController: locationControler,
+                            textStyle: TextStyle(fontSize: 14),
+                            inputDecoration:   const InputDecoration(
+                              hintText: 'Enter City,Locality...',
+                              hintStyle: TextStyle(
+                                fontSize: 14.0,
+                                color: Color(0xff9c9c9c),
+                                fontWeight: FontWeight.w400,
+                                decoration: TextDecoration.none,
+                              ),
+                              border: InputBorder.none,
+                              enabledBorder: InputBorder.none,
+                              focusedBorder: InputBorder.none,
+                            ),
+
+                            googleAPIKey: "AIzaSyDDJ17OjVJ0TS2qYt7GMOnrMjAu1CYZFg8",
+                            debounceTime: 800,
+                            countries: ["in"],
+                            isLatLngRequired: true,
+                            getPlaceDetailWithLatLng: (Prediction prediction) {
+                              print("placeDetails" + prediction.lng.toString());
+                              // lat = prediction.lat.toString();
+                              // lng = prediction.lng.toString();
+                              setState(() { });
+                            },
+                            itemClick: (Prediction prediction) {
+                              locationControler.text = prediction.description!;
+                              locationControler.selection =
+                                  TextSelection.fromPosition(TextPosition(
+                                      offset: prediction.description!.length));
+                              List address = prediction.description!.split(',').reversed.toList();
+                              if(address.length >= 3) {
+                                locationValue = address[2];
+
+                                setState(() { });
+                              } else if(address.length == 2) {
+                                locationValue = address[1];
+
+                                setState(() { });
+                              } else if(address.length == 1) {
+                                locationValue = address[0];
+
+                                setState(() { });
+                              }
+                            },
+                            itemBuilder: (context, index, Prediction prediction) {
+                              return Container(
+                                padding: const EdgeInsets.all(10),
+                                child: Row(
+                                  children: [
+                                    Image.asset("assets/Home/__location.png",width: 17,height: 17,color:  const Color(0xff117af9),),
+                                    const SizedBox(width: 7,),
+                                    Expanded(
+                                        child:
+                                        Text("${prediction.description ?? ""}",style: TextStyle(fontSize: 14,color: Colors.black),))
+                                  ],
+                                ),
+                              );
+                            },
+                            seperatedBuilder: Divider(),
+                            isCrossBtnShown: true,
+                            placeType: PlaceType.geocode,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                  SizedBox(height: 0,),
+                  const Padding(
+                    padding: EdgeInsets.symmetric(horizontal: 15),
+                    child: Divider(thickness: 1.5,),
+                  ),
+                  SizedBox(height: 0,),
+                  Container(
+                    padding: EdgeInsets.only(left: 10,right: 10),
+                    width: double.infinity,
+                    // decoration: BoxDecoration(
+                    //     borderRadius: BorderRadius.circular(10.0),
+                    //     border: Border.all(
+                    //         color: Color(0xffebebeb),
+                    //         width: 1
+                    //     )
+                    // ),
+                    child: Row(
+                      children: [
+                        Image.asset("assets/assets/Images/advertisement.png",height: 20,width: 20,),
+                        SizedBox(width: 10,),
+                        Expanded(
+                          child: DropdownButton(
+                            underline: const SizedBox(),
+                            isExpanded: true,
+                            borderRadius: BorderRadius.circular(8),
+                            elevation: 1,
+                            dropdownColor:Colors.white,
+                            value: loanType,
+                            style: TextStyle(
+                              color: Color(0xff848484),
+                              fontSize: 11,
+                              fontWeight: FontWeight.w400,
+                              decoration: TextDecoration.none,
+                            ),
+                            // icon: Icon(Icons.keyboard_arrow_down,color:Colors.black,size: 15,),
+                            items: [DropdownMenuItem(
+                              value: '',
+                              child: Text('Loan Type', maxLines: 1,style: TextStyle(fontFamily: 'Manrope',fontSize: 12),),
+                              enabled: true,
+                            ), ...loanList.map((items) {
+                              return DropdownMenuItem(
+                                  value: items['id'].toString(),
+                                  child: Text(items['name'], maxLines: 1,style: TextStyle(fontSize: 13, color: Colors.black87),)
+                              );
+                            }
+                            ).toList()],
+                            onChanged: (String? newValue){
+                              setState(() {
+                                loanType = newValue!;
+                              });
+                            },
+                          ),
+                        )
+                      ],
+                    ),
+                  ),
+
+                ],
+              ),
+            ),
+            SizedBox(height: 10,),
+            InkWell(
+              onTap: () async {
+                setState(() {
+                  Loading = true;
+                });
+                var responseAgent = await Api.get(url: Api.agentsList, queryParameters: {
+                  'bank_id': widget.bank,
+                  'agent_type': widget.agentType,
+                  'search': '',
+                  'location': '${locationValue}',
+                  'branch': '',
+                  'loan': '${loanType}',
+                });
+                if(!responseAgent['error']) {
+                  setState(() {
+                    agentList = responseAgent['data'];
+                    Loading = false;
+                  });
+                }
+              },
+              child: Container(
+                height: 45,
+                decoration: BoxDecoration(
+                  color: const Color(0xff117af9),
+                  borderRadius: BorderRadius.circular(30),
+                ),
+                child: Row(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  Image.asset("assets/assets/Images/search.png",height: 30,width: 30,),
+                  Text(Loading ? "Loading..." : "Search",style: TextStyle(fontSize: 15,color: Colors.white,fontWeight: FontWeight.w500),)
+                ],
+              ),
+              ),
+            ),
+            SizedBox(height: 5,),
             Expanded(
               child: ListView.builder(
                 shrinkWrap: true,

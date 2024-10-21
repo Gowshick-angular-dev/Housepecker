@@ -5,7 +5,9 @@ import 'package:Housepecker/utils/Extensions/extensions.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
+import 'package:flutter_downloader/flutter_downloader.dart';
 import 'package:intl/intl.dart';
+import 'package:path_provider/path_provider.dart';
 import 'package:permission_handler/permission_handler.dart';
 
 import '../../../utils/api.dart';
@@ -147,8 +149,18 @@ class _InterestedUsersDetailsState extends State<InterestedUsersDetails> {
                 ),
                 if(intersetedList.isNotEmpty)
                   InkWell(
-                    onTap: (){
-                      generateExcel();
+                    onTap: () async {
+                      // generateExcel();
+                      final Directory? downloadsDirectory = await getExternalStorageDirectory();
+
+                      final taskId = await FlutterDownloader.enqueue(
+                        url: 'https://admin.housepecker.com/api/interested_property_excel?property_id=${widget.propertyId!}',
+                        headers: {},
+                        saveInPublicStorage: true,// optional: header send with url (auth token etc)
+                        savedDir: '${downloadsDirectory!.path}',
+                        showNotification: true, // show download progress in status bar (for Android)
+                        openFileFromNotification: true, // click on notification to open downloaded file (for Android)
+                      );
                     },
                     child: Container(
                       height: 40,
