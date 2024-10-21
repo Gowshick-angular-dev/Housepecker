@@ -478,8 +478,8 @@ class _AddPropertyDetailsState extends State<AddPropertyDetails> {
       appBar: UiUtils.buildAppBar(
         context,
         title: widget.propertyDetails == null
-            ? UiUtils.getTranslatedLabel(context, "Add Post")
-            : UiUtils.getTranslatedLabel(context, "updateProperty"),
+            ? 'Post Property'
+            : 'Update property',
         actions: const [
           Text(
             "2/5",
@@ -1250,7 +1250,7 @@ class _AddPropertyDetailsState extends State<AddPropertyDetails> {
                         text: const TextSpan(
                           children: [
                             TextSpan(
-                              text: "Description",
+                              text: "About Property",
                               style: TextStyle(
                                   color: Colors.black,
                                   fontSize: 15,
@@ -1271,7 +1271,7 @@ class _AddPropertyDetailsState extends State<AddPropertyDetails> {
                         action: TextInputAction.next,
                         controller: _descriptionController,
                         // validator: CustomTextFieldValidator1.nullCheck,
-                        hintText: UiUtils.getTranslatedLabel(context, "writeSomething"),
+                        hintText: 'Enter about property',
                         maxLine: 100,
                         minLine: 6,
                       ),

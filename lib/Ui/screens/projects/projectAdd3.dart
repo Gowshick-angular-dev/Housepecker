@@ -95,10 +95,7 @@ class _ProjectFormThreeState extends State<ProjectFormThree> {
     return Scaffold(
       backgroundColor: Colors.white,
       appBar: UiUtils.buildAppBar(context,
-          title: UiUtils.getTranslatedLabel(
-            context,
-            "Add Project",
-          ),
+          title: widget.isEdit! ? "Update Project" : "Add Project",
           actions: const [
             Text("3/5",style: TextStyle(color: Colors.white)),
             SizedBox(

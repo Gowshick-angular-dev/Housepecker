@@ -271,7 +271,7 @@ class _SetProeprtyParametersScreenState
         ],
         title: widget.isUpdate
             ? UiUtils.getTranslatedLabel(context, "updateProperty")
-            : UiUtils.getTranslatedLabel(context, "Add Post"),
+            : UiUtils.getTranslatedLabel(context, "Add Property"),
       ),
       bottomNavigationBar: Padding(
         padding: const EdgeInsets.symmetric(horizontal: 20.0, vertical: 7),

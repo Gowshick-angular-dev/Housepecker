@@ -237,10 +237,7 @@ class _ProjectFormSecondState extends State<ProjectFormSecond> {
     return Scaffold(
       backgroundColor: Colors.white,
       appBar: UiUtils.buildAppBar(context,
-          title: UiUtils.getTranslatedLabel(
-            context,
-            "Add Project",
-          ),
+          title: widget.isEdit! ? "Update Project" : "Add Project",
           actions: const [
             Text("1/5", style: TextStyle(color: Colors.white)),
             SizedBox(

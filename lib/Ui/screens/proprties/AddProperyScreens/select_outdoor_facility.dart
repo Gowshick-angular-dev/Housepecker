@@ -139,7 +139,7 @@ class _SelectOutdoorFacilityState extends State<SelectOutdoorFacility> {
               width: 14,
             ),
           ],
-          title: "Add Post".translate(context)),
+          title: "Add Property"),
         bottomNavigationBar: BottomAppBar(
           child: GestureDetector(
             onTap: () {

@@ -59,10 +59,7 @@ class _ProjectFormFourState extends State<ProjectFormFour> {
     return Scaffold(
       backgroundColor: Colors.white,
       appBar: UiUtils.buildAppBar(context,
-          title: UiUtils.getTranslatedLabel(
-            context,
-            "Add Project",
-          ),
+          title: widget.isEdit! ? "Update Project" : "Add Project",
           actions: const [
             Text("4/5",style: TextStyle(color: Colors.white)),
             SizedBox(
