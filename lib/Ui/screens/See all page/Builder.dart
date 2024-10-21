@@ -71,7 +71,7 @@ class _TopBuildersState extends State<see_allBuilders> {
     return Scaffold(
       appBar: UiUtils.buildAppBar(context,
           showBackButton: true,
-          title:'Top Agents',
+          title:'Top Builders (${topBuilderList?.length ?? 0})',
           actions: [
           ]),
      /* appBar:  AppBar(
@@ -143,73 +143,80 @@ class _TopBuildersState extends State<see_allBuilders> {
           ],
         ),
       ),*/
-      body: SingleChildScrollView(
-        child: Column(
-          children: [
-            SizedBox(height: 10), // Add space between title and list
-            SizedBox(
-              height: size.height * 0.85, // Fixed height for the list
-              child: builderLoading
-                  ? _buildShimmerList(size) // Show shimmer when loading
-                  : topBuilderList.isEmpty
-                  ? Center(
-                  child: Text(
-                      'No Builders Found')) // Show message if list is empty
-                  : ListView.builder(
-                scrollDirection: Axis.vertical,
-                itemCount: topBuilderList.length,
-                itemBuilder: (context, index) {
-                  return InkWell(
-                    onTap: (){
-                      Navigator.push(context,
-                        MaterialPageRoute(builder: (context) =>
-                            UserDetailProfileScreen(id: topBuilderList[index]['id'] )),
-                      );
-                    },
-                    child: Padding(
-                      padding: const EdgeInsets.only(left: 10, right: 10,bottom: 5),
-                      child: buildAgentCard(size, topBuilderList[index]),
-                    ),
-                  );
-                },
+      body: Column(
+        children: [
+          SizedBox(height: 10),
+          builderLoading
+              ?  Expanded(
+                child: Center(child: Center(
+                            child: UiUtils.progress(
+                normalProgressColor:  const Color(0xff117af9),
+                            ),
+                ),),
+              )
+              : topBuilderList.isEmpty
+              ? const Expanded(
+                child: Center(
+                child: Text(
+                    'No Builders Found')),
+              )
+              : Expanded(
+                child: ListView.builder(
+                            shrinkWrap: true,
+                            scrollDirection: Axis.vertical,
+                            itemCount: topBuilderList.length,
+                            itemBuilder: (context, index) {
+                return InkWell(
+                  onTap: (){
+                    Navigator.push(context,
+                      MaterialPageRoute(builder: (context) =>
+                          UserDetailProfileScreen(id: topBuilderList[index]['id'], isAgent: false, )),
+                    );
+                  },
+                  child: Padding(
+                    padding: const EdgeInsets.only(left: 10, right: 10,bottom: 5),
+                    child: buildAgentCard(size, topBuilderList[index]),
+                  ),
+                );
+                            },
+                          ),
               ),
-            ),
-          ],
-        ),
+        ],
       ),
     );
   }
 
   // Build shimmer effect for loading state
   Widget _buildShimmerList(Size size) {
-    return ListView.builder(
-      scrollDirection: Axis.vertical,
-      itemCount: 10, // Placeholder for 5 shimmer cards
-      itemBuilder: (context, index) {
-        return Padding(
-          padding: const EdgeInsets.only(left: 10, right: 10,bottom: 5),
-          child: Shimmer.fromColors(
-            baseColor: Colors.grey[300]!,
-            highlightColor: Colors.grey[100]!,
-            child: Container(
-              height: size.height * 0.23,
-              width: size.width * 0.7,
-              decoration: BoxDecoration(
-                color: Colors.white,
-                borderRadius: BorderRadius.circular(12),
+    return Expanded(
+      child: ListView.builder(
+        shrinkWrap: true,
+        scrollDirection: Axis.vertical,
+        itemCount: 10, // Placeholder for 5 shimmer cards
+        itemBuilder: (context, index) {
+          return Padding(
+            padding: const EdgeInsets.only(left: 10, right: 10,bottom: 5),
+            child: Shimmer.fromColors(
+              baseColor: Colors.grey[300]!,
+              highlightColor: Colors.grey[100]!,
+              child: Container(
+                height: size.height * 0.23,
+                width: size.width * 0.7,
+                decoration: BoxDecoration(
+                  color: Colors.white,
+                  borderRadius: BorderRadius.circular(12),
+                ),
               ),
             ),
-          ),
-        );
-      },
+          );
+        },
+      ),
     );
   }
 
   // Build the agent card as a reusable widget
   Widget buildAgentCard(Size size, dynamic agent) {
     return Container(
-      height: size.height * 0.23,
-      width: size.width * 0.7,
       decoration: BoxDecoration(
         border: Border.all(color: Color(0xFF9ea1a7)),
         borderRadius: BorderRadius.circular(12),
@@ -253,10 +260,7 @@ class _TopBuildersState extends State<see_allBuilders> {
                       padding: const EdgeInsets.only(top: 5),
                       child: Row(
                         children: [
-                          ImageIcon(
-                            AssetImage('assets/FilterSceen/2.png'),
-                            size: 14,
-                          ),
+                          Image.asset('assets/rera_tic.png', height: 14, width:14),
                           SizedBox(width: 2),
                           Text(
                             'RERA ID : ${agent['rera'] ?? 'N/A'}',
@@ -273,32 +277,29 @@ class _TopBuildersState extends State<see_allBuilders> {
             ),
             SizedBox(height: 10), // Space between agent details and properties
             Container(
-              height: size.height * 0.12,
+              height: size.height * 0.10,
               decoration: BoxDecoration(
                 color: Color(0xFFf5f9ff),
                 borderRadius: BorderRadius.circular(12),
               ),
               child: Row(
-                mainAxisAlignment: MainAxisAlignment.start,
+                mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                 children: [
-              Expanded(
-              child: Column(
+              Column(
               children: [
                   buildPropertyColumn(agent['project_count']?.toString() ?? '0',
                 "Total \nProjects"),
                     ],
-                  ),),
+                  ),
                             const Padding(
                     padding: EdgeInsets.symmetric(vertical: 10),
                     child: VerticalDivider(color: Colors.grey, thickness: 2),
                   ),
-                  Expanded(
-                    child: Column(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      children: [
-                        buildPropertyColumn(agent['city_count']?.toString() ?? '0', "City"),
-                      ],
-                    ),
+                  Column(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      buildPropertyColumn(agent['city_count']?.toString() ?? '0', "City"),
+                    ],
                   ),
                 ],
               ),
@@ -309,21 +310,23 @@ class _TopBuildersState extends State<see_allBuilders> {
     );
   }
 
-  // Build a column for property stats
   Widget buildPropertyColumn(String count, String label) {
     return Column(
+      crossAxisAlignment: CrossAxisAlignment.center,
       children: [
-        SizedBox(height: 5),
+
         Padding(
           padding: const EdgeInsets.symmetric(horizontal: 5),
           child: Text(
             count,
+            textAlign: TextAlign.start,
             style: TextStyle(fontSize: 20, fontWeight: FontWeight.w500),
           ),
         ),
+
         Text(
           label,
-          textAlign: TextAlign.start,
+          textAlign: TextAlign.justify,
           style: TextStyle(
               fontSize: 13,
               fontWeight: FontWeight.w500,

@@ -1,4 +1,5 @@
 import 'dart:io';
+import 'dart:math';
 
 import 'package:flutter/widgets.dart';
 import 'package:Housepecker/Ui/screens/Personalized/personalized_property_screen.dart';
@@ -40,6 +41,8 @@ import '../home/Widgets/property_horizontal_card.dart';
 import '../jointventure/jontventurehome.dart';
 import '../projects/myProjectScreen.dart';
 import '../proprties/my_properties_screen.dart';
+import '../widgets/AnimatedRoutes/blur_page_route.dart';
+import '../widgets/all_gallary_image.dart';
 import '../widgets/blurred_dialoge_box.dart';
 import 'package:url_launcher/url_launcher.dart' as urllauncher;
 
@@ -50,8 +53,9 @@ import 'package:photo_view/photo_view_gallery.dart';
 class UserDetailProfileScreen extends StatefulWidget {
   final int? id;
   final String? name;
+  final bool? isAgent;
 
-  const UserDetailProfileScreen({Key? key, this.id, this.name})
+  const UserDetailProfileScreen({Key? key, this.id, this.name,required this.isAgent})
       : super(key: key);
 
   @override
@@ -63,7 +67,19 @@ class _ProfileScreenState extends State<UserDetailProfileScreen> {
   bool isGuest = false;
   Map? userData;
   bool loading = false;
-  String selectedValue = '0';
+
+
+  List<Map<String, dynamic>> dropDownList = [
+    {"id": 0, "name": "Sell"},
+    {"id": 1, "name": "Rent"},
+  ];
+
+  String? selectedValue;
+  String? selectedStatus;
+  String? selectedCategory;
+
+
+
   int offset = 0, total = 0;
   List<PropertyModel> propertylist = [];
   List propertyLikeLoading = [];
@@ -74,7 +90,9 @@ class _ProfileScreenState extends State<UserDetailProfileScreen> {
   @override
   void initState() {
     getUser();
-    getProperties();
+    getStatus();
+    getCatgory();
+    getProperties(propertyType: "");
     super.initState();
   }
 
@@ -93,13 +111,61 @@ class _ProfileScreenState extends State<UserDetailProfileScreen> {
     }
   }
 
-  Future<void> getProperties() async {
+  List statusList = [];
+
+  Future<void> getStatus() async {
+
+    var response = await Api.get(url: Api.status, queryParameters: {
+      'user_id': widget.id!,
+    });
+    if (!response['error']) {
+      setState(() {
+        statusList = response['data'];
+      });
+    }
+  }
+  
+  List getCatgoryList = [];
+
+  Future<void> getCatgory() async {
+
+    var response = await Api.get(url: Api.apiGetCategories, queryParameters: {
+      'user_id': widget.id!,
+    });
+    if (!response['error']) {
+      setState(() {
+        getCatgoryList = response['data'];
+      });
+    }
+  }
+
+
+  Future<void> getProperties({String? propertyType,String? status,String? categoryId}) async {
     setState(() {
       propertyLoading = true;
     });
+
+    var queryParams = {
+      'offset': offset,
+      'limit': 10.toString(),
+      'userid': widget.id,
+    };
+
+    if (propertyType != null) {
+      queryParams['property_type'] = propertyType;
+    }
+    if (status != null) {
+      queryParams['status'] = status;
+    }
+    if (categoryId != null) {
+      queryParams['category_id'] = categoryId;
+    }
+
     var response = await Api.get(
-        url: Api.apiGetProprty,
-        queryParameters: {'offset': offset, 'limit': 10, 'userid': widget.id});
+      url: Api.apiGetProprty,
+      queryParameters: queryParams,
+    );
+
     if (!response['error']) {
       List<PropertyModel> props = (response['data'] as List)
           .where((e) => e['is_type'] == 'property')
@@ -116,15 +182,16 @@ class _ProfileScreenState extends State<UserDetailProfileScreen> {
     }
   }
 
+
   @override
   Widget build(BuildContext context) {
     Size size = MediaQuery.of(context).size;
     return Scaffold(
-      backgroundColor: Color(0xfff9f9f9),
+      backgroundColor: const Color(0xfff9f9f9),
       appBar: UiUtils.buildAppBar(
         showBackButton: true,
         context,
-        title: 'Agent Profile',
+        title: widget.isAgent == true ? 'Agent Profile':'Builder Profile',
       ),
       body: loading
           ? Center(child: UiUtils.progress(width: 40, height: 40))
@@ -133,758 +200,996 @@ class _ProfileScreenState extends State<UserDetailProfileScreen> {
               child: SingleChildScrollView(
                 controller: profileScreenController,
                 physics: const BouncingScrollPhysics(),
-                child: Padding(
-                  padding: const EdgeInsets.all(8.0),
-                  child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: <Widget>[
-                        Container(
-                          // height: 250,
-                          width: double.infinity,
-                          decoration: BoxDecoration(
-                              color: Colors.white,
-                              borderRadius: BorderRadius.circular(15)),
-                          child: Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            mainAxisAlignment: MainAxisAlignment.start,
-                            children: [
-                              Row(
-                                crossAxisAlignment: CrossAxisAlignment.start,
-                                mainAxisAlignment: MainAxisAlignment.start,
-                                children: [
-                                  Padding(
-                                    padding: const EdgeInsets.all(8.0),
-                                    child: ClipRRect(
-                                      borderRadius: BorderRadius.circular(60),
-                                      child: profileImgWidget(context),
-                                    ),
+                child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: <Widget>[
+                      Container(
+                        margin: EdgeInsets.all(15),
+                        // height: 250,
+                        width: double.infinity,
+                        decoration: BoxDecoration(
+                            color: Colors.white,
+                            boxShadow: [
+                              BoxShadow(
+                                offset: const Offset(0, 1),
+                                blurRadius: 5,
+                                color: Colors.black.withOpacity(0.1),
+                              ),
+                            ],
+                            borderRadius: BorderRadius.circular(15)),
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          mainAxisAlignment: MainAxisAlignment.start,
+                          children: [
+                            Row(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              mainAxisAlignment: MainAxisAlignment.start,
+                              children: [
+                                Padding(
+                                  padding: const EdgeInsets.all(8.0),
+                                  child: ClipRRect(
+                                    borderRadius: BorderRadius.circular(60),
+                                    child: profileImgWidget(context),
                                   ),
-                                  Padding(
-                                    padding: const EdgeInsets.only(
-                                        left: 15, top: 15),
-                                    child: Column(
-                                      crossAxisAlignment:
-                                          CrossAxisAlignment.start,
-                                      children: [
-                                        Row(
-                                          children: [
-                                            Text('${userData!['name']}')
-                                                .color(
-                                                    context.color.textColorDark)
-                                                .size(18)
-                                                .bold(weight: FontWeight.w600)
-                                                .setMaxLines(lines: 1),
-                                            SizedBox(
-                                              width: 5,
-                                            ),
-                                            if (userData!['verified'] != 0)
-                                              Icon(
-                                                Icons.verified,
-                                                size: 15,
-                                                color: Colors.black,
-                                              )
-                                          ],
-                                        ),
-                                        if (userData!['company_name'] != null)
-                                          Text('${userData!['company_name']}')
+                                ),
+                                Padding(
+                                  padding: const EdgeInsets.only(
+                                      left: 15, top: 15),
+                                  child: Column(
+                                    crossAxisAlignment:
+                                        CrossAxisAlignment.start,
+                                    children: [
+                                      Row(
+                                        children: [
+                                          Text('${userData!['name']}')
                                               .color(
                                                   context.color.textColorDark)
-                                              .size(13)
-                                              .bold(weight: FontWeight.w400)
+                                              .size(18)
+                                              .bold(weight: FontWeight.w600)
                                               .setMaxLines(lines: 1),
-                                        Text(
-                                          '${userData!['email']}',
-                                          style: TextStyle(fontSize: 13),
-                                          overflow: TextOverflow.ellipsis,
-                                        ),
-                                        SizedBox(
-                                          height: 3,
-                                        ),
-                                        Text(
-                                          '${userData!['mobile']}',
-                                          style: TextStyle(fontSize: 13),
-                                          overflow: TextOverflow.ellipsis,
-                                        ),
-                                      ],
-                                    ),
-                                  ),
-                                ],
-                              ),
-                              Padding(
-                                padding: const EdgeInsets.all(5.0),
-                                child: Container(
-                                  height: 60,
-                                  decoration: BoxDecoration(
-                                      color: Color(0xFFffe6db),
-                                      borderRadius: BorderRadius.circular(10)),
-                                  child: Row(
-                                    children: [
-                                      Expanded(
-                                        child: Column(
-                                          children: [
-                                            Text('${userData!['completed_project'] ?? '--'}')
-                                                .color(Color(0xff333333))
-                                                .size(context.font.larger)
-                                                .setMaxLines(lines: 1),
-                                            Text(
-                                              'Total Projects',
-                                              style: TextStyle(
-                                                  fontSize: 14,
-                                                  color: Colors.black54,
-                                                  fontWeight: FontWeight.w700),
-                                            ),
-                                          ],
-                                        ),
+                                          const SizedBox(
+                                            width: 5,
+                                          ),
+                                          if (userData!['verified'] != 0)
+                                            const Icon(
+                                              Icons.verified,
+                                              size: 15,
+                                              color: Colors.black,
+                                            )
+                                        ],
                                       ),
-                                      Expanded(
-                                        child: Column(
-                                          children: [
-                                            Text('${userData!['experience'] ?? '--'}')
-                                                .color(Color(0xff333333))
-                                                .size(context.font.larger)
-                                                .setMaxLines(lines: 1),
-                                            Text(
-                                              'Experiance',
-                                              style: TextStyle(
-                                                  fontSize: 14,
-                                                  color: Colors.black54,
-                                                  fontWeight: FontWeight.w700),
-                                            ),
-                                          ],
-                                        ),
+                                      if (userData!['company_name'] != null)
+                                        Text('${userData!['company_name']}')
+                                            .color(
+                                                context.color.textColorDark)
+                                            .size(13)
+                                            .bold(weight: FontWeight.w400)
+                                            .setMaxLines(lines: 1),
+                                      Text(
+                                        userData!['email'].length > 4
+                                            ? '${userData!['email'].substring(0, 4)}..@.....'
+                                            : '${userData!['email']}',
+                                        style: const TextStyle(fontSize: 13),
+                                        overflow: TextOverflow.ellipsis,
+                                      ),
+                                      const SizedBox(
+                                        height: 3,
+                                      ),
+                                      Text(
+                                        userData!['mobile'].length > 4
+                                            ? '${userData!['mobile'].substring(0, 4)}XXXXXX'
+                                            : '${userData!['mobile']}',
+                                        style: const TextStyle(fontSize: 13),
+                                        overflow: TextOverflow.ellipsis,
                                       ),
                                     ],
                                   ),
                                 ),
-                              ),
-                              SizedBox(
-                                height: 20,
-                              ),
-                            ],
-                          ),
-                        ),
-                        Padding(
-                          padding: const EdgeInsets.symmetric(
-                              horizontal: 6, vertical: 5),
-                          child: Text(
-                            'Address',
-                            style: TextStyle(
-                                fontSize: 15, fontWeight: FontWeight.bold),
-                          ),
-                        ),
-                        Padding(
-                          padding: const EdgeInsets.symmetric(
-                              horizontal: 6, vertical: 0),
-                          child: Text(
-                            '${userData!['address'] ?? ''}',
-                          ),
-                        ),
-                        SizedBox(
-                          height: 15,
-                        ),
-                        Padding(
-                          padding: const EdgeInsets.symmetric(horizontal: 10),
-                          child: Text(
-                            'Social Media',
-                            style: TextStyle(
-                                fontSize: 15, fontWeight: FontWeight.bold),
-                          ),
-                        ),
-                        SizedBox(
-                          height: 5,
-                        ),
-                        Padding(
-                          padding: const EdgeInsets.symmetric(
-                            horizontal: 10,
-                          ),
-                          child: Row(
-                            children: [
-                              Row(
-                                mainAxisAlignment: MainAxisAlignment.start,
-                                children: [
-                                  if (userData!['facebook_id'] != '')
-                                    InkWell(
-                                      onTap: () async {
-                                        await urllauncher.launchUrl(
-                                            Uri.parse(
-                                                '${userData!['facebook_id']}'),
-                                            mode:
-                                                LaunchMode.externalApplication);
-                                      },
-                                      child: Image.asset(
-                                        'assets/facebook.png',
-                                        height: 22,
-                                        width: 22,
-                                      ),
-                                    ),
-                                  if (userData!['facebook_id'] != '')
-                                    SizedBox(
-                                      width: 5,
-                                    ),
-                                  if (userData!['instagram_id'] != '')
-                                    InkWell(
-                                      onTap: () async {
-                                        await urllauncher.launchUrl(
-                                            Uri.parse(
-                                                '${userData!['instagram_id']}'),
-                                            mode:
-                                                LaunchMode.externalApplication);
-                                      },
-                                      child: Image.asset(
-                                        'assets/instagram.png',
-                                        height: 22,
-                                        width: 22,
-                                      ),
-                                    ),
-                                  if (userData!['instagram_id'] != '')
-                                    SizedBox(
-                                      width: 5,
-                                    ),
-                                  if (userData!['twitter_id'] != '')
-                                    InkWell(
-                                      onTap: () async {
-                                        await urllauncher.launchUrl(
-                                            Uri.parse(
-                                                '${userData!['twitter_id']}'),
-                                            mode:
-                                                LaunchMode.externalApplication);
-                                      },
-                                      child: Image.asset(
-                                        'assets/pinterest.png',
-                                        height: 22,
-                                        width: 22,
-                                      ),
-                                    ),
-                                  if (userData!['twitter_id'] != '')
-                                    SizedBox(
-                                      width: 5,
-                                    ),
-                                  if (userData!['pintrest_id'] != '')
-                                    InkWell(
-                                      onTap: () async {
-                                        await urllauncher.launchUrl(
-                                            Uri.parse(
-                                                '${userData!['pintrest_id']}'),
-                                            mode:
-                                                LaunchMode.externalApplication);
-                                      },
-                                      child: Image.asset(
-                                        'assets/twitter.png',
-                                        height: 22,
-                                        width: 22,
-                                      ),
-                                    ),
-                                  if (userData!['pintrest_id'] != '')
-                                    SizedBox(
-                                      width: 5,
-                                    ),
-                                ],
-                              ),
-                            ],
-                          ),
-                        ),
-                        SizedBox(
-                          height: 12,
-                        ),
-
-                  Padding(
-                    padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 0),
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Text(
-                          'Photos',
-                          textAlign: TextAlign.start,
-                          style: TextStyle(
-                              fontSize: 20,
-                              color: Colors.black54,
-                              fontWeight: FontWeight.w700),
-                        ),
-                        const SizedBox(height: 10),
-                        if (userData!['gallery'] != null && userData!['gallery'].isNotEmpty)
-                          GridView.builder(
-                            shrinkWrap: true,
-                            physics: NeverScrollableScrollPhysics(), // Disable scrolling inside GridView
-                            itemCount: userData!['gallery'].length,
-                            gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
-                              crossAxisCount: 3,
-                              crossAxisSpacing: 8,
-                              mainAxisSpacing: 8,
-                              mainAxisExtent: 130,
+                              ],
                             ),
-                            itemBuilder: (context, index) {
-                              return GestureDetector(
-                                onTap: () {
-                                  Navigator.push(
-                                    context,
-                                    MaterialPageRoute(
-                                      builder: (context) => FullScreenGallery(
-                                        images: userData!['gallery'],
-                                        initialIndex: index,
+                            const SizedBox(
+                              height: 10,
+                            ),
+                            Padding(
+                              padding: const EdgeInsets.symmetric(horizontal: 15),
+                              child: Container(
+                                height: 60,
+                                padding: EdgeInsets.only(top: 5,bottom: 5),
+                                decoration: BoxDecoration(
+                                    color: const Color(0xFFffe6db),
+                                    borderRadius: BorderRadius.circular(10)),
+                                child: Row(
+                                  children: [
+                                    Expanded(
+                                      child: Column(
+                                        children: [
+                                          Text('${userData!['completed_project'] ?? '--'}')
+                                              .color(const Color(0xff333333))
+                                              .size(context.font.larger)
+                                              .setMaxLines(lines: 1),
+                                          const Text(
+                                            'Total Projects',
+                                            style: TextStyle(
+                                                fontSize: 14,
+                                                color: Colors.black54,
+                                                fontWeight: FontWeight.w700),
+                                          ),
+                                        ],
                                       ),
                                     ),
-                                  );
-                                },
+                                    Expanded(
+                                      child: Column(
+                                        children: [
+                                          Text('${userData!['experience'] ?? '--'}')
+                                              .color(const Color(0xff333333))
+                                              .size(context.font.larger)
+                                              .setMaxLines(lines: 1),
+                                          const Text(
+                                            'Experiance',
+                                            style: TextStyle(
+                                                fontSize: 14,
+                                                color: Colors.black54,
+                                                fontWeight: FontWeight.w700),
+                                          ),
+                                        ],
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                              ),
+                            ),
+                            const SizedBox(
+                              height: 20,
+                            ),
+                          ],
+                        ),
+                      ),
+
+                      const Padding(
+                        padding: EdgeInsets.symmetric(horizontal: 15),
+                        child: Text(
+                          'Address',
+                          style: TextStyle(
+                              fontSize: 14, fontWeight: FontWeight.w600),
+                        ),
+                      ),    const SizedBox(height: 5,),
+                      Padding(
+                        padding: const EdgeInsets.symmetric(horizontal: 15),
+                        child: Row(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+
+                            Image.asset(
+                              "assets/Home/__location.png",
+                              width: 17,
+                              height: 17,
+                              color: const Color(0xff9c9c9c),
+                            ),
+                            const SizedBox(width: 10,),
+                            Expanded(
+                              child: Text(
+                                userData!['address'] ?? "Address not available",
+                                style: const TextStyle(fontSize: 13),
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                      const SizedBox(
+                        height: 15,
+                      ),
+                      // Padding(
+                      //   padding: const EdgeInsets.symmetric(horizontal: 10),
+                      //   child: Text(
+                      //     'Social Media',
+                      //     style: TextStyle(
+                      //         fontSize: 15, fontWeight: FontWeight.bold),
+                      //   ),
+                      // ),
+                      // SizedBox(
+                      //   height: 5,
+                      // ),
+                      // Padding(
+                      //   padding: const EdgeInsets.symmetric(
+                      //     horizontal: 10,
+                      //   ),
+                      //   child: Row(
+                      //     children: [
+                      //       Row(
+                      //         mainAxisAlignment: MainAxisAlignment.start,
+                      //         children: [
+                      //           if (userData!['facebook_id'] != '')
+                      //             InkWell(
+                      //               onTap: () async {
+                      //                 await urllauncher.launchUrl(
+                      //                     Uri.parse(
+                      //                         '${userData!['facebook_id']}'),
+                      //                     mode:
+                      //                         LaunchMode.externalApplication);
+                      //               },
+                      //               child: Image.asset(
+                      //                 'assets/facebook.png',
+                      //                 height: 22,
+                      //                 width: 22,
+                      //               ),
+                      //             ),
+                      //           if (userData!['facebook_id'] != '')
+                      //             SizedBox(
+                      //               width: 5,
+                      //             ),
+                      //           if (userData!['instagram_id'] != '')
+                      //             InkWell(
+                      //               onTap: () async {
+                      //                 await urllauncher.launchUrl(
+                      //                     Uri.parse(
+                      //                         '${userData!['instagram_id']}'),
+                      //                     mode:
+                      //                         LaunchMode.externalApplication);
+                      //               },
+                      //               child: Image.asset(
+                      //                 'assets/instagram.png',
+                      //                 height: 22,
+                      //                 width: 22,
+                      //               ),
+                      //             ),
+                      //           if (userData!['instagram_id'] != '')
+                      //             SizedBox(
+                      //               width: 5,
+                      //             ),
+                      //           if (userData!['twitter_id'] != '')
+                      //             InkWell(
+                      //               onTap: () async {
+                      //                 await urllauncher.launchUrl(
+                      //                     Uri.parse(
+                      //                         '${userData!['twitter_id']}'),
+                      //                     mode:
+                      //                         LaunchMode.externalApplication);
+                      //               },
+                      //               child: Image.asset(
+                      //                 'assets/pinterest.png',
+                      //                 height: 22,
+                      //                 width: 22,
+                      //               ),
+                      //             ),
+                      //           if (userData!['twitter_id'] != '')
+                      //             SizedBox(
+                      //               width: 5,
+                      //             ),
+                      //           if (userData!['pintrest_id'] != '')
+                      //             InkWell(
+                      //               onTap: () async {
+                      //                 await urllauncher.launchUrl(
+                      //                     Uri.parse(
+                      //                         '${userData!['pintrest_id']}'),
+                      //                     mode:
+                      //                         LaunchMode.externalApplication);
+                      //               },
+                      //               child: Image.asset(
+                      //                 'assets/twitter.png',
+                      //                 height: 22,
+                      //                 width: 22,
+                      //               ),
+                      //             ),
+                      //           if (userData!['pintrest_id'] != '')
+                      //             SizedBox(
+                      //               width: 5,
+                      //             ),
+                      //         ],
+                      //       ),
+                      //     ],
+                      //   ),
+                      // ),
+                      // SizedBox(
+                      //   height: 12,
+                      // ),
+
+                Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 15),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      const Text(
+                        'Photos',
+                        textAlign: TextAlign.start,
+                        style: TextStyle(
+                            fontSize: 14,
+                            color: Colors.black,
+                            fontWeight: FontWeight.w600),
+                      ),
+                      const SizedBox(height: 10),
+                      if (userData!['gallery'] != null && userData!['gallery'].isNotEmpty)
+                        GridView.builder(
+                          shrinkWrap: true,
+                          physics: const NeverScrollableScrollPhysics(),
+                          itemCount: userData!['gallery'].length,
+                          gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+                            crossAxisCount: 3,
+                            crossAxisSpacing: 8,
+                            mainAxisSpacing: 8,
+                            mainAxisExtent: 130,
+                          ),
+                          itemBuilder: (context, index) {
+                            return GestureDetector(
+                              onTap: () {
+                                UiUtils.imageGallaryView(
+                                  context,
+                                  images: userData!['gallery'],
+                                  initalIndex: index,
+                                );
+                                // Navigator.push(context,
+                                //     BlurredRouter(
+                                //       builder: (context) {
+                                //         return AllGallaryImages(
+                                //             images: userData!['gallery'],
+                                //             isProject: true);
+                                //       },
+                                //     ));
+                                // Navigator.push(
+                                //   context,
+                                //   MaterialPageRoute(
+                                //     builder: (context) => FullScreenGallery(
+                                //       images: userData!['gallery'],
+                                //       initialIndex: index,
+                                //     ),
+                                //   ),
+                                // );
+                              },
+                              child: ClipRRect(
+                                borderRadius: BorderRadius.circular(10),
                                 child: UiUtils.getImage(
                                   userData!['gallery'][index] ?? "",
                                   fit: BoxFit.cover,
                                 ),
-                              );
-                            },
-                          )
-                        else
-                          const Padding(
-                            padding: EdgeInsets.only(top: 20.0),
-                            child: Center(child: Text('No images found!')),
-                          ),
-                      ],
-                    ),
+                              ),
+                            );
+                          },
+                        )
+                      else
+                        const Padding(
+                          padding: EdgeInsets.only(top: 20.0),
+                          child: Center(child: Text('No images found!')),
+                        ),
+                    ],
                   ),
+                ),
 
-                  const SizedBox(height: 15,),
-                        Row(
-                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                          children: [
-                            Text(
-                              'Properties by Agent',
-                              style: TextStyle(
-                                  fontWeight: FontWeight.bold, fontSize: 15),
-                            ),
-                            DropdownButton<String>(
-                              value: selectedValue,
-                              items: [
-                                DropdownMenuItem(
-                                  child: Text('Sell'),
-                                  value: '0', // Value for 'Sell'
-                                ),
-                                DropdownMenuItem(
-                                  child: Text('Rent'),
-                                  value: '1', // Value for 'Rent'
+                const SizedBox(height: 15,),
+                   if(widget.isAgent == true)
+                   ...[
+                     Padding(
+                       padding: const EdgeInsets.symmetric(horizontal: 15),
+                       child: Row(
+                         mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                         children: [
+                           SizedBox(
+                             width: MediaQuery.of(context).size.width/2,
+                             child: const Text(
+                               'Properties by Home Connect',
+                               maxLines: 1,overflow: TextOverflow.ellipsis,
+                               style: TextStyle(
+                                   fontWeight: FontWeight.w600, fontSize: 14),
+                             ),
+                           ),
+                           Container(
+                             height: 40,
+                             padding: EdgeInsets.symmetric(horizontal: 10),
+                             decoration: BoxDecoration(
+                               color: Colors.white,
+                               borderRadius: BorderRadius.circular(10),
+                               boxShadow: [
+                                 BoxShadow(
+                                   offset: const Offset(0, 1),
+                                   blurRadius: 5,
+                                   color: Colors.black.withOpacity(0.1),
+                                 ),
+                               ],
+                             ),
+                             width: 130,
+                             child: DropdownButton<String>(
+                               underline: const SizedBox(),
+                               isExpanded: true,
+                               style: const TextStyle(fontSize: 14,color: Colors.black),
+                               hint: const Text("Select an option",style: TextStyle(fontSize: 14),maxLines: 1,overflow: TextOverflow.ellipsis,),
+                               value: selectedValue,
+                               items: dropDownList.map((item) {
+                                 return DropdownMenuItem<String>(
+                                   value: item['id'].toString(),
+                                   child: Text(item['name']),
+                                 );
+                               }).toList(),
+                               onChanged: (value) {
+                                 setState(() {
+                                   selectedValue = value;
+                                   getProperties(propertyType: value.toString());
+                                 });
+                               },
+                             ),
+                           ),
+                         ],
+                       ),
+                     ),
+                     const SizedBox(height: 10,),
+                     SizedBox(
+                       height: 230,
+                       width: size.width,
+                       child: propertyLoading?
+                       Padding(
+                         padding: const EdgeInsets.symmetric(horizontal: 15),
+                         child: buildPropertiesShimmer(context,),
+                       )
+                           :propertylist.isEmpty
+                           ? const Center(
+                         child: Text(
+                           'No properties available',
+                           style: TextStyle(fontSize: 14, color: Colors.black),
+                         ),
+                       )
+                           : ListView.separated(
+                         padding: const EdgeInsets.symmetric(horizontal: 15),
+                         separatorBuilder: (context,i)=>const SizedBox(width: 10,),
+                         scrollDirection: Axis.horizontal,
+                         itemCount: propertylist.length,
+                         itemBuilder: (context, index) {
+                           PropertyModel property = propertylist[index];
+                           return GestureDetector(
+                             onTap: () {
+                               Navigator.pushNamed(
+                                 context,
+                                 Routes.propertyDetails,
+                                 arguments: {
+                                   'propertyData': property,
+                                   'propertiesList': propertylist,
+                                   'fromMyProperty': false,
+                                 },
+                               );
+                             },
+                             child: PropertyVerticalCard(
+                               property: property,
+                             ),
+                           );
+                         },
+                       ),
+                     ),
+                   ],
+                      if(widget.isAgent == false)
+                        ...[
+                          Padding(
+                            padding: const EdgeInsets.symmetric(horizontal: 15),
+                            child: Row(
+                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                              children: [
+                                SizedBox(
+                                  child: const Text(
+                                    'Projects by AR Foundation',
+                                    maxLines: 1,overflow: TextOverflow.ellipsis,
+                                    style: TextStyle(
+                                        fontWeight: FontWeight.w600, fontSize: 14),
+                                  ),
                                 ),
                               ],
-                              onChanged: (String? newValue) {
-                                setState(() {
-                                  selectedValue = newValue!;
-                                });
+                            ),
+                          ),
+                          const SizedBox(height: 10,),
+                          Padding(
+                            padding: const EdgeInsets.symmetric(horizontal: 15),
+                            child: Row(
+                              children: [
+                                Expanded(
+                                  child: Container(
+                                    height: 40,
+                                    padding: EdgeInsets.symmetric(horizontal: 10),
+                                    decoration: BoxDecoration(
+                                      color: Colors.white,
+                                      borderRadius: BorderRadius.circular(10),
+                                      boxShadow: [
+                                        BoxShadow(
+                                          offset: const Offset(0, 1),
+                                          blurRadius: 5,
+                                          color: Colors.black.withOpacity(0.1),
+                                        ),
+                                      ],
+                                    ),
+                                    width: 130,
+                                    child: DropdownButton<String>(
+                                      underline: const SizedBox(),
+                                      isExpanded: true,
+                                      style: const TextStyle(fontSize: 14,color: Colors.black),
+                                      hint: const Text("Select an status",style: TextStyle(fontSize: 14),maxLines: 1,overflow: TextOverflow.ellipsis,),
+                                      value: selectedStatus,
+                                      items: statusList.map<DropdownMenuItem<String>>((item) {
+                                        return DropdownMenuItem<String>(
+                                          value: item['id'].toString(),
+                                          child: Text(item['name']),
+                                        );
+                                      }).toList(),
+                                      onChanged: (value) {
+                                        setState(() {
+                                          selectedStatus = value;
+                                        });
+                                      },
+                                    ),
+                                  ),
+                                ),
+                                const SizedBox(width: 10,),
+                                Expanded(
+                                  child: Container(
+                                    height: 40,
+                                    padding: EdgeInsets.symmetric(horizontal: 10),
+                                    decoration: BoxDecoration(
+                                      color: Colors.white,
+                                      borderRadius: BorderRadius.circular(10),
+                                      boxShadow: [
+                                        BoxShadow(
+                                          offset: const Offset(0, 1),
+                                          blurRadius: 5,
+                                          color: Colors.black.withOpacity(0.1),
+                                        ),
+                                      ],
+                                    ),
+                                    width: 130,
+                                    child: DropdownButton<String>(
+                                      underline: const SizedBox(),
+                                      isExpanded: true,
+                                      style: const TextStyle(fontSize: 14,color: Colors.black,),
+                                      hint: const Text("Select an categories",style: TextStyle(fontSize: 14),maxLines: 1,overflow: TextOverflow.ellipsis,),
+                                      value: selectedCategory,
+                                      items: getCatgoryList.map<DropdownMenuItem<String>>((item) {
+                                        return DropdownMenuItem<String>(
+                                          value: item['id'].toString(),
+                                          child: Text(item['category']),
+                                        );
+                                      }).toList(),
+                                      onChanged: (value) {
+                                        setState(() {
+                                          selectedCategory = value;
+                                        });
+                                      },
+                                    ),
+                                  ),
+                                ),
+                                const SizedBox(width: 10,),
+                                InkWell(
+                                  onTap: (){
+                                    getProperties(status: selectedStatus,propertyType: selectedCategory);
+                                  },
+                                  child: Container(
+                                    height: 40,
+                                    width: 40,
+                                    decoration: BoxDecoration(
+                                      color: const Color(0xff117af9),
+                                      borderRadius: BorderRadius.circular(10)
+                                    ),child:Center(child: Image.asset("assets/assets/Images/search.png"),),
+                                  ),
+                                )
+                              ],
+                            ),
+                          ),
+                          const SizedBox(height: 15,),
+                          SizedBox(
+                            height: 230,
+                            width: size.width,
+                            child: propertyLoading?
+                            Padding(
+                              padding: const EdgeInsets.symmetric(horizontal: 15),
+                              child: buildPropertiesShimmer(context,),
+                            )
+                                :propertylist.isEmpty
+                                ? const Center(
+                              child: Text(
+                                'No properties available',
+                                style: TextStyle(fontSize: 14, color: Colors.black),
+                              ),
+                            )
+                                : ListView.separated(
+                              padding: const EdgeInsets.symmetric(horizontal: 15),
+                              separatorBuilder: (context,i)=>const SizedBox(width: 10,),
+                              scrollDirection: Axis.horizontal,
+                              itemCount: propertylist.length,
+                              itemBuilder: (context, index) {
+                                PropertyModel property = propertylist[index];
+                                return GestureDetector(
+                                  onTap: () {
+                                    Navigator.pushNamed(
+                                      context,
+                                      Routes.propertyDetails,
+                                      arguments: {
+                                        'propertyData': property,
+                                        'propertiesList': propertylist,
+                                        'fromMyProperty': false,
+                                      },
+                                    );
+                                  },
+                                  child: PropertyVerticalCard(
+                                    property: property,
+                                  ),
+                                );
                               },
                             ),
-                          ],
-                        ),
-                        SizedBox(
-                          height: 250,
-                          width: size.width,
-                          child: propertylist == null || propertylist.isEmpty
-                              ? Center(
-                            child: Text(
-                              'No properties available', // Message for empty list
-                              style: TextStyle(fontSize: 16, color: Colors.grey),
-                            ),
-                          )
-                              : ListView.builder(
-                            scrollDirection: Axis.horizontal,
-                            itemCount: propertylist.length,
-                            itemBuilder: (context, index) {
-                              PropertyModel property = propertylist[index];
-                              return GestureDetector(
-                                onTap: () {
-                                  Navigator.pushNamed(
-                                    context,
-                                    Routes.propertyDetails,
-                                    arguments: {
-                                      'propertyData': property,
-                                      'propertiesList': propertylist,
-                                      'fromMyProperty': false,
-                                    },
-                                  );
-                                },
-                                child: PropertyVerticalCard(
-                                  property: property,
-                                ),
-                              );
-                            },
                           ),
-                        )
+
+                        ],
+
+                      const SizedBox(height: 30,)
 
 
 
-                        // Column(
-                        //   children: [
-                        //     if (propertyLoading)
-                        //       Expanded(
-                        //         child: Padding(
-                        //           padding: const EdgeInsets.symmetric(horizontal: 15),
-                        //           child: buildPropertiesShimmer(context),
-                        //         ),
-                        //       ),
-                        //     if (!propertyLoading)
-                        //
-                        //   ],
-                        // ),
+                      // Column(
+                      //   children: [
+                      //     if (propertyLoading)
+                      //       Expanded(
+                      //         child: Padding(
+                      //           padding: const EdgeInsets.symmetric(horizontal: 15),
+                      //           child: buildPropertiesShimmer(context),
+                      //         ),
+                      //       ),
+                      //     if (!propertyLoading)
+                      //
+                      //   ],
+                      // ),
 
-                        //               SizedBox(
-                        // height: 200,
-                        // child: GridView.builder(
-                        // shrinkWrap: true,
-                        // scrollDirection: Axis.horizontal,
-                        // itemCount:
-                        // widget.projectLoading! ? 10 : widget.projectList!.length,
-                        // gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
-                        // crossAxisCount: 1,
-                        // crossAxisSpacing: 8,
-                        // mainAxisSpacing: 8,
-                        // // mainAxisExtent: 200,
-                        // childAspectRatio: MediaQuery.sizeOf(context).height / 950),
-                        // itemBuilder: (context, index) {
-                        // if (!widget.projectLoading!) {
-                        // return Padding(
-                        // padding: EdgeInsets.only(
-                        // left: (index == 0 ? 10 : 0),
-                        // right: (widget.projectLoading!
-                        // ? 10
-                        //     : widget.projectList!.length) ==
-                        // (index + 1)
-                        // ? 10
-                        //     : 0),
-                        // child: Container(
-                        // width: 230,
-                        // child: GestureDetector(
-                        // onTap: () {
-                        // Navigator.push(
-                        // context,
-                        // MaterialPageRoute(
-                        // builder: (context) => ProjectDetails(
-                        // property: widget.projectList![index],
-                        // fromMyProperty: true,
-                        // fromCompleteEnquiry: true,
-                        // fromSlider: false,
-                        // fromPropertyAddSuccess: true)),
-                        // );
-                        // },
-                        // child: Container(
-                        // // height: addBottom == null ? 124 : (124 + (additionalHeight ?? 0)),
-                        // decoration: BoxDecoration(
-                        // color: Colors.white,
-                        // borderRadius: BorderRadius.circular(15),
-                        // border: Border.all(
-                        // width: 1, color: Color(0xffe0e0e0))),
-                        // child: Stack(
-                        // fit: StackFit.expand,
-                        // children: [
-                        // Column(
-                        // mainAxisSize: MainAxisSize.min,
-                        // children: [
-                        // Column(
-                        // children: [
-                        // ClipRRect(
-                        // borderRadius: BorderRadius.only(
-                        // topRight: Radius.circular(15),
-                        // topLeft: Radius.circular(15),
-                        // ),
-                        // child: Stack(
-                        // children: [
-                        // UiUtils.getImage(
-                        // widget.projectList![index]
-                        // ['image'] ??
-                        // "",
-                        // width: double.infinity,
-                        // fit: BoxFit.cover,
-                        // height: 103,
-                        // ),
-                        // // const PositionedDirectional(
-                        // //     start: 5,
-                        // //     top: 5,
-                        // //     child: PromotedCard(
-                        // //         type: PromoteCardType.icon)),
-                        // // PositionedDirectional(
-                        // //   bottom: 6,
-                        // //   start: 6,
-                        // //   child: Container(
-                        // //     height: 19,
-                        // //     clipBehavior: Clip.antiAlias,
-                        // //     decoration: BoxDecoration(
-                        // //         color: context.color.secondaryColor
-                        // //             .withOpacity(0.7),
-                        // //         borderRadius:
-                        // //         BorderRadius.circular(4)),
-                        // //     child: BackdropFilter(
-                        // //       filter: ImageFilter.blur(
-                        // //           sigmaX: 2, sigmaY: 3),
-                        // //       child: Padding(
-                        // //         padding: const EdgeInsets.symmetric(
-                        // //             horizontal: 8.0),
-                        // //         child: Center(
-                        // //           child: Text(widget.projectList![index]['category'] != null ?
-                        // //             widget.projectList![index]['category']!['category'] : '',
-                        // //           )
-                        // //               .color(
-                        // //             context.color.textColorDark,
-                        // //           )
-                        // //               .bold(weight: FontWeight.w500)
-                        // //               .size(10),
-                        // //         ),
-                        // //       ),
-                        // //     ),
-                        // //   ),
-                        // // ),
-                        // Positioned(
-                        // right: 8,
-                        // top: 8,
-                        // child: InkWell(
-                        // onTap: () {
-                        // GuestChecker.check(
-                        // onNotGuest: () async {
-                        // setState(() {
-                        // widget.likeLoading![
-                        // index] = true;
-                        // });
-                        // var body = {
-                        // "type": widget.projectList![
-                        // index][
-                        // 'is_favourite'] ==
-                        // 1
-                        // ? 0
-                        //     : 1,
-                        // "project_id":
-                        // widget.projectList![
-                        // index]['id']
-                        // };
-                        // var response =
-                        // await Api.post(
-                        // url: Api
-                        //     .addFavProject,
-                        // parameter: body);
-                        // if (!response['error']) {
-                        // widget.projectList![
-                        // index][
-                        // 'is_favourite'] =
-                        // (widget.projectList![
-                        // index]
-                        // [
-                        // 'is_favourite'] ==
-                        // 1
-                        // ? 0
-                        //     : 1);
-                        // setState(() {
-                        // widget.likeLoading![
-                        // index] = false;
-                        // });
-                        // }
-                        // });
-                        // },
-                        // child: Container(
-                        // width: 32,
-                        // height: 32,
-                        // decoration: BoxDecoration(
-                        // color: context
-                        //     .color.secondaryColor,
-                        // shape: BoxShape.circle,
-                        // boxShadow: const [
-                        // BoxShadow(
-                        // color: Color.fromARGB(
-                        // 12, 0, 0, 0),
-                        // offset: Offset(0, 2),
-                        // blurRadius: 15,
-                        // spreadRadius: 0,
-                        // )
-                        // ],
-                        // ),
-                        // child: Container(
-                        // width: 32,
-                        // height: 32,
-                        // decoration: BoxDecoration(
-                        // color: context
-                        //     .color.primaryColor,
-                        // shape: BoxShape.circle,
-                        // boxShadow: const [
-                        // BoxShadow(
-                        // color: Color
-                        //     .fromARGB(33,
-                        // 0, 0, 0),
-                        // offset:
-                        // Offset(0, 2),
-                        // blurRadius: 15,
-                        // spreadRadius: 0)
-                        // ],
-                        // ),
-                        // child: Center(
-                        // child: (widget
-                        //     .likeLoading![
-                        // index])
-                        // ? UiUtils
-                        //     .progress(
-                        // width: 20,
-                        // height:
-                        // 20)
-                        //     : widget.projectList![
-                        // index]
-                        // [
-                        // 'is_favourite'] ==
-                        // 1
-                        // ? UiUtils
-                        //     .getSvg(
-                        // AppIcons
-                        //     .like_fill,
-                        // color: context
-                        //     .color
-                        //     .tertiaryColor,
-                        // )
-                        //     : UiUtils.getSvg(
-                        // AppIcons
-                        //     .like,
-                        // color: context
-                        //     .color
-                        //     .tertiaryColor)),
-                        // ),
-                        // ),
-                        // ),
-                        // ),
-                        // ],
-                        // ),
-                        // ),
-                        // ],
-                        // ),
-                        // Padding(
-                        // padding: const EdgeInsets.only(
-                        // left: 10, right: 10),
-                        // child: Column(
-                        // crossAxisAlignment:
-                        // CrossAxisAlignment.start,
-                        // mainAxisAlignment:
-                        // MainAxisAlignment.spaceEvenly,
-                        // children: [
-                        // SizedBox(
-                        // height: 6,
-                        // ),
-                        // Text(
-                        // widget.projectList![index]['title'],
-                        // maxLines: 1,
-                        // overflow: TextOverflow.ellipsis,
-                        // style: TextStyle(
-                        // color: Color(0xff333333),
-                        // fontSize: 12.5,
-                        // fontWeight: FontWeight.w500),
-                        // ),
-                        // SizedBox(
-                        // height: 4,
-                        // ),
-                        // if (widget.projectList![index]
-                        // ['address'] !=
-                        // "")
-                        // Padding(
-                        // padding: const EdgeInsets.only(
-                        // bottom: 4),
-                        // child: Row(
-                        // children: [
-                        // Image.asset(
-                        // "assets/Home/__location.png",
-                        // width: 15,
-                        // fit: BoxFit.cover,
-                        // height: 15,
-                        // ),
-                        // SizedBox(
-                        // width: 5,
-                        // ),
-                        // Expanded(
-                        // child: Text(
-                        // widget.projectList![index]
-                        // ['address']
-                        //     ?.trim() ??
-                        // "",
-                        // maxLines: 1,
-                        // overflow:
-                        // TextOverflow.ellipsis,
-                        // style: TextStyle(
-                        // color:
-                        // Color(0xffa2a2a2),
-                        // fontSize: 9,
-                        // fontWeight:
-                        // FontWeight.w400),
-                        // ))
-                        // ],
-                        // ),
-                        // ),
-                        // SizedBox(
-                        // height: 4,
-                        // ),
-                        // Row(
-                        // children: [
-                        // Text(
-                        // '${widget.projectList![index]['project_details'].length > 0 ? formatAmount(widget.projectList![index]['project_details'][0]['avg_price'] ?? 0) : 0}'
-                        //     .toString()
-                        //     .formatAmount(
-                        // prefix: true,
-                        // ),
-                        // maxLines: 1,
-                        // overflow: TextOverflow.ellipsis,
-                        // style: TextStyle(
-                        // color: Color(0xff333333),
-                        // fontSize: 9,
-                        // fontWeight:
-                        // FontWeight.w500),
-                        // ),
-                        // Padding(
-                        // padding:
-                        // const EdgeInsets.symmetric(
-                        // horizontal: 8.0),
-                        // child: Container(
-                        // height: 12,
-                        // width: 2,
-                        // color: Colors.black54,
-                        // ),
-                        // ),
-                        // Text(
-                        // '${widget.projectList![index]['project_details'].length > 0 ? formatAmount(widget.projectList![index]['project_details'][0]['size'] ?? 0) : 0} Sq.ft'
-                        //     .toString(),
-                        // maxLines: 1,
-                        // overflow: TextOverflow.ellipsis,
-                        // style: TextStyle(
-                        // color: Color(0xff333333),
-                        // fontSize: 9,
-                        // fontWeight:
-                        // FontWeight.w500),
-                        // ),
-                        // ],
-                        // ),
-                        // SizedBox(
-                        // height: 4,
-                        // ),
-                        // Row(
-                        // mainAxisAlignment:
-                        // MainAxisAlignment.end,
-                        // children: [
-                        // // Text("Posted By ${premiumPropertiesList[i]['role'] == 1 ? 'Owner' : premiumPropertiesList[i]['role'] == 2 ? 'Agent' : premiumPropertiesList[i]['role'] == 3 ? 'Builder' : 'Housepecker'}",
-                        // //   maxLines: 1,
-                        // //   overflow: TextOverflow.ellipsis,
-                        // //   style: TextStyle(
-                        // //       color: Color(0xffa2a2a2),
-                        // //       fontSize: 8,
-                        // //       fontWeight: FontWeight.w400
-                        // //   ),
-                        // // ),
-                        // ],
-                        // ),
-                        // ],
-                        // ),
-                        // ),
-                        // ],
-                        // ),
-                        // ],
-                        // ),
-                        // )),
-                        // ),
-                        // );
-                        // } else {
-                        // return ClipRRect(
-                        // clipBehavior: Clip.antiAliasWithSaveLayer,
-                        // borderRadius: BorderRadius.all(Radius.circular(15)),
-                        // child: CustomShimmer(height: 90, width: 90),
-                        // );
-                        // }
-                        // },
-                        // ),
-                        // ),
-                      ]),
-                ),
+                      //               SizedBox(
+                      // height: 200,
+                      // child: GridView.builder(
+                      // shrinkWrap: true,
+                      // scrollDirection: Axis.horizontal,
+                      // itemCount:
+                      // widget.projectLoading! ? 10 : widget.projectList!.length,
+                      // gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+                      // crossAxisCount: 1,
+                      // crossAxisSpacing: 8,
+                      // mainAxisSpacing: 8,
+                      // // mainAxisExtent: 200,
+                      // childAspectRatio: MediaQuery.sizeOf(context).height / 950),
+                      // itemBuilder: (context, index) {
+                      // if (!widget.projectLoading!) {
+                      // return Padding(
+                      // padding: EdgeInsets.only(
+                      // left: (index == 0 ? 10 : 0),
+                      // right: (widget.projectLoading!
+                      // ? 10
+                      //     : widget.projectList!.length) ==
+                      // (index + 1)
+                      // ? 10
+                      //     : 0),
+                      // child: Container(
+                      // width: 230,
+                      // child: GestureDetector(
+                      // onTap: () {
+                      // Navigator.push(
+                      // context,
+                      // MaterialPageRoute(
+                      // builder: (context) => ProjectDetails(
+                      // property: widget.projectList![index],
+                      // fromMyProperty: true,
+                      // fromCompleteEnquiry: true,
+                      // fromSlider: false,
+                      // fromPropertyAddSuccess: true)),
+                      // );
+                      // },
+                      // child: Container(
+                      // // height: addBottom == null ? 124 : (124 + (additionalHeight ?? 0)),
+                      // decoration: BoxDecoration(
+                      // color: Colors.white,
+                      // borderRadius: BorderRadius.circular(15),
+                      // border: Border.all(
+                      // width: 1, color: Color(0xffe0e0e0))),
+                      // child: Stack(
+                      // fit: StackFit.expand,
+                      // children: [
+                      // Column(
+                      // mainAxisSize: MainAxisSize.min,
+                      // children: [
+                      // Column(
+                      // children: [
+                      // ClipRRect(
+                      // borderRadius: BorderRadius.only(
+                      // topRight: Radius.circular(15),
+                      // topLeft: Radius.circular(15),
+                      // ),
+                      // child: Stack(
+                      // children: [
+                      // UiUtils.getImage(
+                      // widget.projectList![index]
+                      // ['image'] ??
+                      // "",
+                      // width: double.infinity,
+                      // fit: BoxFit.cover,
+                      // height: 103,
+                      // ),
+                      // // const PositionedDirectional(
+                      // //     start: 5,
+                      // //     top: 5,
+                      // //     child: PromotedCard(
+                      // //         type: PromoteCardType.icon)),
+                      // // PositionedDirectional(
+                      // //   bottom: 6,
+                      // //   start: 6,
+                      // //   child: Container(
+                      // //     height: 19,
+                      // //     clipBehavior: Clip.antiAlias,
+                      // //     decoration: BoxDecoration(
+                      // //         color: context.color.secondaryColor
+                      // //             .withOpacity(0.7),
+                      // //         borderRadius:
+                      // //         BorderRadius.circular(4)),
+                      // //     child: BackdropFilter(
+                      // //       filter: ImageFilter.blur(
+                      // //           sigmaX: 2, sigmaY: 3),
+                      // //       child: Padding(
+                      // //         padding: const EdgeInsets.symmetric(
+                      // //             horizontal: 8.0),
+                      // //         child: Center(
+                      // //           child: Text(widget.projectList![index]['category'] != null ?
+                      // //             widget.projectList![index]['category']!['category'] : '',
+                      // //           )
+                      // //               .color(
+                      // //             context.color.textColorDark,
+                      // //           )
+                      // //               .bold(weight: FontWeight.w500)
+                      // //               .size(10),
+                      // //         ),
+                      // //       ),
+                      // //     ),
+                      // //   ),
+                      // // ),
+                      // Positioned(
+                      // right: 8,
+                      // top: 8,
+                      // child: InkWell(
+                      // onTap: () {
+                      // GuestChecker.check(
+                      // onNotGuest: () async {
+                      // setState(() {
+                      // widget.likeLoading![
+                      // index] = true;
+                      // });
+                      // var body = {
+                      // "type": widget.projectList![
+                      // index][
+                      // 'is_favourite'] ==
+                      // 1
+                      // ? 0
+                      //     : 1,
+                      // "project_id":
+                      // widget.projectList![
+                      // index]['id']
+                      // };
+                      // var response =
+                      // await Api.post(
+                      // url: Api
+                      //     .addFavProject,
+                      // parameter: body);
+                      // if (!response['error']) {
+                      // widget.projectList![
+                      // index][
+                      // 'is_favourite'] =
+                      // (widget.projectList![
+                      // index]
+                      // [
+                      // 'is_favourite'] ==
+                      // 1
+                      // ? 0
+                      //     : 1);
+                      // setState(() {
+                      // widget.likeLoading![
+                      // index] = false;
+                      // });
+                      // }
+                      // });
+                      // },
+                      // child: Container(
+                      // width: 32,
+                      // height: 32,
+                      // decoration: BoxDecoration(
+                      // color: context
+                      //     .color.secondaryColor,
+                      // shape: BoxShape.circle,
+                      // boxShadow: const [
+                      // BoxShadow(
+                      // color: Color.fromARGB(
+                      // 12, 0, 0, 0),
+                      // offset: Offset(0, 2),
+                      // blurRadius: 15,
+                      // spreadRadius: 0,
+                      // )
+                      // ],
+                      // ),
+                      // child: Container(
+                      // width: 32,
+                      // height: 32,
+                      // decoration: BoxDecoration(
+                      // color: context
+                      //     .color.primaryColor,
+                      // shape: BoxShape.circle,
+                      // boxShadow: const [
+                      // BoxShadow(
+                      // color: Color
+                      //     .fromARGB(33,
+                      // 0, 0, 0),
+                      // offset:
+                      // Offset(0, 2),
+                      // blurRadius: 15,
+                      // spreadRadius: 0)
+                      // ],
+                      // ),
+                      // child: Center(
+                      // child: (widget
+                      //     .likeLoading![
+                      // index])
+                      // ? UiUtils
+                      //     .progress(
+                      // width: 20,
+                      // height:
+                      // 20)
+                      //     : widget.projectList![
+                      // index]
+                      // [
+                      // 'is_favourite'] ==
+                      // 1
+                      // ? UiUtils
+                      //     .getSvg(
+                      // AppIcons
+                      //     .like_fill,
+                      // color: context
+                      //     .color
+                      //     .tertiaryColor,
+                      // )
+                      //     : UiUtils.getSvg(
+                      // AppIcons
+                      //     .like,
+                      // color: context
+                      //     .color
+                      //     .tertiaryColor)),
+                      // ),
+                      // ),
+                      // ),
+                      // ),
+                      // ],
+                      // ),
+                      // ),
+                      // ],
+                      // ),
+                      // Padding(
+                      // padding: const EdgeInsets.only(
+                      // left: 10, right: 10),
+                      // child: Column(
+                      // crossAxisAlignment:
+                      // CrossAxisAlignment.start,
+                      // mainAxisAlignment:
+                      // MainAxisAlignment.spaceEvenly,
+                      // children: [
+                      // SizedBox(
+                      // height: 6,
+                      // ),
+                      // Text(
+                      // widget.projectList![index]['title'],
+                      // maxLines: 1,
+                      // overflow: TextOverflow.ellipsis,
+                      // style: TextStyle(
+                      // color: Color(0xff333333),
+                      // fontSize: 12.5,
+                      // fontWeight: FontWeight.w500),
+                      // ),
+                      // SizedBox(
+                      // height: 4,
+                      // ),
+                      // if (widget.projectList![index]
+                      // ['address'] !=
+                      // "")
+                      // Padding(
+                      // padding: const EdgeInsets.only(
+                      // bottom: 4),
+                      // child: Row(
+                      // children: [
+                      // Image.asset(
+                      // "assets/Home/__location.png",
+                      // width: 15,
+                      // fit: BoxFit.cover,
+                      // height: 15,
+                      // ),
+                      // SizedBox(
+                      // width: 5,
+                      // ),
+                      // Expanded(
+                      // child: Text(
+                      // widget.projectList![index]
+                      // ['address']
+                      //     ?.trim() ??
+                      // "",
+                      // maxLines: 1,
+                      // overflow:
+                      // TextOverflow.ellipsis,
+                      // style: TextStyle(
+                      // color:
+                      // Color(0xffa2a2a2),
+                      // fontSize: 9,
+                      // fontWeight:
+                      // FontWeight.w400),
+                      // ))
+                      // ],
+                      // ),
+                      // ),
+                      // SizedBox(
+                      // height: 4,
+                      // ),
+                      // Row(
+                      // children: [
+                      // Text(
+                      // '${widget.projectList![index]['project_details'].length > 0 ? formatAmount(widget.projectList![index]['project_details'][0]['avg_price'] ?? 0) : 0}'
+                      //     .toString()
+                      //     .formatAmount(
+                      // prefix: true,
+                      // ),
+                      // maxLines: 1,
+                      // overflow: TextOverflow.ellipsis,
+                      // style: TextStyle(
+                      // color: Color(0xff333333),
+                      // fontSize: 9,
+                      // fontWeight:
+                      // FontWeight.w500),
+                      // ),
+                      // Padding(
+                      // padding:
+                      // const EdgeInsets.symmetric(
+                      // horizontal: 8.0),
+                      // child: Container(
+                      // height: 12,
+                      // width: 2,
+                      // color: Colors.black54,
+                      // ),
+                      // ),
+                      // Text(
+                      // '${widget.projectList![index]['project_details'].length > 0 ? formatAmount(widget.projectList![index]['project_details'][0]['size'] ?? 0) : 0} Sq.ft'
+                      //     .toString(),
+                      // maxLines: 1,
+                      // overflow: TextOverflow.ellipsis,
+                      // style: TextStyle(
+                      // color: Color(0xff333333),
+                      // fontSize: 9,
+                      // fontWeight:
+                      // FontWeight.w500),
+                      // ),
+                      // ],
+                      // ),
+                      // SizedBox(
+                      // height: 4,
+                      // ),
+                      // Row(
+                      // mainAxisAlignment:
+                      // MainAxisAlignment.end,
+                      // children: [
+                      // // Text("Posted By ${premiumPropertiesList[i]['role'] == 1 ? 'Owner' : premiumPropertiesList[i]['role'] == 2 ? 'Agent' : premiumPropertiesList[i]['role'] == 3 ? 'Builder' : 'Housepecker'}",
+                      // //   maxLines: 1,
+                      // //   overflow: TextOverflow.ellipsis,
+                      // //   style: TextStyle(
+                      // //       color: Color(0xffa2a2a2),
+                      // //       fontSize: 8,
+                      // //       fontWeight: FontWeight.w400
+                      // //   ),
+                      // // ),
+                      // ],
+                      // ),
+                      // ],
+                      // ),
+                      // ),
+                      // ],
+                      // ),
+                      // ],
+                      // ),
+                      // )),
+                      // ),
+                      // );
+                      // } else {
+                      // return ClipRRect(
+                      // clipBehavior: Clip.antiAliasWithSaveLayer,
+                      // borderRadius: BorderRadius.all(Radius.circular(15)),
+                      // child: CustomShimmer(height: 90, width: 90),
+                      // );
+                      // }
+                      // },
+                      // ),
+                      // ),
+                    ]),
               ),
             ),
     );
@@ -1096,7 +1401,7 @@ class _ProfileScreenState extends State<UserDetailProfileScreen> {
                 flex: 3,
                 child: Text(
                   title.firstUpperCase(),
-                  style: TextStyle(
+                  style: const TextStyle(
                       fontSize: 13,
                       color: Color(0xff333333),
                       fontWeight: FontWeight.w500),
@@ -1139,7 +1444,7 @@ class _ProfileScreenState extends State<UserDetailProfileScreen> {
         content: Text(
           desc,
           textAlign: TextAlign.center,
-          style: TextStyle(color: Color(0xff6d6d6d), fontSize: 12),
+          style: const TextStyle(color: Color(0xff6d6d6d), fontSize: 12),
         ),
         acceptButtonName: "deleteBtnLbl".translate(context),
         cancelTextColor: context.color.textColorDark,
@@ -1215,7 +1520,7 @@ class _ProfileScreenState extends State<UserDetailProfileScreen> {
     return GridView.builder(
       shrinkWrap: true,
       itemCount: 10,
-      gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+      gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
         crossAxisCount: 2,
         crossAxisSpacing: 8,
         mainAxisSpacing: 8,
@@ -1227,7 +1532,7 @@ class _ProfileScreenState extends State<UserDetailProfileScreen> {
           decoration: BoxDecoration(
               color: Colors.white,
               borderRadius: BorderRadius.circular(15),
-              border: Border.all(width: 1, color: Color(0xffe0e0e0))),
+              border: Border.all(width: 1, color: const Color(0xffe0e0e0))),
           child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: <Widget>[
@@ -1242,7 +1547,7 @@ class _ProfileScreenState extends State<UserDetailProfileScreen> {
                     height: 110,
                   ),
                 ),
-                SizedBox(
+                const SizedBox(
                   height: 8,
                 ),
                 LayoutBuilder(builder: (context, c) {
@@ -1256,20 +1561,20 @@ class _ProfileScreenState extends State<UserDetailProfileScreen> {
                           height: 14,
                           width: c.maxWidth - 50,
                         ),
-                        SizedBox(
+                        const SizedBox(
                           height: 5,
                         ),
                         const CustomShimmer(
                           height: 13,
                         ),
-                        SizedBox(
+                        const SizedBox(
                           height: 5,
                         ),
                         CustomShimmer(
                           height: 12,
                           width: c.maxWidth / 1.2,
                         ),
-                        SizedBox(
+                        const SizedBox(
                           height: 8,
                         ),
                         Align(
@@ -1313,7 +1618,7 @@ class FullScreenGallery extends StatelessWidget {
             heroAttributes: PhotoViewHeroAttributes(tag: images[index]),
           );
         },
-        loadingBuilder: (context, event) => Center(
+        loadingBuilder: (context, event) => const Center(
           child: CircularProgressIndicator(),
         ),
       ),

@@ -3714,7 +3714,7 @@ class CusomterProfileWidget1 extends StatelessWidget {
                     Navigator.push(
                       context,
                       MaterialPageRoute(builder: (context) =>
-                          UserDetailProfileScreen(id: widget.property?.addedBy)),
+                          UserDetailProfileScreen(id: widget.property?.addedBy, isAgent: widget.property?.customerRole == 2 ? true : false,)),
                     );
                   },
                   child: Container(

@@ -351,20 +351,13 @@ class _LoanHomeState extends State<LoanHome> {
                           },
                           child: Container(
                             decoration: BoxDecoration(
+                              image: DecorationImage(image: NetworkImage(item['image']!),fit: BoxFit.contain),
                               border: Border.all(
                                 color: item['id'].toString() == selectedBank ? Color(0xffffb239) : Color(0xffe5e5e5),
                                 width: item['id'].toString() == selectedBank ? 3 : 1
                               ),
                               borderRadius: BorderRadius.circular(15),
                             ),alignment: Alignment.center,
-                            child: Center(
-                              child: ClipRRect(
-                                borderRadius: BorderRadius.circular(15),
-                                child: UiUtils.getImage(
-                                    item['image']!,
-                                    fit: BoxFit.cover),
-                              ),
-                            ),
                           ),
                         );
                       },

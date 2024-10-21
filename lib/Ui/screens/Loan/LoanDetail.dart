@@ -257,629 +257,627 @@ class _LoanDetailState extends State<LoanDetail> {
         child: CircularProgressIndicator(
           color: Color(0xff117af9),
         ),
-      ) : Expanded(
-        child: SingleChildScrollView(
-          child: Column(
-            children: [
-              SizedBox(height: 15,),
-              Stack(
-                children: [
-                  if(agentInfo!['image'].length > 0)
-                    CarouselSlider(
-                        options: CarouselOptions(
-                          aspectRatio: 2.5,
-                          viewportFraction: 1.0,
-                          onPageChanged: (index, reason) {
-                            setState(() {
-                              currentIndex = index;
-                            });
-                          },
-                        ),
-                        items: [
-                          for(var img in agentInfo!['image'])
-                            Container(
-                              margin: EdgeInsets.only(right: 15, left: 15),
-                              child: ClipRRect(
-                                borderRadius: BorderRadius.circular(15.0),
-                                child: CachedNetworkImage(
-                                  imageUrl: img,
-                                  fit: BoxFit.cover,
-                                  width: double.infinity,
-                                  placeholder: (context, url) => Image.asset("assets/profile/noimg.png", fit: BoxFit.cover),
-                                  errorWidget: (context, url, error) =>  Image.asset("assets/profile/noimg.png", fit: BoxFit.cover),
-                                ),
+      ) : SingleChildScrollView(
+        child: Column(
+          children: [
+            SizedBox(height: 15,),
+            Stack(
+              children: [
+                if(agentInfo!['image'].length > 0)
+                  CarouselSlider(
+                      options: CarouselOptions(
+                        aspectRatio: 2.5,
+                        viewportFraction: 1.0,
+                        onPageChanged: (index, reason) {
+                          setState(() {
+                            currentIndex = index;
+                          });
+                        },
+                      ),
+                      items: [
+                        for(var img in agentInfo!['image'])
+                          Container(
+                            margin: EdgeInsets.only(right: 15, left: 15),
+                            child: ClipRRect(
+                              borderRadius: BorderRadius.circular(15.0),
+                              child: CachedNetworkImage(
+                                imageUrl: img,
+                                fit: BoxFit.cover,
+                                width: double.infinity,
+                                placeholder: (context, url) => Image.asset("assets/profile/noimg.png", fit: BoxFit.cover),
+                                errorWidget: (context, url, error) =>  Image.asset("assets/profile/noimg.png", fit: BoxFit.cover),
                               ),
-                            )
-                        ]
-                    ),
-                  Positioned(
-                    right: 20,
-                    top: 10,
-                    child: InkWell(
-                      onTap: () {
-                        share(agentInfo!['id'].toString() ?? "");
-                      },
-                      child: Container(
-                        width: 32,
-                        height: 32,
-                        decoration: BoxDecoration(
-                          color: context.color.primaryColor,
-                          shape: BoxShape.circle,
-                          boxShadow: const [
-                            BoxShadow(
-                                color: Color.fromARGB(33, 0, 0, 0),
-                                offset: Offset(0, 2),
-                                blurRadius: 15,
-                                spreadRadius: 0)
-                          ],
-                        ),
-                        child: Icon(
-                          Icons.share,
-                          color: context.color.tertiaryColor,
-                        ),
+                            ),
+                          )
+                      ]
+                  ),
+                Positioned(
+                  right: 20,
+                  top: 10,
+                  child: InkWell(
+                    onTap: () {
+                      share(agentInfo!['id'].toString() ?? "");
+                    },
+                    child: Container(
+                      width: 32,
+                      height: 32,
+                      decoration: BoxDecoration(
+                        color: context.color.primaryColor,
+                        shape: BoxShape.circle,
+                        boxShadow: const [
+                          BoxShadow(
+                              color: Color.fromARGB(33, 0, 0, 0),
+                              offset: Offset(0, 2),
+                              blurRadius: 15,
+                              spreadRadius: 0)
+                        ],
+                      ),
+                      child: Icon(
+                        Icons.share,
+                        color: context.color.tertiaryColor,
                       ),
                     ),
                   ),
-                  if(agentInfo!['image'].length > 0)
-                    Positioned(
-                      bottom: 8,
-                      right: 0,
-                      left: 0,
-                      child: Row(
-                        mainAxisAlignment: MainAxisAlignment.center,
-                        children: [
-                          CustomDotsIndicator(
-                            dotsCount: agentInfo!['image'].length,
-                            position: currentIndex.toDouble(),
-                          ),
-                        ],
-                      ),
+                ),
+                if(agentInfo!['image'].length > 0)
+                  Positioned(
+                    bottom: 8,
+                    right: 0,
+                    left: 0,
+                    child: Row(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        CustomDotsIndicator(
+                          dotsCount: agentInfo!['image'].length,
+                          position: currentIndex.toDouble(),
+                        ),
+                      ],
                     ),
+                  ),
+                SizedBox(height: 15,),
+                // Container(
+                //   padding: EdgeInsets.only(
+                //       left: 10,
+                //       right: 10,
+                //       top: 3,
+                //       bottom: 3),
+                //   decoration: BoxDecoration(
+                //     color: Color(0xff7e71d8),
+                //     borderRadius:
+                //     BorderRadius.circular(5),
+                //   ),
+                //   child: Text(
+                //     'LOAN00${agentInfo!['id']}',
+                //     style: TextStyle(
+                //       fontSize: 10,
+                //       color: Colors.white,
+                //       fontWeight: FontWeight.w500,
+                //     ),
+                //   ),
+                // ),
+                // SizedBox(height: 5,)
+              ],
+            ),
+            Padding(
+              padding: const EdgeInsets.only(left: 15,bottom: 15,right: 15),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
                   SizedBox(height: 15,),
-                  // Container(
-                  //   padding: EdgeInsets.only(
-                  //       left: 10,
-                  //       right: 10,
-                  //       top: 3,
-                  //       bottom: 3),
-                  //   decoration: BoxDecoration(
-                  //     color: Color(0xff7e71d8),
-                  //     borderRadius:
-                  //     BorderRadius.circular(5),
-                  //   ),
-                  //   child: Text(
-                  //     'LOAN00${agentInfo!['id']}',
-                  //     style: TextStyle(
-                  //       fontSize: 10,
-                  //       color: Colors.white,
-                  //       fontWeight: FontWeight.w500,
-                  //     ),
-                  //   ),
-                  // ),
-                  // SizedBox(height: 5,)
-                ],
-              ),
-              Padding(
-                padding: const EdgeInsets.only(left: 15,bottom: 15,right: 15),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    SizedBox(height: 15,),
-                    Container(
-                      padding: EdgeInsets.all(8),
-                      decoration: BoxDecoration(
-                          color: Colors.white,
-                          borderRadius: BorderRadius.circular(15),
-                        boxShadow: [
-                          BoxShadow(
-                            color: Color(0xfff0f0f0),
-                            offset: Offset(0, 2),
-                            blurRadius: 2.0,
-                            spreadRadius: 2.0,
-                          ),
-                        ],
-                      ),
-                      child: Row(
-                        crossAxisAlignment: CrossAxisAlignment.center,
-                        mainAxisAlignment: MainAxisAlignment.start,
-                        children: [
-                          ClipRRect(
-                              borderRadius: BorderRadius.circular(50),
-                              child: Image.network(agentInfo!['photo'],width: 70,height: 70,)),
-                          SizedBox(width: 10,),
-                          Expanded(
-                            child: Column(
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              children: [
-                                Row(
-                                  children: [
-                                    Text('${agentInfo!['title']}',
-                                      style: TextStyle(
-                                        fontSize: 13,
-                                        color: Colors.black,
-                                        fontWeight: FontWeight.w600,
+                  Container(
+                    padding: EdgeInsets.all(8),
+                    decoration: BoxDecoration(
+                        color: Colors.white,
+                        borderRadius: BorderRadius.circular(15),
+                      boxShadow: [
+                        BoxShadow(
+                          color: Color(0xfff0f0f0),
+                          offset: Offset(0, 2),
+                          blurRadius: 2.0,
+                          spreadRadius: 2.0,
+                        ),
+                      ],
+                    ),
+                    child: Row(
+                      crossAxisAlignment: CrossAxisAlignment.center,
+                      mainAxisAlignment: MainAxisAlignment.start,
+                      children: [
+                        ClipRRect(
+                            borderRadius: BorderRadius.circular(50),
+                            child: Image.network(agentInfo!['photo'],width: 70,height: 70,)),
+                        SizedBox(width: 10,),
+                        Expanded(
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Row(
+                                children: [
+                                  Text('${agentInfo!['title']}',
+                                    style: TextStyle(
+                                      fontSize: 13,
+                                      color: Colors.black,
+                                      fontWeight: FontWeight.w600,
+                                    ),),
+                                  SizedBox(width: 2,),
+                                  if(agentInfo!['status'] == 'Verified')
+                                    Image.asset("assets/verified.png",width: 20,height: 20,),
+                                ],
+                              ),
+                              SizedBox(height: 5,),
+                              Row(
+                                children: [
+                                  Image.asset("assets/Loans/_-114.png",width: 15,height: 15,),
+                                  SizedBox(width: 5,),
+                                  Text('${UiUtils.trimNumberToOneDecimal(agentInfo!['reviews_avg_ratting'] ?? '0')}'
+                                      ' (${agentInfo!['user_count']} Ratings)',style: TextStyle(
+                                      fontSize: 11,
+                                      color: Color(0xff7d7d7d)
+                                  ),)
+                                ],
+                              ),
+                              SizedBox(height: 5,),
+                              Row(
+                                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                                children: [
+                                  Row(
+                                    children: [
+                                      Text('Bank   :',style: TextStyle(
+                                          fontSize: 11,
+                                          color: Color(0xff7d7d7d)
                                       ),),
-                                    SizedBox(width: 2,),
-                                    if(agentInfo!['status'] == 'Verified')
-                                      Image.asset("assets/verified.png",width: 20,height: 20,),
-                                  ],
-                                ),
-                                SizedBox(height: 5,),
-                                Row(
-                                  children: [
-                                    Image.asset("assets/Loans/_-114.png",width: 15,height: 15,),
-                                    SizedBox(width: 5,),
-                                    Text('${UiUtils.trimNumberToOneDecimal(agentInfo!['reviews_avg_ratting'] ?? '0')}'
-                                        ' (${agentInfo!['user_count']} Ratings)',style: TextStyle(
-                                        fontSize: 11,
-                                        color: Color(0xff7d7d7d)
-                                    ),)
-                                  ],
-                                ),
-                                SizedBox(height: 5,),
-                                Row(
-                                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                                  children: [
-                                    Row(
-                                      children: [
-                                        Text('Bank   :',style: TextStyle(
-                                            fontSize: 11,
-                                            color: Color(0xff7d7d7d)
-                                        ),),
-                                        SizedBox(width: 8,),
-                                        Container(
-                                          width: MediaQuery.of(context).size.width/2.5,
-                                          child: Text('${agentInfo!['bank_name']}',
-                                            maxLines: 1,overflow: TextOverflow.ellipsis,
-                                            style: TextStyle(
-                                              fontSize: 11,
-                                              fontWeight: FontWeight.w600,
-                                              color: Colors.black
-                                            ),
-                                          ),
-                                        ),
-                                      ],
-                                    ),
-                                    Row(
-                                      mainAxisAlignment: MainAxisAlignment.end,
-                                      children: [
-                                        Text('${agentInfo!['agent_type'] ?? 'DST & DSA'}',
+                                      SizedBox(width: 8,),
+                                      Container(
+                                        width: MediaQuery.of(context).size.width/2.5,
+                                        child: Text('${agentInfo!['bank_name']}',
+                                          maxLines: 1,overflow: TextOverflow.ellipsis,
                                           style: TextStyle(
                                             fontSize: 11,
                                             fontWeight: FontWeight.w600,
                                             color: Colors.black
                                           ),
-                                        )
-                                      ],
-                                    ),
-                                  ],
-                                ),
-                                SizedBox(height: 5,),
-                                Row(
-                                  children: [
-                                    Text('Branch   :',style: TextStyle(
-                                        fontSize: 11,
-                                        color: Color(0xff7d7d7d)
-                                    ),),
-                                    SizedBox(width: 8,),
-                                    Text('${agentInfo!['branch']}',style: TextStyle(
-                                        fontSize: 11,
-                                        fontWeight: FontWeight.w600,
-                                        color: Colors.black
-                                    ),)
-                                  ],
-                                ),
-                              ],
-                            ),
-                          )
-                        ],
-                      ),
-                    ),
-                    SizedBox(height: 15,),
-                    Container(
-                      padding: EdgeInsets.all(10),
-                      decoration: BoxDecoration(
-                        color: Colors.white,
-                        boxShadow: [
-                          BoxShadow(
-                            color: Color(0xfff0f0f0),
-                            offset: Offset(0, 2),
-                            blurRadius: 2.0,
-                            spreadRadius: 2.0,
+                                        ),
+                                      ),
+                                    ],
+                                  ),
+                                  Row(
+                                    mainAxisAlignment: MainAxisAlignment.end,
+                                    children: [
+                                      Text('${agentInfo!['agent_type'] ?? 'DST & DSA'}',
+                                        style: TextStyle(
+                                          fontSize: 11,
+                                          fontWeight: FontWeight.w600,
+                                          color: Colors.black
+                                        ),
+                                      )
+                                    ],
+                                  ),
+                                ],
+                              ),
+                              SizedBox(height: 5,),
+                              Row(
+                                children: [
+                                  Text('Branch   :',style: TextStyle(
+                                      fontSize: 11,
+                                      color: Color(0xff7d7d7d)
+                                  ),),
+                                  SizedBox(width: 8,),
+                                  Text('${agentInfo!['branch']}',style: TextStyle(
+                                      fontSize: 11,
+                                      fontWeight: FontWeight.w600,
+                                      color: Colors.black
+                                  ),)
+                                ],
+                              ),
+                            ],
                           ),
-                        ],
-                        borderRadius: BorderRadius.circular(10),
-                      ),
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Row(
-                            mainAxisAlignment:
-                            MainAxisAlignment.spaceBetween,
-                            children: [
-                              Text(
-                                'Bank Info',
+                        )
+                      ],
+                    ),
+                  ),
+                  SizedBox(height: 15,),
+                  Container(
+                    padding: EdgeInsets.all(10),
+                    decoration: BoxDecoration(
+                      color: Colors.white,
+                      boxShadow: [
+                        BoxShadow(
+                          color: Color(0xfff0f0f0),
+                          offset: Offset(0, 2),
+                          blurRadius: 2.0,
+                          spreadRadius: 2.0,
+                        ),
+                      ],
+                      borderRadius: BorderRadius.circular(10),
+                    ),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Row(
+                          mainAxisAlignment:
+                          MainAxisAlignment.spaceBetween,
+                          children: [
+                            Text(
+                              'Bank Info',
+                              style: TextStyle(
+                                fontSize: 13,
+                                color: Colors.black,
+                                fontWeight: FontWeight.w600,
+                              ),
+                            ),
+                            InkWell(
+                              onTap: () => _showAlertDialog(context),
+                              child: Text(
+                                '+ Add Ratting',
                                 style: TextStyle(
                                   fontSize: 13,
-                                  color: Colors.black,
+                                  color: Color(0xff117af9),
                                   fontWeight: FontWeight.w600,
                                 ),
                               ),
-                              InkWell(
-                                onTap: () => _showAlertDialog(context),
-                                child: Text(
-                                  '+ Add Ratting',
-                                  style: TextStyle(
-                                    fontSize: 13,
-                                    color: Color(0xff117af9),
-                                    fontWeight: FontWeight.w600,
-                                  ),
-                                ),
-                              )
-                            ],
-                          ),
-                          SizedBox(
-                            height: 10,
-                          ),
-                          Row(
-                            children: [
-                              Expanded(
-                                child: Text(
-                                  'Office Timing:',
-                                  style: TextStyle(
-                                      fontSize: 11,
-                                      color: Color(0xff7d7d7d)),
-                                ),
+                            )
+                          ],
+                        ),
+                        SizedBox(
+                          height: 10,
+                        ),
+                        Row(
+                          children: [
+                            Expanded(
+                              child: Text(
+                                'Office Timing:',
+                                style: TextStyle(
+                                    fontSize: 11,
+                                    color: Color(0xff7d7d7d)),
                               ),
-                              SizedBox(
-                                width: 8,
-                              ),
-                              Expanded(
-                                child: Text(
-                                  '${agentInfo!['timing'] ?? '--'}',
-                                  style: TextStyle(
-                                      fontSize: 11,
-                                      fontWeight: FontWeight.w500,
-                                      color: Colors.black),
-                                ),
-                              )
-                            ],
-                          ),
-                          SizedBox(
-                            height: 8,
-                          ),
-                          Row(
-                            children: [
-                              Expanded(
-                                child: Text(
-                                  'Phone No:',
-                                  style: TextStyle(
-                                      fontSize: 11,
-                                      color: Color(0xff7d7d7d)),
-                                ),
-                              ),
-                              SizedBox(
-                                width: 8,
-                              ),
-                              Expanded(
-                                child: Text(
-                                  '+91 ${agentInfo!['phone'] ?? '--'}',
-                                  style: TextStyle(
-                                      fontSize: 11,
-                                      fontWeight: FontWeight.w500,
-                                      color: Colors.black),
-                                ),
-                              )
-                            ],
-                          ),
-                          SizedBox(
-                            height: 8,
-                          ),
-                          Row(
-                            children: [
-                              Expanded(
-                                child: Text(
-                                  'Email Id:',
-                                  style: TextStyle(
-                                      fontSize: 11,
-                                      color: Color(0xff7d7d7d)),
-                                ),
-                              ),
-                              SizedBox(
-                                width: 8,
-                              ),
-                              Expanded(
-                                child: Text(
-                                  '${agentInfo!['email'] ?? '--'}',
-                                  style: TextStyle(
-                                      fontSize: 11,
-                                      fontWeight: FontWeight.w500,
-                                      color: Colors.black),
-                                ),
-                              )
-                            ],
-                          ),
-                          SizedBox(
-                            height: 8,
-                          ),
-                          Row(
-                            children: [
-                              Expanded(
-                                child: Text(
-                                  'Locations:',
-                                  style: TextStyle(
-                                      fontSize: 11,
-                                      color: Color(0xff7d7d7d)),
-                                ),
-                              ),
-                              SizedBox(
-                                width: 8,
-                              ),
-                              Expanded(
-                                child: Text(
-                                  '${agentInfo!['location'] ?? '--'}',
-                                  style: TextStyle(
-                                      fontSize: 11,
-                                      fontWeight: FontWeight.w500,
-                                      color: Colors.black),
-                                ),
-                              )
-                            ],
-                          ),
-                          SizedBox(
-                            height: 8,
-                          ),
-                          Row(
-                            children: [
-                              Expanded(
-                                child: Text(
-                                  'Brokerage:',
-                                  style: TextStyle(
-                                      fontSize: 11,
-                                      color: Color(0xff7d7d7d)),
-                                ),
-                              ),
-                              SizedBox(
-                                width: 8,
-                              ),
-                              Expanded(
-                                child: Text(
-                                  '${agentInfo!['brokerage'] ?? '--'}',
-                                  style: TextStyle(
-                                      fontSize: 11,
-                                      fontWeight: FontWeight.w500,
-                                      color: Colors.black),
-                                ),
-                              )
-                            ],
-                          ),
-                        ],
-                      ),
-                    ),
-                    SizedBox(height: 15,),
-                    Container(
-                      width: double.infinity,
-                      padding: EdgeInsets.all(10),
-                      decoration: BoxDecoration(
-                        color: Colors.white,
-                        boxShadow: [
-                          BoxShadow(
-                            color: Color(0xfff0f0f0),
-                            offset: Offset(0, 2),
-                            blurRadius: 2.0,
-                            spreadRadius: 2.0,
-                          ),
-                        ],
-                        borderRadius: BorderRadius.circular(10),
-                      ),
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Text('Loan Types',
-                            style: TextStyle(
-                              fontSize: 13,
-                              color: Colors.black,
-                              fontWeight: FontWeight.w600,
-                            ),),
-                            SizedBox(height: 10,),
-                          SingleChildScrollView(
-                            scrollDirection: Axis.horizontal,
-                            child: Row(
-                              children: [
-                                for(var typ in agentInfo!['loan_type'])
-                                  Padding(
-                                    padding: const EdgeInsets.all(5),
-                                    child: Container(
-                                    padding: EdgeInsets.only(left: 15,right: 15,top: 6,bottom: 6),
-                                    decoration: BoxDecoration(
-                                      color: Color(0xfffffbf3),
-                                      border: Border.all(
-                                          color: Color(0xffffe8c2), width: 1
-                                      ),
-                                      borderRadius: BorderRadius.circular(30),
-                                    ),alignment: Alignment.center,
-                                    child: Text('${typ}',style: TextStyle(
-                                        fontSize: 10,
-                                        fontWeight: FontWeight.w500,
-                                        color: Color(0xff333333)
-                                    ),),
-                                                                  ),
-                                  ),
-                              ],
                             ),
-                          ),
-                        ],
-                      ),
-                    ),
-                    SizedBox(height: 15,),
-                    Container(
-                      width: double.infinity,
-                      padding: EdgeInsets.all(10),
-                      decoration: BoxDecoration(
-                        color: Colors.white,
-                        boxShadow: [
-                          BoxShadow(
-                            color: Color(0xfff0f0f0),
-                            offset: Offset(0, 2),
-                            blurRadius: 2.0,
-                            spreadRadius: 2.0,
-                          ),
-                        ],
-                        borderRadius: BorderRadius.circular(10),
-                      ),
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Text(
-                            'Address',
-                            style: TextStyle(
-                              fontSize: 13,
-                              color: Colors.black,
-                              fontWeight: FontWeight.w600,
+                            SizedBox(
+                              width: 8,
                             ),
-                          ),
-                          SizedBox(
-                            height: 10,
-                          ),
-                          Text(
-                            '${agentInfo!['address'] ?? '--'}',
-                            style: TextStyle(
-                                fontSize: 12, color: Color(0xff707070)),
-                          ),
-                          SizedBox(
-                            height: 15,
-                          ),
-                          Text('Description',
-                            style: TextStyle(
-                              fontSize: 13,
-                              color: Colors.black,
-                              fontWeight: FontWeight.w600,
-                            ),),
-                          SizedBox(height: 10,),
-                          Text('${agentInfo!['description']}',style: TextStyle(
-                              fontSize: 12,
-                              color: Color(0xff707070)
+                            Expanded(
+                              child: Text(
+                                '${agentInfo!['timing'] ?? '--'}',
+                                style: TextStyle(
+                                    fontSize: 11,
+                                    fontWeight: FontWeight.w500,
+                                    color: Colors.black),
+                              ),
+                            )
+                          ],
+                        ),
+                        SizedBox(
+                          height: 8,
+                        ),
+                        Row(
+                          children: [
+                            Expanded(
+                              child: Text(
+                                'Phone No:',
+                                style: TextStyle(
+                                    fontSize: 11,
+                                    color: Color(0xff7d7d7d)),
+                              ),
+                            ),
+                            SizedBox(
+                              width: 8,
+                            ),
+                            Expanded(
+                              child: Text(
+                                '+91 ${agentInfo!['phone'] ?? '--'}',
+                                style: TextStyle(
+                                    fontSize: 11,
+                                    fontWeight: FontWeight.w500,
+                                    color: Colors.black),
+                              ),
+                            )
+                          ],
+                        ),
+                        SizedBox(
+                          height: 8,
+                        ),
+                        Row(
+                          children: [
+                            Expanded(
+                              child: Text(
+                                'Email Id:',
+                                style: TextStyle(
+                                    fontSize: 11,
+                                    color: Color(0xff7d7d7d)),
+                              ),
+                            ),
+                            SizedBox(
+                              width: 8,
+                            ),
+                            Expanded(
+                              child: Text(
+                                '${agentInfo!['email'] ?? '--'}',
+                                style: TextStyle(
+                                    fontSize: 11,
+                                    fontWeight: FontWeight.w500,
+                                    color: Colors.black),
+                              ),
+                            )
+                          ],
+                        ),
+                        SizedBox(
+                          height: 8,
+                        ),
+                        Row(
+                          children: [
+                            Expanded(
+                              child: Text(
+                                'Locations:',
+                                style: TextStyle(
+                                    fontSize: 11,
+                                    color: Color(0xff7d7d7d)),
+                              ),
+                            ),
+                            SizedBox(
+                              width: 8,
+                            ),
+                            Expanded(
+                              child: Text(
+                                '${agentInfo!['location'] ?? '--'}',
+                                style: TextStyle(
+                                    fontSize: 11,
+                                    fontWeight: FontWeight.w500,
+                                    color: Colors.black),
+                              ),
+                            )
+                          ],
+                        ),
+                        SizedBox(
+                          height: 8,
+                        ),
+                        Row(
+                          children: [
+                            Expanded(
+                              child: Text(
+                                'Brokerage:',
+                                style: TextStyle(
+                                    fontSize: 11,
+                                    color: Color(0xff7d7d7d)),
+                              ),
+                            ),
+                            SizedBox(
+                              width: 8,
+                            ),
+                            Expanded(
+                              child: Text(
+                                '${agentInfo!['brokerage'] ?? '--'}',
+                                style: TextStyle(
+                                    fontSize: 11,
+                                    fontWeight: FontWeight.w500,
+                                    color: Colors.black),
+                              ),
+                            )
+                          ],
+                        ),
+                      ],
+                    ),
+                  ),
+                  SizedBox(height: 15,),
+                  Container(
+                    width: double.infinity,
+                    padding: EdgeInsets.all(10),
+                    decoration: BoxDecoration(
+                      color: Colors.white,
+                      boxShadow: [
+                        BoxShadow(
+                          color: Color(0xfff0f0f0),
+                          offset: Offset(0, 2),
+                          blurRadius: 2.0,
+                          spreadRadius: 2.0,
+                        ),
+                      ],
+                      borderRadius: BorderRadius.circular(10),
+                    ),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text('Loan Types',
+                          style: TextStyle(
+                            fontSize: 13,
+                            color: Colors.black,
+                            fontWeight: FontWeight.w600,
                           ),),
+                          SizedBox(height: 10,),
+                        SingleChildScrollView(
+                          scrollDirection: Axis.horizontal,
+                          child: Row(
+                            children: [
+                              for(var typ in agentInfo!['loan_type'])
+                                Padding(
+                                  padding: const EdgeInsets.all(5),
+                                  child: Container(
+                                  padding: EdgeInsets.only(left: 15,right: 15,top: 6,bottom: 6),
+                                  decoration: BoxDecoration(
+                                    color: Color(0xfffffbf3),
+                                    border: Border.all(
+                                        color: Color(0xffffe8c2), width: 1
+                                    ),
+                                    borderRadius: BorderRadius.circular(30),
+                                  ),alignment: Alignment.center,
+                                  child: Text('${typ}',style: TextStyle(
+                                      fontSize: 10,
+                                      fontWeight: FontWeight.w500,
+                                      color: Color(0xff333333)
+                                  ),),
+                                                                ),
+                                ),
+                            ],
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                  SizedBox(height: 15,),
+                  Container(
+                    width: double.infinity,
+                    padding: EdgeInsets.all(10),
+                    decoration: BoxDecoration(
+                      color: Colors.white,
+                      boxShadow: [
+                        BoxShadow(
+                          color: Color(0xfff0f0f0),
+                          offset: Offset(0, 2),
+                          blurRadius: 2.0,
+                          spreadRadius: 2.0,
+                        ),
+                      ],
+                      borderRadius: BorderRadius.circular(10),
+                    ),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          'Address',
+                          style: TextStyle(
+                            fontSize: 13,
+                            color: Colors.black,
+                            fontWeight: FontWeight.w600,
+                          ),
+                        ),
+                        SizedBox(
+                          height: 10,
+                        ),
+                        Text(
+                          '${agentInfo!['address'] ?? '--'}',
+                          style: TextStyle(
+                              fontSize: 12, color: Color(0xff707070)),
+                        ),
+                        SizedBox(
+                          height: 15,
+                        ),
+                        Text('Description',
+                          style: TextStyle(
+                            fontSize: 13,
+                            color: Colors.black,
+                            fontWeight: FontWeight.w600,
+                          ),),
+                        SizedBox(height: 10,),
+                        Text('${agentInfo!['description']}',style: TextStyle(
+                            fontSize: 12,
+                            color: Color(0xff707070)
+                        ),),
+                      ],
+                    ),
+                  ),
+                  SizedBox(height: 15,),
+                ],
+              ),
+            ),
+            Container(
+              padding: EdgeInsets.only(top: 10,bottom: 10,left: 15,right: 15),
+              decoration: BoxDecoration(
+                  color: Colors.white,
+                  borderRadius: BorderRadius.circular(15),
+                  boxShadow: [
+                    BoxShadow(
+                      color: Color(0xfff0f0f0),
+                      offset: Offset(0, 2),
+                      blurRadius: 2.0,
+                      spreadRadius: 2.0,
+                    ),
+                  ],
+
+              ),
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  InkWell(
+                    onTap: () async {
+                      final url = 'tel:${agentInfo!['phone']}'; // Create a tel URL with the phone number
+                      if (await canLaunchUrl(Uri.parse(url))) {
+                      await launchUrl(Uri.parse(url));
+                      } else {
+                      throw 'Could not launch $url';
+                      }
+                    },
+                    child: Container(
+                      height: 40,
+                      padding: EdgeInsets.only(left: 15,right: 15,top: 10,bottom: 10),
+                      decoration: BoxDecoration(
+                        color: Color(0xff117af9),
+                        borderRadius: BorderRadius.circular(7),
+                      ),
+                      child: Row(
+                        children: [
+                          Image.asset("assets/NewPropertydetailscreen/__call.png",width: 18,height: 18,),
+                          SizedBox(width: 10,),
+                          Text('Call',
+                            style: TextStyle(
+                              color: Colors.white,
+                              fontSize: 12,
+                            ),
+                          ),
                         ],
                       ),
                     ),
-                    SizedBox(height: 15,),
-                  ],
-                ),
+                  ),
+                  // InkWell(
+                  //   onTap: () async {
+                  //     final url = 'sms:${agentInfo!['phone']}'; // Create a tel URL with the phone number
+                  //     if (await canLaunchUrl(Uri.parse(url))) {
+                  //     await launchUrl(Uri.parse(url));
+                  //     } else {
+                  //     throw 'Could not launch $url';
+                  //     }
+                  //   },
+                  //   child: Container(
+                  //     height: 40,
+                  //     padding: EdgeInsets.only(left: 15,right: 15,top: 10,bottom: 10),
+                  //     decoration: BoxDecoration(
+                  //         color: Color(0xff117af9),
+                  //         borderRadius: BorderRadius.circular(7),
+                  //     ),
+                  //     child: Row(
+                  //       children: [
+                  //         Image.asset("assets/NewPropertydetailscreen/__chat.png",width: 18,height: 18,),
+                  //         SizedBox(width: 10,),
+                  //         Text('Message',
+                  //              style: TextStyle(
+                  //                color: Colors.white,
+                  //                fontSize: 12,
+                  //              ),
+                  //         ),
+                  //       ],
+                  //     ),
+                  //   ),
+                  // ),
+                  InkWell(
+                    onTap: () async {
+                      final url = 'whatsapp://send?phone=:+91${agentInfo!['whatsapp_number']}&text='; // Create a tel URL with the phone number
+                      if (await canLaunchUrl(Uri.parse(url))) {
+                      await launchUrl(Uri.parse(url));
+                      } else {
+                      throw 'Could not launch $url';
+                      }
+                    },
+                    child: Container(
+                      height: 40,
+                      padding: EdgeInsets.only(left: 15,right: 15,top: 10,bottom: 10),
+                      decoration: BoxDecoration(
+                        color: Color(0xff25d366),
+                        borderRadius: BorderRadius.circular(10),
+                      ),
+                      child: Row(
+                        children: [
+                          Image.asset("assets/NewPropertydetailscreen/__whatsapp.png",width: 18,height: 18,),
+                          SizedBox(width: 5,),
+                          Text('Whatsapp',
+                            style: TextStyle(
+                              color: Colors.white,
+                              fontSize: 12,
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                  ),
+                ],
               ),
-              Container(
-                padding: EdgeInsets.only(top: 10,bottom: 10,left: 15,right: 15),
-                decoration: BoxDecoration(
-                    color: Colors.white,
-                    borderRadius: BorderRadius.circular(15),
-                    boxShadow: [
-                      BoxShadow(
-                        color: Color(0xfff0f0f0),
-                        offset: Offset(0, 2),
-                        blurRadius: 2.0,
-                        spreadRadius: 2.0,
-                      ),
-                    ],
-
-                ),
-                child: Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  children: [
-                    InkWell(
-                      onTap: () async {
-                        final url = 'tel:${agentInfo!['phone']}'; // Create a tel URL with the phone number
-                        if (await canLaunchUrl(Uri.parse(url))) {
-                        await launchUrl(Uri.parse(url));
-                        } else {
-                        throw 'Could not launch $url';
-                        }
-                      },
-                      child: Container(
-                        height: 40,
-                        padding: EdgeInsets.only(left: 15,right: 15,top: 10,bottom: 10),
-                        decoration: BoxDecoration(
-                          color: Color(0xff117af9),
-                          borderRadius: BorderRadius.circular(7),
-                        ),
-                        child: Row(
-                          children: [
-                            Image.asset("assets/NewPropertydetailscreen/__call.png",width: 18,height: 18,),
-                            SizedBox(width: 10,),
-                            Text('Call',
-                              style: TextStyle(
-                                color: Colors.white,
-                                fontSize: 12,
-                              ),
-                            ),
-                          ],
-                        ),
-                      ),
-                    ),
-                    // InkWell(
-                    //   onTap: () async {
-                    //     final url = 'sms:${agentInfo!['phone']}'; // Create a tel URL with the phone number
-                    //     if (await canLaunchUrl(Uri.parse(url))) {
-                    //     await launchUrl(Uri.parse(url));
-                    //     } else {
-                    //     throw 'Could not launch $url';
-                    //     }
-                    //   },
-                    //   child: Container(
-                    //     height: 40,
-                    //     padding: EdgeInsets.only(left: 15,right: 15,top: 10,bottom: 10),
-                    //     decoration: BoxDecoration(
-                    //         color: Color(0xff117af9),
-                    //         borderRadius: BorderRadius.circular(7),
-                    //     ),
-                    //     child: Row(
-                    //       children: [
-                    //         Image.asset("assets/NewPropertydetailscreen/__chat.png",width: 18,height: 18,),
-                    //         SizedBox(width: 10,),
-                    //         Text('Message',
-                    //              style: TextStyle(
-                    //                color: Colors.white,
-                    //                fontSize: 12,
-                    //              ),
-                    //         ),
-                    //       ],
-                    //     ),
-                    //   ),
-                    // ),
-                    InkWell(
-                      onTap: () async {
-                        final url = 'whatsapp://send?phone=:+91${agentInfo!['whatsapp_number']}&text='; // Create a tel URL with the phone number
-                        if (await canLaunchUrl(Uri.parse(url))) {
-                        await launchUrl(Uri.parse(url));
-                        } else {
-                        throw 'Could not launch $url';
-                        }
-                      },
-                      child: Container(
-                        height: 40,
-                        padding: EdgeInsets.only(left: 15,right: 15,top: 10,bottom: 10),
-                        decoration: BoxDecoration(
-                          color: Color(0xff25d366),
-                          borderRadius: BorderRadius.circular(10),
-                        ),
-                        child: Row(
-                          children: [
-                            Image.asset("assets/NewPropertydetailscreen/__whatsapp.png",width: 18,height: 18,),
-                            SizedBox(width: 5,),
-                            Text('Whatsapp',
-                              style: TextStyle(
-                                color: Colors.white,
-                                fontSize: 12,
-                              ),
-                            ),
-                          ],
-                        ),
-                      ),
-                    ),
-                  ],
-                ),
-              )
-            ],
-          ),
+            )
+          ],
         ),
       ),
     );

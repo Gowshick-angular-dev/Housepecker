@@ -69,12 +69,13 @@ class _seeallAgentState extends State<seeallAgent> {
     Size size = MediaQuery.sizeOf(context);
 
     return Scaffold(
-      appBar: UiUtils.buildAppBar(context,
-          showBackButton: true,
-          title:'Top Agents',
-          actions: [
-          ]),
-     /* appBar: AppBar(
+      appBar: UiUtils.buildAppBar(
+        context,
+        showBackButton: true,
+        title: 'Top Agents (${Top_agenylist?.length ?? 0})',
+        actions: [],
+      ),
+      /* appBar: AppBar(
         backgroundColor: tertiaryColor_,
         leadingWidth: 40, // Adjust the width to decrease the space between back icon and title
         titleSpacing: 15,
@@ -142,35 +143,44 @@ class _seeallAgentState extends State<seeallAgent> {
           ],
         ),
       ),*/
-      body: SingleChildScrollView(
-        child: Column(
-          children: [
-            SizedBox(height: 10),
-            SizedBox(
-              height: size.height * 0.85,
-              child: AgentLOading
-                  ? buildShimmerList(size) // Show shimmer effect if loading
-                  : ListView.builder(
-                scrollDirection: Axis.vertical,
-                itemCount: Top_agenylist.length,
-                itemBuilder: (context, index) {
-                  return Padding(
-                    padding: const EdgeInsets.only(left: 10, right: 10,bottom: 5),
-                    child: buildAgentCard(size, Top_agenylist[index]),
-                  );
-                },
+      body: Column(
+        children: [
+          SizedBox(height: 10),
+          AgentLOading
+              ?  Expanded(
+            child: Center(child: Center(
+              child: UiUtils.progress(
+                normalProgressColor:  const Color(0xff117af9),
               ),
-            ),
-          ],
-        ),
+            ),),
+          )
+              : Top_agenylist.isEmpty
+                  ? Expanded(
+                child: Center(
+                    child: Text(
+                        'No Agents Found')),
+                  )
+              : Expanded(
+                child: ListView.builder(
+                              shrinkWrap: true,
+                              scrollDirection: Axis.vertical,
+                              itemCount: Top_agenylist.length,
+                              itemBuilder: (context, index) {
+                return Padding(
+                  padding: const EdgeInsets.only(left: 10, right: 10,bottom: 5),
+                  child: buildAgentCard(size, Top_agenylist[index]),
+                );
+                              },
+                            ),
+              ),
+        ],
       ),
     );
   }
 
   Widget buildAgentCard(Size size, dynamic agent) {
     return Container(
-      height: size.height * 0.28,
-      width: size.width * 0.75,
+
       decoration: BoxDecoration(
         border: Border.all(color: Color(0xFF9ea1a7)),
         borderRadius: BorderRadius.circular(12),
@@ -211,13 +221,10 @@ class _seeallAgentState extends State<seeallAgent> {
                       padding: const EdgeInsets.only(top: 5),
                       child: Row(
                         children: [
-                          ImageIcon(
-                            AssetImage('assets/FilterSceen/2.png'),
-                            size: 14,
-                          ),
+                          Image.asset('assets/rera_tic.png', height: 14, width:14),
                           SizedBox(width: 2),
                           Text(
-                            'RERA ID : ${agent['rera']}',
+                            'RERA ID : ${agent['rera'] ?? 'N/A'}',
                             overflow: TextOverflow.ellipsis,
                             maxLines: 1, // Display RERA ID
                             style: TextStyle(
@@ -234,7 +241,7 @@ class _seeallAgentState extends State<seeallAgent> {
             ),
             SizedBox(height: 10),
             Container(
-              height: size.height * 0.11,
+              height: size.height * 0.10,
               decoration: BoxDecoration(
                 color: Color(0xFFfff5f1),
                 borderRadius: BorderRadius.circular(12),
@@ -257,7 +264,7 @@ class _seeallAgentState extends State<seeallAgent> {
                 Text(
                   'View All Properties',
                   style: TextStyle(
-                      fontWeight: FontWeight.bold, color: Color(0xFF9ea1a7)),
+                      fontWeight: FontWeight.w600, color: Color(0xFF9ea1a7)),
                 ),
                 InkWell(
                   onTap: () {
@@ -265,7 +272,7 @@ class _seeallAgentState extends State<seeallAgent> {
                       context,
                       MaterialPageRoute(
                           builder: (context) =>
-                              UserDetailProfileScreen(id: agent['id'])),
+                              UserDetailProfileScreen(id: agent['id'], isAgent: true,)),
                     );
                   },
                   child: Container(
@@ -296,7 +303,7 @@ class _seeallAgentState extends State<seeallAgent> {
 
   Widget buildPropertyColumn(String count, String label) {
     return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
+      crossAxisAlignment: CrossAxisAlignment.center,
       children: [
         SizedBox(height: 5),
         Padding(
@@ -322,26 +329,29 @@ class _seeallAgentState extends State<seeallAgent> {
 
 
   Widget buildShimmerList(Size size) {
-    return ListView.builder(
-      scrollDirection: Axis.vertical,
-      itemCount: 5, // Arbitrary number of shimmer items
-      itemBuilder: (context, index) {
-        return Padding(
-          padding: const EdgeInsets.only(left: 10, right: 10,bottom: 5),
-          child: Shimmer.fromColors(
-            baseColor: Colors.grey[300]!,
-            highlightColor: Colors.grey[100]!,
-            child: Container(
-              height: size.height * 0.3,
-              width: size.width * 0.7,
-              decoration: BoxDecoration(
-                color: Colors.grey[300],
-                borderRadius: BorderRadius.circular(12),
+    return Expanded(
+      child: ListView.builder(
+        shrinkWrap: true,
+        scrollDirection: Axis.vertical,
+        itemCount: 5, // Arbitrary number of shimmer items
+        itemBuilder: (context, index) {
+          return Padding(
+            padding: const EdgeInsets.only(left: 10, right: 10,bottom: 5),
+            child: Shimmer.fromColors(
+              baseColor: Colors.grey[300]!,
+              highlightColor: Colors.grey[100]!,
+              child: Container(
+                height: size.height * 0.3,
+                width: size.width * 0.7,
+                decoration: BoxDecoration(
+                  color: Colors.grey[300],
+                  borderRadius: BorderRadius.circular(12),
+                ),
               ),
             ),
-          ),
-        );
-      },
+          );
+        },
+      ),
     );
   }
 }

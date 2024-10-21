@@ -1690,10 +1690,10 @@ class PropertyDetailsState extends State<ProjectDetails> {
                                 ],
                               ),
                             ),
-                         SizedBox(height: 15,),
+                         const SizedBox(height: 15,),
 
                             Container(
-                              padding: EdgeInsets.symmetric(horizontal: 15),
+                              padding: const EdgeInsets.symmetric(horizontal: 15),
                               height: 60,
                               margin: const EdgeInsets.symmetric(horizontal: 15),
                               decoration:  BoxDecoration(
@@ -2724,7 +2724,9 @@ class PropertyDetailsState extends State<ProjectDetails> {
 
                             if(property!['customer'] != null)
                               CusomterProfileWidget1(
-                                data: property!['customer'], propertyID: widget.property!['id'], reraId:  "${widget.property!['project_details']?.isNotEmpty == true ? widget.property!['project_details'][0]['rera_no'] ?? '' : ''}",
+                                data: property!['customer'], propertyID: widget.property!['id'],
+                                reraId:  "${widget.property!['project_details']?.isNotEmpty == true ? widget.property!['project_details'][0]['rera_no'] ?? '' : ''}",
+                                roleId: widget.property?['customer']['role_id'],
                               ),
                             Padding(
                               padding:const EdgeInsets.symmetric(horizontal: 15),
@@ -2735,7 +2737,7 @@ class PropertyDetailsState extends State<ProjectDetails> {
                                       child: const Text("Property have inaccurate data ?",style: TextStyle(fontSize: 13),),
                                     ),
                                   ),
-                                  SizedBox(width: 10,),
+                                  const SizedBox(width: 10,),
                                   GestureDetector(
                                     onTap: () {
                                       showDialog(
@@ -2767,7 +2769,7 @@ class PropertyDetailsState extends State<ProjectDetails> {
                                       decoration: BoxDecoration(
                                           borderRadius: BorderRadius.circular(8),
                                           color: const Color(0xffffe4e4)
-                                      ),child: Text("Report",style: TextStyle(color: Colors.red,fontSize: 13),),
+                                      ),child: const Text("Report",style: TextStyle(color: Colors.red,fontSize: 13),),
                                     ),
                                   )
                                 ],
@@ -2912,11 +2914,11 @@ class PropertyDetailsState extends State<ProjectDetails> {
                                       color: Colors.white,
                                       border: Border.all(
                                         width: 1,
-                                        color: Color(0xff117af9),
+                                        color: const Color(0xff117af9),
                                       ),
                                       boxShadow: [
                                         BoxShadow(
-                                          offset: Offset(0, 1),
+                                          offset: const Offset(0, 1),
                                           blurRadius: 5,
                                           color: Colors.black.withOpacity(0.1),
                                         ),
@@ -2924,7 +2926,7 @@ class PropertyDetailsState extends State<ProjectDetails> {
                                     ),
                                     child: LinearProgressIndicator(
                                       value: progress / 100,
-                                      valueColor: AlwaysStoppedAnimation<Color>(Colors.green),
+                                      valueColor: const AlwaysStoppedAnimation<Color>(Colors.green),
                                       backgroundColor: Colors.grey[200],
                                       minHeight: 10,
                                     ),
@@ -4329,7 +4331,7 @@ class PropertyDetailsState extends State<ProjectDetails> {
               borderRadius: BorderRadius.circular(15),
               border: Border.all(
                   width: 1,
-                  color: Color(0xffe0e0e0)
+                  color: const Color(0xffe0e0e0)
               )
           ),
           child: Column(
@@ -4343,7 +4345,7 @@ class PropertyDetailsState extends State<ProjectDetails> {
                   ),
                   child: CustomShimmer(width: double.infinity,height: 110,),
                 ),
-                SizedBox(height: 8,),
+                const SizedBox(height: 8,),
                 LayoutBuilder(builder: (context, c) {
                   return Padding(
                     padding: const EdgeInsets.only(left:10,right: 10),
@@ -4356,16 +4358,16 @@ class PropertyDetailsState extends State<ProjectDetails> {
                           height: 14,
                           width: c.maxWidth - 50,
                         ),
-                        SizedBox(height: 5,),
+                        const SizedBox(height: 5,),
                         const CustomShimmer(
                           height: 13,
                         ),
-                        SizedBox(height: 5,),
+                        const SizedBox(height: 5,),
                         CustomShimmer(
                           height: 12,
                           width: c.maxWidth / 1.2,
                         ),
-                        SizedBox(height: 8,),
+                        const SizedBox(height: 8,),
                         Align(
                           alignment: Alignment.bottomLeft,
                           child: CustomShimmer(
@@ -4475,9 +4477,9 @@ class PropertyDetailsState extends State<ProjectDetails> {
                       style: TextStyle(fontSize: 18, fontWeight: FontWeight.w600),
                     ),
                     const SizedBox(height: 10),
-                    Row(
+                    const Row(
                       children: [
-                        const Text(
+                        Text(
                           "Reasons",
                           style: TextStyle(fontSize: 14, fontWeight: FontWeight.w600),
                         ),
@@ -4485,9 +4487,9 @@ class PropertyDetailsState extends State<ProjectDetails> {
                     ),
                     const SizedBox(height: 10),
                     Container(
-                      decoration: BoxDecoration(color: Color(0xfff4f5f4),borderRadius: BorderRadius.circular(10)),
+                      decoration: BoxDecoration(color: const Color(0xfff4f5f4),borderRadius: BorderRadius.circular(10)),
                       child: ListView.builder(
-                        padding: EdgeInsets.all(0),
+                        padding: const EdgeInsets.all(0),
                         scrollDirection: Axis.vertical,
                         shrinkWrap: true,
                         itemCount: reportCheckboxListWithOther.length,
@@ -4500,7 +4502,7 @@ class PropertyDetailsState extends State<ProjectDetails> {
                             child: CheckboxListTile(
                               title: Text(
                                 reason['reason'] ?? '',
-                                style: TextStyle(fontSize: 14),
+                                style: const TextStyle(fontSize: 14),
                               ),
                               value: selectedPropertyId == reasonId,
                               onChanged: (bool? value) {
@@ -4522,7 +4524,7 @@ class PropertyDetailsState extends State<ProjectDetails> {
                     if (selectedPropertyId == 0)
                       Container(
                         alignment: Alignment.centerLeft,
-                        padding: EdgeInsets.symmetric(horizontal: 10),
+                        padding: const EdgeInsets.symmetric(horizontal: 10),
                         height: 45,
                         width: MediaQuery.of(context).size.width,
                         decoration: BoxDecoration(
@@ -4531,7 +4533,7 @@ class PropertyDetailsState extends State<ProjectDetails> {
                         ),
                         child: TextFormField(
                           controller: controller,
-                          style: TextStyle(),
+                          style: const TextStyle(),
                           decoration: const InputDecoration(
                             border: InputBorder.none,
                             hintText: "Write your reason here",
@@ -4544,7 +4546,7 @@ class PropertyDetailsState extends State<ProjectDetails> {
                       Row(
                         children: [
                           const SizedBox(height: 5),
-                          Text(errorText,style: TextStyle(fontSize: 12,color: Colors.red),),
+                          Text(errorText,style: const TextStyle(fontSize: 12,color: Colors.red),),
                         ],
                       ),
                     const SizedBox(height: 10),
@@ -4560,7 +4562,7 @@ class PropertyDetailsState extends State<ProjectDetails> {
                               height: 45,
                               decoration: BoxDecoration(
                                 borderRadius: BorderRadius.circular(10),
-                                color: Color(0xffff1e1e),
+                                color: const Color(0xffff1e1e),
                               ),
                               child: const Text(
                                 "Cancel",
@@ -4573,7 +4575,7 @@ class PropertyDetailsState extends State<ProjectDetails> {
                             ),
                           ),
                         ),
-                        SizedBox(width: 15),
+                        const SizedBox(width: 15),
                         Expanded(
                           child: GestureDetector(
                             onTap: () async {
@@ -4613,7 +4615,7 @@ class PropertyDetailsState extends State<ProjectDetails> {
                               height: 45,
                               decoration: BoxDecoration(
                                 borderRadius: BorderRadius.circular(10),
-                                color: Color(0xff117af9),
+                                color: const Color(0xff117af9),
                               ),
                               child: const Text(
                                 "Report",
@@ -4886,9 +4888,9 @@ class PropertyDetailsState extends State<ProjectDetails> {
             },
             child: Center(child:isLoading
                 ? const Text('Loading...').size(context.font.large)
-                .bold().color(Color(0xff117af9))
+                .bold().color(const Color(0xff117af9))
                 :  const Text('View Contact').size(context.font.large)
-                .bold().color(Color(0xff117af9)),)),
+                .bold().color(const Color(0xff117af9)),)),
       ),
     );
   }
@@ -5307,12 +5309,14 @@ class CusomterProfileWidget1 extends StatelessWidget {
     super.key,
     required this.data,
     required this.propertyID,
-    required this.reraId
+    required this.reraId,
+    required this.roleId
   });
 
   final Map data;
   final  int propertyID;
  final String? reraId;
+ final int roleId;
   
 
   @override
@@ -5384,8 +5388,8 @@ class CusomterProfileWidget1 extends StatelessWidget {
                           const SizedBox(height: 5,),
                           Row(
                             children: [
-                              const Text("Agent",
-                                style: TextStyle(
+                               Text(roleId == 1 ? 'Owner' : roleId == 2 ? 'Agent' : 'Builder',
+                                style: const TextStyle(
                                     fontSize: 11,
                                     color: Color(0xff7d7d7d)
                                 ),
@@ -5437,12 +5441,13 @@ class CusomterProfileWidget1 extends StatelessWidget {
                   ],
                 ),
               ),
+              if(roleId!=1)
               InkWell(
                 onTap: () {
                   Navigator.push(
                     context,
                     MaterialPageRoute(builder: (context) =>
-                        UserDetailProfileScreen(id: data['id'])),
+                        UserDetailProfileScreen(id: data['id'], isAgent: roleId==2?true:false)),
                   );
                 },
                 child: Container(

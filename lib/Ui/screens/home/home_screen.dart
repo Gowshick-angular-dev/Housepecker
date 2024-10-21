@@ -3964,7 +3964,7 @@ Widget buildMeetOutTopAgent(BuildContext context,bool AgentLOading,List Top_agen
                     Navigator.push(
                       context,
                       MaterialPageRoute(builder: (context) =>
-                          UserDetailProfileScreen(id: agent['id'] )),
+                          UserDetailProfileScreen(id: agent['id'], isAgent: true, )),
                     );
                   },
                   child: Row(
@@ -3982,7 +3982,7 @@ Widget buildMeetOutTopAgent(BuildContext context,bool AgentLOading,List Top_agen
                     Navigator.push(
                       context,
                       MaterialPageRoute(builder: (context) =>
-                          UserDetailProfileScreen(id: agent['id'] )),
+                          UserDetailProfileScreen(id: agent['id'], isAgent: true, )),
                     );
                   },
                   child: Container(
@@ -4098,7 +4098,7 @@ Widget buildMeetOurTopBuildes(BuildContext context,bool builderLoading,List topB
                   onTap: () {
                     Navigator.push(context,
                       MaterialPageRoute(builder: (context) =>
-                          UserDetailProfileScreen(id: topBuilderList[index]['id'] )),
+                          UserDetailProfileScreen(id: topBuilderList[index]['id'], isAgent: false, )),
                     );
                   },
                   child: buildBuilderCard(size, topBuilderList[index],context)),
