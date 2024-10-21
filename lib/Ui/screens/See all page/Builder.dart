@@ -1,5 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:geocoding/geocoding.dart';
+import 'package:google_places_flutter/google_places_flutter.dart';
+import 'package:google_places_flutter/model/place_type.dart';
+import 'package:google_places_flutter/model/prediction.dart';
 import 'package:shimmer/shimmer.dart';
 
 import '../../../app/routes.dart';
@@ -25,6 +28,9 @@ class _TopBuildersState extends State<see_allBuilders> {
   String currentPlace = '';
   String currentCity = '';
   String currentMainCity = '';
+
+  String? locationValue='';
+  TextEditingController locationControler = TextEditingController();
 
   Future<void> getTopBuilder(String? city) async {
     setState(() {
@@ -56,11 +62,7 @@ class _TopBuildersState extends State<see_allBuilders> {
 
   @override
   void initState() {
-    if ( city == null){
-      getTopBuilder('');
-    }else{
-      getTopBuilder(city!);
-    }
+    getTopBuilder('');
     super.initState();
   }
 
@@ -145,6 +147,99 @@ class _TopBuildersState extends State<see_allBuilders> {
       ),*/
       body: Column(
         children: [
+          SizedBox(height: 10),
+          Container(
+            margin: EdgeInsets.symmetric(horizontal: 10),
+            padding: EdgeInsets.only(left: 10),
+            width: double.infinity,
+            decoration: BoxDecoration(
+              color: Colors.white,
+              borderRadius: BorderRadius.circular(10.0),
+              boxShadow: [
+                BoxShadow(
+                  offset: const Offset(0, 1),
+                  blurRadius: 5,
+                  color: Colors.black.withOpacity(0.1),
+                ),
+              ],
+            ),
+            child: Row(
+              children: [
+                Image.asset("assets/Home/__location.png",width: 17,height: 17,color:  const Color(0xff117af9),),
+                SizedBox(width: 10,),
+                Expanded(
+                  child: GooglePlaceAutoCompleteTextField(
+                    boxDecoration: BoxDecoration(
+                        border: Border.all(color: Colors.transparent)
+                    ),
+                    textEditingController: locationControler,
+                    textStyle: TextStyle(fontSize: 14),
+                    inputDecoration:   const InputDecoration(
+                      hintText: 'Enter City,Locality...',
+                      hintStyle: TextStyle(
+                        fontSize: 14.0,
+                        color: Color(0xff9c9c9c),
+                        fontWeight: FontWeight.w400,
+                        decoration: TextDecoration.none,
+                      ),
+                      border: InputBorder.none,
+                      enabledBorder: InputBorder.none,
+                      focusedBorder: InputBorder.none,
+                    ),
+
+                    googleAPIKey: "AIzaSyDDJ17OjVJ0TS2qYt7GMOnrMjAu1CYZFg8",
+                    debounceTime: 800,
+                    countries: ["in"],
+                    isLatLngRequired: true,
+                    getPlaceDetailWithLatLng: (Prediction prediction) {
+                      print("placeDetails" + prediction.lng.toString());
+                      // lat = prediction.lat.toString();
+                      // lng = prediction.lng.toString();
+                      setState(() { });
+                    },
+                    itemClick: (Prediction prediction) {
+                      locationControler.text = prediction.description!;
+                      locationControler.selection =
+                          TextSelection.fromPosition(TextPosition(
+                              offset: prediction.description!.length));
+                      List address = prediction.description!.split(',').reversed.toList();
+                      if(address.length >= 3) {
+                        locationValue = address[2];
+                        getTopBuilder(locationValue);
+                        setState(() { });
+                      } else if(address.length == 2) {
+                        locationValue = address[1];
+                        getTopBuilder(locationValue);
+                        setState(() { });
+                      } else if(address.length == 1) {
+                        locationValue = address[0];
+                        getTopBuilder(locationValue);
+                        setState(() { });
+                      }
+
+                    },
+                    itemBuilder: (context, index, Prediction prediction) {
+                      return Container(
+                        padding: const EdgeInsets.all(10),
+                        child: Row(
+                          children: [
+                            Image.asset("assets/Home/__location.png",width: 17,height: 17,color:  const Color(0xff117af9),),
+                            const SizedBox(width: 7,),
+                            Expanded(
+                                child:
+                                Text("${prediction.description ?? ""}",style: TextStyle(fontSize: 14,color: Colors.black),))
+                          ],
+                        ),
+                      );
+                    },
+                    seperatedBuilder: Divider(),
+                    isCrossBtnShown: true,
+                    placeType: PlaceType.geocode,
+                  ),
+                ),
+              ],
+            ),
+          ),
           SizedBox(height: 10),
           builderLoading
               ?  Expanded(
@@ -237,7 +332,7 @@ class _TopBuildersState extends State<see_allBuilders> {
                     image: agent['profile'] != null
                         ? DecorationImage(
                       image: NetworkImage(agent['profile']),
-                      fit: BoxFit.contain,
+                      fit: BoxFit.cover,
                     )
                         : DecorationImage(
                       image: AssetImage('assets/FilterSceen/2.png'),

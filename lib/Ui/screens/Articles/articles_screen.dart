@@ -138,6 +138,7 @@ class _ArticlesScreenState extends State<ArticlesScreen> {
           Routes.articleDetailsScreenRoute,
           arguments: {
             "model": article,
+            'title':article.title ?? ""
           },
         );
       },

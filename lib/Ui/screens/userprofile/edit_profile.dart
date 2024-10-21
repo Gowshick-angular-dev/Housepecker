@@ -1534,9 +1534,14 @@ class UserProfileScreenState extends State<UserProfileScreen> {
           Duration.zero,
           () {
             HelperUtils.killPreviousPages(
-                context, Routes.personalizedPropertyScreen, {
-              "type": PersonalizedVisitType.FirstTime,
-            });
+              context,
+              Routes.main,
+              {"from": "login"},
+            );
+            // HelperUtils.killPreviousPages(
+            //     context, Routes.personalizedPropertyScreen, {
+            //   "type": PersonalizedVisitType.FirstTime,
+            // });
 
             // HelperUtils.killPreviousPages(
             //     context, Routes.main, {"from": widget.from});

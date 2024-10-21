@@ -18,12 +18,16 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:google_mobile_ads/google_mobile_ads.dart';
+import 'package:google_places_flutter/google_places_flutter.dart';
+import 'package:google_places_flutter/model/place_type.dart';
+import 'package:google_places_flutter/model/prediction.dart';
 
 import '../../data/Repositories/location_repository.dart';
 import '../../data/model/google_place_model.dart';
 import '../../utils/AppIcon.dart';
 import '../../utils/api.dart';
 import '../../utils/constant.dart';
+import '../../utils/helper_utils.dart';
 import '../../utils/ui_utils.dart';
 import 'main_activity.dart';
 
@@ -56,6 +60,10 @@ class FilterScreenState extends State<FilterScreen> {
       TextEditingController(text: Constant.propertyFilter?.minPrice);
   TextEditingController maxController =
       TextEditingController(text: Constant.propertyFilter?.maxPrice);
+  TextEditingController minAreaController =
+  TextEditingController();
+  TextEditingController maxAreaController =
+  TextEditingController();
   final TextEditingController _searchController = TextEditingController();
   final FocusNode _focusNode = FocusNode();
 
@@ -92,7 +100,8 @@ class FilterScreenState extends State<FilterScreen> {
   bool loadintCitiesInProgress = false;
   List<GooglePlaceModel>? cities;
   Map? cityCod;
-
+  String? locationValue='';
+  TextEditingController locationControler = TextEditingController();
   @override
   void dispose() {
     minController.dispose();
@@ -100,7 +109,7 @@ class FilterScreenState extends State<FilterScreen> {
     super.dispose();
   }
 
-  Future<void> searchDelayTimer() async {
+/*  Future<void> searchDelayTimer() async {
     if (_timer?.isActive ?? false) {
       _timer?.cancel();
     }
@@ -144,14 +153,14 @@ class FilterScreenState extends State<FilterScreen> {
       },
     );
     setState(() {});
-  }
+  }*/
 
   @override
   void initState() {
     super.initState();
     selectedCategory = null;
     _searchController.addListener(() {
-      searchDelayTimer();
+   //   searchDelayTimer();
     });
     getMasters();
     // getMasters2();
@@ -159,7 +168,6 @@ class FilterScreenState extends State<FilterScreen> {
     // getMasters4();
     // getRoles();
     setDefaultVal(isrefresh: false);
-
     _focusNode.addListener(() {
       if (_focusNode.hasFocus) {
         print('TextField is focused');
@@ -412,8 +420,8 @@ class FilterScreenState extends State<FilterScreen> {
                   allProperties: '1',
                   amenities: amenities.join(',').toString(),
                   post_by: selectedRole.join(',').toString(),
-                  max_size: ProjectSizeRange.end == 0.0 ? '' : ProjectSizeRange.end.toString(),
-                  min_size: ProjectSizeRange.start == 0.0 ? '' : ProjectSizeRange.start.toString(),
+                  max_size: maxAreaController.text,
+                  min_size: minAreaController.text,
                   parametersId: parameterIds.join(',').toString(),
                   parametersVal: jsonEncode(parametersValues),
                 );
@@ -438,8 +446,8 @@ class FilterScreenState extends State<FilterScreen> {
               crossAxisAlignment: CrossAxisAlignment.start,
               //mainAxisAlignment: MainAxisAlignment.spaceEvenly,
               children: <Widget>[
-                const SizedBox(height: 10),
-                Container(
+
+           /*     Container(
                     height: 50.rh(context),
                     alignment: Alignment.center,
                     decoration: BoxDecoration(
@@ -472,6 +480,101 @@ class FilterScreenState extends State<FilterScreen> {
                           //change prefix icon color to primary
                         }
                         ),
+                ),*/
+                Container(
+                  padding: EdgeInsets.only(left: 10),
+                  width: double.infinity,
+                  decoration: BoxDecoration(
+                      borderRadius: BorderRadius.circular(10.0),
+                      border:   Border.all(width: 1.5, color: context.color.borderColor),
+                  ),
+                  child: Row(
+                    children: [
+                      Image.asset("assets/Home/__location.png",width: 17,height: 17,color:  const Color(0xff117af9),),
+                      SizedBox(width: 10,),
+                      Expanded(
+                        child: GooglePlaceAutoCompleteTextField(
+                          boxDecoration: BoxDecoration(
+                              border: Border.all(color: Colors.transparent)
+                          ),
+                          textEditingController: locationControler,
+                          textStyle: TextStyle(fontSize: 14),
+                          inputDecoration:   const InputDecoration(
+                            hintText: 'Enter City,Locality...',
+                            hintStyle: TextStyle(
+                              fontSize: 14.0,
+                              color: Color(0xff9c9c9c),
+                              fontWeight: FontWeight.w400,
+                              decoration: TextDecoration.none,
+                            ),
+                            border: InputBorder.none,
+                            enabledBorder: InputBorder.none,
+                            focusedBorder: InputBorder.none,
+                          ),
+
+                          googleAPIKey: "AIzaSyDDJ17OjVJ0TS2qYt7GMOnrMjAu1CYZFg8",
+                          debounceTime: 800,
+                          countries: ["in"],
+                          isLatLngRequired: true,
+                          getPlaceDetailWithLatLng: (Prediction prediction) {
+                            print("placeDetails" + prediction.lng.toString());
+                            // lat = prediction.lat.toString();
+                            // lng = prediction.lng.toString();
+                            setState(() { });
+                          },
+                          itemClick: (Prediction prediction) {
+                            if (selectedCityList.length < 3) {
+                              locationControler.text = prediction.description!;
+                              locationControler.selection = TextSelection.fromPosition(
+                                TextPosition(offset: prediction.description!.length),
+                              );
+
+                              List<String> address = prediction.description!.split(',').reversed.toList();
+                              String selectedCity;
+                              if (address.length >= 3) {
+                                selectedCity = address[2];
+                              } else if (address.length == 2) {
+                                selectedCity = address[1];
+                              } else {
+                                selectedCity = address[0];
+                              }
+
+                              if (!selectedCityList.contains(selectedCity)) {
+                                selectedCityList.add(selectedCity);
+                                locationControler.text = '';
+                              }
+
+                              setState(() {});
+                            } else {
+                              HelperUtils.showSnackBarMessage(
+                                context,
+                                UiUtils.getTranslatedLabel(context, "You can only select a maximum of 3 locations."),
+                                type: MessageType.success,
+                                messageDuration: 3,
+                              );
+                            }
+                          },
+                          itemBuilder: (context, index, Prediction prediction) {
+                            return Container(
+                              padding: const EdgeInsets.all(10),
+                              child: Row(
+                                children: [
+                                  Image.asset("assets/Home/__location.png",width: 17,height: 17,color:  const Color(0xff117af9),),
+                                  const SizedBox(width: 7,),
+                                  Expanded(
+                                      child:
+                                      Text("${prediction.description ?? ""}",style: TextStyle(fontSize: 14,color: Colors.black),))
+                                ],
+                              ),
+                            );
+                          },
+                          seperatedBuilder: Divider(),
+                          isCrossBtnShown: true,
+                          placeType: PlaceType.geocode,
+                        ),
+                      ),
+                    ],
+                  ),
                 ),
                 const SizedBox(height: 10),
                 Wrap(
@@ -2714,8 +2817,8 @@ class FilterScreenState extends State<FilterScreen> {
           onChanged: (RangeValues values) {
             setState(() {
               _currentRangeValues = values;
-              minController.text = values.start.toString();
-              maxController.text = values.end.toString();
+              minController.text = values.start.toStringAsFixed(0);
+              maxController.text = values.end.toStringAsFixed(0);
             });
           },
         ),
@@ -2723,10 +2826,68 @@ class FilterScreenState extends State<FilterScreen> {
         Row(
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
           children: [
-            Text('${(_currentRangeValues.start.toInt())}'),
-            Text('${_currentRangeValues.end.toInt()}'),
+            Expanded(
+              child: Container(
+                padding: EdgeInsets.symmetric(horizontal: 10),
+                height: 45,
+                decoration: BoxDecoration(
+                  borderRadius: BorderRadius.circular(10),
+                  border: Border.all(color: Colors.grey.withOpacity(0.5)),
+                ),
+                child: TextFormField(
+                  controller: minController,
+                  style: TextStyle(fontSize: 14),
+                  decoration: InputDecoration(
+                    border: InputBorder.none,
+                    hintStyle: TextStyle(fontSize: 14, color: Colors.grey.withOpacity(0.8)),
+                    hintText: "Min Budget",
+                  ),
+                  keyboardType: TextInputType.number,
+                  // onChanged: (value) {
+                  //   setState(() {
+                  //     double minValue = double.tryParse(value) ?? _currentRangeValues.start;
+                  //     _currentRangeValues = RangeValues(minValue, _currentRangeValues.end);
+                  //   });
+                  // },
+                ),
+              ),
+            ),
+            SizedBox(width: 15),
+            Expanded(
+              child: Container(
+                padding: EdgeInsets.symmetric(horizontal: 10),
+                height: 45,
+                decoration: BoxDecoration(
+                  borderRadius: BorderRadius.circular(10),
+                  border: Border.all(color: Colors.grey.withOpacity(0.5)),
+                ),
+                child: TextFormField(
+                  controller: maxController,
+                  style: TextStyle(fontSize: 14),
+                  decoration: InputDecoration(
+                    border: InputBorder.none,
+                    hintStyle: TextStyle(fontSize: 14, color: Colors.grey.withOpacity(0.8)),
+                    hintText: "Max Budget",
+                  ),
+                  keyboardType: TextInputType.number,
+                  // onChanged: (value) {
+                  //   setState(() {
+                  //     double maxValue = double.tryParse(value) ?? _currentRangeValues.end;
+                  //     _currentRangeValues = RangeValues(_currentRangeValues.start, maxValue);
+                  //   });
+                  // },
+                ),
+              ),
+            ),
           ],
         ),
+        // Row(
+        //   mainAxisAlignment: MainAxisAlignment.spaceBetween,
+        //   children: [
+        //     Text('${(_currentRangeValues.start.toInt())}'),
+        //     Text('${_currentRangeValues.end.toInt()}'),
+        //   ],
+        // ),
       ],
     );
   }
@@ -2747,6 +2908,8 @@ class FilterScreenState extends State<FilterScreen> {
           onChanged: (RangeValues values) {
             setState(() {
               ProjectSizeRange = values;
+              minAreaController.text = values.start.toStringAsFixed(0);
+              maxAreaController.text = values.end.toStringAsFixed(0);
             });
           },
         ),
@@ -2754,10 +2917,69 @@ class FilterScreenState extends State<FilterScreen> {
         Row(
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
           children: [
-            Text('${(ProjectSizeRange.start.toInt())}'),
-            Text('${ProjectSizeRange.end.toInt()}'),
+            Expanded(
+              child: Container(
+                padding: EdgeInsets.symmetric(horizontal: 10),
+                height: 45,
+                decoration: BoxDecoration(
+                  borderRadius: BorderRadius.circular(10),
+                  border: Border.all(color: Colors.grey.withOpacity(0.5)),
+                ),
+                child: TextFormField(
+                  controller: minAreaController,
+                  style: TextStyle(fontSize: 14),
+                  decoration: InputDecoration(
+                    border: InputBorder.none,
+                    hintStyle: TextStyle(fontSize: 14, color: Colors.grey.withOpacity(0.8)),
+                    hintText: "Min Budget",
+                  ),
+                  keyboardType: TextInputType.number,
+                  // onChanged: (value) {
+                  //   setState(() {
+                  //     double minValue = double.tryParse(value) ?? _currentRangeValues.start;
+                  //     _currentRangeValues = RangeValues(minValue, _currentRangeValues.end);
+                  //   });
+                  // },
+                ),
+              ),
+            ),
+            SizedBox(width: 15),
+            Expanded(
+              child: Container(
+                padding: EdgeInsets.symmetric(horizontal: 10),
+                height: 45,
+                decoration: BoxDecoration(
+                  borderRadius: BorderRadius.circular(10),
+                  border: Border.all(color: Colors.grey.withOpacity(0.5)),
+                ),
+                child: TextFormField(
+                  controller: maxAreaController,
+                  style: TextStyle(fontSize: 14),
+                  decoration: InputDecoration(
+                    border: InputBorder.none,
+                    hintStyle: TextStyle(fontSize: 14, color: Colors.grey.withOpacity(0.8)),
+                    hintText: "Max Budget",
+                  ),
+                  keyboardType: TextInputType.number,
+                  // onChanged: (value) {
+                  //   setState(() {
+                  //     double maxValue = double.tryParse(value) ?? _currentRangeValues.end;
+                  //     _currentRangeValues = RangeValues(_currentRangeValues.start, maxValue);
+                  //   });
+                  // },
+                ),
+              ),
+            ),
           ],
         ),
+        // SizedBox(height: 10,),
+        // Row(
+        //   mainAxisAlignment: MainAxisAlignment.spaceBetween,
+        //   children: [
+        //     Text('${(ProjectSizeRange.start.toInt())}'),
+        //     Text('${ProjectSizeRange.end.toInt()}'),
+        //   ],
+        // ),
       ],
     );
   }

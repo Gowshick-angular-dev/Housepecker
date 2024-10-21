@@ -9,14 +9,15 @@ import '../widgets/AnimatedRoutes/blur_page_route.dart';
 
 class ArticleDetails extends StatelessWidget {
   final ArticleModel article;
+  final String title;
 
-  const ArticleDetails({super.key, required this.article});
+  const ArticleDetails({super.key, required this.article, required this.title});
   static Route route(RouteSettings settings) {
     Map? arguments = settings.arguments as Map;
     return BlurredRouter(
       builder: (context) {
         return ArticleDetails(
-          article: arguments['model'],
+          article: arguments['model'], title: arguments['title'],
         );
       },
     );
@@ -27,6 +28,7 @@ class ArticleDetails extends StatelessWidget {
     return Scaffold(
       backgroundColor: Colors.white,
       appBar: UiUtils.buildAppBar(
+        title: title,
         context,
         showBackButton: true,
       ),
@@ -34,7 +36,7 @@ class ArticleDetails extends StatelessWidget {
         physics: const BouncingScrollPhysics(),
         child: Padding(
           padding: const EdgeInsets.all(
-            20.0,
+            15.0,
           ),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,

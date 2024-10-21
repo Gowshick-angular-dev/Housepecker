@@ -817,7 +817,7 @@ class HomeScreenState extends State<HomeScreen>
                       ),
                       Row(
                         children: [
-                          if(!showSellRentButton)
+                       //   if(!showSellRentButton)
                             InkWell(
                               // onTap: () async {
                               //   GuestChecker.check(onNotGuest: ()
@@ -833,32 +833,28 @@ class HomeScreenState extends State<HomeScreen>
                               // },
                               // onTap: () => widget.openDrawer,
                               onTap: () {
-                                Timer? _timer;
+                            //    Timer? _timer;
                                 if (isReverse?.value == true) {
                                   isReverse?.value = false;
                                   showSellRentButton = true;
                                   _forRentController.forward();
                                   _forAdsController.forward();
                                   _forSellAnimationController.forward();
-                                  setState(() {});
-                                  _timer = Timer(const Duration(seconds: 3), () {
-                                    showSellRentButton = false;
-                                    isReverse?.value = true;
-                                    _forRentController.reverse();
-                                    _forAdsController.reverse();
-                                    _forSellAnimationController.reverse();
-                                    setState(() {});
-                                  });
+                                   setState(() {});
+                                  // showSellRentButton = false;
+                                  // isReverse?.value = true;
+                                  // _forRentController.reverse();
+                                  // _forAdsController.reverse();
+                                  // _forSellAnimationController.reverse();
+                                  // setState(() {});
                                 } else {
+
                                   showSellRentButton = false;
                                   isReverse?.value = true;
                                   _forRentController.reverse();
                                   _forAdsController.reverse();
                                   _forSellAnimationController.reverse();
                                   setState(() {});
-                                  if (_timer != null && _timer.isActive) {
-                                    _timer.cancel();
-                                  }
                                 }
                                 setState(() {});
                               },

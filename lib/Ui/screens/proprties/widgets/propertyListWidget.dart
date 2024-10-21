@@ -5,6 +5,7 @@ import 'package:google_mobile_ads/google_mobile_ads.dart';
 import 'package:Housepecker/utils/ui_utils.dart';
 
 import '../../../../app/routes.dart';
+import '../../../../data/cubits/property/fetch_property_from_type_cubit.dart';
 import '../../../../data/model/property_model.dart';
 import '../../../../utils/AdMob/bannerAdLoadWidget.dart';
 import '../../../../utils/api.dart';
@@ -103,13 +104,29 @@ class PropertiesListWidgetState extends State<PropertiesListWidget> {
   Widget build(BuildContext context) {
     return bodyWidget();
   }
+  Widget filterOptionsBtn() {
+    return IconButton(
+        onPressed: () {
 
+          Navigator.pushNamed(context, Routes.filterScreen,
+              arguments: {"showPropertyType": false}).then((value) {
+            setState(() {});
+          });
+        },
+        icon: Icon(
+          Icons.filter_list_rounded,
+          color: Colors.white,
+        ));
+  }
   Widget bodyWidget() {
     return Scaffold(
         backgroundColor: Colors.white,
         appBar: UiUtils.buildAppBar(context,
             showBackButton: true,
             title: widget.typeName,
+          actions: [
+            filterOptionsBtn(),
+          ]
         ),
         bottomNavigationBar: const BottomAppBar(
           child: BannerAdWidget(bannerSize: AdSize.banner),

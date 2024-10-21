@@ -7,6 +7,7 @@ import 'package:Housepecker/utils/Extensions/extensions.dart';
 import 'package:Housepecker/utils/helper_utils.dart';
 import 'package:Housepecker/utils/ui_utils.dart';
 import 'package:flutter/material.dart';
+import '../../../app/routes.dart';
 import '../../../utils/AppIcon.dart';
 import '../../../utils/api.dart';
 import '../../../utils/guestChecker.dart';
@@ -77,13 +78,30 @@ class _ViewAllScreenState extends State<ProjectViewAllScreen> {
     }
     return result;
   }
+  Widget filterOptionsBtn() {
+    return IconButton(
+        onPressed: () {
 
+          Navigator.pushNamed(context, Routes.filterScreen,
+              arguments: {"showPropertyType": false}).then((value) {
+            setState(() {});
+          });
+        },
+        icon: Icon(
+          Icons.filter_list_rounded,
+          color: Colors.white,
+        ));
+  }
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: Colors.white,
       appBar: UiUtils.buildAppBar(context,
-          title: 'Projects', showBackButton: true),
+          title: 'Projects', showBackButton: true,
+      actions: [
+          filterOptionsBtn(),
+          ]
+      ),
       body: projectLoading ? Center(child: UiUtils.progress()) : Column(
         children: [
       Expanded(

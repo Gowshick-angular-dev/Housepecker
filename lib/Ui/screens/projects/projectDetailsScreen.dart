@@ -1508,6 +1508,7 @@ class PropertyDetailsState extends State<ProjectDetails> {
                               Padding(
                                 padding: const EdgeInsets.symmetric( horizontal: 15,),
                                 child: Row(
+                                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
                                   children: [
                                     Text(
                                       '₹${property!['project_details'].length > 0 ? formatAmount(property!['project_details'][0]['avg_price'] ?? 0) : 0}'
@@ -1516,28 +1517,27 @@ class PropertyDetailsState extends State<ProjectDetails> {
                                       overflow: TextOverflow.ellipsis,
                                       style: const TextStyle(
                                           color: Color(0xff117af9),
-                                          fontSize: 14,
+                                          fontSize: 16,
                                           fontFamily: 'Robato',
                                           fontWeight: FontWeight.w500
                                       ),
                                     ),
-                                    Padding(
-                                      padding: const EdgeInsets.symmetric(horizontal: 8.0),
-                                      child: Container(
-                                        height: 12,
-                                        width: 2,
-                                        color: Colors.black54,
-                                      ),
-                                    ),
+                                    // Padding(
+                                    //   padding: const EdgeInsets.symmetric(horizontal: 8.0),
+                                    //   child: Container(
+                                    //     height: 12,
+                                    //     width: 2,
+                                    //     color: Colors.black54,
+                                    //   ),
+                                    // ),
                                     Text(
-                                      '${property!['project_details'].length > 0 ? formatAmount(property!['project_details'][0]['size'] ?? 0) : 0} Sq.ft'
-                                          .toString(),
+                                      '${property!['project_details'].length > 0 ? property!['project_details'][0]['size'].toInt() ?? 0 : '0'} Sq.ft',
                                       maxLines: 1,
                                       overflow: TextOverflow.ellipsis,
-                                      style: const TextStyle(
-                                          color: Color(0xffa2a2a2),
-                                          fontSize: 10,
-                                          fontWeight: FontWeight.w600
+                                      style: TextStyle(
+                                        color: Colors.grey[700],
+                                        fontSize: 12,
+                                        fontWeight: FontWeight.w600,
                                       ),
                                     ),
                                   ],
@@ -1557,7 +1557,7 @@ class PropertyDetailsState extends State<ProjectDetails> {
                                     overflow: TextOverflow.ellipsis,
                                     style: const TextStyle(
                                         color: Color(0xff117af9),
-                                        fontSize: 14,
+                                        fontSize: 16,
                                         fontFamily: 'Robato',
                                         fontWeight: FontWeight.w500
                                     ),
@@ -1567,13 +1567,13 @@ class PropertyDetailsState extends State<ProjectDetails> {
                                       Row(
                                         children: [
                                           Text(
-                                            '${property!['min_size']} - ${property!['max_size']} Sq.ft'
+                                            '${property!['min_size']} - ${property!['max_size'].toInt()} Sq.ft'
                                                 .toString(),
                                             maxLines: 1,
                                             overflow: TextOverflow.ellipsis,
-                                            style: const TextStyle(
-                                                color: Color(0xffa2a2a2),
-                                                fontSize: 10,
+                                            style:  TextStyle(
+                                                color:Colors.grey[700],
+                                                fontSize: 12,
                                                 fontWeight: FontWeight.w600
                                             ),
                                           ),
@@ -1597,9 +1597,9 @@ class PropertyDetailsState extends State<ProjectDetails> {
                                       property!['address'],
                                       maxLines: 2,
                                       overflow: TextOverflow.ellipsis,
-                                      style: const TextStyle(
-                                          color: Color(0xffa2a2a2),
-                                          fontSize: 11,
+                                      style:  TextStyle(
+                                          color:Colors.grey[700],
+                                          fontSize: 12,
                                           fontWeight: FontWeight.w400
                                       ),),
                                   ),
@@ -1731,10 +1731,10 @@ class PropertyDetailsState extends State<ProjectDetails> {
                                     child: Text('${property!['project_details'][0]['offers']}',
                                       maxLines: 1,
                                       overflow: TextOverflow.ellipsis,
-                                      style: const TextStyle(
-                                          color: Color(0xffa2a2a2),
+                                      style:  TextStyle(
+                                          color:Colors.grey[800],
                                           fontSize: 12,
-                                          fontWeight: FontWeight.w400
+                                          fontWeight: FontWeight.w500
                                       ),
                                     ),
                                   ),
@@ -2846,7 +2846,6 @@ class PropertyDetailsState extends State<ProjectDetails> {
                                    mainAxisSpacing: 8,
                                    childAspectRatio: 1 / 0.7,
                                  ),
-
                                  itemBuilder: (context, index) {
                                    final Map<String, dynamic> griddata = property!['amenity'][index];
                                    return GestureDetector(
@@ -2878,8 +2877,8 @@ class PropertyDetailsState extends State<ProjectDetails> {
                                              // child: Image.asset(griddata["image"],width: 23,height: 23,),
                                            ),
                                            Text(
-                                             griddata["name"],
-                                             maxLines: 1,
+                                             "${griddata["name"]}",
+                                             maxLines: 2,
                                              overflow: TextOverflow.ellipsis,
                                            )
                                                .size(11)
@@ -3631,7 +3630,7 @@ class PropertyDetailsState extends State<ProjectDetails> {
                                   ],
                                 ),
                               ),
-                              const SizedBox(height: 20),
+                              const SizedBox(height: 10),
                               SizedBox(
                                 height: 240,
                                 child: ListView.separated(
@@ -3850,14 +3849,15 @@ class PropertyDetailsState extends State<ProjectDetails> {
                                                           ),
                                                         ),
                                                         Text(
-                                                          '${similarProjectsList[index]['project_details'].length > 0 ? formatAmount(similarProjectsList[index]['project_details'][0]['size'] ?? 0) : 0} Sq.ft'
-                                                              .toString(),
+                                                          '${(similarProjectsList[index]['project_details'].isNotEmpty && similarProjectsList[index]['project_details'][0]['size'] != null)
+                                                              ? int.tryParse(similarProjectsList[index]['project_details'][0]['size'].toString()) ?? 0
+                                                              : 0} Sq.ft',
                                                           maxLines: 1,
                                                           overflow: TextOverflow.ellipsis,
                                                           style: const TextStyle(
-                                                              color: Color(0xffa2a2a2),
-                                                              fontSize: 9,
-                                                              fontWeight: FontWeight.w500
+                                                            color: Colors.black87,
+                                                            fontSize: 9,
+                                                            fontWeight: FontWeight.w500,
                                                           ),
                                                         ),
                                                       ],
@@ -3872,7 +3872,7 @@ class PropertyDetailsState extends State<ProjectDetails> {
                                                             maxLines: 1,
                                                             overflow: TextOverflow.ellipsis,
                                                             style: const TextStyle(
-                                                                color: Color(0xff333333),
+                                                                color: Colors.black87,
                                                                 fontSize: 12,
                                                                 fontFamily: 'Robato',
                                                                 fontWeight: FontWeight.w500
@@ -3897,7 +3897,7 @@ class PropertyDetailsState extends State<ProjectDetails> {
                                                           maxLines: 1,
                                                           overflow: TextOverflow.ellipsis,
                                                           style: const TextStyle(
-                                                            color: Color(0xffa2a2a2),
+                                                            color: Colors.black87,
                                                             fontSize: 10.5,
                                                             fontWeight: FontWeight.w400,
                                                           ),
@@ -3984,7 +3984,7 @@ class PropertyDetailsState extends State<ProjectDetails> {
                                   ],
                                 ),
                               ),
-                              const SizedBox(height: 20),
+                              const SizedBox(height: 10),
                               SizedBox(
                                 height: 240,
                                 child: ListView.separated(
@@ -4201,8 +4201,9 @@ class PropertyDetailsState extends State<ProjectDetails> {
                                                           ),
                                                         ),
                                                         Text(
-                                                          '${agentProjectsList[i]['project_details'].length > 0 ? formatAmount(agentProjectsList[i]['project_details'][0]['size'] ?? 0) : 0} Sq.ft'
-                                                              .toString(),
+                                                          '${(agentProjectsList[i]['project_details'].isNotEmpty && agentProjectsList[i]['project_details'][0]['size'] != null)
+                                                              ? int.tryParse(agentProjectsList[i]['project_details'][0]['size'].toString()) ?? 0
+                                                              : 0} Sq.ft',
                                                           maxLines: 1,
                                                           overflow: TextOverflow.ellipsis,
                                                           style: const TextStyle(
@@ -4223,7 +4224,7 @@ class PropertyDetailsState extends State<ProjectDetails> {
                                                             maxLines: 1,
                                                             overflow: TextOverflow.ellipsis,
                                                             style: const TextStyle(
-                                                                color: Color(0xff333333),
+                                                                color: Color(0xffa2a2a2),
                                                                 fontSize: 12,
                                                                 fontFamily: 'Robato',
                                                                 fontWeight: FontWeight.w500
@@ -5638,17 +5639,12 @@ class OutdoorFacilityListWidget extends StatelessWidget {
     //   },
     // );
 
-    return SizedBox(
-      height: 60,
-      child: GridView.builder(
-        // physics: const NeverScrollableScrollPhysics(),
-        // shrinkWrap: true,
-        scrollDirection: Axis.horizontal, // Set scroll direction to horizontal
-        gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-          crossAxisCount: 1,
-          mainAxisSpacing :10,
-          mainAxisExtent: 140,
-        ),
+    return  SizedBox(
+      height: 65,
+      child: ListView.separated(
+        padding: EdgeInsets.symmetric(horizontal: 15),
+        separatorBuilder: (context,i)=>SizedBox(width: 10,),
+        scrollDirection: Axis.horizontal,
         itemCount: outdoorFacilityList.length,
         itemBuilder: (context, index) {
           AssignedOutdoorFacility facility = outdoorFacilityList[index];
@@ -5656,8 +5652,8 @@ class OutdoorFacilityListWidget extends StatelessWidget {
           return Row(
             children: [
               Container(
-                width: 140,
                 padding: const EdgeInsets.all(6),
+                width: 160,
                 decoration: BoxDecoration(
                   color: Colors.white,
                   borderRadius: BorderRadius.circular(10),
@@ -5692,17 +5688,17 @@ class OutdoorFacilityListWidget extends StatelessWidget {
                       Expanded(
                         child: Column(
                           crossAxisAlignment: CrossAxisAlignment.start,
+                          mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                           children: [
                             Text(
-                              facility.name ?? "",
+                              "${facility.name ?? ""}",
                               style: const TextStyle(
                                 fontSize: 11,
                                 color: Color(0xff585858),
                               ),
-                              maxLines: 1,
+                              maxLines: 2,
                               overflow: TextOverflow.ellipsis,
                             ),
-                            const SizedBox(height: 4),
                             Text(
                               "${facility.distance} KM",
                               style: const TextStyle(

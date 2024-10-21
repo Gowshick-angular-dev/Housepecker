@@ -1218,7 +1218,7 @@ class PropertyDetailsState extends State<PropertyDetails>
                                             "rent") ...[
                                           Text((rentPrice))
                                               .color(context.color.tertiaryColor)
-                                              .size(15)
+                                              .size(16)
                                               .bold(weight: FontWeight.w500),
                                         ] else ...[
                                           Text(formatAmount(int.parse(property!.price!))
@@ -1228,7 +1228,7 @@ class PropertyDetailsState extends State<PropertyDetails>
                                           //         false)
                                               .formatAmount(prefix: true),style: TextStyle(  fontFamily: 'Roboto',),)
                                               .color(context.color.tertiaryColor)
-                                              .size(15)
+                                              .size(16)
                                               .bold(weight: FontWeight.w500),
                                         ],
                                         if (Constant.isNumberWithSuffix) ...[
@@ -1241,7 +1241,7 @@ class PropertyDetailsState extends State<PropertyDetails>
                                             ),
                                             Text("(${formatAmount(int.parse(property!.price!))})")
                                                 .color(context.color.tertiaryColor)
-                                                .size(15).bold(weight: FontWeight.w500),
+                                                .size(16).bold(weight: FontWeight.w500),
                                           ]
                                         ]
                                       ],
@@ -1249,9 +1249,9 @@ class PropertyDetailsState extends State<PropertyDetails>
                                   ),
                                   Padding(
                                     padding: const EdgeInsets.symmetric( horizontal: 15,),
-                                    child: Text(property?.sqft != null ? '${property?.sqft} Sq.Ft.' : '',
-                                      style: const TextStyle(
-                                          color: Color(0xffa2a2a2),
+                                    child: Text(property?.sqft != null ? '${property?.sqft?.toInt()} Sq.Ft.' : '',
+                                      style:  TextStyle(
+                                          color: Colors.grey[700],
                                           fontSize: 12,
                                           fontWeight: FontWeight.w600
                                       ),
@@ -1276,8 +1276,8 @@ class PropertyDetailsState extends State<PropertyDetails>
                                             child: Text(property!.address!.firstUpperCase(),
                                               maxLines: 2,
                                               overflow: TextOverflow.ellipsis,
-                                              style: const TextStyle(
-                                                  color: Color(0xffa2a2a2),
+                                              style:  TextStyle(
+                                                  color: Colors.grey[700],
                                                   fontSize: 11,
                                                   fontWeight: FontWeight.w400
                                               ),
@@ -1405,7 +1405,99 @@ class PropertyDetailsState extends State<PropertyDetails>
                                             fontWeight: FontWeight.w600
                                           ),),
                                           const SizedBox(height :10),
-                                          Wrap(
+                                         /*   GridView.builder(
+                                              padding: EdgeInsets.all(0),
+                                              shrinkWrap: true,
+                                              physics: const NeverScrollableScrollPhysics(), 
+                                              gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+                                                crossAxisCount: 2, 
+                                                 crossAxisSpacing: 0.0,
+                                                 mainAxisSpacing: 0.0,
+                                                childAspectRatio: 3 / 1.5,
+                                              ),
+                                              itemCount: property?.parameters?.length ?? 0,
+                                              itemBuilder: (context, index) {
+                                                Parameter? parameter = property?.parameters![index];
+                                      
+                                                return ConstrainedBox(
+                                                  constraints: BoxConstraints(minWidth: (context.screenWidth / 2) - 40),
+                                                  child: Container(
+                                                 //  color: Colors.red,
+                                                    child: Row(
+                                                      crossAxisAlignment: CrossAxisAlignment.center,
+                                                      mainAxisSize: MainAxisSize.min,
+                                                      children: [
+                                                        Container(
+                                                          width: 36.rw(context),
+                                                          height: 36.rh(context),
+                                                          alignment: Alignment.center,
+                                                          decoration: BoxDecoration(
+                                                            color: context.color.tertiaryColor.withOpacity(0.2),
+                                                            borderRadius: BorderRadius.circular(10),
+                                                          ),
+                                                          child: SizedBox(
+                                                            height: 20.rh(context),
+                                                            width: 20.rw(context),
+                                                            child: FittedBox(
+                                                              child: UiUtils.imageType(
+                                                                parameter?.image ?? "",
+                                                                fit: BoxFit.cover,
+                                                                color: context.color.tertiaryColor,
+                                                              ),
+                                                            ),
+                                                          ),
+                                                        ),
+                                                        SizedBox(
+                                                          width: 10.rw(context),
+                                                        ),
+                                                        Column(
+                                                          crossAxisAlignment: CrossAxisAlignment.start,
+                                                          mainAxisSize: MainAxisSize.min,
+                                                          children: [
+                                                            Text(parameter?.name ?? "")
+                                                                .size(10)
+                                                                .color(const Color(0xff5d5d5d)),
+                                                            if (parameter?.typeOfParameter == "file") ...{
+                                                              InkWell(
+                                                                onTap: () async {
+                                                                  await urllauncher.launchUrl(
+                                                                    Uri.parse(parameter!.value),
+                                                                    mode: LaunchMode.externalApplication,
+                                                                  );
+                                                                },
+                                                                child: Text(
+                                                                  UiUtils.getTranslatedLabel(context, "viewFile"),
+                                                                ).underline().color(context.color.tertiaryColor),
+                                                              ),
+                                                            } else if (parameter?.value is List) ...{
+                                                              Text((parameter?.value as List).join(","))
+                                                            } else ...[
+                                                              if (parameter?.typeOfParameter == "textarea") ...[
+                                                                SizedBox(
+                                                                  width: MediaQuery.of(context).size.width * 0.7,
+                                                                  child: Text("${parameter?.value}")
+                                                                      .size(12)
+                                                                      .bold(weight: FontWeight.w600),
+                                                                )
+                                                              ] else ...[
+                                                                SizedBox(
+                                                                  width: MediaQuery.of(context).size.width/4,
+                                                                  child: Text(
+                                                                    "${parameter?.value}",
+                                                                    maxLines: 2,overflow: TextOverflow.ellipsis,
+                                                                  ).size(12).bold(weight: FontWeight.w500),
+                                                                )
+                                                              ]
+                                                            ]
+                                                          ],
+                                                        )
+                                                      ],
+                                                    ),
+                                                  ),
+                                                );
+                                              },
+                                            ),*/
+           Wrap(
                                             direction: Axis.horizontal,
                                             crossAxisAlignment: WrapCrossAlignment.start,
                                             runAlignment: WrapAlignment.start,
@@ -2046,7 +2138,7 @@ class PropertyDetailsState extends State<PropertyDetails>
                                            ),
                                            Text(
                                              griddata["name"],
-                                             maxLines: 1,
+                                             maxLines: 2,
                                              overflow: TextOverflow.ellipsis,
                                            )
                                                .size(11)
@@ -3907,74 +3999,81 @@ class OutdoorFacilityListWidget extends StatelessWidget {
     // );
 
     return SizedBox(
-      height: 60,
+      height: 65,
       child: ListView.separated(
-        separatorBuilder: (context,i)=>const SizedBox(width: 10,),
-        padding: const EdgeInsets.symmetric(horizontal: 15),
+        padding: EdgeInsets.symmetric(horizontal: 15),
+        separatorBuilder: (context,i)=>SizedBox(width: 10,),
         scrollDirection: Axis.horizontal,
         itemCount: outdoorFacilityList.length,
         itemBuilder: (context, index) {
           AssignedOutdoorFacility facility = outdoorFacilityList[index];
 
-          return Container(
-            width: 140,
-            padding: const EdgeInsets.all(6),
-            decoration: BoxDecoration(
-              color: Colors.white,
-              borderRadius: BorderRadius.circular(10),
-              border: Border.all(
-                width: 1,
-                color: const Color(0xffe9e9e9),
-              ),
-            ),
-            child: Row(
-              children: [
-                Container(
-                  width: 46,
-                  height: 46,
-                  decoration: BoxDecoration(
-                    borderRadius: BorderRadius.circular(10),
-                    color: const Color(0xfffff1db),
-                  ),
-                  child: Center(
-                    child: UiUtils.imageType(
-                      facility.image ?? "",
-                      color: Constant.adaptThemeColorSvg
-                          ? context.color.tertiaryColor
-                          : null,
-                      width: 20,
-                      height: 20,
-                    ),
+          return Row(
+            children: [
+              Container(
+                padding: const EdgeInsets.all(6),
+                width: 160,
+                decoration: BoxDecoration(
+                  color: Colors.white,
+                  borderRadius: BorderRadius.circular(10),
+                  border: Border.all(
+                    width: 1,
+                    color: const Color(0xffe9e9e9),
                   ),
                 ),
-                const SizedBox(width: 8),
-                Expanded(
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
+                child: SizedBox(
+                  width: double.infinity,
+                  child: Row(
                     children: [
-                      Text(
-                        facility.name ?? "",
-                        style: const TextStyle(
-                          fontSize: 11,
-                          color: Color(0xff585858),
+                      Container(
+                        width: 46,
+                        height: 46,
+                        decoration: BoxDecoration(
+                          borderRadius: BorderRadius.circular(10),
+                          color: const Color(0xfffff1db),
                         ),
-                        maxLines: 1,
-                        overflow: TextOverflow.ellipsis,
+                        child: Center(
+                          child: UiUtils.imageType(
+                            facility.image ?? "",
+                            color: Constant.adaptThemeColorSvg
+                                ? context.color.tertiaryColor
+                                : null,
+                            width: 20,
+                            height: 20,
+                          ),
+                        ),
                       ),
-                      const SizedBox(height: 4),
-                      Text(
-                        "${facility.distance} KM",
-                        style: const TextStyle(
-                          color: Color(0xff333333),
-                          fontSize: 12,
-                          fontWeight: FontWeight.w500,
+                      const SizedBox(width: 8),
+                      Expanded(
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                          children: [
+                            Text(
+                              "${facility.name ?? ""}",
+                              style: const TextStyle(
+                                fontSize: 11,
+                                color: Color(0xff585858),
+                              ),
+                              maxLines: 2,
+                              overflow: TextOverflow.ellipsis,
+                            ),
+                            Text(
+                              "${facility.distance} KM",
+                              style: const TextStyle(
+                                color: Color(0xff333333),
+                                fontSize: 12,
+                                fontWeight: FontWeight.w500,
+                              ),
+                            ),
+                          ],
                         ),
                       ),
                     ],
                   ),
                 ),
-              ],
-            ),
+              ),
+            ],
           );
         },
       ),

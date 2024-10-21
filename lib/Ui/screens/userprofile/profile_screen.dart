@@ -850,25 +850,25 @@ class _ProfileScreenState extends State<ProfileScreen>
                           });
                         },
                       ),
-                      dividerWithSpacing(),
+                //      dividerWithSpacing(),
 
-                      customTile(
-                        context,
-                        title: UiUtils.getTranslatedLabel(
-                          context,
-                          "personalized",
-                        ),
-                        pngImagePath: "assets/profile/_-85.png",
-                        onTap: () {
-                          GuestChecker.check(onNotGuest: () {
-                            Navigator.pushNamed(
-                                context, Routes.personalizedPropertyScreen,
-                                arguments: {
-                                  "type": PersonalizedVisitType.Normal
-                                });
-                          });
-                        },
-                      ),
+                      // customTile(
+                      //   context,
+                      //   title: UiUtils.getTranslatedLabel(
+                      //     context,
+                      //     "personalized",
+                      //   ),
+                      //   pngImagePath: "assets/profile/_-85.png",
+                      //   onTap: () {
+                      //     GuestChecker.check(onNotGuest: () {
+                      //       Navigator.pushNamed(
+                      //           context, Routes.personalizedPropertyScreen,
+                      //           arguments: {
+                      //             "type": PersonalizedVisitType.Normal
+                      //           });
+                      //     });
+                      //   },
+                      // ),
                       // dividerWithSpacing(),
                       //
                       // customTile(

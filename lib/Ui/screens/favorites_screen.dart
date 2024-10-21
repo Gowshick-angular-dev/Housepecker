@@ -563,7 +563,7 @@ class _FavoritesScreenState extends State<FavoritesScreen> {
                                                               height: 4,
                                                             ),
                                                             Text(
-                                                              "Ready To Move",
+                                                              "${ favProjectsList[index]['project_details']?.isNotEmpty == true ?  favProjectsList[index]['project_details'][0]['project_status_name'] ?? '' : ''}",
                                                               maxLines: 1,
                                                               overflow:
                                                                   TextOverflow

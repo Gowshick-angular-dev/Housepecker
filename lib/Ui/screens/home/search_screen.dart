@@ -5,6 +5,7 @@ import 'dart:ui';
 import 'package:Housepecker/Ui/screens/widgets/Erros/no_internet.dart';
 import 'package:Housepecker/utils/AdMob/bannerAdLoadWidget.dart';
 import 'package:Housepecker/utils/api.dart';
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:google_mobile_ads/google_mobile_ads.dart';
@@ -129,20 +130,27 @@ class SearchScreenState extends State<SearchScreen>
     super.build(context);
     return Scaffold(
       backgroundColor: Colors.white,
-      appBar: AppBar(
-        automaticallyImplyLeading: false,
-        leading: BackButton(
-          color: context.color.tertiaryColor,
-        ),
-        elevation: 0,
-        backgroundColor: tertiaryColor_,
-        title: searchTextField(),
-      ),
+      appBar: UiUtils.buildAppBar(context,
+          showBackButton: true,
+          title:'Search',
+          actions: [
+          ]),
+      // appBar: AppBar(
+      //   automaticallyImplyLeading: false,
+      //   leading: BackButton(
+      //     color: context.color.tertiaryColor,
+      //   ),
+      //   elevation: 0,
+      //   backgroundColor: tertiaryColor_,
+      //   title: searchTextField(),
+      // ),
       bottomNavigationBar: const BottomAppBar(
         child: BannerAdWidget(bannerSize: AdSize.banner),
       ),
       body: Column(
         children: [
+          SizedBox(height: 10,),
+          searchTextField(),
           // BlocBuilder<PropertyCubit, PropertyState>(
           //   builder: (context, state) {
           //     log("state isss $state");
@@ -540,10 +548,8 @@ class SearchScreenState extends State<SearchScreen>
   }
 
   Widget setSearchIcon() {
-    return Padding(
-        padding: const EdgeInsets.all(8.0),
-        child: UiUtils.getSvg(AppIcons.search,
-            color: context.color.tertiaryColor));
+    return UiUtils.getSvg(AppIcons.search,height: 20,width: 20,
+        color: context.color.tertiaryColor);
   }
 
   Widget setSuffixIcon() {
@@ -563,95 +569,95 @@ class SearchScreenState extends State<SearchScreen>
   }
 
   Widget searchTextField() {
-    return LayoutBuilder(builder: (context, c) {
-      return SizedBox(
-        width: c.maxWidth,
-        child: FittedBox(
-          fit: BoxFit.none,
-          child: Row(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              Container(
-                  width: 270.rw(context),
-                  height: 40.rh(context),
-                  alignment: Alignment.center,
-                  decoration: BoxDecoration(
-                      border: Border.all(
-                          width: 1.5, color: context.color.borderColor),
-                      borderRadius: const BorderRadius.all(Radius.circular(10)),
-                      color: context.color.secondaryColor),
-                  child: Padding(
-                    padding: const EdgeInsets.only(bottom: 5),
-                    child: TextFormField(
-                        autofocus: widget.autoFocus ?? false,
-                        controller: searchController,
-                        decoration: InputDecoration(
-                          border: InputBorder.none,
-                          fillColor: Theme.of(context).colorScheme.secondaryColor,
-                          hintStyle: TextStyle(
-                            fontSize: 13,
-                          ),
-                          hintText: UiUtils.getTranslatedLabel(
-                              context, "searchHintLbl"),
-                          prefixIcon: setSearchIcon(),
-                          prefixIconConstraints:
-                              const BoxConstraints(minHeight: 5, minWidth: 5),
-                        ),
-                        enableSuggestions: true,
-                        onEditingComplete: () {
-                          setState(
-                            () {
-                              isFocused = false;
-                            },
-                          );
-                          FocusScope.of(context).unfocus();
-                        },
-                        onTap: () {
-                          //change prefix icon color to primary
-                          setState(() {
-                            isFocused = true;
-                          });
-                        }),
-                  )),
-              SizedBox(
-                width: 5,
-              ),
-              GestureDetector(
-                onTap: () {
-                  Navigator.pushNamed(
-                    context,
-                    Routes.filterScreen,
-                  ).then((value) {
-                    if (value == true) {
-                      context
-                          .read<SearchPropertyCubit>()
-                          .searchProperty(searchController.text, offset: 0);
-                    }
-                  });
-                },
-                child: Container(
-                  width: 40.rw(context),
-                  height: 40.rh(context),
-                  decoration: BoxDecoration(
+    return Padding(
+      padding: const EdgeInsets.symmetric(horizontal: 15),
+      child: Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Expanded(
+            child: Container(
+              padding: EdgeInsets.symmetric(horizontal: 10),
+                width: MediaQuery.of(context).size.width,
+                height: 50,
+                alignment: Alignment.center,
+                decoration: BoxDecoration(
                     border: Border.all(
                         width: 1.5, color: context.color.borderColor),
-                    color: context.color.secondaryColor,
-                    borderRadius: BorderRadius.circular(50),
-                  ),
-                  child: Center(
-                    child: UiUtils.getSvg(AppIcons.filter,
-                        color: context.color.tertiaryColor),
-                  ),
-                ),
-              ),
-              SizedBox(
-                width: c.maxWidth * 0.06,
-              )
-            ],
+                    borderRadius: const BorderRadius.all(Radius.circular(10)),
+                    color: context.color.secondaryColor),
+                child: Row(
+                  children: [
+                    setSearchIcon(),
+                    SizedBox(width: 10,),
+                    Expanded(
+                      child: TextFormField(
+                          autofocus: widget.autoFocus ?? false,
+                          controller: searchController,
+                          style: TextStyle(fontSize: 14),
+                          decoration: InputDecoration(
+                            border: InputBorder.none,
+                            fillColor: Theme.of(context).colorScheme.secondaryColor,
+                            hintStyle: TextStyle(
+                              fontSize: 14,
+                            ),
+                            hintText: UiUtils.getTranslatedLabel(
+                                context, "searchHintLbl"),
+                            prefixIconConstraints:
+                            const BoxConstraints(minHeight: 5, minWidth: 5),
+                          ),
+                          enableSuggestions: true,
+                          onEditingComplete: () {
+                            setState(
+                                  () {
+                                isFocused = false;
+                              },
+                            );
+                            FocusScope.of(context).unfocus();
+                          },
+                          onTap: () {
+                            //change prefix icon color to primary
+                            setState(() {
+                              isFocused = true;
+                            });
+                          }),
+                    ),
+                  ],
+                )),
           ),
-        ),
-      );
-    });
+          SizedBox(
+            width: 5,
+          ),
+          GestureDetector(
+            onTap: () {
+              Navigator.pushNamed(
+                context,
+                Routes.filterScreen,
+              ).then((value) {
+                if (value == true) {
+                  context
+                      .read<SearchPropertyCubit>()
+                      .searchProperty(searchController.text, offset: 0);
+                }
+              });
+            },
+            child: Container(
+              width: 50,
+              height:  50,
+              decoration: BoxDecoration(
+                border: Border.all(
+                    width: 1.5, color: context.color.borderColor),
+                color: context.color.secondaryColor,
+                borderRadius: BorderRadius.circular(10),
+              ),
+              child: Center(
+                child: UiUtils.getSvg(AppIcons.filter,
+                    color: context.color.tertiaryColor),
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
   }
 
   @override
