@@ -369,33 +369,33 @@ class _ServiceListState extends State<ConstructionList> {
                 ),
               ),
               const SizedBox(height: 10,),
-              CarouselSlider(
-                options: CarouselOptions(
-                  aspectRatio: 1.9,
-                  viewportFraction: 1.0,
-                  autoPlay: true,
-                  onPageChanged: (index, reason) {
-                    setState(() {
-                      currentIndex = index;
-                    });
-                  },
-                ),
-                items: [
-                  for (var img in banners)
-                    Container(
-                      child: ClipRRect(
-                        borderRadius: BorderRadius.circular(15.0),
-                        child: CachedNetworkImage(
-                          imageUrl: img,
-                          fit: BoxFit.cover,
-                          width: double.infinity,
-                          placeholder: (context, url) => Image.asset("assets/profile/noimg.png", fit: BoxFit.cover),
-                          errorWidget: (context, url, error) =>  Image.asset("assets/profile/noimg.png", fit: BoxFit.cover),
-                        ),
-                      ),
-                    )
-                ],
-              ),
+              // CarouselSlider(
+              //   options: CarouselOptions(
+              //     aspectRatio: 1.9,
+              //     viewportFraction: 1.0,
+              //     autoPlay: true,
+              //     onPageChanged: (index, reason) {
+              //       setState(() {
+              //         currentIndex = index;
+              //       });
+              //     },
+              //   ),
+              //   items: [
+              //     for (var img in banners)
+              //       Container(
+              //         child: ClipRRect(
+              //           borderRadius: BorderRadius.circular(15.0),
+              //           child: CachedNetworkImage(
+              //             imageUrl: img,
+              //             fit: BoxFit.cover,
+              //             width: double.infinity,
+              //             placeholder: (context, url) => Image.asset("assets/profile/noimg.png", fit: BoxFit.cover),
+              //             errorWidget: (context, url, error) =>  Image.asset("assets/profile/noimg.png", fit: BoxFit.cover),
+              //           ),
+              //         ),
+              //       )
+              //   ],
+              // ),
               if(Loading)
                 ListView.builder(
                   itemBuilder: (context, index) {

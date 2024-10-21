@@ -324,6 +324,115 @@ class _LoanHomeState extends State<LoanHome> {
                       ],
                     ),
                     SizedBox(height: 25,),
+                    Text('Select Type',style: TextStyle(
+                        color: Colors.black,
+                        fontSize: 16,
+                        fontWeight: FontWeight.w600
+                    ),),
+                    SizedBox(height: 25,),
+                    Row(
+                      children: [
+                        InkWell(
+                          onTap: () {
+                            setState(() {
+                              agentType = 'DST';
+                            });
+                          },
+                          child: Container(
+                            padding: EdgeInsets.only(left: 20,right: 10,top: 10,bottom: 10),
+                            decoration: BoxDecoration(
+                              color: agentType == 'DST' ? Color(0xfffffbf3) : Color(0xfff2f2f2),
+                              border: Border.all(
+                                  color: agentType == 'DST' ? Color(0xffffb239) : Color(0xffdcdcdc), width: 1
+                              ),
+                              borderRadius: BorderRadius.circular(30),
+                            ),alignment: Alignment.center,
+                            child: Row(
+                              children: [
+                                Text('DST',style: TextStyle(
+                                    fontSize: 12,
+                                    fontWeight: FontWeight.w500,
+                                    color: Color(0xff333333)
+                                ),),
+                                SizedBox(width: 10,),
+                                ClipRRect(
+                                  borderRadius: BorderRadius.circular(10.0),
+                                  child: Image.asset(
+                                    'assets/Loans/_-113.png',
+                                    width: 18.0,
+                                    height: 18.0,
+                                    fit: BoxFit.cover,
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ),
+                        ),
+                        SizedBox(width: 10,),
+                        InkWell(
+                          onTap: () {
+                            setState(() {
+                              agentType = 'DSA';
+                            });
+                          },
+                          child: Container(
+                            padding: EdgeInsets.only(left: 20,right: 10,top: 10,bottom: 10),
+                            decoration: BoxDecoration(
+                              color: agentType == 'DSA' ? Color(0xfffffbf3) : Color(0xfff2f2f2),
+                              border: Border.all(
+                                  color: agentType == 'DSA' ? Color(0xffffb239) : Color(0xffdcdcdc), width: 1
+                              ),
+                              borderRadius: BorderRadius.circular(30),
+                            ),alignment: Alignment.center,
+                            child: Row(
+                              children: [
+                                Text('DSA',style: TextStyle(
+                                    fontSize: 12,
+                                    fontWeight: FontWeight.w500,
+                                    color: Color(0xff333333)
+                                ),),
+                                SizedBox(width: 10,),
+                                ClipRRect(
+                                  borderRadius: BorderRadius.circular(10.0),
+                                  child: Image.asset(
+                                    'assets/Loans/_-113.png',
+                                    width: 18.0,
+                                    height: 18.0,
+                                    fit: BoxFit.cover,
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ),
+                        ),
+                        SizedBox(width: 10,),
+                        InkWell(
+                          onTap: () {
+                            setState(() {
+                              agentType = '';
+                            });
+                          },
+                          child: Container(
+                            padding: EdgeInsets.only(left: 20,right: 20,top: 10,bottom: 10),
+                            decoration: BoxDecoration(
+                              color: agentType == '' ? Color(0xfffffbf3) : Color(0xfff2f2f2),
+                              border: Border.all(
+                                  color: agentType == '' ? Color(0xffffb239) : Color(0xffdcdcdc), width: 1
+                              ),
+                              borderRadius: BorderRadius.circular(30),
+                            ),alignment: Alignment.center,
+                            child: Center(
+                              child: Text('Both', style: TextStyle(
+                                  fontSize: 13,
+                                  fontWeight: FontWeight.w500,
+                                  color: Color(0xff333333)
+                              ),),
+                            ),
+                          ),
+                        ),
+                      ],
+                    ),
+                    SizedBox(height: 25,),
                     Text('Select Bank',style: TextStyle(
                       color: Colors.black,
                       fontSize: 16,
@@ -424,114 +533,6 @@ class _LoanHomeState extends State<LoanHome> {
                         ],
                       ),
                     SizedBox(height: 25,),
-                    Text('Select Type',style: TextStyle(
-                        color: Colors.black,
-                        fontSize: 16,
-                        fontWeight: FontWeight.w600
-                    ),),
-                    SizedBox(height: 25,),
-                    Row(
-                      children: [
-                        InkWell(
-                          onTap: () {
-                            setState(() {
-                              agentType = 'DST';
-                            });
-                          },
-                          child: Container(
-                            padding: EdgeInsets.only(left: 20,right: 10,top: 10,bottom: 10),
-                            decoration: BoxDecoration(
-                              color: agentType == 'DST' ? Color(0xfffffbf3) : Color(0xfff2f2f2),
-                              border: Border.all(
-                                 color: agentType == 'DST' ? Color(0xffffb239) : Color(0xffdcdcdc), width: 1
-                              ),
-                              borderRadius: BorderRadius.circular(30),
-                            ),alignment: Alignment.center,
-                            child: Row(
-                              children: [
-                                Text('DST',style: TextStyle(
-                                  fontSize: 12,
-                                  fontWeight: FontWeight.w500,
-                                  color: Color(0xff333333)
-                                ),),
-                                SizedBox(width: 10,),
-                                ClipRRect(
-                                  borderRadius: BorderRadius.circular(10.0),
-                                  child: Image.asset(
-                                    'assets/Loans/_-113.png',
-                                    width: 18.0,
-                                    height: 18.0,
-                                    fit: BoxFit.cover,
-                                  ),
-                                ),
-                              ],
-                            ),
-                          ),
-                        ),
-                        SizedBox(width: 10,),
-                        InkWell(
-                          onTap: () {
-                            setState(() {
-                              agentType = 'DSA';
-                            });
-                          },
-                          child: Container(
-                            padding: EdgeInsets.only(left: 20,right: 10,top: 10,bottom: 10),
-                            decoration: BoxDecoration(
-                              color: agentType == 'DSA' ? Color(0xfffffbf3) : Color(0xfff2f2f2),
-                              border: Border.all(
-                                  color: agentType == 'DSA' ? Color(0xffffb239) : Color(0xffdcdcdc), width: 1
-                              ),
-                              borderRadius: BorderRadius.circular(30),
-                            ),alignment: Alignment.center,
-                            child: Row(
-                              children: [
-                                Text('DSA',style: TextStyle(
-                                    fontSize: 12,
-                                    fontWeight: FontWeight.w500,
-                                    color: Color(0xff333333)
-                                ),),
-                                SizedBox(width: 10,),
-                                ClipRRect(
-                                  borderRadius: BorderRadius.circular(10.0),
-                                  child: Image.asset(
-                                    'assets/Loans/_-113.png',
-                                    width: 18.0,
-                                    height: 18.0,
-                                    fit: BoxFit.cover,
-                                  ),
-                                ),
-                              ],
-                            ),
-                          ),
-                        ),
-                        SizedBox(width: 10,),
-                        InkWell(
-                          onTap: () {
-                            setState(() {
-                              agentType = '';
-                            });
-                          },
-                          child: Container(
-                            padding: EdgeInsets.only(left: 20,right: 20,top: 10,bottom: 10),
-                            decoration: BoxDecoration(
-                              color: agentType == '' ? Color(0xfffffbf3) : Color(0xfff2f2f2),
-                              border: Border.all(
-                                  color: agentType == '' ? Color(0xffffb239) : Color(0xffdcdcdc), width: 1
-                              ),
-                              borderRadius: BorderRadius.circular(30),
-                            ),alignment: Alignment.center,
-                            child: Center(
-                              child: Text('Both', style: TextStyle(
-                                  fontSize: 13,
-                                  fontWeight: FontWeight.w500,
-                                  color: Color(0xff333333)
-                              ),),
-                            ),
-                          ),
-                        ),
-                      ],
-                    ),
                   ],
                 ),
               ),

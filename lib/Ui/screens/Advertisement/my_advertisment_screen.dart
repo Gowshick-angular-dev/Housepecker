@@ -397,13 +397,13 @@ class _MyAdvertismentScreenState extends State<MyAdvertismentScreen> {
                                       padding: EdgeInsets.symmetric(horizontal: 15),
                                       decoration: BoxDecoration(
                                           borderRadius: BorderRadius.circular(6),
-                                          color: item['status'] == 0 ?Color(0xfffff1f1):Color(0xffd9efcf),
-                                          border: Border.all(color:   item['status'] == 0 ?Colors.red:Colors.green)
+                                          color: item['approved'] == 0 ?Color(0xfffff1f1):Color(0xffd9efcf),
+                                          border: Border.all(color: item['approved'] == 0 ?Colors.red:Colors.green)
                                       ),child: Row(
                                       mainAxisSize: MainAxisSize.min,
                                       mainAxisAlignment: MainAxisAlignment.center,
                                       children: [
-                                        Text(  item['status'] == 0 ? "InActive" : "Active",style: TextStyle(fontSize: 12,color: item['status'] == 0 ?Colors.red: Colors.green),)
+                                        Text(item['approved'] == 0 ? "InActive" : "Active",style: TextStyle(fontSize: 12,color: item['approved'] == 0 ?Colors.red: Colors.green),)
                                       ],
                                     ),
                                     ),

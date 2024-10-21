@@ -107,7 +107,7 @@ class PropertyModel {
   final String? metaDescription;
   final String? metaKeywords;
   final String? metaImage;
-  final int? sqft;
+  final double? sqft;
   final List<Gallery>? gallery;
   final int? totalView;
   final int? status;
@@ -158,7 +158,7 @@ class PropertyModel {
           String? properyType,
           String? titleImage,
           String? postCreated,
-          int? sqft,
+          double? sqft,
           List<Gallery>? gallery,
           int? totalView,
           int? status,
@@ -288,7 +288,7 @@ class PropertyModel {
         properyType: rawjson["property_type"].toString(),
         titleImage: rawjson["title_image"],
         postCreated: rawjson["post_created"],
-        sqft: rawjson["sqft"],
+        sqft: double.parse(rawjson["sqft"].toString()),
         gallery: List<Gallery>.from((rawjson["gallery"] as List)
             .map((x) => Gallery.fromMap(x is String ? json.decode(x) : x))),
         totalView: Adapter.forceInt((rawjson["total_view"] as dynamic)),

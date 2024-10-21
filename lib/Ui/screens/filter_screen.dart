@@ -377,14 +377,14 @@ class FilterScreenState extends State<FilterScreen> {
             //   } else {
 
 
-                if (widget.showPropertyType ?? false) {
-                  if (selectedCategory == null) {
-                    selectedcategoryName = "";
-                  } else {
-                    selectedcategoryName =
-                        (selectedCategory as Category).category ?? "";
-                  }
-                }
+                // if (widget.showPropertyType ?? false) {
+                //   if (selectedCategory == null) {
+                //     selectedcategoryName = "";
+                //   } else {
+                //     selectedcategoryName =
+                //         (selectedCategory as Category).category ?? "";
+                //   }
+                // }
 
                 List parameterIds = [];
                 List parametersValues = [];

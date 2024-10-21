@@ -491,7 +491,7 @@ class _LoanHomeState extends State<LoanAdForm> {
       appBar: AppBar(
         backgroundColor: tertiaryColor_,
         title: Text(
-          widget.isEdit ? 'Update Post' : 'Add Post',
+          widget.isEdit ? 'Update Advertisement' : 'Post Advertisement',
           style: TextStyle(fontSize: 14, color: Colors.white),
         ),
       ),
@@ -799,7 +799,7 @@ class _LoanHomeState extends State<LoanAdForm> {
                                 if(packages.isEmpty)
                                   Column(
                                     children: [
-                                      Text('You dont have any active packages for post a project. If you want to buy click here!',
+                                      Text('You dont have any active packages for post a Advertisement. If you want to buy click here!',
                                         style: const TextStyle(color: Colors.red, fontSize: 12),),
                                       SizedBox(height: 10,),
                                       InkWell(

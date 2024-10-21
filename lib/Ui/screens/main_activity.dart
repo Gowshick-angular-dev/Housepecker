@@ -936,78 +936,78 @@ class MainActivityState extends State<MainActivity>
                   //   ),
                   // ),
 
-                  Transform(
-                    transform: Matrix4.identity()..translate(0.toDouble(), -40),
-                    child: Column(
-                      mainAxisSize: MainAxisSize.min,
-                      children: [
-                        GestureDetector(
-                          onTap: () async {
-                            if (isReverse?.value == true) {
-                              isReverse?.value = false;
-                              showSellRentButton = true;
-                              _forRentController.forward();
-                              _forSellAnimationController.forward();
-                              _forPropAnimationController.forward();
-                            } else {
-                              showSellRentButton = false;
-                              isReverse?.value = true;
-                              _forRentController.reverse();
-                              _forSellAnimationController.reverse();
-                              _forPropAnimationController.reverse();
-                            }
-                            // setState(() {});
-                          },
-                          child: SizedBox(
-                              width: 55,
-                              height: 55,
-                              child: artboard == null
-                                  ? Container()
-                                  : Container(
-                                width: 55,
-                                 height: 55,
-                                 decoration: BoxDecoration(
-                                   border: Border.all(
-                                     width: 3,
-                                     color: Colors.white
-                                   ),
-                                   color: Color(0xff117af9),
-                                   borderRadius: BorderRadius.circular(50),
-                                   boxShadow: [
-                                     BoxShadow(
-                                       color: Color(0xffe1e1e1), // Shadow color
-                                       offset: Offset(
-                                           0, 2), // Offset from the widget's position
-                                       blurRadius: 2.0, // Spread of the shadow
-                                       spreadRadius: 2.0, // Expands the shadow
-                                     ),
-                                   ],
-                                 ),
-                                child: InkWell(
-                                    onTap: () async {
-                                      if (isReverse?.value == true) {
-                                        isReverse?.value = false;
-                                        showSellRentButton = true;
-                                        _forRentController.forward();
-                                        _forSellAnimationController.forward();
-                                        _forPropAnimationController.forward();
-                                      } else {
-                                        showSellRentButton = false;
-                                        isReverse?.value = true;
-                                        _forRentController.reverse();
-                                        _forSellAnimationController.reverse();
-                                        _forPropAnimationController.reverse();
-                                      }
-                                      // setState(() {});
-                                    },
-                                    child: Center(child: Image.asset("assets/Home/__Add .png",width: 22,height: 22,fit: BoxFit.cover,))),
-                              ),
-                          )
-                                  // : Rive(artboard: artboard!)),
-                        ),
-                      ],
-                    ),
-                  ),
+                  // Transform(
+                  //   transform: Matrix4.identity()..translate(0.toDouble(), -40),
+                  //   child: Column(
+                  //     mainAxisSize: MainAxisSize.min,
+                  //     children: [
+                  //       GestureDetector(
+                  //         onTap: () async {
+                  //           if (isReverse?.value == true) {
+                  //             isReverse?.value = false;
+                  //             showSellRentButton = true;
+                  //             _forRentController.forward();
+                  //             _forSellAnimationController.forward();
+                  //             _forPropAnimationController.forward();
+                  //           } else {
+                  //             showSellRentButton = false;
+                  //             isReverse?.value = true;
+                  //             _forRentController.reverse();
+                  //             _forSellAnimationController.reverse();
+                  //             _forPropAnimationController.reverse();
+                  //           }
+                  //           // setState(() {});
+                  //         },
+                  //         child: SizedBox(
+                  //             width: 55,
+                  //             height: 55,
+                  //             child: artboard == null
+                  //                 ? Container()
+                  //                 : Container(
+                  //               width: 55,
+                  //                height: 55,
+                  //                decoration: BoxDecoration(
+                  //                  border: Border.all(
+                  //                    width: 3,
+                  //                    color: Colors.white
+                  //                  ),
+                  //                  color: Color(0xff117af9),
+                  //                  borderRadius: BorderRadius.circular(50),
+                  //                  boxShadow: [
+                  //                    BoxShadow(
+                  //                      color: Color(0xffe1e1e1), // Shadow color
+                  //                      offset: Offset(
+                  //                          0, 2), // Offset from the widget's position
+                  //                      blurRadius: 2.0, // Spread of the shadow
+                  //                      spreadRadius: 2.0, // Expands the shadow
+                  //                    ),
+                  //                  ],
+                  //                ),
+                  //               child: InkWell(
+                  //                   onTap: () async {
+                  //                     if (isReverse?.value == true) {
+                  //                       isReverse?.value = false;
+                  //                       showSellRentButton = true;
+                  //                       _forRentController.forward();
+                  //                       _forSellAnimationController.forward();
+                  //                       _forPropAnimationController.forward();
+                  //                     } else {
+                  //                       showSellRentButton = false;
+                  //                       isReverse?.value = true;
+                  //                       _forRentController.reverse();
+                  //                       _forSellAnimationController.reverse();
+                  //                       _forPropAnimationController.reverse();
+                  //                     }
+                  //                     // setState(() {});
+                  //                   },
+                  //                   child: Center(child: Image.asset("assets/Home/__Add .png",width: 22,height: 22,fit: BoxFit.cover,))),
+                  //             ),
+                  //         )
+                  //                 // : Rive(artboard: artboard!)),
+                  //       ),
+                  //     ],
+                  //   ),
+                  // ),
                   buildBottomNavigationbarItem(
                     3,
                     "assets/Home/__Shortlist.png",
@@ -1021,78 +1021,78 @@ class MainActivityState extends State<MainActivity>
                     currtab == 4,
                   ),
                 ]),
-            Positioned(
-              left: 0,
-              right: 0,
-              bottom: 0,
-              child: Column(
-                mainAxisSize: MainAxisSize.min,
-
-                children: [
-                  SizedBox(height: 8,),
-                  InkWell(
-                    onTap: () async {
-                      if (isReverse?.value == true) {
-                        isReverse?.value = false;
-                        showSellRentButton = true;
-                        _forRentController.forward();
-                        _forSellAnimationController.forward();
-                        _forPropAnimationController.forward();
-                      } else {
-                        showSellRentButton = false;
-                        isReverse?.value = true;
-                        _forRentController.reverse();
-                        _forSellAnimationController.reverse();
-                        _forPropAnimationController.reverse();
-                      }
-                      // setState(() {});
-                    },
-                    child: Text(
-                      "Post Ad",
-                      style: TextStyle(
-                          fontSize: 10,fontWeight: FontWeight.w500,color: Color(0xff747474)
-                      ),
-                      textAlign: TextAlign.center,
-                    ),
-                  ),
-                  SizedBox(height: 3,),
-                  InkWell(
-                    onTap: () async {
-                      if (isReverse?.value == true) {
-                        isReverse?.value = false;
-                        showSellRentButton = true;
-                        _forRentController.forward();
-                        _forSellAnimationController.forward();
-                        _forPropAnimationController.forward();
-                      } else {
-                        showSellRentButton = false;
-                        isReverse?.value = true;
-                        _forRentController.reverse();
-                        _forSellAnimationController.reverse();
-                        _forPropAnimationController.reverse();
-                      }
-                      // setState(() {});
-                    },
-                    child: Container(
-                      padding: EdgeInsets.only(left: 8,right: 8,top: 2,bottom: 2),
-                      decoration: BoxDecoration(
-                        color: Color(0xffffa920),
-                        borderRadius: BorderRadius.circular(15.0),
-
-                      ),
-                      child: Text(
-                        "FREE",
-                        style: TextStyle(
-                            fontSize: 7,fontWeight: FontWeight.w600,color: Colors.white
-                        ),
-                        textAlign: TextAlign.center,
-                      ),
-                    ),
-                  ),
-                  SizedBox(height: 5,),
-                ],
-              ),
-            ),
+            // Positioned(
+            //   left: 0,
+            //   right: 0,
+            //   bottom: 0,
+            //   child: Column(
+            //     mainAxisSize: MainAxisSize.min,
+            //
+            //     children: [
+            //       SizedBox(height: 8,),
+            //       InkWell(
+            //         onTap: () async {
+            //           if (isReverse?.value == true) {
+            //             isReverse?.value = false;
+            //             showSellRentButton = true;
+            //             _forRentController.forward();
+            //             _forSellAnimationController.forward();
+            //             _forPropAnimationController.forward();
+            //           } else {
+            //             showSellRentButton = false;
+            //             isReverse?.value = true;
+            //             _forRentController.reverse();
+            //             _forSellAnimationController.reverse();
+            //             _forPropAnimationController.reverse();
+            //           }
+            //           // setState(() {});
+            //         },
+            //         child: Text(
+            //           "Post Ad",
+            //           style: TextStyle(
+            //               fontSize: 10,fontWeight: FontWeight.w500,color: Color(0xff747474)
+            //           ),
+            //           textAlign: TextAlign.center,
+            //         ),
+            //       ),
+            //       SizedBox(height: 3,),
+            //       InkWell(
+            //         onTap: () async {
+            //           if (isReverse?.value == true) {
+            //             isReverse?.value = false;
+            //             showSellRentButton = true;
+            //             _forRentController.forward();
+            //             _forSellAnimationController.forward();
+            //             _forPropAnimationController.forward();
+            //           } else {
+            //             showSellRentButton = false;
+            //             isReverse?.value = true;
+            //             _forRentController.reverse();
+            //             _forSellAnimationController.reverse();
+            //             _forPropAnimationController.reverse();
+            //           }
+            //           // setState(() {});
+            //         },
+            //         child: Container(
+            //           padding: EdgeInsets.only(left: 8,right: 8,top: 2,bottom: 2),
+            //           decoration: BoxDecoration(
+            //             color: Color(0xffffa920),
+            //             borderRadius: BorderRadius.circular(15.0),
+            //
+            //           ),
+            //           child: Text(
+            //             "FREE",
+            //             style: TextStyle(
+            //                 fontSize: 7,fontWeight: FontWeight.w600,color: Colors.white
+            //             ),
+            //             textAlign: TextAlign.center,
+            //           ),
+            //         ),
+            //       ),
+            //       SizedBox(height: 5,),
+            //     ],
+            //   ),
+            // ),
           ],
         ),
       ),

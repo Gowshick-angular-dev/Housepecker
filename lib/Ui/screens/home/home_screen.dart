@@ -657,11 +657,8 @@ class HomeScreenState extends State<HomeScreen>
         FetchMostViewedPropertiesSuccess,
         FetchMostViewedPropertiesFailure>();
 
-    ViewAllScreen<FetchMostViewedPropertiesCubit,
-        FetchMostViewedPropertiesState>(
-      title: "mostViewed".translate(context),
-      map: stateMap,
-    ).open(context);
+    ViewAllScreen<FetchMostViewedPropertiesCubit, FetchMostViewedPropertiesState>(
+      title: "mostViewed".translate(context), map: stateMap).open(context);
   }
 
   void _onRefresh() {
@@ -1993,268 +1990,282 @@ class HomeScreenState extends State<HomeScreen>
       mainAxisSize: MainAxisSize.min,
       children: <Widget>[
 
-        Padding(
-          padding: const EdgeInsets.only(left: 15, right: 15),
-          child: SizedBox(
-            height: 85,
-            child: BlocConsumer<FetchCategoryCubit, FetchCategoryState>(
-              listener: (context, state) {
-                if (state is FetchCategoryFailure) {
-                  if (state.errorMessage == "auth-expired") {
-                    HelperUtils.showSnackBarMessage(context,
-                        UiUtils.getTranslatedLabel(context, "authExpired"));
+        SizedBox(
+          height: 85,
+          child: BlocConsumer<FetchCategoryCubit, FetchCategoryState>(
+            listener: (context, state) {
+              if (state is FetchCategoryFailure) {
+                if (state.errorMessage == "auth-expired") {
+                  HelperUtils.showSnackBarMessage(context,
+                      UiUtils.getTranslatedLabel(context, "authExpired"));
 
-                    HiveUtils.logoutUser(
-                      context,
-                      onLogout: () {},
-                    );
-                  }
-                }
-
-                if (state is FetchCategorySuccess) {
-                  isCategoryEmpty = state.categories.isEmpty;
-                  setState(() {});
-                }
-              },
-              builder: (context, state) {
-                if (state is FetchCategoryInProgress) {
-                  return const CategoryShimmer();
-                }
-                if (state is FetchCategoryFailure) {
-                  return Center(
-                    child: Text(state.errorMessage.toString()),
+                  HiveUtils.logoutUser(
+                    context,
+                    onLogout: () {},
                   );
                 }
-                if (state is FetchCategorySuccess) {
-                  return ListView.separated(
-                    padding: const EdgeInsets.symmetric(
-                      horizontal: sidePadding,
+              }
+
+              if (state is FetchCategorySuccess) {
+                isCategoryEmpty = state.categories.isEmpty;
+                setState(() {});
+              }
+            },
+            builder: (context, state) {
+              if (state is FetchCategoryInProgress) {
+                return Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 15),
+                  child: const CategoryShimmer(),
+                );
+              }
+              if (state is FetchCategoryFailure) {
+                return Center(
+                  child: Text(state.errorMessage.toString()),
+                );
+              }
+              if (state is FetchCategorySuccess) {
+                return Row(
+                  children: [
+                    Icon(Icons.arrow_left,
+                      color: Colors.black38,
+                      size: 20
                     ),
-                    scrollDirection: Axis.horizontal,
-                    // shrinkWrap: false,
-                    // gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
-                    //   crossAxisCount: 4, // Number of items in one line
-                    //   crossAxisSpacing: 10.0,
-                    //   mainAxisSpacing: 10.0,
-                    //   childAspectRatio :1.0,
-                    // ),
-                    itemCount: state.categories.length + 3,
-                    // itemCount: state.categories.length
-                    //     .clamp(0, Constant.maxCategoryLength),
-                    itemBuilder: (context, index) {
-                      // if (index == (Constant.maxCategoryLength - 1)) {
-                      //   return Padding(
-                      //     padding: const EdgeInsetsDirectional.only(start: 10,),
-                      //     child: GestureDetector(
-                      //       onTap: () {
-                      //         Navigator.pushNamed(context, Routes.categories);
-                      //       },
-                      //       child: Container(
-                      //         constraints: BoxConstraints(
-                      //           minWidth: 100.rw(context),
-                      //         ),
-                      //         height: 44.rh(context),
-                      //         alignment: Alignment.center,
-                      //         decoration: DesignConfig.boxDecorationBorder(
-                      //           color: context.color.secondaryColor,
-                      //           radius: 10,
-                      //           borderWidth: 1.5,
-                      //           borderColor: context.color.borderColor,
-                      //         ),
-                      //         child: Padding(
-                      //           padding:
-                      //           const EdgeInsets.symmetric(horizontal: 10),
-                      //           child: Text(
-                      //               UiUtils.getTranslatedLabel(context, "more")),
-                      //         ),
-                      //       ),
-                      //     ),
-                      //   );
-                      // }
-                      if(index > 2) {
-                        Category category = state.categories[index - 3];
-                        Constant.propertyFilter = null;
-                        return Padding(
-                          padding: const EdgeInsets.all(5),
-                          child: buildCategoryCard(context, category, index != 0),
-                        );
-                      } else {
-                        return Container();
-                      }
-                    }, separatorBuilder: (BuildContext context, int index) {
-                      if(index == 0) {
-                        return Padding(
-                          padding: const EdgeInsets.all(5),
-                          child: GestureDetector(
-                            onTap: () {
-                              // onTapCategory.call(category);
-                              Navigator.of(context).pushNamed(Routes.propertiesListType,
-                                  arguments: {'type': 'buy', 'typeName': 'buy'});
-                            },
-                            child: Container(
-                              width: MediaQuery.sizeOf(context).width/4.9,
-                              decoration: BoxDecoration(
-                                color: const Color(0xff117af9).withOpacity(0.1),
-                                borderRadius: BorderRadius.circular(15.0),
-                                boxShadow: [
-                                  const BoxShadow(
-                                    color: Color(0xfff0f0f0),
-                                    offset: Offset(0, 2),
-                                    blurRadius: 2.0,
-                                    spreadRadius: 2.0,
-                                  ),
-                                ],
-                              ),
-                              child: Padding(
-                                padding: const EdgeInsets.symmetric(horizontal: 5,vertical: 5),
-                                child: Column(
-                                  mainAxisAlignment: MainAxisAlignment.center,
-                                  crossAxisAlignment: CrossAxisAlignment.center,
-                                  mainAxisSize: MainAxisSize.max,
-                                  children: [
-                                    Center(
-                                      child: ClipRRect(
-                                        // borderRadius: BorderRadius.circular(10),
-                                        child: Image.asset("assets/Home/__Buy.png", width: 25, height: 25,),
+                    Expanded(
+                      child: ListView.separated(
+                        // padding: const EdgeInsets.symmetric(
+                        //   horizontal: sidePadding,
+                        // ),
+                        scrollDirection: Axis.horizontal,
+                        // shrinkWrap: false,
+                        // gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+                        //   crossAxisCount: 4, // Number of items in one line
+                        //   crossAxisSpacing: 10.0,
+                        //   mainAxisSpacing: 10.0,
+                        //   childAspectRatio :1.0,
+                        // ),
+                        itemCount: state.categories.length + 3,
+                        // itemCount: state.categories.length
+                        //     .clamp(0, Constant.maxCategoryLength),
+                        itemBuilder: (context, index) {
+                          // if (index == (Constant.maxCategoryLength - 1)) {
+                          //   return Padding(
+                          //     padding: const EdgeInsetsDirectional.only(start: 10,),
+                          //     child: GestureDetector(
+                          //       onTap: () {
+                          //         Navigator.pushNamed(context, Routes.categories);
+                          //       },
+                          //       child: Container(
+                          //         constraints: BoxConstraints(
+                          //           minWidth: 100.rw(context),
+                          //         ),
+                          //         height: 44.rh(context),
+                          //         alignment: Alignment.center,
+                          //         decoration: DesignConfig.boxDecorationBorder(
+                          //           color: context.color.secondaryColor,
+                          //           radius: 10,
+                          //           borderWidth: 1.5,
+                          //           borderColor: context.color.borderColor,
+                          //         ),
+                          //         child: Padding(
+                          //           padding:
+                          //           const EdgeInsets.symmetric(horizontal: 10),
+                          //           child: Text(
+                          //               UiUtils.getTranslatedLabel(context, "more")),
+                          //         ),
+                          //       ),
+                          //     ),
+                          //   );
+                          // }
+                          if(index > 2) {
+                            Category category = state.categories[index - 3];
+                            Constant.propertyFilter = null;
+                            return Padding(
+                              padding: EdgeInsets.only(left: 5, top: 5, bottom: 5, right: (index == 6) ? 0 : 5),
+                              child: buildCategoryCard(context, category, index != 0),
+                            );
+                          } else {
+                            return Container();
+                          }
+                        }, separatorBuilder: (BuildContext context, int index) {
+                          if(index == 0) {
+                            return Padding(
+                              padding: const EdgeInsets.only(top: 5, right: 5, bottom: 5),
+                              child: GestureDetector(
+                                onTap: () {
+                                  // onTapCategory.call(category);
+                                  Navigator.of(context).pushNamed(Routes.propertiesListType,
+                                      arguments: {'type': 'buy', 'typeName': 'buy'});
+                                },
+                                child: Container(
+                                  width: MediaQuery.sizeOf(context).width/4.9,
+                                  decoration: BoxDecoration(
+                                    color: const Color(0xff117af9).withOpacity(0.1),
+                                    borderRadius: BorderRadius.circular(15.0),
+                                    boxShadow: [
+                                      const BoxShadow(
+                                        color: Color(0xfff0f0f0),
+                                        offset: Offset(0, 2),
+                                        blurRadius: 2.0,
+                                        spreadRadius: 2.0,
                                       ),
+                                    ],
+                                  ),
+                                  child: Padding(
+                                    padding: const EdgeInsets.symmetric(horizontal: 5,vertical: 5),
+                                    child: Column(
+                                      mainAxisAlignment: MainAxisAlignment.center,
+                                      crossAxisAlignment: CrossAxisAlignment.center,
+                                      mainAxisSize: MainAxisSize.max,
+                                      children: [
+                                        Center(
+                                          child: ClipRRect(
+                                            // borderRadius: BorderRadius.circular(10),
+                                            child: Image.asset("assets/Home/__Buy.png", width: 25, height: 25,),
+                                          ),
+                                        ),
+                                        const SizedBox(height: 5),
+                                        const SizedBox(
+                                            child: Text('Buy',
+                                                style: TextStyle(
+                                                    fontSize: 9,
+                                                    fontWeight: FontWeight.w500,
+                                                    color: Color(0xff333333)
+                                                ),
+                                                textAlign: TextAlign.center,
+                                                maxLines: 2,
+                                                overflow: TextOverflow.ellipsis)
+                                        ),
+                                      ],
                                     ),
-                                    const SizedBox(height: 5),
-                                    const SizedBox(
-                                        child: Text('Buy',
-                                            style: TextStyle(
-                                                fontSize: 9,
-                                                fontWeight: FontWeight.w500,
-                                                color: Color(0xff333333)
-                                            ),
-                                            textAlign: TextAlign.center,
-                                            maxLines: 2,
-                                            overflow: TextOverflow.ellipsis)
-                                    ),
-                                  ],
+                                  ),
                                 ),
                               ),
-                            ),
-                          ),
-                        );
-                      } else if(index == 1) {
-                        return Padding(
-                          padding: const EdgeInsets.all(5),
-                          child: GestureDetector(
-                            onTap: () {
-                              // onTapCategory.call(category);
-                              Navigator.of(context).pushNamed(Routes.propertiesListType,
-                                  arguments: {'type': 'rent', 'typeName': 'rent'});
-                            },
-                            child: Container(
-                              width: MediaQuery.sizeOf(context).width/4.9,
-                              decoration: BoxDecoration(
-                                color: const Color(0xff117af9).withOpacity(0.1),
-                                borderRadius: BorderRadius.circular(15.0),
-                                boxShadow: [
-                                  const BoxShadow(
-                                    color: Color(0xfff0f0f0),
-                                    offset: Offset(0, 2),
-                                    blurRadius: 2.0,
-                                    spreadRadius: 2.0,
-                                  ),
-                                ],
-                              ),
-                              child: Padding(
-                                padding: const EdgeInsets.symmetric(horizontal: 5,vertical: 5),
-                                child: Column(
-                                  mainAxisAlignment: MainAxisAlignment.center,
-                                  crossAxisAlignment: CrossAxisAlignment.center,
-                                  mainAxisSize: MainAxisSize.max,
-                                  children: [
-                                    Center(
-                                      child: ClipRRect(
-                                        // borderRadius: BorderRadius.circular(10),
-                                        child: Image.asset("assets/Home/__Rent.png", width: 25, height: 25,),
+                            );
+                          } else if(index == 1) {
+                            return Padding(
+                              padding: const EdgeInsets.all(5),
+                              child: GestureDetector(
+                                onTap: () {
+                                  // onTapCategory.call(category);
+                                  Navigator.of(context).pushNamed(Routes.propertiesListType,
+                                      arguments: {'type': 'rent', 'typeName': 'rent'});
+                                },
+                                child: Container(
+                                  width: MediaQuery.sizeOf(context).width/4.9,
+                                  decoration: BoxDecoration(
+                                    color: const Color(0xff117af9).withOpacity(0.1),
+                                    borderRadius: BorderRadius.circular(15.0),
+                                    boxShadow: [
+                                      const BoxShadow(
+                                        color: Color(0xfff0f0f0),
+                                        offset: Offset(0, 2),
+                                        blurRadius: 2.0,
+                                        spreadRadius: 2.0,
                                       ),
+                                    ],
+                                  ),
+                                  child: Padding(
+                                    padding: const EdgeInsets.symmetric(horizontal: 5,vertical: 5),
+                                    child: Column(
+                                      mainAxisAlignment: MainAxisAlignment.center,
+                                      crossAxisAlignment: CrossAxisAlignment.center,
+                                      mainAxisSize: MainAxisSize.max,
+                                      children: [
+                                        Center(
+                                          child: ClipRRect(
+                                            // borderRadius: BorderRadius.circular(10),
+                                            child: Image.asset("assets/Home/__Rent.png", width: 25, height: 25,),
+                                          ),
+                                        ),
+                                        const SizedBox(height: 5),
+                                        const SizedBox(
+                                            child: Text('Rent/Lease',
+                                                style: TextStyle(
+                                                    fontSize: 9,
+                                                    fontWeight: FontWeight.w500,
+                                                    color: Color(0xff333333)
+                                                ),
+                                                textAlign: TextAlign.center,
+                                                maxLines: 2,
+                                                overflow: TextOverflow.ellipsis)
+                                        ),
+                                      ],
                                     ),
-                                    const SizedBox(height: 5),
-                                    const SizedBox(
-                                        child: Text('Rent/Lease',
-                                            style: TextStyle(
-                                                fontSize: 9,
-                                                fontWeight: FontWeight.w500,
-                                                color: Color(0xff333333)
-                                            ),
-                                            textAlign: TextAlign.center,
-                                            maxLines: 2,
-                                            overflow: TextOverflow.ellipsis)
-                                    ),
-                                  ],
+                                  ),
                                 ),
                               ),
-                            ),
-                          ),
-                        );
-                      } else if(index == 2) {
-                        return Padding(
-                          padding: const EdgeInsets.all(5),
-                          child: GestureDetector(
-                            onTap: () {
-                              Navigator.push(
-                                context,
-                                MaterialPageRoute(builder: (context) =>
-                                    ProjectViewAllScreen()),
-                              );
-                            },
-                            child: Container(
-                              width: MediaQuery.sizeOf(context).width/4.9,
-                              decoration: BoxDecoration(
-                                color: const Color(0xff117af9).withOpacity(0.1),
-                                borderRadius: BorderRadius.circular(15.0),
-                                boxShadow: [
-                                  const BoxShadow(
-                                    color: Color(0xfff0f0f0),
-                                    offset: Offset(0, 2),
-                                    blurRadius: 2.0,
-                                    spreadRadius: 2.0,
-                                  ),
-                                ],
-                              ),
-                              child: Padding(
-                                padding: const EdgeInsets.symmetric(horizontal: 5,vertical: 5),
-                                child: Column(
-                                  mainAxisAlignment: MainAxisAlignment.center,
-                                  crossAxisAlignment: CrossAxisAlignment.center,
-                                  mainAxisSize: MainAxisSize.max,
-                                  children: [
-                                    Center(
-                                      child: ClipRRect(
-                                        // borderRadius: BorderRadius.circular(10),
-                                        child: Image.asset("assets/Home/__PG.png", width: 25, height: 25,),
+                            );
+                          } else if(index == 2) {
+                            return Padding(
+                              padding: const EdgeInsets.all(5),
+                              child: GestureDetector(
+                                onTap: () {
+                                  Navigator.push(
+                                    context,
+                                    MaterialPageRoute(builder: (context) =>
+                                        ProjectViewAllScreen()),
+                                  );
+                                },
+                                child: Container(
+                                  width: MediaQuery.sizeOf(context).width/4.9,
+                                  decoration: BoxDecoration(
+                                    color: const Color(0xff117af9).withOpacity(0.1),
+                                    borderRadius: BorderRadius.circular(15.0),
+                                    boxShadow: [
+                                      const BoxShadow(
+                                        color: Color(0xfff0f0f0),
+                                        offset: Offset(0, 2),
+                                        blurRadius: 2.0,
+                                        spreadRadius: 2.0,
                                       ),
+                                    ],
+                                  ),
+                                  child: Padding(
+                                    padding: const EdgeInsets.symmetric(horizontal: 5,vertical: 5),
+                                    child: Column(
+                                      mainAxisAlignment: MainAxisAlignment.center,
+                                      crossAxisAlignment: CrossAxisAlignment.center,
+                                      mainAxisSize: MainAxisSize.max,
+                                      children: [
+                                        Center(
+                                          child: ClipRRect(
+                                            // borderRadius: BorderRadius.circular(10),
+                                            child: Image.asset("assets/Home/__PG.png", width: 25, height: 25,),
+                                          ),
+                                        ),
+                                        const SizedBox(height: 5),
+                                        const SizedBox(
+                                            child: Text('New Projects',
+                                                style: TextStyle(
+                                                    fontSize: 9,
+                                                    fontWeight: FontWeight.w500,
+                                                    color: Color(0xff333333)
+                                                ),
+                                                textAlign: TextAlign.center,
+                                                maxLines: 2,
+                                                overflow: TextOverflow.ellipsis)
+                                        ),
+                                      ],
                                     ),
-                                    const SizedBox(height: 5),
-                                    const SizedBox(
-                                        child: Text('New Projects',
-                                            style: TextStyle(
-                                                fontSize: 9,
-                                                fontWeight: FontWeight.w500,
-                                                color: Color(0xff333333)
-                                            ),
-                                            textAlign: TextAlign.center,
-                                            maxLines: 2,
-                                            overflow: TextOverflow.ellipsis)
-                                    ),
-                                  ],
+                                  ),
                                 ),
                               ),
-                            ),
-                          ),
-                        );
-                      } else {
-                        return Container();
-                      }
-                  },
-                  );
-                }
-                return Container();
-              },
-            ),
+                            );
+                          } else {
+                            return Container();
+                          }
+                      },
+                      ),
+                    ),
+                    Icon(Icons.arrow_right,
+                      color: Colors.black38,
+                      size: 20
+                    )
+                  ],
+                );
+              }
+              return Container();
+            },
           ),
         ),
         if(adListLoading)
@@ -2989,6 +3000,12 @@ class HomeScreenState extends State<HomeScreen>
                       ),
                     );
                   }
+                  if (index == 0) {
+                    Navigator.pushNamed(context, Routes.searchScreenRoute, arguments: {
+                      'autoFocus': false,
+                      'openFilterScreen': false,
+                    });
+                  }
                   if (index == 2) {
                     Navigator.push(
                       context,
@@ -3590,10 +3607,10 @@ class _RecentPropertiesSectionWidgetState
                                               ),
                                               Text(
                                                 '${widget.projectList![index]['project_details'].isNotEmpty
-                                                    ? formatAmount(widget.projectList![index]['project_details'][0]['size'] ?? 0)
+                                                    ? widget.projectList![index]['project_details'][0]['size']
                                                     : 0} Sq.ft',
                                                 style: const TextStyle(
-                                                  color: Color(0xffa2a2a2),
+                                                  color: Colors.black87,
                                                   fontSize: 9,
                                                   fontWeight: FontWeight.w500,
                                                 ),
@@ -3615,14 +3632,12 @@ class _RecentPropertiesSectionWidgetState
                                             ],
                                           ),
                                         if (widget.projectList![index]['min_price'] != null)
-
-                                        if (widget.projectList![index]['min_price'] != null)
                                           Row(
                                             children: [
                                               Text(
                                                 '${widget.projectList![index]['min_size']} - ${widget.projectList![index]['max_size']} Sq.ft',
                                                 style: const TextStyle(
-                                                  color: Color(0xffa2a2a2),
+                                                  color: Colors.black87,
                                                   fontSize: 10,
                                                   fontWeight: FontWeight.w500,
                                                 ),
@@ -3643,7 +3658,7 @@ class _RecentPropertiesSectionWidgetState
                                                     maxLines: 1,
                                                     overflow: TextOverflow.ellipsis,
                                                     style: const TextStyle(
-                                                      color: Color(0xffa2a2a2),
+                                                      color: Colors.black87,
                                                       fontSize: 9,
                                                       fontWeight: FontWeight.w500,
                                                     ),

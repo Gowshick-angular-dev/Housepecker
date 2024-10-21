@@ -248,7 +248,7 @@ class SearchScreenState extends State<SearchScreen>
          
                   itemBuilder: (context, index) {
                     List data = [...state.searchedroperties, ...?state.searchedProjects];
-                    data.shuffle(Random());
+                    // data.shuffle(Random());
                     PropertyModel? property;
                     Map? projects;
                     var type = '';

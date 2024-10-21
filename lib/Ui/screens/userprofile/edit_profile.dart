@@ -179,7 +179,7 @@ class UserProfileScreenState extends State<UserProfileScreen> {
 
     String mobileNumber = mobile!.substring(countryCodeLength, mobile.length);
 
-    mobileNumber = "${countryCode!} $mobileNumber";
+    mobileNumber = "+$mobile";
     return mobileNumber;
   }
 
@@ -404,71 +404,71 @@ class UserProfileScreenState extends State<UserProfileScreen> {
                                           controller: companyController,
                                           // validator: selectedRole == '3' ? CustomTextFieldValidator.nullCheck : null,
                                         ),
-                                      // Column(
-                                      //   crossAxisAlignment: CrossAxisAlignment.start,
-                                      //   children: [
-                                      //     SizedBox(
-                                      //       height: 10.rh(context),
-                                      //     ),
-                                      //     Text(UiUtils.getTranslatedLabel(context, 'Role')),
-                                      //     SizedBox(
-                                      //       height: 10.rh(context),
-                                      //     ),
-                                      //     Row(
-                                      //       children: [
-                                      //         Expanded(
-                                      //           child: MultiSelectDropDown(
-                                      //             backgroundColor: Color(0xfff5f5f5),
-                                      //             borderColor: roleError ? Colors.red : Color(0xffededed),
-                                      //             borderWidth: 1.3,
-                                      //             padding: EdgeInsets.all(15),
-                                      //             onOptionSelected: (List<ValueItem> selectedOptions) {
-                                      //               if(selectedOptions.length > 0) {
-                                      //                 setState(() {
-                                      //                   selectedRole =
-                                      //                   selectedOptions[0]
-                                      //                       .value!;
-                                      //                   selectedRoleWidget =
-                                      //                   selectedOptions[0];
-                                      //                 });
-                                      //               } else {
-                                      //                 setState(() {
-                                      //                   selectedRole = '';
-                                      //                   selectedRoleWidget = null;
-                                      //                 });
-                                      //               }
-                                      //             },
-                                      //             selectedOptions: selectedRoleWidget == null ? [] : [selectedRoleWidget!],
-                                      //             options: [
-                                      //               for(int i = 0; i < roleList.length; i++)
-                                      //                 ValueItem(label: roleList[i]['name'], value: roleList[i]['id'].toString()),
-                                      //             ],
-                                      //             selectionType: SelectionType.single,
-                                      //             chipConfig: const ChipConfig(wrapType: WrapType.wrap),
-                                      //             dropdownHeight: 300,
-                                      //             optionTextStyle: const TextStyle(fontSize: 16),
-                                      //             selectedOptionIcon: const Icon(Icons.check_circle),
-                                      //           ),
-                                      //         ),
-                                      //       ],
-                                      //     ),
-                                      //     if(roleError)
-                                      //       Column(
-                                      //         children: [
-                                      //           SizedBox(height: 5,),
-                                      //           Padding(
-                                      //             padding: const EdgeInsets.only(left: 15),
-                                      //             child: Text('Field must not be empty',
-                                      //             style: TextStyle(
-                                      //               color: Colors.red,
-                                      //               fontSize: 11
-                                      //             ),),
-                                      //           ),
-                                      //         ],
-                                      //       ),
-                                      //     SizedBox(height: 15,),
-                                      //   ],
-                                      // ),
+                                      Column(
+                                        crossAxisAlignment: CrossAxisAlignment.start,
+                                        children: [
+                                          SizedBox(
+                                            height: 10.rh(context),
+                                          ),
+                                          Text(UiUtils.getTranslatedLabel(context, 'Role')),
+                                          SizedBox(
+                                            height: 10.rh(context),
+                                          ),
+                                          Row(
+                                            children: [
+                                              Expanded(
+                                                child: MultiSelectDropDown(
+                                                  backgroundColor: Color(0xfff5f5f5),
+                                                  borderColor: roleError ? Colors.red : Color(0xffededed),
+                                                  borderWidth: 1.3,
+                                                  padding: EdgeInsets.all(15),
+                                                  onOptionSelected: (List<ValueItem> selectedOptions) {
+                                                    if(selectedOptions.length > 0) {
+                                                      setState(() {
+                                                        selectedRole =
+                                                        selectedOptions[0]
+                                                            .value!;
+                                                        selectedRoleWidget =
+                                                        selectedOptions[0];
+                                                      });
+                                                    } else {
+                                                      setState(() {
+                                                        selectedRole = '';
+                                                        selectedRoleWidget = null;
+                                                      });
+                                                    }
+                                                  },
+                                                  selectedOptions: selectedRoleWidget == null ? [] : [selectedRoleWidget!],
+                                                  options: [
+                                                    for(int i = 0; i < roleList.length; i++)
+                                                      ValueItem(label: roleList[i]['name'], value: roleList[i]['id'].toString()),
+                                                  ],
+                                                  selectionType: SelectionType.single,
+                                                  chipConfig: const ChipConfig(wrapType: WrapType.wrap),
+                                                  dropdownHeight: 300,
+                                                  optionTextStyle: const TextStyle(fontSize: 16),
+                                                  selectedOptionIcon: const Icon(Icons.check_circle),
+                                                ),
+                                              ),
+                                            ],
+                                          ),
+                                          if(roleError)
+                                            Column(
+                                              children: [
+                                                SizedBox(height: 5,),
+                                                Padding(
+                                                  padding: const EdgeInsets.only(left: 15),
+                                                  child: Text('Field must not be empty',
+                                                  style: TextStyle(
+                                                    color: Colors.red,
+                                                    fontSize: 11
+                                                  ),),
+                                                ),
+                                              ],
+                                            ),
+                                          SizedBox(height: 15,),
+                                        ],
+                                      ),
                                       if(selectedRole == '2' || selectedRole == '3')
                                         buildTextField(
                                           context,
@@ -1103,7 +1103,7 @@ class UserProfileScreenState extends State<UserProfileScreen> {
                             city: city,
                             state: _state,
                             country: country,
-                            placeId: placeid);
+                            placeId: placeid ?? '');
                         Hive.box(HiveKeys.userDetailsBox)
                             .put(HiveKeys.cityTeemp, city);
                         context
