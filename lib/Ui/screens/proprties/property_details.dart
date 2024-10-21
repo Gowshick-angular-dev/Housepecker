@@ -3039,49 +3039,49 @@ class PropertyDetailsState extends State<PropertyDetails>
                 return Row(
                   mainAxisSize: MainAxisSize.min,
                   children: [
-                    if (!HiveUtils.isGuest()) ...[
-                      if (isPromoted == false &&
-                          (property?.status.toString() != "0")) ...[
-                        Expanded(
-                            child: UiUtils.buildButton(
-                          context,
-                          disabled: (property?.status.toString() == "0"),
-                          // padding: const EdgeInsets.symmetric(horizontal: 1),
-                          outerPadding: const EdgeInsets.all(
-                            1,
-                          ),
-                          onPressed: () {
-                            Navigator.pushNamed(
-                              context,
-                              Routes.createAdvertismentScreenRoute,
-                              arguments: {
-                                "model": property,
-                              },
-                            ).then(
-                              (value) {
-                                setState(() {});
-                              },
-                            );
-                          },
-                          prefixWidget: Padding(
-                            padding: const EdgeInsets.only(right: 6),
-                            child: SvgPicture.asset(
-                              AppIcons.promoted,
-                              width: 14,
-                              height: 14,
-                            ),
-                          ),
-
-                          fontSize: context.font.normal,
-                          width: context.screenWidth / 3,
-                          buttonTitle:
-                              UiUtils.getTranslatedLabel(context, "feature"),
-                        )),
-                        const SizedBox(
-                          width: 8,
-                        ),
-                      ],
-                    ],
+                    // if (!HiveUtils.isGuest()) ...[
+                    //   if (isPromoted == false &&
+                    //       (property?.status.toString() != "0")) ...[
+                    //     Expanded(
+                    //         child: UiUtils.buildButton(
+                    //       context,
+                    //       disabled: (property?.status.toString() == "0"),
+                    //       // padding: const EdgeInsets.symmetric(horizontal: 1),
+                    //       outerPadding: const EdgeInsets.all(
+                    //         1,
+                    //       ),
+                    //       onPressed: () {
+                    //         Navigator.pushNamed(
+                    //           context,
+                    //           Routes.createAdvertismentScreenRoute,
+                    //           arguments: {
+                    //             "model": property,
+                    //           },
+                    //         ).then(
+                    //           (value) {
+                    //             setState(() {});
+                    //           },
+                    //         );
+                    //       },
+                    //       prefixWidget: Padding(
+                    //         padding: const EdgeInsets.only(right: 6),
+                    //         child: SvgPicture.asset(
+                    //           AppIcons.promoted,
+                    //           width: 14,
+                    //           height: 14,
+                    //         ),
+                    //       ),
+                    //
+                    //       fontSize: context.font.normal,
+                    //       width: context.screenWidth / 3,
+                    //       buttonTitle:
+                    //           UiUtils.getTranslatedLabel(context, "feature"),
+                    //     )),
+                    //     const SizedBox(
+                    //       width: 8,
+                    //     ),
+                    //   ],
+                    // ],
                     Expanded(
                       child: UiUtils.buildButton(context,
                           // padding: const EdgeInsets.symmetric(horizontal: 1),

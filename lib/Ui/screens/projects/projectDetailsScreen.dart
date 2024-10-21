@@ -4207,7 +4207,7 @@ class PropertyDetailsState extends State<ProjectDetails> {
                                                           maxLines: 1,
                                                           overflow: TextOverflow.ellipsis,
                                                           style: const TextStyle(
-                                                              color: Color(0xffa2a2a2),
+                                                              color: Colors.black87,
                                                               fontSize: 9,
                                                               fontWeight: FontWeight.w500
                                                           ),
@@ -4224,7 +4224,7 @@ class PropertyDetailsState extends State<ProjectDetails> {
                                                             maxLines: 1,
                                                             overflow: TextOverflow.ellipsis,
                                                             style: const TextStyle(
-                                                                color: Color(0xffa2a2a2),
+                                                                color: Colors.black87,
                                                                 fontSize: 12,
                                                                 fontFamily: 'Robato',
                                                                 fontWeight: FontWeight.w500
@@ -4266,7 +4266,7 @@ class PropertyDetailsState extends State<ProjectDetails> {
                                                           maxLines: 1,
                                                           overflow: TextOverflow.ellipsis,
                                                           style: const TextStyle(
-                                                              color: Color(0xffa2a2a2),
+                                                              color: Colors.black87,
                                                               fontSize: 10.5,
                                                               fontWeight: FontWeight.w400),
                                                         ),

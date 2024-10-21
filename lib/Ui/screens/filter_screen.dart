@@ -685,8 +685,8 @@ class FilterScreenState extends State<FilterScreen> {
 
                       Row(
                         children: [
-                          Image.asset("assets/FilterSceen/1.png",width: 18,height: 18,fit: BoxFit.cover,),
-                          SizedBox(width: 6,),
+                          // Image.asset("assets/FilterSceen/1.png",width: 18,height: 18,fit: BoxFit.cover,),
+                          // SizedBox(width: 6,),
                           Text(UiUtils.getTranslatedLabel(context, "Categories"),style: TextStyle(
                               fontSize: 14,
                               color: Color(0xff333333),
@@ -817,8 +817,8 @@ class FilterScreenState extends State<FilterScreen> {
                     ),
                     Row(
                       children: [
-                        Image.asset("assets/FilterSceen/2.png",width: 18,height: 18,fit: BoxFit.cover,),
-                        SizedBox(width: 6,),
+                        // Image.asset("assets/FilterSceen/2.png",width: 18,height: 18,fit: BoxFit.cover,),
+                        // SizedBox(width: 6,),
                         Text(UiUtils.getTranslatedLabel(context, 'budgetLbl'),style: TextStyle(
                           fontSize: 14,
                           color: Color(0xff333333),
@@ -829,9 +829,24 @@ class FilterScreenState extends State<FilterScreen> {
                     ),
                     const SizedBox(height: 10),
                     budgetOption(),
-                    const SizedBox(
-                      height: 15,
+                    const SizedBox(height: 10),
+                    Divider(thickness: 1,color: Color(0xffdddddd),),
+                    const SizedBox(height: 10),
+                    Row(
+                      children: [
+                        // Image.asset("assets/FilterSceen/5.png",width: 18,height: 18,fit: BoxFit.cover,),
+                        // SizedBox(width: 6,),
+                        Text(UiUtils.getTranslatedLabel(context, 'Area (SqFt.)'),style: TextStyle(
+                            fontSize: 14,
+                            color: Color(0xff333333),
+                            fontWeight: FontWeight.w600
+                        ),
+                        ),
+                      ],
                     ),
+                    const SizedBox(height: 10),
+                    projectSizeOption(),
+                    const SizedBox(height: 15),
                     Divider(thickness: 1,color: Color(0xffdddddd),),
                     const SizedBox(height: 15),
                     postedby(),
@@ -877,24 +892,7 @@ class FilterScreenState extends State<FilterScreen> {
                     // ),
                     // const SizedBox(height: 15),
                     // Divider(thickness: 1,color: Color(0xffdddddd),),
-                    const SizedBox(height: 15),
-                    Row(
-                      children: [
-                        Image.asset("assets/FilterSceen/5.png",width: 18,height: 18,fit: BoxFit.cover,),
-                        SizedBox(width: 6,),
-                        Text(UiUtils.getTranslatedLabel(context, 'Area (SqFt.)'),style: TextStyle(
-                            fontSize: 14,
-                            color: Color(0xff333333),
-                            fontWeight: FontWeight.w600
-                        ),
-                        ),
-                      ],
-                    ),
-                    const SizedBox(height: 10),
-                    projectSizeOption(),
-                    const SizedBox(height: 15),
-                    Divider(thickness: 1,color: Color(0xffdddddd),),
-                    const SizedBox(height: 15),
+
                     projectAmenities(),
                     const SizedBox(height: 15),
                     Divider(thickness: 1,color: Color(0xffdddddd),),
@@ -914,8 +912,8 @@ class FilterScreenState extends State<FilterScreen> {
                     const SizedBox(height: 15),
                     Row(
                       children: [
-                        Image.asset("assets/FilterSceen/2.png",width: 18,height: 18,fit: BoxFit.cover,),
-                        SizedBox(width: 6,),
+                        // Image.asset("assets/FilterSceen/2.png",width: 18,height: 18,fit: BoxFit.cover,),
+                        // SizedBox(width: 6,),
                         Text(UiUtils.getTranslatedLabel(context, 'budgetLbl'),style: TextStyle(
                             fontSize: 14,
                             color: Color(0xff333333),
@@ -936,8 +934,8 @@ class FilterScreenState extends State<FilterScreen> {
                     const SizedBox(height: 15),
                     Row(
                       children: [
-                        Image.asset("assets/FilterSceen/5.png",width: 18,height: 18,fit: BoxFit.cover,),
-                        SizedBox(width: 6,),
+                        // Image.asset("assets/FilterSceen/5.png",width: 18,height: 18,fit: BoxFit.cover,),
+                        // SizedBox(width: 6,),
                         Text(UiUtils.getTranslatedLabel(context, 'Project Age'),style: TextStyle(
                             fontSize: 14,
                             color: Color(0xff333333),
@@ -953,8 +951,8 @@ class FilterScreenState extends State<FilterScreen> {
                     const SizedBox(height: 15),
                     Row(
                       children: [
-                        Image.asset("assets/FilterSceen/5.png",width: 18,height: 18,fit: BoxFit.cover,),
-                        SizedBox(width: 6,),
+                        // Image.asset("assets/FilterSceen/5.png",width: 18,height: 18,fit: BoxFit.cover,),
+                        // SizedBox(width: 6,),
                         Text(UiUtils.getTranslatedLabel(context, 'Area (SqFt.)'),style: TextStyle(
                             fontSize: 14,
                             color: Color(0xff333333),
@@ -995,10 +993,10 @@ class FilterScreenState extends State<FilterScreen> {
           children: [
             Row(
               children: [
-                Image.asset("assets/FilterSceen/6.png", width: 18,
-                  height: 18,
-                  fit: BoxFit.cover,),
-                SizedBox(width: 6,),
+                // Image.asset("assets/FilterSceen/6.png", width: 18,
+                //   height: 18,
+                //   fit: BoxFit.cover,),
+                // SizedBox(width: 6,),
                 Text(UiUtils.getTranslatedLabel(context, '${data['name']}'),
                   style: TextStyle(
                       fontSize: 14,
@@ -1084,10 +1082,10 @@ class FilterScreenState extends State<FilterScreen> {
             children: [
               Row(
                 children: [
-                  Image.asset("assets/FilterSceen/6.png", width: 18,
-                    height: 18,
-                    fit: BoxFit.cover,),
-                  SizedBox(width: 6,),
+                  // Image.asset("assets/FilterSceen/6.png", width: 18,
+                  //   height: 18,
+                  //   fit: BoxFit.cover,),
+                  // SizedBox(width: 6,),
                   Text(UiUtils.getTranslatedLabel(context, 'Property Type'),
                     style: TextStyle(
                         fontSize: 14,
@@ -1174,10 +1172,10 @@ class FilterScreenState extends State<FilterScreen> {
             children: [
               Row(
                 children: [
-                  Image.asset("assets/FilterSceen/6.png", width: 18,
-                    height: 18,
-                    fit: BoxFit.cover,),
-                  SizedBox(width: 6,),
+                  // Image.asset("assets/FilterSceen/6.png", width: 18,
+                  //   height: 18,
+                  //   fit: BoxFit.cover,),
+                  // SizedBox(width: 6,),
                   Text(UiUtils.getTranslatedLabel(context, '${data['name']}'),
                     style: TextStyle(
                         fontSize: 14,
@@ -1263,10 +1261,10 @@ class FilterScreenState extends State<FilterScreen> {
           children: [
             Row(
               children: [
-                Image.asset("assets/FilterSceen/6.png", width: 18,
-                  height: 18,
-                  fit: BoxFit.cover,),
-                SizedBox(width: 6,),
+                // Image.asset("assets/FilterSceen/6.png", width: 18,
+                //   height: 18,
+                //   fit: BoxFit.cover,),
+                // SizedBox(width: 6,),
                 Text(UiUtils.getTranslatedLabel(context, '${data['name']}'),
                   style: TextStyle(
                       fontSize: 14,
@@ -1352,10 +1350,10 @@ class FilterScreenState extends State<FilterScreen> {
             children: [
               Row(
                 children: [
-                  Image.asset("assets/FilterSceen/6.png", width: 18,
-                    height: 18,
-                    fit: BoxFit.cover,),
-                  SizedBox(width: 6,),
+                  // Image.asset("assets/FilterSceen/6.png", width: 18,
+                  //   height: 18,
+                  //   fit: BoxFit.cover,),
+                  // SizedBox(width: 6,),
                   Text(UiUtils.getTranslatedLabel(context, 'Property Type'),
                     style: TextStyle(
                         fontSize: 14,
@@ -1442,10 +1440,10 @@ class FilterScreenState extends State<FilterScreen> {
             children: [
               Row(
                 children: [
-                  Image.asset("assets/FilterSceen/6.png", width: 18,
-                    height: 18,
-                    fit: BoxFit.cover,),
-                  SizedBox(width: 6,),
+                  // Image.asset("assets/FilterSceen/6.png", width: 18,
+                  //   height: 18,
+                  //   fit: BoxFit.cover,),
+                  // SizedBox(width: 6,),
                   Text(UiUtils.getTranslatedLabel(context, '${data['name']}'),
                     style: TextStyle(
                         fontSize: 14,
@@ -1614,8 +1612,8 @@ class FilterScreenState extends State<FilterScreen> {
        children: [
          Row(
            children: [
-             Image.asset("assets/FilterSceen/3.png",width: 18,height: 18,fit: BoxFit.cover,),
-             SizedBox(width: 6,),
+             // Image.asset("assets/FilterSceen/3.png",width: 18,height: 18,fit: BoxFit.cover,),
+             // SizedBox(width: 6,),
              Text(UiUtils.getTranslatedLabel(context, 'Posted by'),style: TextStyle(
                  fontSize: 14,
                  color: Color(0xff333333),
@@ -1690,8 +1688,8 @@ class FilterScreenState extends State<FilterScreen> {
       children: [
         Row(
           children: [
-            Image.asset("assets/FilterSceen/3.png",width: 18,height: 18,fit: BoxFit.cover,),
-            SizedBox(width: 6,),
+            // Image.asset("assets/FilterSceen/3.png",width: 18,height: 18,fit: BoxFit.cover,),
+            // SizedBox(width: 6,),
             Text(UiUtils.getTranslatedLabel(context, 'Brokerage'),style: TextStyle(
                 fontSize: 14,
                 color: Color(0xff333333),
@@ -1798,8 +1796,8 @@ class FilterScreenState extends State<FilterScreen> {
       children: [
         Row(
           children: [
-            Image.asset("assets/FilterSceen/3.png",width: 18,height: 18,fit: BoxFit.cover,),
-            SizedBox(width: 6,),
+            // Image.asset("assets/FilterSceen/3.png",width: 18,height: 18,fit: BoxFit.cover,),
+            // SizedBox(width: 6,),
             Text(UiUtils.getTranslatedLabel(context, 'Posted On'),style: TextStyle(
                 fontSize: 14,
                 color: Color(0xff333333),
@@ -2055,8 +2053,8 @@ class FilterScreenState extends State<FilterScreen> {
       children: [
         Row(
           children: [
-            Image.asset("assets/FilterSceen/4.png",width: 18,height: 18,fit: BoxFit.cover,),
-            SizedBox(width: 6,),
+            // Image.asset("assets/FilterSceen/4.png",width: 18,height: 18,fit: BoxFit.cover,),
+            // SizedBox(width: 6,),
             Text(UiUtils.getTranslatedLabel(context, 'BHK'),
               style: TextStyle(
                 fontSize: 14,
@@ -2141,8 +2139,8 @@ class FilterScreenState extends State<FilterScreen> {
       children: [
         Row(
           children: [
-            Image.asset("assets/FilterSceen/4.png",width: 18,height: 18,fit: BoxFit.cover,),
-            SizedBox(width: 6,),
+            // Image.asset("assets/FilterSceen/4.png",width: 18,height: 18,fit: BoxFit.cover,),
+            // SizedBox(width: 6,),
             Text(UiUtils.getTranslatedLabel(context, 'Category'),
               style: TextStyle(
                   fontSize: 14,
@@ -2219,8 +2217,8 @@ class FilterScreenState extends State<FilterScreen> {
       children: [
         Row(
           children: [
-            Image.asset("assets/FilterSceen/4.png",width: 18,height: 18,fit: BoxFit.cover,),
-            SizedBox(width: 6,),
+            // Image.asset("assets/FilterSceen/4.png",width: 18,height: 18,fit: BoxFit.cover,),
+            // SizedBox(width: 6,),
             Text(UiUtils.getTranslatedLabel(context, 'Project Status'),
               style: TextStyle(
                   fontSize: 14,
@@ -2295,8 +2293,8 @@ class FilterScreenState extends State<FilterScreen> {
       children: [
         Row(
           children: [
-            Image.asset("assets/FilterSceen/2.png",width: 18,height: 18,fit: BoxFit.cover,),
-            SizedBox(width: 6,),
+            // Image.asset("assets/FilterSceen/2.png",width: 18,height: 18,fit: BoxFit.cover,),
+            // SizedBox(width: 6,),
             Text(UiUtils.getTranslatedLabel(context, 'Offers'),style: TextStyle(
                 fontSize: 14,
                 color: Color(0xff333333),
