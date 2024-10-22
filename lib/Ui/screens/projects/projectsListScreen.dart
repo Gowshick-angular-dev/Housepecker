@@ -1,5 +1,6 @@
 import 'dart:ui';
 
+import 'package:Housepecker/Ui/screens/projects/projectFilterScreen.dart';
 import 'package:flutter_svg/svg.dart';
 import 'package:Housepecker/Ui/screens/projects/projectDetailsScreen.dart';
 import 'package:Housepecker/Ui/screens/widgets/AnimatedRoutes/blur_page_route.dart';
@@ -81,11 +82,16 @@ class _ViewAllScreenState extends State<ProjectViewAllScreen> {
   Widget filterOptionsBtn() {
     return IconButton(
         onPressed: () {
-
           Navigator.pushNamed(context, Routes.filterScreen,
-              arguments: {"showPropertyType": false}).then((value) {
+              arguments: {"showPropertyType": false, "isProject": true}).then((value) {
             setState(() {});
           });
+          // Navigator.push(
+          //   context,
+          //   MaterialPageRoute(
+          //       builder:
+          //           (context) => ProjectFilterPage(),
+          // ));
         },
         icon: Icon(
           Icons.filter_list_rounded,

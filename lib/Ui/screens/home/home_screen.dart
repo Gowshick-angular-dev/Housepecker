@@ -266,6 +266,20 @@ class HomeScreenState extends State<HomeScreen>
   Future<void> _getCurrentLocation() async {
     bool serviceEnabled = await Geolocator.isLocationServiceEnabled();
     if (!serviceEnabled) {
+      getProjects();
+      getProperties();
+      getAdTypes();
+      getSystemSetting();
+      initializeSettings();
+      addPageScrollListener();
+      gettop_Agents ();
+      getTopBuilder();
+      notificationPermissionChecker();
+      fetchApiKeys();
+      loadInitialData(context);
+      initializeHomeStateListener();
+      getBlogs();
+      initRiveAddButtonAnimation();
 
       _showLocationSettingsDialog(context);
       return;

@@ -166,6 +166,9 @@ class FilterScreenState extends State<FilterScreen> {
    //   searchDelayTimer();
     });
     getMasters();
+    if(widget.isProject != null && widget.isProject == true) {
+      filterType = "Project";
+    }
     // getMasters2();
     // getMasters3();
     // getMasters4();
@@ -356,6 +359,7 @@ class FilterScreenState extends State<FilterScreen> {
               //       context,
               //       "clearfilter",
               //     ),
+              //     ),
               //   ),
               // )
             ]
@@ -542,9 +546,20 @@ class FilterScreenState extends State<FilterScreen> {
                                 selectedCity = address[0];
                               }
 
-                              if (!selectedCityList.contains(selectedCity)) {
+                              if (selectedCityList.isNotEmpty && selectedCityList[0] == selectedCity) {
+                                selectedCityList.add(prediction.description!.split(',')[0]);
+                                locationControler.text = '';
+                              } else if(selectedCityList.isEmpty) {
                                 selectedCityList.add(selectedCity);
                                 locationControler.text = '';
+                              } else {
+                                locationControler.text = '';
+                                HelperUtils.showSnackBarMessage(
+                                  context,
+                                  UiUtils.getTranslatedLabel(context, "Add a location near ${selectedCityList.first}"),
+                                  type: MessageType.success,
+                                  messageDuration: 3,
+                                );
                               }
 
                               setState(() {});
@@ -917,7 +932,7 @@ class FilterScreenState extends State<FilterScreen> {
                       children: [
                         // Image.asset("assets/FilterSceen/2.png",width: 18,height: 18,fit: BoxFit.cover,),
                         // SizedBox(width: 6,),
-                        Text(UiUtils.getTranslatedLabel(context, 'budgetLbl'),style: TextStyle(
+                        Text(UiUtils.getTranslatedLabel(context, 'budgetLbl'),style: const TextStyle(
                             fontSize: 14,
                             color: Color(0xff333333),
                             fontWeight: FontWeight.w600
@@ -2246,7 +2261,7 @@ class FilterScreenState extends State<FilterScreen> {
         SizedBox(
           height: 45,
           child: ListView.builder(
-            itemCount: categoryList.length,
+            itemCount: categoryList.isNotEmpty ? 2 : 0,
             scrollDirection: Axis.horizontal,
             itemBuilder: (context, index) {
               return GestureDetector(

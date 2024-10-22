@@ -172,7 +172,7 @@ class PropertiesListTypeState extends State<PropertiesListType> {
                 return error;
               }
               return Center(
-                child: Text(state.errorMessage),
+                child: Text(state.errorMessage.toString()),
               );
             }
             if (state is FetchPropertyFromTypeSuccess) {

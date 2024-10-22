@@ -292,7 +292,7 @@ class PropertyModel {
         properyType: rawjson["property_type"].toString(),
         titleImage: rawjson["title_image"],
         postCreated: rawjson["post_created"],
-        sqft: double.parse(rawjson["sqft"].toString()),
+        sqft: double.parse((rawjson["sqft"] ?? 0.0).toString()),
         gallery: List<Gallery>.from((rawjson["gallery"] as List)
             .map((x) => Gallery.fromMap(x is String ? json.decode(x) : x))),
         totalView: Adapter.forceInt((rawjson["total_view"] as dynamic)),
