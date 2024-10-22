@@ -492,7 +492,7 @@ class _LoanHomeState extends State<LoanAdForm> {
         backgroundColor: tertiaryColor_,
         title: Text(
           widget.isEdit ? 'Update Advertisement' : 'Post Advertisement',
-          style: TextStyle(fontSize: 14, color: Colors.white),
+          style: const TextStyle(fontSize: 14, color: Colors.white),
         ),
       ),
       body: Column(

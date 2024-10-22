@@ -37,9 +37,11 @@ dynamic country = "";
 
 class FilterScreen extends StatefulWidget {
   final bool? showPropertyType;
+  final bool? isProject;
   const FilterScreen({
     Key? key,
     this.showPropertyType,
+    this.isProject,
   }) : super(key: key);
 
   @override
@@ -50,6 +52,7 @@ class FilterScreen extends StatefulWidget {
     return BlurredRouter(
       builder: (_) => FilterScreen(
         showPropertyType: arguments?['showPropertyType'],
+        isProject: arguments?['isProject'],
       ),
     );
   }
@@ -682,7 +685,6 @@ class FilterScreenState extends State<FilterScreen> {
                   Column(
                   children: [
                     const SizedBox(height: 15),
-
                       Row(
                         children: [
                           // Image.asset("assets/FilterSceen/1.png",width: 18,height: 18,fit: BoxFit.cover,),
@@ -805,16 +807,15 @@ class FilterScreenState extends State<FilterScreen> {
                       const SizedBox(
                         height: 15,
                       ),
-                      // if( currentCategory != null &&  currentCategory!.id != '1' && currentCategory!.id != '3')
-                      //   Salestype(),
-                      const SizedBox(
-                        height: 15,
-                      ),
-
                     Divider(thickness: 1, color: Color(0xffdddddd),),
                     const SizedBox(
                       height: 15,
                     ),
+                    if(currentCategory != null)
+                    for(int i = 0; i < 3; i++)
+                      if(parameterList[i]['type_of_parameter'] == 'dropdown')
+                        attributesWidget(parameterList[i]),
+                    const SizedBox(height: 15),
                     Row(
                       children: [
                         // Image.asset("assets/FilterSceen/2.png",width: 18,height: 18,fit: BoxFit.cover,),
@@ -893,13 +894,15 @@ class FilterScreenState extends State<FilterScreen> {
                     // const SizedBox(height: 15),
                     // Divider(thickness: 1,color: Color(0xffdddddd),),
 
+                    if(currentCategory != null)
+                    for(int i = (currentCategory!.id == '4' || currentCategory!.id == '2') ? 3 : 0; i< parameterList.length; i++)
+                      if(parameterList[i]['type_of_parameter'] == 'dropdown')
+                        attributesWidget(parameterList[i]),
+                    const SizedBox(height: 15),
                     projectAmenities(),
                     const SizedBox(height: 15),
                     Divider(thickness: 1,color: Color(0xffdddddd),),
                     const SizedBox(height: 15),
-                    for(int i = 0; i< parameterList.length; i++)
-                      if(parameterList[i]['type_of_parameter'] == 'dropdown')
-                        attributesWidget(parameterList[i])
                   ],
                 ),
                 if(filterType == "Project")
@@ -1522,6 +1525,95 @@ class FilterScreenState extends State<FilterScreen> {
             ],
           );
         }
+      }
+    } else {
+      if(currentCategory!.id != '4' && currentCategory!.id != '2') {
+        print('hhhhhhhhhhhhhhhhhhhhhhhhhhh: ${currentCategory}');
+        return Column(
+          children: [
+            Row(
+              children: [
+                // Image.asset("assets/FilterSceen/6.png", width: 18,
+                //   height: 18,
+                //   fit: BoxFit.cover,),
+                // SizedBox(width: 6,),
+                Text(UiUtils.getTranslatedLabel(context, '${data['name']}'),
+                  style: TextStyle(
+                      fontSize: 14,
+                      color: Color(0xff333333),
+                      fontWeight: FontWeight.w600
+                  ),),
+              ],
+            ),
+            SizedBox(height: 15,),
+            if(data['type_values'] != null)
+              SizedBox(
+                height: 45,
+                child: ListView.builder(
+                  itemCount: data['type_values']!.length,
+                  scrollDirection: Axis.horizontal,
+                  itemBuilder: (context, index) {
+                    return GestureDetector(
+                      onTap: () {
+                        if (parameterValues![data['id']].any((item) =>
+                        item == data['type_values'][index])) {
+                          parameterValues![data['id']].remove(
+                              data['type_values'][index]);
+                          setState(() {});
+                        } else {
+                          parameterValues![data['id']].add(
+                              data['type_values'][index]);
+                          setState(() {});
+                        }
+                      },
+                      child: Padding(
+                        padding: const EdgeInsets.all(1.0),
+                        child: Container(
+                          alignment: Alignment.center,
+                          decoration: BoxDecoration(
+                            color: parameterValues![data['id']].any((
+                                item) => item == data['type_values'][index])
+                                ? Color(0xfffffbf3)
+                                : Color(0xfff2f2f2),
+                            borderRadius: BorderRadius.circular(100),
+                            border: Border.all(
+                              width: 1.5,
+                              color: parameterValues![data['id']].any((
+                                  item) => item == data['type_values'][index])
+                                  ? Color(0xffffbf59)
+                                  : Color(0xfff2f2f2),
+                            ),
+                          ),
+                          height: 30,
+                          child: Padding(
+                            padding: const EdgeInsets.symmetric(
+                                horizontal: 16.0, vertical: 8),
+                            child: Row(
+                              mainAxisAlignment: MainAxisAlignment
+                                  .spaceEvenly,
+                              children: [
+                                Text(
+                                  data['type_values'][index],
+                                  style: TextStyle(
+                                    fontSize: 11,
+                                    fontWeight: FontWeight.w500,
+                                  ),
+                                ),
+                                // Other child widgets here
+                              ],
+                            ),
+                          ),
+                        ),
+                      ),
+                    );
+                  },
+                ),
+              ),
+            SizedBox(height: 15,),
+            Divider(thickness: 1, color: Color(0xffdddddd),),
+            const SizedBox(height: 15),
+          ],
+        );
       }
     }
     return Container();

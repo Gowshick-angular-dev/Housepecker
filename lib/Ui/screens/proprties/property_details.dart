@@ -1087,7 +1087,7 @@ class PropertyDetailsState extends State<PropertyDetails>
                                        ),
                                        child: Text(
                                          property!.parameters != null && property!.parameters!.isNotEmpty
-                                             ? property!.parameters![0].value
+                                             ? '${property!.parameters![0].value}'
                                              : '',
                                          style: const TextStyle(
                                            color: Color(0xff333333),

@@ -177,8 +177,8 @@ class MainActivityState extends State<MainActivity>
 
     if (Constant.isDemoModeOn) {
       HiveUtils.setLocation(
-        city: "Bhuj",
-        state: "Gujrat",
+        city: "Chennai",
+        state: "Tamilnadu",
         country: "India",
         placeId: "ChIJF28LAAniUDkRpnQHr1jzd3A",
       );
