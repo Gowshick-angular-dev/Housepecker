@@ -91,6 +91,7 @@ import '../widgets/Erros/no_data_found.dart';
 import '../widgets/Erros/no_internet.dart';
 import '../widgets/Erros/something_went_wrong.dart';
 import '../widgets/all_gallary_image.dart';
+import '../widgets/blurred_dialoge_box.dart';
 import '../widgets/like_button_widget.dart';
 import '../widgets/promoted_widget.dart';
 import '../widgets/shimmerLoadingContainer.dart';
@@ -179,8 +180,8 @@ class HomeScreenState extends State<HomeScreen>
 
   @override
   void initState() {
-    DeepLinkManager.initDeepLinks(context);
     _getCurrentLocation();
+    DeepLinkManager.initDeepLinks(context);
     getInitialLink().then((value) {
       if (value == null) return;
 
@@ -222,16 +223,54 @@ class HomeScreenState extends State<HomeScreen>
     return permission;
   }
 
+  // Future<void> checkLocationPermission() async {
+  //   print('11111111111111111111111111111111111111111');
+  //   PermissionStatus status = await Permission.locationWhenInUse.request();
+  //
+  //   if (status.isGranted) {
+  //     await _getCurrentLocation();
+  //   } else if (status.isDenied || status.isPermanentlyDenied) {
+  //   //  _locationMessage = 'Location permission denied';
+  //
+  //   } else if (status.isRestricted) {
+  //   //  _locationMessage = 'Location permission restricted';
+  //
+  //   }
+  // }
+  void _showLocationSettingsDialog(BuildContext context) {
+    UiUtils.showBlurredDialoge(
+      context,
+      dialoge: BlurredDialogBox(
+        title: "Location Services Disabled",
+        content: const Text("Please enable location services to access this feature.",
+          textAlign: TextAlign.center,
+          style: TextStyle(
+              color: Color(0xff6d6d6d),
+              fontSize: 12
+          ),),
+        acceptButtonName: "Settings".translate(context),
+        cancelTextColor: context.color.textColorDark,
+        svgImagePath: AppIcons.deleteIcon,
+        isAcceptContainesPush: true,
+        onAccept: () async {
+          Navigator.of(context).pop();
+          await Geolocator.openLocationSettings();
+          await Future.delayed(const Duration(seconds: 2));
+          _getCurrentLocation();
+        },
+      ),
+    );
+  }
+
+
   Future<void> _getCurrentLocation() async {
     bool serviceEnabled = await Geolocator.isLocationServiceEnabled();
     if (!serviceEnabled) {
-      return Future.error('Location services are disabled.');
+
+      _showLocationSettingsDialog(context);
+      return;
     }
 
-    LocationPermission permission = await _requestLocationPermission();
-    if (permission != LocationPermission.always && permission != LocationPermission.whileInUse) {
-      return Future.error('Location permission denied');
-    }
 
     Position position = await Geolocator.getCurrentPosition(desiredAccuracy: LocationAccuracy.high);
     try {
@@ -252,7 +291,7 @@ class HomeScreenState extends State<HomeScreen>
         placeId: place.postalCode??'',
       );
 
-      getBanners(address);
+      getBanners(currentMainCity);
 
       getProjects();
       getProperties();
@@ -662,6 +701,7 @@ class HomeScreenState extends State<HomeScreen>
   }
 
   void _onRefresh() {
+    getBanners(currentMainCity);
     getSystemSetting();
     getProjects();
     getProperties();
@@ -1060,11 +1100,18 @@ class HomeScreenState extends State<HomeScreen>
                                   }
 
                                   else if (section == HomeScreenSections.banner) {
-                                    return isBannerLoading?const Padding(
-                                      padding: EdgeInsets.symmetric(horizontal: 15),
-                                      child: SliderShimmer(),
-                                    ):bannerWidget();
+                                    if (isBannerLoading) {
+                                      return const Padding(
+                                        padding: EdgeInsets.symmetric(horizontal: 15),
+                                        child: SliderShimmer(),
+                                      );
+                                    } else if (banners != null && banners.isNotEmpty) {
+                                      return bannerWidget();
+                                    } else {
+                                      return SizedBox();
+                                    }
                                   }
+
 
                                   // else if (section == HomeScreenSections.RecentlyAdded) {
                                   //   return  const RecentPropertiesSectionWidget();
@@ -1378,7 +1425,7 @@ class HomeScreenState extends State<HomeScreen>
                       ),
                     );
                   }),
-              AnimatedBuilder(
+                AnimatedBuilder(
                   animation: _forSellAnimationController,
                   builder: (context, c) {
                     return Positioned(
