@@ -290,8 +290,8 @@ class _AddPropertyDetailsState extends State<AddPropertyDetails> {
            _descriptionController.text == '' , _sqftController.text == '' , _FLoorController.text == '',
            _cityNameController.text == '' , _stateNameController.text == '' , _countryNameController.text == '',
            _latitudeController.text == '' , _longitudeController.text == '' , _addressController.text == '',
-           (titleImage == null && titleImageURL == "") , check == false,
-           !(widget.propertyDetails == null && ((remainFreeProPost > 0 && selectedPackage == 0 && selectedRole == 'Free Listing') || selectedPackage != 0))
+           (titleImage == null && titleImageURL == "") , check == false, widget.propertyDetails == null,((remainFreeProPost > 0 && selectedPackage == 0 && selectedRole == 'Free Listing') || selectedPackage != 0),
+          !((remainFreeProPost > 0 && selectedPackage == 0 && selectedRole == 'Free Listing') || selectedPackage != 0)
       ]}');
 
       if (_propertyNameController.text == '' || PropertyTyperole == '' ||  _priceController.text == ''
@@ -299,7 +299,7 @@ class _AddPropertyDetailsState extends State<AddPropertyDetails> {
           || _cityNameController.text == '' || _stateNameController.text == '' || _countryNameController.text == ''
           || _latitudeController.text == '' || _longitudeController.text == '' || _addressController.text == ''
           || (titleImage == null && titleImageURL == "") || check == false
-          || !(widget.propertyDetails == null && ((remainFreeProPost > 0 && selectedPackage == 0 && selectedRole == 'Free Listing') || selectedPackage != 0))
+          || !((remainFreeProPost > 0 && selectedPackage == 0 && selectedRole == 'Free Listing') || selectedPackage != 0)
       ) {
         Future.delayed(Duration.zero, () {
           UiUtils.showBlurredDialoge(context,

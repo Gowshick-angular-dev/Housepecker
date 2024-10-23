@@ -126,7 +126,7 @@ class _ProjectFormSecondState extends State<ProjectFormsixth> {
       appBar: UiUtils.buildAppBar(context,
           title: widget.isEdit! ? "Update Project" : "Add Project",
           actions: const [
-            Text("1/5", style: TextStyle(color: Colors.white)),
+            Text("7/8", style: TextStyle(color: Colors.white)),
             SizedBox(
               width: 14,
             ),

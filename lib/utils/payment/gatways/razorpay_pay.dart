@@ -31,7 +31,7 @@ class RazorpayPay extends Payment {
     final Razorpay razorpay = Razorpay();
     var options = {
       'key': Constant.razorpayKey,
-      'amount': _model!.price! * 100,
+      'amount': _model!.offerPrice! * 100,
       'name': _model!.name,
       'description': '',
       'prefill': {

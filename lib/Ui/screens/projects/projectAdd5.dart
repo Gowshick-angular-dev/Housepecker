@@ -64,11 +64,11 @@ class _ProjectFormFiveState extends State<ProjectFormFive> {
   @override
   void initState() {
     if(widget.isEdit!) {
-      videoControler.text = widget.data!['video_link'];
-      metaTitleControler.text = widget.data!['meta_title'];
-      metaDescControler.text = widget.data!['meta_description'];
-      metaKeywordControler.text = widget.data!['meta_keywords'];
-      gallaryEdit = widget.data!['gallary_images'];
+      videoControler.text = widget.data!['video_link'] ?? '';
+      metaTitleControler.text = widget.data!['meta_title'] ?? '';
+      metaDescControler.text = widget.data!['meta_description'] ?? '';
+      metaKeywordControler.text = widget.data!['meta_keywords'] ?? '';
+      gallaryEdit = widget.data!['gallary_images'] ?? '';
       // broucher = File(widget.data!['documents']![0]['name']);
 
       List<Map<String, dynamic>> floorPlans = [];
@@ -220,7 +220,7 @@ class _ProjectFormFiveState extends State<ProjectFormFive> {
         appBar: UiUtils.buildAppBar(context,
             title: widget.isEdit! ? "Update Project" : "Add Project",
             actions: const [
-              Text("5/5",style: TextStyle(color: Colors.white)),
+              Text("8/8",style: TextStyle(color: Colors.white)),
               SizedBox(
                 width: 14,
               ),

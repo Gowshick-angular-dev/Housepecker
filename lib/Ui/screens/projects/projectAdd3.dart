@@ -97,7 +97,7 @@ class _ProjectFormThreeState extends State<ProjectFormThree> {
       appBar: UiUtils.buildAppBar(context,
           title: widget.isEdit! ? "Update Project" : "Add Project",
           actions: const [
-            Text("3/5",style: TextStyle(color: Colors.white)),
+            Text("4/8",style: TextStyle(color: Colors.white)),
             SizedBox(
               width: 14,
             ),

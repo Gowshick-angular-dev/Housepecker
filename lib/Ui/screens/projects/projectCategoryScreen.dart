@@ -7,6 +7,7 @@ import 'package:Housepecker/Ui/screens/projects/projectAdd1.dart';
 import 'package:Housepecker/utils/Extensions/extensions.dart';
 
 import '../../../utils/api.dart';
+import '../../../utils/ui_utils.dart';
 import '../widgets/shimmerLoadingContainer.dart';
 
 
@@ -53,14 +54,15 @@ class _ProjectFormOneState extends State<ProjectFormOne> {
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: Colors.white,
-      appBar: AppBar(
-        backgroundColor: Color(0xff117af9),
-        title: Text('Project Categories',
-          style: TextStyle(
-              fontSize: 14,color: Colors.white
-          ),
-        ),
-      ),
+      appBar: UiUtils.buildAppBar(context,
+          title: widget.isEdit! ? "Update Project" : "Add Project",
+          actions: const [
+            Text("1/8", style: TextStyle(color: Colors.white)),
+            SizedBox(
+              width: 14,
+            ),
+          ],
+          showBackButton: true),
       body: Column(
         children: [
           Expanded(
