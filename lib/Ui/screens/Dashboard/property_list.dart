@@ -164,30 +164,31 @@ class _PropertyListDashboardState extends State<PropertyListDashboard>
                                       Navigator.pushNamed(context,
                                           Routes.addPropertyDetailsScreen,
                                           arguments: {
-                                            "details": {
-                                              "id": model?.id,
-                                              "catId": model?.category?.id,
-                                              "propType": model?.properyType,
-                                              "name": model?.title,
-                                              "desc": model?.description,
-                                              "city": model?.city,
-                                              "state": model?.state,
-                                              "country": model?.country,
-                                              "latitude": model?.latitude,
-                                              "longitude": model?.longitude,
-                                              "address": model?.address,
-                                              "client": model?.clientAddress,
-                                              "price": model?.price,
-                                              'parms': model?.parameters,
-                                              "images": model?.gallery
-                                                  ?.map((e) => e.imageUrl)
-                                                  .toList(),
-                                              "rentduration":
-                                                  model?.rentduration,
-                                              "assign_facilities": model
-                                                  ?.assignedOutdoorFacility,
-                                              "titleImage": model?.titleImage
-                                            }
+                                            "details": model.toMap()
+                                            // "details": {
+                                            //   "id": model?.id,
+                                            //   "catId": model?.category?.id,
+                                            //   "propType": model?.properyType,
+                                            //   "name": model?.title,
+                                            //   "desc": model?.description,
+                                            //   "city": model?.city,
+                                            //   "state": model?.state,
+                                            //   "country": model?.country,
+                                            //   "latitude": model?.latitude,
+                                            //   "longitude": model?.longitude,
+                                            //   "address": model?.address,
+                                            //   "client": model?.clientAddress,
+                                            //   "price": model?.price,
+                                            //   'parms': model?.parameters,
+                                            //   "images": model?.gallery
+                                            //       ?.map((e) => e.imageUrl)
+                                            //       .toList(),
+                                            //   "rentduration":
+                                            //       model?.rentduration,
+                                            //   "assign_facilities": model
+                                            //       ?.assignedOutdoorFacility,
+                                            //   "titleImage": model?.titleImage
+                                            // }
                                           });
                                     },
                                     icon: Icon(

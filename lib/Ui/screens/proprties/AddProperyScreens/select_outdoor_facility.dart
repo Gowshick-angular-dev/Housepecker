@@ -2,6 +2,7 @@
 
 // ignore_for_file: invalid_use_of_visible_for_testing_member
 
+import 'package:Housepecker/Ui/screens/proprties/AddProperyScreens/propertyAddFinall.dart';
 import 'package:flutter/widgets.dart';
 import 'package:Housepecker/Ui/screens/widgets/custom_text_form_field.dart';
 import 'package:Housepecker/data/cubits/outdoorfacility/fetch_outdoor_facility_list.dart';
@@ -15,6 +16,7 @@ import 'package:flutter/rendering.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
+import '../../../../app/routes.dart';
 import '../../../../data/cubits/property/create_property_cubit.dart';
 import '../../../../utils/constant.dart';
 import '../../../../utils/sliver_grid_delegate_with_fixed_cross_axis_count_and_fixed_height.dart';
@@ -141,34 +143,30 @@ class _SelectOutdoorFacilityState extends State<SelectOutdoorFacility> {
           ],
           title: "Add Property"),
         bottomNavigationBar: BottomAppBar(
-          child: GestureDetector(
-            onTap: () {
-              distanceFieldList.forEach((element, v) {});
-            },
-            child: Padding(
-              padding: const EdgeInsets.all(8.0),
-              child: UiUtils.buildButton(
-                fontSize: 13,
-                context,
-                onPressed: () {
-                  Map<String, dynamic>? parameters = widget.apiParameters;
-                  print(Constant.subscriptionPackageId);
-                  print("package_id");
-                  ///adding facility data to api payload
-                  parameters!.addAll(assembleOutdoorFacility());
-                  parameters
-                    ..remove("assign_facilities")
-                    ..remove("isUpdate");
-                  if (_formKey.currentState!.validate()) {
-                    context
-                        .read<CreatePropertyCubit>()
-                        .create(parameters: parameters);
-                  }
-                },
-                buttonTitle: widget.apiParameters?['action_type'] == "0"
-                    ? UiUtils.getTranslatedLabel(context, "Next")
-                    : UiUtils.getTranslatedLabel(context, "Next"),
-              ),
+          child: Padding(
+            padding: const EdgeInsets.all(8.0),
+            child: UiUtils.buildButton(
+              fontSize: 13,
+              context,
+              onPressed: () {
+                Map<String, dynamic>? parameters = widget.apiParameters;
+                print(Constant.subscriptionPackageId);
+                print("package_id");
+                ///adding facility data to api payload
+                parameters!.addAll(assembleOutdoorFacility());
+                parameters
+                  ..remove("assign_facilities");
+
+                Navigator.push(context,
+                    MaterialPageRoute(
+                        builder:
+                            (context) => PropertyPostFinalPage(
+                            details: parameters,
+                        )));
+              },
+              buttonTitle: widget.apiParameters?['action_type'] == "0"
+                  ? UiUtils.getTranslatedLabel(context, "Next")
+                  : UiUtils.getTranslatedLabel(context, "Next"),
             ),
           ),
         ),

@@ -493,36 +493,37 @@ class PropertyHorizontalCard1 extends StatelessWidget {
                           Navigator.pushNamed(
                               context, Routes.addPropertyDetailsScreen,
                               arguments: {
-                                "details": {
-                                  "id": property?.id,
-                                  "catId": property?.category?.id,
-                                  "propType": property?.properyType,
-                                  "name": property?.title,
-                                  "desc": property?.description,
-                                  "city": property?.city,
-                                  "state": property?.state,
-                                  "country": property?.country,
-                                  "latitude": property?.latitude,
-                                  "longitude": property?.longitude,
-                                  "address": property?.address,
-                                  "client": property?.clientAddress,
-                                  "price": property?.price,
-                                  'parms': property?.parameters,
-                                  'rera': property?.rera,
-                                  'highlight': property?.highlight,
-                                  'brokerage': property?.brokerage,
-                                  'customerRole': property?.customerRole,
-                                  'amenity': property?.amenity,
-                                   'sqft': property?.sqft,
-                                  "images": property?.gallery
-                                      ?.map((e) => e.imageUrl)
-                                      .toList(),
-                                  "gallary_with_id": property?.gallery,
-                                  "rentduration": property?.rentduration,
-                                  "assign_facilities":
-                                  property?.assignedOutdoorFacility,
-                                  "titleImage": property?.titleImage
-                                }
+                                "details": property.toMap()
+                                //   "details": {
+                                //   "id": property?.id,
+                                //   "catId": property?.category?.id,
+                                //   "propType": property?.properyType,
+                                //   "name": property?.title,
+                                //   "desc": property?.description,
+                                //   "city": property?.city,
+                                //   "state": property?.state,
+                                //   "country": property?.country,
+                                //   "latitude": property?.latitude,
+                                //   "longitude": property?.longitude,
+                                //   "address": property?.address,
+                                //   "client": property?.clientAddress,
+                                //   "price": property?.price,
+                                //   'parms': property?.parameters,
+                                //   'rera': property?.rera,
+                                //   'highlight': property?.highlight,
+                                //   'brokerage': property?.brokerage,
+                                //   'customerRole': property?.customerRole,
+                                //   'amenity': property?.amenity,
+                                //    'sqft': property?.sqft,
+                                //   "images": property?.gallery
+                                //       ?.map((e) => e.imageUrl)
+                                //       .toList(),
+                                //   "gallary_with_id": property?.gallery,
+                                //   "rentduration": property?.rentduration,
+                                //   "assign_facilities":
+                                //   property?.assignedOutdoorFacility,
+                                //   "titleImage": property?.titleImage
+                                // }
                               });
                         },
                         value: 1,
