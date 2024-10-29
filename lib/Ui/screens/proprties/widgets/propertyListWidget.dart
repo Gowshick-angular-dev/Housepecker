@@ -107,9 +107,8 @@ class PropertiesListWidgetState extends State<PropertiesListWidget> {
   Widget filterOptionsBtn() {
     return IconButton(
         onPressed: () {
-
           Navigator.pushNamed(context, Routes.filterScreen,
-              arguments: {"showPropertyType": false}).then((value) {
+            arguments: {"showPropertyType": false, 'isPremium': widget.typeName == "Premium Properties For Sale" ? true : false, 'isDeal': widget.typeName == "Deal Of The Month" ? true : false}).then((value) {
             setState(() {});
           });
         },

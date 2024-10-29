@@ -491,7 +491,7 @@ class PropertyHorizontalCard1 extends StatelessWidget {
                             )
                           });
                           Navigator.pushNamed(
-                              context, Routes.addPropertyDetailsScreen,
+                              context, Routes.selectPropertyTypeScreen,
                               arguments: {
                                 "details": property.toMap()
                                 //   "details": {

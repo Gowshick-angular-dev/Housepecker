@@ -94,10 +94,10 @@ class _ProjectFormSecondState extends State<ProjectFormSecond> {
 
       if (freepackage != null) {
         setState(() {
+          freeDuration = freepackage['duration'] ?? 0;
           remainFreeProPost = freepackage['project_limit'] -
               freepackage['used_project_limit'];
-          maxUnits = freepackage['project_units'];
-          freeDuration = freepackage['duration'] ?? 0;
+          maxUnits = freepackage['project_units'] ?? 0;
         });
       }
 
@@ -278,7 +278,7 @@ class _ProjectFormSecondState extends State<ProjectFormSecond> {
                         ),
                         if (selectedRole == 'Free Listing' && !loading)
                           Text(
-                            remainFreeProPost > 0 ? "Note: This post is valid for $freeDuration days from the date of posting." : "Free Listing limit exceeded.",
+                            remainFreeProPost > 0 ? "Note: This post is valid for $freeDuration months from the date of posting." : "Free Listing limit exceeded.",
                             style: const TextStyle(color: Colors.red, fontSize: 12),
                           ),
                         const SizedBox(height: 5),

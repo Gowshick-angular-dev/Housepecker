@@ -61,10 +61,10 @@ class PropertyHorizontalCard extends StatelessWidget {
   Widget build(BuildContext context) {
     String rentPrice = formatAmount(int.parse(property.price!));
 
-    if (property.rentduration != "" && property.rentduration != null) {
-      rentPrice =
-          ("$rentPrice/") + (rentDurationMap[property.rentduration] ?? "");
-    }
+    // if (property.rentduration != "" && property.rentduration != null) {
+    //   rentPrice =
+    //       ("$rentPrice/") + (rentDurationMap[property.rentduration] ?? "");
+    // }
 
     return BlocProvider(
       create: (context) => AddToFavoriteCubitCubit(),
@@ -330,6 +330,17 @@ class PropertyHorizontalCard extends StatelessWidget {
                                   style: TextStyle(
                                       color: Color(0xff333333),
                                       fontSize: 12,
+                                      fontFamily: 'Roboto',
+                                      fontWeight: FontWeight.w500
+                                  ),
+                                ),
+                                Text(
+                                  '/${(rentDurationMap[property.rentduration] ?? "")}',
+                                  maxLines: 1,
+                                  overflow: TextOverflow.ellipsis,
+                                  style: TextStyle(
+                                      color: Color(0xff333333),
+                                      fontSize: 9,
                                       fontFamily: 'Roboto',
                                       fontWeight: FontWeight.w500
                                   ),

@@ -85,6 +85,7 @@ class _ProjectFormTwoState extends State<ProjectFormTwo> {
     }
     if (widget.isEdit!) {
       getUpdateProject();
+      print('iiiiiiiiiiiiiiiiiii ${widget.data}');
     } else {
       setState(() {
         loading = false;
@@ -93,6 +94,7 @@ class _ProjectFormTwoState extends State<ProjectFormTwo> {
   }
 
   Future<void> getUpdateProject() async {
+
     totalUnitsControler.text = widget.data!['project_details'][0]['total_units'] ?? '';
     projectAreaControler.text = widget.data!['project_details'][0]['total_project'] ?? '';
     sizeControler.text = widget.data!['project_details'][0]['size'].toString();
@@ -111,13 +113,19 @@ class _ProjectFormTwoState extends State<ProjectFormTwo> {
     nearByMetroControler.text = widget.data!['project_details'][0]['near_by_metro'] ?? '';
     vegOnly = widget.data!['project_details'][0]['veg_only'] ?? '';
     coveredParking = widget.data!['project_details'][0]['covered_parking'] ?? '';
+
     openParking = widget.data!['project_details'][0]['open_parking'] ?? '';
     gatedCommunity = widget.data!['project_details'][0]['gated_community'] ?? '';
     lakeView = widget.data!['project_details'][0]['lake_view'] ?? '';
+
     highRiseApartment = widget.data!['project_details'][0]['high_rise'] ?? '';
     selectedDate = DateTime.parse(widget.data!['project_details'][0]['launch_date']);
+
     possessionDate = widget.data!['project_details'][0]['possession_start'] != null ? DateTime.parse(widget.data!['project_details'][0]['possession_start']) : DateTime.now();
-    projectCompletedControler.text = widget.data!['project_details'][0]['project_completed'];
+
+    projectCompletedControler.text = widget.data!['project_details'][0]['project_completed'] ?? '';
+
+
 
     suitableForWidget = suitableForList
         .where((element) =>

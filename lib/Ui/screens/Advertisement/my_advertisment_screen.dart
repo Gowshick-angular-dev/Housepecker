@@ -209,14 +209,25 @@ class _MyAdvertismentScreenState extends State<MyAdvertismentScreen> {
                                           color: Color(0xff333333),
                                           fontWeight: FontWeight.w600),
                                     ),
+                              
+                                    
                                     Row(
                                       children: [
                                         Image.asset("assets/Home/__location.png",width:12,fit: BoxFit.cover,height: 12,),
-                                        SizedBox(width: 2,),
-                                        Text('${item['post_details'][0]['location']}',style: TextStyle(
-                                            fontSize: 9,
-                                            color: Color(0xff333333),
-                                            fontWeight: FontWeight.w500),
+                                        SizedBox(width: 2,), Container(
+                                       //   color: Colors.red,
+                                          width: MediaQuery.of(context).size.width/2-20,
+                                          child: Expanded(
+                                            child: Text('${item['post_details'][0]['location']}',
+                                                                            
+                                              style: TextStyle(
+                                                fontSize: 9,
+                                                color: Color(0xff333333),
+                                                fontWeight: FontWeight.w500),
+                                              maxLines: 1,
+                                              overflow: TextOverflow.ellipsis,
+                                            ),
+                                          ),
                                         )
                                       ],
                                     ),

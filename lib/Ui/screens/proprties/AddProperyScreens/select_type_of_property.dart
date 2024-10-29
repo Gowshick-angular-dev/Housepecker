@@ -18,12 +18,16 @@ import '../../widgets/AnimatedRoutes/blur_page_route.dart';
 import '../../widgets/blurred_dialoge_box.dart';
 
 class SelectPropertyType extends StatefulWidget {
-  const SelectPropertyType({super.key});
+  final Map? propertyDetails;
+  const SelectPropertyType({super.key, this.propertyDetails});
 
   static Route route(RouteSettings settings) {
+    Map? arguments = settings.arguments as Map?;
     return BlurredRouter(
       builder: (context) {
-        return const SelectPropertyType();
+        return SelectPropertyType(
+          propertyDetails: arguments?['details'],
+        );
       },
     );
   }
@@ -37,6 +41,7 @@ class _SelectPropertyTypeState extends State<SelectPropertyType> {
   Category? selectedCategory;
   bool isLimitFetched = false;
   bool isDialogeShown = false;
+
   @override
   void initState() {
     super.initState();
@@ -100,6 +105,18 @@ class _SelectPropertyTypeState extends State<SelectPropertyType> {
     );
   }
 
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    List cat = context.watch<FetchCategoryCubit>().getCategories();
+    if(widget.propertyDetails != null) {
+      print('^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^: ${Category.fromJson(widget.propertyDetails!['category'])}, ${cat.indexOf(Category.fromJson(widget.propertyDetails!['category']))}, ${cat}');
+      selectedCategory = Category.fromJson(widget.propertyDetails!['category']);
+      selectedIndex = cat.indexWhere((item) => item.id == Category.fromJson(widget.propertyDetails!['category']).id);
+
+    }
+  }
+
   void _openSubscriptionScreen() {
     Navigator.pushNamed(
       context,
@@ -114,7 +131,7 @@ class _SelectPropertyTypeState extends State<SelectPropertyType> {
       appBar: UiUtils.buildAppBar(context,
           title: UiUtils.getTranslatedLabel(
             context,
-            "Post Properties",
+            widget.propertyDetails != null ? "Edit Property" : "Post Properties",
           ),
           actions: const [
             Text("1/4",style: TextStyle(color: Colors.white)),
@@ -146,7 +163,10 @@ class _SelectPropertyTypeState extends State<SelectPropertyType> {
                     // },));
                     //TODO:
                     Navigator.pushNamed(
-                        context, Routes.addPropertyDetailsScreen);
+                      context, Routes.addPropertyDetailsScreen,
+                      arguments: {
+                        "details": widget.propertyDetails
+                      });
                   }
                 }
               },

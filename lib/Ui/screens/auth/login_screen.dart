@@ -714,7 +714,71 @@ class LoginScreenState extends State<LoginScreen> {
                 SizedBox(
                   height: 30.rh(context),
                 ),
-                loginButton(context)
+                loginButton(context),
+                SizedBox(
+                  height: 20.rh(context),
+                ),
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    Text('By clicking "Next" you agree to our',
+                      style: TextStyle(
+                          color: Color(0xff909090),
+                          fontSize: 12,
+                          fontWeight: FontWeight.w400
+                      ),
+                    ),
+                  ],
+                ),
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    InkWell(
+                      onTap: () {
+                        Navigator.pushNamed(context, Routes.profileSettings,
+                            arguments: {
+                              'title': UiUtils.getTranslatedLabel(
+                                  context, "termsConditions"),
+                              'param': Api.termsAndConditions
+                            });
+                      },
+                      child: Text(" Terms & Condition",
+                        style: TextStyle(
+                            color: Color(0xff117af9),
+                            fontSize: 13,
+                            fontWeight: FontWeight.w600
+                        ),
+                      ),
+                    ),
+                    Text(' and',
+                      style: TextStyle(
+                          color: Color(0xff909090),
+                          fontSize: 12,
+                          fontWeight: FontWeight.w400
+                      ),
+                    ),
+                    InkWell(
+                      onTap: () {
+                        Navigator.pushNamed(
+                          context,
+                          Routes.profileSettings,
+                          arguments: {
+                            'title': UiUtils.getTranslatedLabel(
+                                context, "privacyPolicy"),
+                            'param': Api.privacyPolicy
+                          },
+                        );
+                      },
+                      child: Text(" Privacy Policy",
+                        style: TextStyle(
+                            color: Color(0xff117af9),
+                            fontSize: 13,
+                            fontWeight: FontWeight.w600
+                        ),
+                      ),
+                    )
+                  ],
+                ),
               ]),
         ),
       ],
@@ -809,35 +873,67 @@ class LoginScreenState extends State<LoginScreen> {
                 SizedBox(
                   height: 20.rh(context),
                 ),
-                // Row(
-                //   mainAxisAlignment: MainAxisAlignment.center,
-                //   children: [
-                //     Text("New to Own house? ",
-                //       style: TextStyle(
-                //         color: Color(0xff909090),
-                //         fontSize: 13,
-                //         fontWeight: FontWeight.w600
-                //       ),
-                //     ),
-                //     InkWell(
-                //       onTap: () {
-                //         Navigator.push(
-                //           context,
-                //           MaterialPageRoute(
-                //             builder: (context) => Register(),
-                //           ),
-                //         );
-                //       },
-                //       child: Text("Sign Up",
-                //         style: TextStyle(
-                //             color: Color(0xff117af9),
-                //             fontSize: 13,
-                //             fontWeight: FontWeight.w600
-                //         ),
-                //       ),
-                //     )
-                //   ],
-                // )
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    Text('By clicking "Next" you agree to our',
+                      style: TextStyle(
+                        color: Color(0xff909090),
+                        fontSize: 12,
+                        fontWeight: FontWeight.w400
+                      ),
+                    ),
+                  ],
+                ),
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    InkWell(
+                      onTap: () {
+                        Navigator.pushNamed(context, Routes.profileSettings,
+                            arguments: {
+                              'title': UiUtils.getTranslatedLabel(
+                                  context, "termsConditions"),
+                              'param': Api.termsAndConditions
+                            });
+                      },
+                      child: Text(" Terms & Condition",
+                        style: TextStyle(
+                            color: Color(0xff117af9),
+                            fontSize: 13,
+                            fontWeight: FontWeight.w600
+                        ),
+                      ),
+                    ),
+                    Text(' and',
+                      style: TextStyle(
+                          color: Color(0xff909090),
+                          fontSize: 12,
+                          fontWeight: FontWeight.w400
+                      ),
+                    ),
+                    InkWell(
+                      onTap: () {
+                        Navigator.pushNamed(
+                          context,
+                          Routes.profileSettings,
+                          arguments: {
+                            'title': UiUtils.getTranslatedLabel(
+                                context, "privacyPolicy"),
+                            'param': Api.privacyPolicy
+                          },
+                        );
+                      },
+                      child: Text(" Privacy Policy",
+                        style: TextStyle(
+                            color: Color(0xff117af9),
+                            fontSize: 13,
+                            fontWeight: FontWeight.w600
+                        ),
+                      ),
+                    )
+                  ],
+                ),
                 // buildTermsAndPrivacyWidget(),
               ],
             ),

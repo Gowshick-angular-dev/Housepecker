@@ -147,7 +147,7 @@ class _LoanHomeState extends State<LoanAdForm> {
       final SystemRepository _systemRepository = SystemRepository();
       Map settings = await _systemRepository.fetchSystemSettings(isAnonymouse: false);
 
-      List allPacks = settings['data']['package']['user_purchased_package'];
+      List allPacks = settings['data']['package'] != null ? settings['data']['package']['user_purchased_package'] : [];
       Map freepackage = settings['data']['free_package'];
 
       if (freepackage != null) {
@@ -528,7 +528,7 @@ class _LoanHomeState extends State<LoanAdForm> {
                         ),
                         if (selectedRole == 'Free Listing' && !loading)
                           Text(
-                            remainFreeProPost > 0 ? "Note: This post is valid for $freeDuration days from the date of posting." : "Free Listing limit exceeded.",
+                            remainFreeProPost > 0 ? "Note: This post is valid for $freeDuration months from the date of posting." : "Free Listing limit exceeded.",
                             style: const TextStyle(color: Colors.red, fontSize: 12),
                           ),
                         const SizedBox(height: 5),

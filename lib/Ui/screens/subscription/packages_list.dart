@@ -777,21 +777,24 @@ class _SubscriptionPackageListScreenState
           Row(
             children: [
               Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-                if (subscriptionPacakge.advertisementlimit != "not_available")
+                if (subscriptionPacakge.advertisementlimit != "not_available" && subscriptionPacakge.advertisementlimit != null)
                   bulletPoint(context,
                       "Advertisement post limit is ${subscriptionPacakge.advertisementlimit == '' ? UiUtils.getTranslatedLabel(context, "lifetime") : ifServiceUnlimited(subscriptionPacakge.advertisementlimit)}"),
-                if (subscriptionPacakge.propertyLimit != "not_available")
+                if (subscriptionPacakge.propertyLimit != "not_available" && subscriptionPacakge.propertyLimit != null)
                   bulletPoint(context,
                       "Property post limit is ${subscriptionPacakge.propertyLimit == '' ? UiUtils.getTranslatedLabel(context, "lifetime") : ifServiceUnlimited(subscriptionPacakge.propertyLimit)}"),
-                if (subscriptionPacakge.projectLimit != "not_available")
+                if (subscriptionPacakge.projectLimit != "not_available" && subscriptionPacakge.projectLimit != null)
                   bulletPoint(context,
                       "Project post limit is ${subscriptionPacakge.projectLimit == '' ? UiUtils.getTranslatedLabel(context, "lifetime") : ifServiceUnlimited(subscriptionPacakge.projectLimit)}"),
-                if (subscriptionPacakge.projectLimit != "not_available")
+                if (subscriptionPacakge.projectLimit != "not_available" && subscriptionPacakge.numberofUnits != null)
                   bulletPoint(context,
                       "Project Units upto ${subscriptionPacakge.numberofUnits ?? 0}"),
-                if (subscriptionPacakge.addonLimit != "not_available" && subscriptionPacakge.addonLimit != 0)
+                if (subscriptionPacakge.addonLimit != "not_available" && subscriptionPacakge.addonLimit != 0 && subscriptionPacakge.addonLimit != null)
                   bulletPoint(context,
                       "Add-on Limit is ${subscriptionPacakge.addonLimit == '' ? UiUtils.getTranslatedLabel(context, "lifetime") : ifServiceUnlimited(subscriptionPacakge.addonLimit)}"),
+                if (subscriptionPacakge.viewLimit != "not_available" && subscriptionPacakge.viewLimit != 0 && subscriptionPacakge.viewLimit != null)
+                  bulletPoint(context,
+                      "Contact Show Listing ${subscriptionPacakge.viewLimit == '' ? UiUtils.getTranslatedLabel(context, "lifetime") : ifServiceUnlimited(subscriptionPacakge.viewLimit)}"),
                 bulletPoint(context,
                     "${UiUtils.getTranslatedLabel(context, "validity")} ${subscriptionPacakge.duration == 0 ? UiUtils.getTranslatedLabel(context, "lifetime") : subscriptionPacakge.duration} ${subscriptionPacakge.duration == 0 ? "" : UiUtils.getTranslatedLabel(context, "Months")}"),
 

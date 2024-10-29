@@ -38,10 +38,14 @@ dynamic country = "";
 class FilterScreen extends StatefulWidget {
   final bool? showPropertyType;
   final bool? isProject;
+  final bool? isPremium;
+  final bool? isDeal;
   const FilterScreen({
     Key? key,
     this.showPropertyType,
     this.isProject,
+    this.isPremium,
+    this.isDeal,
   }) : super(key: key);
 
   @override
@@ -53,6 +57,8 @@ class FilterScreen extends StatefulWidget {
       builder: (_) => FilterScreen(
         showPropertyType: arguments?['showPropertyType'],
         isProject: arguments?['isProject'],
+        isPremium: arguments?['isPremium'],
+        isDeal: arguments?['isDeal'],
       ),
     );
   }
@@ -98,6 +104,30 @@ class FilterScreenState extends State<FilterScreen> {
   int offers = 0;
   bool enable = false;
 
+  List commProjectType = [
+    "Shop",
+    "Office Space",
+    "Showroom",
+    "Bare Shell Office Space",
+    "Ware House",
+    "Godown",
+    "Commercial Land",
+    "Cold Storage"
+  ];
+
+  List resProjectType = [
+    "Apartment",
+    "Indipentant House/Villa",
+    "Row House",
+    "Plot",
+    "Floor Villa",
+    "1RK / Studio Apartment",
+    "Doublex",
+    "Penthouse",
+    "Form House",
+    "Form Land"
+  ];
+
   Timer? _timer;
   String previouseSearchQuery = "";
   bool loadintCitiesInProgress = false;
@@ -105,6 +135,7 @@ class FilterScreenState extends State<FilterScreen> {
   Map? cityCod;
   String? locationValue='';
   TextEditingController locationControler = TextEditingController();
+  TextEditingController areaControler = TextEditingController();
   @override
   void dispose() {
     minController.dispose();
@@ -411,6 +442,7 @@ class FilterScreenState extends State<FilterScreen> {
                     }
                   }
                 }
+                print('yyyyyyyyyyyyyyyyyyyyyyyyyy: ${selectedCityList}');
                 Constant.propertyFilter = PropertyFilterModel(
                   propertyType: properyType,
                   maxPrice: maxController.text,
@@ -420,15 +452,20 @@ class FilterScreenState extends State<FilterScreen> {
                       : selectedCategory?.id) ??
                       "",
                   postedSince: postedOn,
-                  city: city,
+                  city: selectedCityList.length > 0 ? '${selectedCityList[0]}' : '',
                   state: _state,
                   country: country,
-                  area: selectedCityList.join(','),
-                  allProperties: '1',
+                  projectType: selectedProjectType.join(','),
+                  possessionStart: selectedPossDate,
+                  area: selectedCityList.length > 2 ? '${selectedCityList[1]},${selectedCityList[2]}' : selectedCityList.length > 1 ? '${selectedCityList[1]}' : '',
+                  allProperties: (widget.isPremium != null && widget.isPremium!) || (widget.isDeal != null && widget.isDeal!) ? '' : '1',
+                  allProjects: (widget.isProject != null && widget.isProject!) ? '1' : '',
                   amenities: amenities.join(',').toString(),
                   post_by: selectedRole.join(',').toString(),
                   max_size: maxAreaController.text,
                   min_size: minAreaController.text,
+                  premium: widget.isPremium != null && widget.isPremium! ? '1' : '',
+                  deal: widget.isDeal != null && widget.isDeal! ? '1' : '',
                   parametersId: parameterIds.join(',').toString(),
                   parametersVal: jsonEncode(parametersValues),
                 );
@@ -436,6 +473,7 @@ class FilterScreenState extends State<FilterScreen> {
                 Navigator.pushNamed(context, Routes.searchScreenRoute, arguments: {
                   'autoFocus': false,
                   'openFilterScreen': false,
+                  'isProject' : filterType == 'Project' ? true : false,
                 });
 
                 // Navigator.pop(context, true);
@@ -536,7 +574,7 @@ class FilterScreenState extends State<FilterScreen> {
                                 TextPosition(offset: prediction.description!.length),
                               );
 
-                              List<String> address = prediction.description!.split(',').reversed.toList();
+                              List<String> address = prediction.description!.split(', ').reversed.toList();
                               String selectedCity;
                               if (address.length >= 3) {
                                 selectedCity = address[2];
@@ -546,10 +584,11 @@ class FilterScreenState extends State<FilterScreen> {
                                 selectedCity = address[0];
                               }
 
-                              if (selectedCityList.isNotEmpty && selectedCityList[0] == selectedCity) {
+                              if (selectedCityList.isNotEmpty && prediction.description!.contains(selectedCityList[0])) {
                                 selectedCityList.add(prediction.description!.split(',')[0]);
                                 locationControler.text = '';
                               } else if(selectedCityList.isEmpty) {
+                                print("eeeeeeeeeeeeeeeeeeeeeeeeeeee: ${selectedCity}");
                                 selectedCityList.add(selectedCity);
                                 locationControler.text = '';
                               } else {
@@ -696,7 +735,7 @@ class FilterScreenState extends State<FilterScreen> {
                 ),
                 const SizedBox(height: 10),
                 // propOrProjOption(),
-                if(filterType == "Property")
+                // if(filterType == "Property")
                   Column(
                   children: [
                     const SizedBox(height: 15),
@@ -724,7 +763,7 @@ class FilterScreenState extends State<FilterScreen> {
                                 scrollDirection: Axis.horizontal,
                                 shrinkWrap: true,
                                 children: List.generate(
-                                  categoriesList.length.clamp(0, 8),
+                                  categoriesList.length.clamp(0, (filterType == 'Project') ? 3 : 8),
                                       (int index) {
                                     if (index == 0) {
                                       return allCategoriesFilterButton(context);
@@ -815,10 +854,14 @@ class FilterScreenState extends State<FilterScreen> {
                           return Container();
                         },
                       ),
-                      if(currentCategory != null && currentCategory!.id != '1')
+                      if(currentCategory != null && currentCategory!.id != '1' && filterType != 'Project')
                         const SizedBox(height: 30),
-                      if(currentCategory != null && currentCategory!.id != '1' )
+                      if(currentCategory != null && currentCategory!.id != '1' && filterType != 'Project')
                         buyORsellOption(),
+                      if(filterType == 'Project')
+                        const SizedBox(height: 30),
+                      if(filterType == 'Project')
+                        projectType(),
                       const SizedBox(
                         height: 15,
                       ),
@@ -827,9 +870,9 @@ class FilterScreenState extends State<FilterScreen> {
                       height: 15,
                     ),
                     if(currentCategory != null)
-                    for(int i = 0; i < 3; i++)
-                      if(parameterList[i]['type_of_parameter'] == 'dropdown')
-                        attributesWidget(parameterList[i]),
+                      for(int i = 0; i < 3; i++)
+                        if(parameterList[i]['type_of_parameter'] == 'dropdown')
+                          attributesWidget(parameterList[i]),
                     const SizedBox(height: 15),
                     Row(
                       children: [
@@ -865,18 +908,34 @@ class FilterScreenState extends State<FilterScreen> {
                     const SizedBox(height: 15),
                     Divider(thickness: 1,color: Color(0xffdddddd),),
                     const SizedBox(height: 15),
-                    postedby(),
-                    const SizedBox(height: 15),
-                    Divider(thickness: 1,color: Color(0xffdddddd),),
-                    const SizedBox(height: 15),
-                    brokerage(),
-                    const SizedBox(height: 15),
-                    Divider(thickness: 1,color: Color(0xffdddddd),),
-                    const SizedBox(height: 15),
+                    if(filterType != 'Project')
+                      postedby(),
+                    if(filterType != 'Project')
+                      const SizedBox(height: 15),
+                    if(filterType != 'Project')
+                      Divider(thickness: 1,color: Color(0xffdddddd),),
+                    if(filterType != 'Project')
+                      const SizedBox(height: 15),
+                    if(filterType != 'Project')
+                      brokerage(),
+                    if(filterType != 'Project')
+                      const SizedBox(height: 15),
+                    if(filterType != 'Project')
+                      Divider(thickness: 1,color: Color(0xffdddddd),),
+                    if(filterType != 'Project')
+                      const SizedBox(height: 15),
                     postedSince(),
                     const SizedBox(height: 15),
                     Divider(thickness: 1,color: Color(0xffdddddd),),
                     const SizedBox(height: 15),
+                    if(filterType == 'Project')
+                      possessionStarts(),
+                    if(filterType == 'Project')
+                      const SizedBox(height: 15),
+                    if(filterType == 'Project')
+                      Divider(thickness: 1,color: Color(0xffdddddd),),
+                    if(filterType == 'Project')
+                      const SizedBox(height: 15),
                     // Row(
                     //   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     //   children: [
@@ -910,9 +969,13 @@ class FilterScreenState extends State<FilterScreen> {
                     // Divider(thickness: 1,color: Color(0xffdddddd),),
 
                     if(currentCategory != null)
-                    for(int i = (currentCategory!.id == '4' || currentCategory!.id == '2') ? 3 : 0; i< parameterList.length; i++)
+                    for(int i = (currentCategory!.id == '4' || currentCategory!.id == '2') ? 3 : 0; i < parameterList.length; i++)
                       if(parameterList[i]['type_of_parameter'] == 'dropdown')
                         attributesWidget(parameterList[i]),
+                    if(currentCategory != null && filterType == 'Project')
+                      for(int i = 0; i < parameterList.length; i++)
+                        if(parameterList[i]['type_of_parameter'] == 'dropdown')
+                          projectsAttributes(parameterList[i]),
                     const SizedBox(height: 15),
                     projectAmenities(),
                     const SizedBox(height: 15),
@@ -920,88 +983,276 @@ class FilterScreenState extends State<FilterScreen> {
                     const SizedBox(height: 15),
                   ],
                 ),
-                if(filterType == "Project")
-                  Column(
-                  children: [
-                    const SizedBox(height: 15),
-                    projectCat(),
-                    const SizedBox(height: 15),
-                    Divider(thickness: 1,color: Color(0xffdddddd),),
-                    const SizedBox(height: 15),
-                    Row(
-                      children: [
-                        // Image.asset("assets/FilterSceen/2.png",width: 18,height: 18,fit: BoxFit.cover,),
-                        // SizedBox(width: 6,),
-                        Text(UiUtils.getTranslatedLabel(context, 'budgetLbl'),style: const TextStyle(
-                            fontSize: 14,
-                            color: Color(0xff333333),
-                            fontWeight: FontWeight.w600
-                        ),),
-                      ],
-                    ),
-                    const SizedBox(height: 10),
-                    budgetOption(),
-                    const SizedBox(
-                      height: 15,
-                    ),
-                    Divider(thickness: 1,color: Color(0xffdddddd),),
-                    const SizedBox(height: 15),
-                    projectbhk(),
-                    const SizedBox(height: 15),
-                    Divider(thickness: 1,color: Color(0xffdddddd),),
-                    const SizedBox(height: 15),
-                    Row(
-                      children: [
-                        // Image.asset("assets/FilterSceen/5.png",width: 18,height: 18,fit: BoxFit.cover,),
-                        // SizedBox(width: 6,),
-                        Text(UiUtils.getTranslatedLabel(context, 'Project Age'),style: TextStyle(
-                            fontSize: 14,
-                            color: Color(0xff333333),
-                            fontWeight: FontWeight.w600
-                        ),
-                        ),
-                      ],
-                    ),
-                    const SizedBox(height: 10),
-                    projectAgeOption(),
-                    const SizedBox(height: 15),
-                    Divider(thickness: 1,color: Color(0xffdddddd),),
-                    const SizedBox(height: 15),
-                    Row(
-                      children: [
-                        // Image.asset("assets/FilterSceen/5.png",width: 18,height: 18,fit: BoxFit.cover,),
-                        // SizedBox(width: 6,),
-                        Text(UiUtils.getTranslatedLabel(context, 'Area (SqFt.)'),style: TextStyle(
-                            fontSize: 14,
-                            color: Color(0xff333333),
-                            fontWeight: FontWeight.w600
-                        ),
-                        ),
-                      ],
-                    ),
-                    const SizedBox(height: 10),
-                    projectSizeOption(),
-                    const SizedBox(height: 15),
-                    Divider(thickness: 1,color: Color(0xffdddddd),),
-                    const SizedBox(height: 15),
-                    projectStatus(),
-                    const SizedBox(height: 15),
-                    Divider(thickness: 1,color: Color(0xffdddddd),),
-                    const SizedBox(height: 15),
-                    projectOffers(),
-                    const SizedBox(height: 15),
-                    Divider(thickness: 1,color: Color(0xffdddddd),),
-                    const SizedBox(height: 15),
-                    projectAmenities(),
-                    const SizedBox(height: 15),
-                  ],
-                ),
+                // if(filterType == "Project")
+                //   Column(
+                //   children: [
+                //     const SizedBox(height: 15),
+                //     projectCat(),
+                //     const SizedBox(height: 15),
+                //     Divider(thickness: 1,color: Color(0xffdddddd),),
+                //     const SizedBox(height: 15),
+                //     Row(
+                //       children: [
+                //         // Image.asset("assets/FilterSceen/2.png",width: 18,height: 18,fit: BoxFit.cover,),
+                //         // SizedBox(width: 6,),
+                //         Text(UiUtils.getTranslatedLabel(context, 'budgetLbl'),style: const TextStyle(
+                //             fontSize: 14,
+                //             color: Color(0xff333333),
+                //             fontWeight: FontWeight.w600
+                //         ),),
+                //       ],
+                //     ),
+                //     const SizedBox(height: 10),
+                //     budgetOption(),
+                //     const SizedBox(
+                //       height: 15,
+                //     ),
+                //     Divider(thickness: 1,color: Color(0xffdddddd),),
+                //     const SizedBox(height: 15),
+                //     projectbhk(),
+                //     const SizedBox(height: 15),
+                //     Divider(thickness: 1,color: Color(0xffdddddd),),
+                //     const SizedBox(height: 15),
+                //     Row(
+                //       children: [
+                //         // Image.asset("assets/FilterSceen/5.png",width: 18,height: 18,fit: BoxFit.cover,),
+                //         // SizedBox(width: 6,),
+                //         Text(UiUtils.getTranslatedLabel(context, 'Project Age'),style: TextStyle(
+                //             fontSize: 14,
+                //             color: Color(0xff333333),
+                //             fontWeight: FontWeight.w600
+                //         ),
+                //         ),
+                //       ],
+                //     ),
+                //     const SizedBox(height: 10),
+                //     projectAgeOption(),
+                //     const SizedBox(height: 15),
+                //     Divider(thickness: 1,color: Color(0xffdddddd),),
+                //     const SizedBox(height: 15),
+                //     Row(
+                //       children: [
+                //         // Image.asset("assets/FilterSceen/5.png",width: 18,height: 18,fit: BoxFit.cover,),
+                //         // SizedBox(width: 6,),
+                //         Text(UiUtils.getTranslatedLabel(context, 'Area (SqFt.)'),style: TextStyle(
+                //             fontSize: 14,
+                //             color: Color(0xff333333),
+                //             fontWeight: FontWeight.w600
+                //         ),
+                //         ),
+                //       ],
+                //     ),
+                //     const SizedBox(height: 10),
+                //     projectSizeOption(),
+                //     const SizedBox(height: 15),
+                //     Divider(thickness: 1,color: Color(0xffdddddd),),
+                //     const SizedBox(height: 15),
+                //     projectStatus(),
+                //     const SizedBox(height: 15),
+                //     Divider(thickness: 1,color: Color(0xffdddddd),),
+                //     const SizedBox(height: 15),
+                //     projectOffers(),
+                //     const SizedBox(height: 15),
+                //     Divider(thickness: 1,color: Color(0xffdddddd),),
+                //     const SizedBox(height: 15),
+                //     projectAmenities(),
+                //     const SizedBox(height: 15),
+                //   ],
+                // ),
               ],
             ),
           ),
         ),
       ),
     );
+  }
+
+  projectsAttributes(data) {
+    if(currentCategory!.id == '4') {
+      if (data['id'] == 1 || data['id'] == 6 || data['id'] == 9 ||
+          data['id'] == 15 || data['id'] == 47 || data['id'] == 30 ||
+          data['id'] == 46 || data['id'] == 49 || data['id'] == 28 ||
+          data['id'] == 26 || data['id'] == 27 || data['id'] == 48) {
+        return Column(
+          children: [
+            Row(
+              children: [
+                // Image.asset("assets/FilterSceen/6.png", width: 18,
+                //   height: 18,
+                //   fit: BoxFit.cover,),
+                // SizedBox(width: 6,),
+                Text(UiUtils.getTranslatedLabel(context, '${data['name']}'),
+                  style: TextStyle(
+                      fontSize: 14,
+                      color: Color(0xff333333),
+                      fontWeight: FontWeight.w600
+                  ),),
+              ],
+            ),
+            SizedBox(height: 15,),
+            if(data['type_values'] != null)
+              SizedBox(
+                height: 45,
+                child: ListView.builder(
+                  itemCount: data['type_values']!.length,
+                  scrollDirection: Axis.horizontal,
+                  itemBuilder: (context, index) {
+                    return GestureDetector(
+                      onTap: () {
+                        if (parameterValues![data['id']].any((item) =>
+                        item == data['type_values'][index])) {
+                          parameterValues![data['id']].remove(
+                              data['type_values'][index]);
+                          setState(() {});
+                        } else {
+                          parameterValues![data['id']].add(
+                              data['type_values'][index]);
+                          setState(() {});
+                        }
+                      },
+                      child: Padding(
+                        padding: const EdgeInsets.all(1.0),
+                        child: Container(
+                          alignment: Alignment.center,
+                          decoration: BoxDecoration(
+                            color: parameterValues![data['id']].any((
+                                item) => item == data['type_values'][index])
+                                ? Color(0xfffffbf3)
+                                : Color(0xfff2f2f2),
+                            borderRadius: BorderRadius.circular(100),
+                            border: Border.all(
+                              width: 1.5,
+                              color: parameterValues![data['id']].any((
+                                  item) => item == data['type_values'][index])
+                                  ? Color(0xffffbf59)
+                                  : Color(0xfff2f2f2),
+                            ),
+                          ),
+                          height: 30,
+                          child: Padding(
+                            padding: const EdgeInsets.symmetric(
+                                horizontal: 16.0, vertical: 8),
+                            child: Row(
+                              mainAxisAlignment: MainAxisAlignment
+                                  .spaceEvenly,
+                              children: [
+                                Text(
+                                  data['type_values'][index],
+                                  style: TextStyle(
+                                    fontSize: 11,
+                                    fontWeight: FontWeight.w500,
+                                  ),
+                                ),
+                                // Other child widgets here
+                              ],
+                            ),
+                          ),
+                        ),
+                      ),
+                    );
+                  },
+                ),
+              ),
+            SizedBox(height: 15,),
+            Divider(thickness: 1, color: Color(0xffdddddd),),
+            const SizedBox(height: 15),
+          ],
+        );
+      } else {
+        return Container();
+      }
+    } else {
+      if (data['id'] == 6 || data['id'] == 9 || data['id'] == 15 ||
+          data['id'] == 47 || data['id'] == 30 || data['id'] == 26) {
+        return Column(
+          children: [
+            Row(
+              children: [
+                // Image.asset("assets/FilterSceen/6.png", width: 18,
+                //   height: 18,
+                //   fit: BoxFit.cover,),
+                // SizedBox(width: 6,),
+                Text(UiUtils.getTranslatedLabel(context, '${data['name']}'),
+                  style: TextStyle(
+                      fontSize: 14,
+                      color: Color(0xff333333),
+                      fontWeight: FontWeight.w600
+                  ),),
+              ],
+            ),
+            SizedBox(height: 15,),
+            if(data['type_values'] != null)
+              SizedBox(
+                height: 45,
+                child: ListView.builder(
+                  itemCount: data['type_values']!.length,
+                  scrollDirection: Axis.horizontal,
+                  itemBuilder: (context, index) {
+                    return GestureDetector(
+                      onTap: () {
+                        if (parameterValues![data['id']].any((item) =>
+                        item == data['type_values'][index])) {
+                          parameterValues![data['id']].remove(
+                              data['type_values'][index]);
+                          setState(() {});
+                        } else {
+                          parameterValues![data['id']].add(
+                              data['type_values'][index]);
+                          setState(() {});
+                        }
+                      },
+                      child: Padding(
+                        padding: const EdgeInsets.all(1.0),
+                        child: Container(
+                          alignment: Alignment.center,
+                          decoration: BoxDecoration(
+                            color: parameterValues![data['id']].any((
+                                item) => item == data['type_values'][index])
+                                ? Color(0xfffffbf3)
+                                : Color(0xfff2f2f2),
+                            borderRadius: BorderRadius.circular(100),
+                            border: Border.all(
+                              width: 1.5,
+                              color: parameterValues![data['id']].any((
+                                  item) => item == data['type_values'][index])
+                                  ? Color(0xffffbf59)
+                                  : Color(0xfff2f2f2),
+                            ),
+                          ),
+                          height: 30,
+                          child: Padding(
+                            padding: const EdgeInsets.symmetric(
+                                horizontal: 16.0, vertical: 8),
+                            child: Row(
+                              mainAxisAlignment: MainAxisAlignment
+                                  .spaceEvenly,
+                              children: [
+                                Text(
+                                  data['type_values'][index],
+                                  style: TextStyle(
+                                    fontSize: 11,
+                                    fontWeight: FontWeight.w500,
+                                  ),
+                                ),
+                                // Other child widgets here
+                              ],
+                            ),
+                          ),
+                        ),
+                      ),
+                    );
+                  },
+                ),
+              ),
+            SizedBox(height: 15,),
+            Divider(thickness: 1, color: Color(0xffdddddd),),
+            const SizedBox(height: 15),
+          ],
+        );
+      } else {
+        return Container();
+      }
+    }
   }
 
   attributesWidget(data) {
@@ -1681,6 +1932,7 @@ class FilterScreenState extends State<FilterScreen> {
                             width: 18.0,
                             height: 18.0,
                             fit: BoxFit.cover,
+                            color: Color(0xff117af9),
                           ),
                         ),
                         shape: StadiumBorder(
@@ -1788,6 +2040,142 @@ class FilterScreenState extends State<FilterScreen> {
 
        ],
      );
+  }
+
+  List selectedProjectType = [];
+  projectType() {
+    if(currentCategory != null) {
+      return Column(
+        children: [
+          Row(
+            children: [
+              // Image.asset("assets/FilterSceen/3.png",width: 18,height: 18,fit: BoxFit.cover,),
+              // SizedBox(width: 6,),
+              Text(UiUtils.getTranslatedLabel(context, 'Project Type'),
+                style: TextStyle(
+                    fontSize: 14,
+                    color: Color(0xff333333),
+                    fontWeight: FontWeight.w600
+                ),),
+            ],
+          ),
+          SizedBox(height: 15,),
+          SizedBox(
+            height: 45,
+            child: ListView.builder(
+              itemCount: currentCategory!.id == '2'
+                  ? commProjectType.length
+                  : resProjectType.length,
+              scrollDirection: Axis.horizontal,
+              itemBuilder: (context, index) {
+                return GestureDetector(
+                  onTap: () {
+                    setState(() {
+                      // selectedRole = index;
+                      if (currentCategory!.id == '2') {
+                        if (selectedProjectType.any((item) =>
+                        item == commProjectType[index])) {
+                          selectedProjectType.removeWhere((element) =>
+                          element == commProjectType[index]);
+                          setState(() {});
+                        } else {
+                          selectedProjectType.add(commProjectType[index]);
+                          setState(() {});
+                        }
+                      } else {
+                        if (selectedProjectType.any((item) =>
+                        item == resProjectType[index])) {
+                          selectedProjectType.removeWhere((element) =>
+                          element == resProjectType[index]);
+                          setState(() {});
+                        } else {
+                          selectedProjectType.add(resProjectType[index]);
+                          setState(() {});
+                        }
+                      }
+                    });
+                  },
+                  child: Padding(
+                    padding: const EdgeInsets.all(1.0),
+                    child: currentCategory!.id == '2' ? Container(
+                      alignment: Alignment.center,
+                      decoration: BoxDecoration(
+                        color: selectedProjectType.any((item) =>
+                        item == commProjectType[index])
+                            ? Color(0xfffffbf3)
+                            : Color(0xfff2f2f2),
+                        borderRadius: BorderRadius.circular(100),
+                        border: Border.all(
+                          width: 1.5,
+                          color: selectedProjectType.any((item) =>
+                          item == commProjectType[index])
+                              ? Color(0xffffbf59)
+                              : Color(0xfff2f2f2),
+                        ),
+                      ),
+                      height: 30,
+                      child: Padding(
+                        padding: const EdgeInsets.symmetric(
+                            horizontal: 16.0, vertical: 8),
+                        child: Row(
+                          mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                          children: [
+                            Text(
+                              commProjectType[index],
+                              style: TextStyle(
+                                fontSize: 11,
+                                fontWeight: FontWeight.w500,
+                              ),
+                            ),
+                            // Other child widgets here
+                          ],
+                        ),
+                      ),
+                    ) : Container(
+                      alignment: Alignment.center,
+                      decoration: BoxDecoration(
+                        color: selectedProjectType.any((item) =>
+                        item == resProjectType[index])
+                            ? Color(0xfffffbf3)
+                            : Color(0xfff2f2f2),
+                        borderRadius: BorderRadius.circular(100),
+                        border: Border.all(
+                          width: 1.5,
+                          color: selectedProjectType.any((item) =>
+                          item == resProjectType[index])
+                              ? Color(0xffffbf59)
+                              : Color(0xfff2f2f2),
+                        ),
+                      ),
+                      height: 30,
+                      child: Padding(
+                        padding: const EdgeInsets.symmetric(
+                            horizontal: 16.0, vertical: 8),
+                        child: Row(
+                          mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                          children: [
+                            Text(
+                              resProjectType[index],
+                              style: TextStyle(
+                                fontSize: 11,
+                                fontWeight: FontWeight.w500,
+                              ),
+                            ),
+                            // Other child widgets here
+                          ],
+                        ),
+                      ),
+                    ),
+                  ),
+                );
+              },
+            ),
+          ),
+        ],
+      );
+    } else {
+      return Container();
+    }
   }
 
   brokerage() {
@@ -2135,6 +2523,187 @@ class FilterScreenState extends State<FilterScreen> {
                         children: [
                           Text(
                             'Last 4 Month',
+                            style: TextStyle(
+                              fontSize: 11,
+                              fontWeight: FontWeight.w500,
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                  ),
+                ),
+              ),
+            ],
+          ),
+        ),
+
+      ],
+    );
+  }
+
+  String selectedPossDate = '';
+  possessionStarts() {
+    return Column(
+      children: [
+        Row(
+          children: [
+            // Image.asset("assets/FilterSceen/3.png",width: 18,height: 18,fit: BoxFit.cover,),
+            // SizedBox(width: 6,),
+            Text(UiUtils.getTranslatedLabel(context, 'Possession Starts'),style: TextStyle(
+                fontSize: 14,
+                color: Color(0xff333333),
+                fontWeight: FontWeight.w600
+            ),),
+          ],
+        ),
+        SizedBox(height: 15,),
+        SizedBox(
+          height: 45,
+          child: ListView(
+            scrollDirection: Axis.horizontal,
+            children: [
+              InkWell(
+                onTap: () {
+                  setState(() {
+                    selectedPossDate = '0-1 year';
+                  });
+                },
+                child: Padding(
+                  padding: const EdgeInsets.all(1.0),
+                  child: Container(
+                    alignment: Alignment.center,
+                    decoration: BoxDecoration(
+                      color: selectedPossDate == '0-1 year' ? const Color(0xfffffbf3) : const Color(0xfff2f2f2),
+                      borderRadius: BorderRadius.circular(100),
+                      border: Border.all(
+                        width: 1.5,
+                        color: selectedPossDate == '0-1 year' ? const Color(0xffffbf59) : const Color(0xfff2f2f2),
+                      ),
+                    ),
+                    height: 40,
+                    child: Padding(
+                      padding: const EdgeInsets.symmetric(
+                          horizontal: 16.0, vertical: 8),
+                      child: Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                        children: [
+                          Text(
+                            '0-1 year',
+                            style: TextStyle(
+                              fontSize: 11,
+                              fontWeight: FontWeight.w500,
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                  ),
+                ),
+              ),
+              InkWell(
+                onTap: () {
+                  setState(() {
+                    selectedPossDate = '1-2 years';
+                  });
+                },
+                child: Padding(
+                  padding: const EdgeInsets.all(1.0),
+                  child: Container(
+                    alignment: Alignment.center,
+                    decoration: BoxDecoration(
+                      color: selectedPossDate == '1-2 years' ? Color(0xfffffbf3) : Color(0xfff2f2f2),
+                      borderRadius: BorderRadius.circular(100),
+                      border: Border.all(
+                        width: 1.5,
+                        color: selectedPossDate == '1-2 years' ? Color(0xffffbf59) : Color(0xfff2f2f2),
+                      ),
+                    ),
+                    height: 40,
+                    child: Padding(
+                      padding: const EdgeInsets.symmetric(
+                          horizontal: 16.0, vertical: 8),
+                      child: Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                        children: [
+                          Text(
+                            '1-2 years',
+                            style: TextStyle(
+                              fontSize: 11,
+                              fontWeight: FontWeight.w500,
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                  ),
+                ),
+              ),
+              InkWell(
+                onTap: () {
+                  setState(() {
+                    selectedPossDate = '2-3 years';
+                  });
+                },
+                child: Padding(
+                  padding: const EdgeInsets.all(1.0),
+                  child: Container(
+                    alignment: Alignment.center,
+                    decoration: BoxDecoration(
+                      color: selectedPossDate == '2-3 years' ? Color(0xfffffbf3) : Color(0xfff2f2f2),
+                      borderRadius: BorderRadius.circular(100),
+                      border: Border.all(
+                        width: 1.5,
+                        color: selectedPossDate == '2-3 years' ? Color(0xffffbf59) : Color(0xfff2f2f2),
+                      ),
+                    ),
+                    height: 40,
+                    child: Padding(
+                      padding: const EdgeInsets.symmetric(
+                          horizontal: 16.0, vertical: 8),
+                      child: Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                        children: [
+                          Text(
+                            '2-3 years',
+                            style: TextStyle(
+                              fontSize: 11,
+                              fontWeight: FontWeight.w500,
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                  ),
+                ),
+              ),
+              InkWell(
+                onTap: () {
+                  setState(() {
+                    selectedPossDate = 'Greater than 4 years';
+                  });
+                },
+                child: Padding(
+                  padding: const EdgeInsets.all(1.0),
+                  child: Container(
+                    alignment: Alignment.center,
+                    decoration: BoxDecoration(
+                      color: selectedPossDate == 'Greater than 4 years' ? Color(0xfffffbf3) : Color(0xfff2f2f2),
+                      borderRadius: BorderRadius.circular(100),
+                      border: Border.all(
+                        width: 1.5,
+                        color: selectedPossDate == 'Greater than 4 years' ? Color(0xffffbf59) : Color(0xfff2f2f2),
+                      ),
+                    ),
+                    height: 40,
+                    child: Padding(
+                      padding: const EdgeInsets.symmetric(
+                          horizontal: 16.0, vertical: 8),
+                      child: Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                        children: [
+                          Text(
+                            'Greater than 4 years',
                             style: TextStyle(
                               fontSize: 11,
                               fontWeight: FontWeight.w500,

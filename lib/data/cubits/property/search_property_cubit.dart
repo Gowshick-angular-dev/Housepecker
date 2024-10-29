@@ -75,7 +75,10 @@ class SearchPropertyCubit extends Cubit<SearchPropertyState> {
           hasError: false,
           isLoadingMore: false,
           offset: 0,
-          searchedroperties: result.modelList));
+          searchedroperties: result.modelList,
+          searchedProjects: result.modelList2,
+      ));
+      print('yyyyyyyyyyyyyyyyyyy${result.modelList2}');
     } catch (e) {
       emit(SearchPropertyFailure(e));
     }
@@ -103,12 +106,14 @@ class SearchPropertyCubit extends Cubit<SearchPropertyState> {
 
         SearchPropertySuccess bookingsState = (state as SearchPropertySuccess);
         bookingsState.searchedroperties.addAll(result.modelList);
+        bookingsState.searchedProjects!.addAll(result.modelList2!);
         emit(
           SearchPropertySuccess(
             searchQuery: (state as SearchPropertySuccess).searchQuery,
             isLoadingMore: false,
             hasError: false,
             searchedroperties: bookingsState.searchedroperties,
+            searchedProjects: bookingsState.searchedProjects!,
             offset: (state as SearchPropertySuccess).searchedroperties.length,
             total: result.total,
           ),

@@ -13,6 +13,7 @@ class SubscriptionPackageModel {
   int? numberofUnits;
   dynamic propertyLimit;
   dynamic addonLimit;
+  dynamic viewLimit;
   dynamic projectLimit;
   dynamic advertisementlimit;
   String? createdAt;
@@ -31,6 +32,7 @@ class SubscriptionPackageModel {
       this.projectLimit,
       this.advertisementlimit,
       this.addonLimit,
+      this.viewLimit,
       this.createdAt,
       this.updatedAt});
 
@@ -39,6 +41,7 @@ class SubscriptionPackageModel {
     advertisementlimit = json['advertisement_limit'];
     projectLimit = json['project_limit'];
     addonLimit = json['addon_limit'];
+    viewLimit = json['view_limit'];
     id = json['id'];
     numberofUnits = json['no_of_units'];
     name = json['name'];
@@ -65,6 +68,7 @@ class SubscriptionPackageModel {
     data['updated_at'] = updatedAt;
     data['property_limit'] = propertyLimit;
     data['addon_limit'] = addonLimit;
+    data['view_limit'] = viewLimit;
     data['project_limit'] = projectLimit;
     data['advertisement_limit'] = advertisementlimit;
     return data;

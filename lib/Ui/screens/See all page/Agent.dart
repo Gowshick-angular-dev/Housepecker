@@ -25,6 +25,7 @@ class seeallAgent extends StatefulWidget {
 
 class _seeallAgentState extends State<seeallAgent> {
   // Dummy data for agents
+
   final List<String> agents = [
     "Agent Tobi Jr",
     "Agent Jane Doe",
@@ -33,11 +34,15 @@ class _seeallAgentState extends State<seeallAgent> {
     "Agent Emma White",
   ];
   bool AgentLOading = false;
+  bool AgentLoadingMore = false;
   List Top_agenylist = [];
+  int offset = 0;
   String currentAddress = '';
+  int totalcount = 0;
   String currentPlace = '';
   String currentCity = '';
   String currentMainCity = '';
+  late ScrollController controller;
   String? locationValue='';
   TextEditingController locationControler = TextEditingController();
 
@@ -46,16 +51,54 @@ class _seeallAgentState extends State<seeallAgent> {
       AgentLOading = true;
     });
     var response = await Api.get(url: Api.gettop_agent, queryParameters: {
-
+      'offset': offset,
       'city': city!,
-      'limit': 25,
+      'limit': 10,
       // 'current_user': HiveUtils.getUserId()
     });
     if (!response['error']) {
       setState(() {
         Top_agenylist = response['data'];
+        totalcount = response['total'];
         AgentLOading = false;
+        offset += 10;
       });
+    }
+  }
+
+
+  Future<void> getAgentMore() async {
+    setState(() {
+      AgentLoadingMore = true;
+    });
+    var response = await Api.get(url: Api.gettop_agent, queryParameters:  {
+      'offset': offset,
+      'limit': 10,
+      'city': locationValue ?? '',
+    });
+    if(!response['error']) {
+      setState(() {
+        Top_agenylist.addAll((response['data'] as List).toList());
+        AgentLoadingMore = false;
+        offset += 10;
+      });
+    }
+  }
+
+
+  @override
+  void dispose() {
+    controller.removeListener(_loadMore);
+    controller.dispose();
+    super.dispose();
+  }
+
+
+  void _loadMore() async {
+    if (controller.isEndReached()) {
+      if (totalcount > Top_agenylist.length && !AgentLOading && !AgentLoadingMore) {
+        getAgentMore();
+      }
     }
   }
 
@@ -63,6 +106,7 @@ class _seeallAgentState extends State<seeallAgent> {
   void initState() {
     gettop_Agents('');
     super.initState();
+    controller = ScrollController()..addListener(_loadMore);
   }
 
   @override
@@ -73,7 +117,7 @@ class _seeallAgentState extends State<seeallAgent> {
       appBar: UiUtils.buildAppBar(
         context,
         showBackButton: true,
-        title: 'Top Agents (${Top_agenylist?.length ?? 0})',
+        title: 'Top Agents (${totalcount ?? 0})',
         actions: [],
       ),
       /* appBar: AppBar(
@@ -204,16 +248,19 @@ class _seeallAgentState extends State<seeallAgent> {
                       List address = prediction.description!.split(',').reversed.toList();
                       if(address.length >= 3) {
                         locationValue = address[2];
-                        gettop_Agents(locationValue);
+                        offset = 0;
                         setState(() { });
+                        gettop_Agents(locationValue);
                       } else if(address.length == 2) {
                         locationValue = address[1];
-                        gettop_Agents(locationValue);
+                        offset = 0;
                         setState(() { });
+                        gettop_Agents(locationValue);
                       } else if(address.length == 1) {
                         locationValue = address[0];
-                        gettop_Agents(locationValue);
+                        offset = 0;
                         setState(() { });
+                        gettop_Agents(locationValue);
                       }
 
                     },
@@ -257,6 +304,7 @@ class _seeallAgentState extends State<seeallAgent> {
               : Expanded(
                 child: ListView.builder(
                               shrinkWrap: true,
+                              controller: controller,
                               scrollDirection: Axis.vertical,
                               itemCount: Top_agenylist.length,
                               itemBuilder: (context, index) {
@@ -267,6 +315,7 @@ class _seeallAgentState extends State<seeallAgent> {
                               },
                             ),
               ),
+          if (AgentLoadingMore) UiUtils.progress()
         ],
       ),
     );

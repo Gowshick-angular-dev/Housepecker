@@ -273,7 +273,7 @@ class _InterestedUsersDetailsState extends State<InterestedUsersDetails> {
                                value: 2,
                                child: Row(
                                  children: [
-                                   Text("Contected", style: TextStyle(color: Colors.black, fontWeight: FontWeight.w500,fontSize: 12),),
+                                   Text("Contacted", style: TextStyle(color: Colors.black, fontWeight: FontWeight.w500,fontSize: 12),),
                                    SizedBox(width: 10,),
                                    if (statusLive == 1)
                                      Image.asset("assets/assets/Images/_check.png", height: 16, width: 16),
@@ -281,7 +281,6 @@ class _InterestedUsersDetailsState extends State<InterestedUsersDetails> {
                                ),
                              ),
                            ],
-
                            color: Color(0xFFFFFFFF),
                          )
                      )

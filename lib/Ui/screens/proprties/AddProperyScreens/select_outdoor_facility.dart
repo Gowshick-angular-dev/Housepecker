@@ -23,7 +23,7 @@ import '../../../../utils/sliver_grid_delegate_with_fixed_cross_axis_count_and_f
 import '../../widgets/AnimatedRoutes/blur_page_route.dart';
 
 class SelectOutdoorFacility extends StatefulWidget {
-  final Map<String, dynamic>? apiParameters;
+    final Map<String, dynamic>? apiParameters;
 
   const SelectOutdoorFacility({super.key, required this.apiParameters});
 
@@ -52,7 +52,10 @@ class _SelectOutdoorFacilityState extends State<SelectOutdoorFacility> {
   @override
   void initState() {
     List<AssignedOutdoorFacility> facilities = [];
-    facilities = widget.apiParameters?['assign_facilities'] ?? [];
+    print('rrrrrrrrrrrrrrrrrrrrrrrrrrrrrr: ${widget.apiParameters?['assign_facilities']}');
+    // facilities = widget.apiParameters?['assign_facilities'] ?? [];
+    facilities = List<AssignedOutdoorFacility>.from(widget.apiParameters?['assign_facilities']?.map((e) => AssignedOutdoorFacility.fromJson(e)) ?? []);
+    // facilities = [];
 
     // context.read<FetchOutdoorFacilityListCubit>().fetchIfFailed();
     facilityList = context.read<FetchOutdoorFacilityListCubit>().getList();
@@ -97,7 +100,7 @@ class _SelectOutdoorFacilityState extends State<SelectOutdoorFacility> {
 
       facilitymap.addAll({
         "facilities[$i][facility_id]": element.key,
-        "facilities[$i][distance]": element.value.text
+        "facilities[$i][distance]": element.value.text == '' ? '0' : element.value.text,
       });
     }
 
@@ -141,7 +144,7 @@ class _SelectOutdoorFacilityState extends State<SelectOutdoorFacility> {
               width: 14,
             ),
           ],
-          title: "Add Property"),
+          title: widget.apiParameters != null ? "Edit Property" : "Post Properties"),
         bottomNavigationBar: BottomAppBar(
           child: Padding(
             padding: const EdgeInsets.all(8.0),

@@ -22,6 +22,7 @@ class CreatePropertyFailure extends CreatePropertyState {
   final String errorMessage;
 
   CreatePropertyFailure(this.errorMessage);
+
 }
 
 class CreatePropertyCubit extends Cubit<CreatePropertyState> {

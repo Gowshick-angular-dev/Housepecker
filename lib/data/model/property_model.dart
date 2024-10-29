@@ -12,68 +12,69 @@ import '../../utils/helper_utils.dart';
 class PropertyModel {
   PropertyModel(
       {this.id,
-      this.title,
-      this.type,
-      this.customerName,
-      this.brokerage,
-      this.customerEmail,
-      this.customerNumber,
-      this.customerProfile,
-      this.customerRole,
-      this.rera,
-      this.price,
-      this.code,
-      this.category,
-      this.builtUpArea,
-      this.plotArea,
-      this.hectaArea,
-      this.acre,
-      this.houseType,
-      this.furnished,
-      this.unitType,
-      this.description,
-      this.address,
-      this.clientAddress,
-      this.properyType,
-      this.titleImage,
-      this.postCreated,
-      this.sqft,
-      this.gallery,
-      this.totalView,
-      this.status,
-      this.state,
-      this.city,
-      this.highlight,
-      this.country,
-      this.addedBy,
-      this.inquiry,
-      this.promoted,
-      this.isFavourite,
-      this.rentduration,
-      this.isInterested,
-      this.isPremium,
-      this.isDeal,
-      this.favouriteUsers,
-      this.interestedUsers,
-      this.totalInterestedUsers,
-      this.totalFavouriteUsers,
-      this.parameters,
-      this.latitude,
-      this.longitude,
-      this.threeDImage,
-      this.advertisment,
-      this.video,
-      this.assignedOutdoorFacility,
-      this.slugId,
-      this.amenity,
-      this.metaTitle,
-      this.metaDescription,
-      this.metaKeywords,
-      this.metaImage,
-      this.viewContact,
-      this.titleimagehash,
-      this.companyName,
-      this.addOn
+        this.title,
+        this.type,
+        this.customerName,
+        this.brokerage,
+        this.customerEmail,
+        this.customerNumber,
+        this.customerProfile,
+        this.customerRole,
+        this.rera,
+        this.price,
+        this.code,
+        this.floor,
+        this.category,
+        this.builtUpArea,
+        this.plotArea,
+        this.hectaArea,
+        this.acre,
+        this.houseType,
+        this.furnished,
+        this.unitType,
+        this.description,
+        this.address,
+        this.clientAddress,
+        this.properyType,
+        this.titleImage,
+        this.postCreated,
+        this.sqft,
+        this.gallery,
+        this.totalView,
+        this.status,
+        this.state,
+        this.city,
+        this.highlight,
+        this.country,
+        this.addedBy,
+        this.inquiry,
+        this.promoted,
+        this.isFavourite,
+        this.rentduration,
+        this.isInterested,
+        this.isPremium,
+        this.isDeal,
+        this.favouriteUsers,
+        this.interestedUsers,
+        this.totalInterestedUsers,
+        this.totalFavouriteUsers,
+        this.parameters,
+        this.latitude,
+        this.longitude,
+        this.threeDImage,
+        this.advertisment,
+        this.video,
+        this.assignedOutdoorFacility,
+        this.slugId,
+        this.amenity,
+        this.metaTitle,
+        this.metaDescription,
+        this.metaKeywords,
+        this.metaImage,
+        this.viewContact,
+        this.titleimagehash,
+        this.companyName,
+        this.addOn
       });
 
   final int? id;
@@ -81,6 +82,7 @@ class PropertyModel {
   final String? type;
   final String? price;
   final String? code;
+  final String? floor;
   final String? customerName;
   final String? rera;
   final String? brokerage;
@@ -141,57 +143,58 @@ class PropertyModel {
   final dynamic addOn;
 
   PropertyModel copyWith(
-          {int? id,
-          String? title,
-          String? type,
-          String? price,
-          String? code,
-          Categorys? category,
-          dynamic builtUpArea,
-          dynamic plotArea,
-          dynamic hectaArea,
-          dynamic acre,
-          dynamic houseType,
-          dynamic furnished,
-          UnitType? unitType,
-          String? description,
-          String? address,
-          String? clientAddress,
-          String? properyType,
-          String? titleImage,
-          String? postCreated,
-          double? sqft,
-          List<Gallery>? gallery,
-          int? totalView,
-          int? status,
-          String? state,
-          String? city,
-          String? highlight,
-          String? country,
-          int? addedBy,
-          bool? inquiry,
-          bool? promoted,
-          int? isFavourite,
-          int? viewContact,
-          int? isInterested,
-          int? isPremium,
-          int? isDeal,
-          List<dynamic>? favouriteUsers,
-          List<dynamic>? interestedUsers,
-          int? totalInterestedUsers,
-          int? totalFavouriteUsers,
-          List<Parameter>? parameters,
-          List<dynamic>? amenity,
-          List<AssignedOutdoorFacility>? assignedOutdoorFacility,
-          String? latitude,
-          String? longitude,
-          String? threeDimage,
-          String? video,
-          dynamic advertisment,
-          String? rentduration,
-          String? companyName,
-          dynamic addOn,
-          String? titleImageHash}) =>
+      {int? id,
+        String? title,
+        String? type,
+        String? price,
+        String? code,
+        String? floor,
+        Categorys? category,
+        dynamic builtUpArea,
+        dynamic plotArea,
+        dynamic hectaArea,
+        dynamic acre,
+        dynamic houseType,
+        dynamic furnished,
+        UnitType? unitType,
+        String? description,
+        String? address,
+        String? clientAddress,
+        String? properyType,
+        String? titleImage,
+        String? postCreated,
+        double? sqft,
+        List<Gallery>? gallery,
+        int? totalView,
+        int? status,
+        String? state,
+        String? city,
+        String? highlight,
+        String? country,
+        int? addedBy,
+        bool? inquiry,
+        bool? promoted,
+        int? isFavourite,
+        int? viewContact,
+        int? isInterested,
+        int? isPremium,
+        int? isDeal,
+        List<dynamic>? favouriteUsers,
+        List<dynamic>? interestedUsers,
+        int? totalInterestedUsers,
+        int? totalFavouriteUsers,
+        List<Parameter>? parameters,
+        List<dynamic>? amenity,
+        List<AssignedOutdoorFacility>? assignedOutdoorFacility,
+        String? latitude,
+        String? longitude,
+        String? threeDimage,
+        String? video,
+        dynamic advertisment,
+        String? rentduration,
+        String? companyName,
+        dynamic addOn,
+        String? titleImageHash}) =>
       PropertyModel(
           id: id ?? this.id,
           rentduration: rentduration ?? this.rentduration,
@@ -202,6 +205,7 @@ class PropertyModel {
           type: title ?? this.type,
           price: price ?? this.price,
           code: code ?? this.code,
+          floor: floor ?? this.floor,
           category: category ?? this.category,
           builtUpArea: builtUpArea ?? this.builtUpArea,
           plotArea: plotArea ?? this.plotArea,
@@ -250,7 +254,7 @@ class PropertyModel {
   factory PropertyModel.fromMap(Map<String, dynamic> rawjson) {
     try {
       List list =
-          (rawjson['parameters'] as List).map((e) => e['image']).toList();
+      (rawjson['parameters'] as List).map((e) => e['image']).toList();
       HelperUtils.precacheSVG(List.from(list));
     } catch (e) {}
 
@@ -273,6 +277,7 @@ class PropertyModel {
         type: rawjson["is_type"].toString(),
         price: rawjson["price"].toString(),
         code: rawjson["code"].toString(),
+        floor: rawjson["floor_no"],
         category: rawjson["category"] == null
             ? null
             : Categorys.fromMap(rawjson["category"]),
@@ -325,96 +330,97 @@ class PropertyModel {
             ? null
             : List<dynamic>.from(rawjson["interested_users"].map((x) => x)),
         totalInterestedUsers:
-            Adapter.forceInt(rawjson["total_interested_users"]),
+        Adapter.forceInt(rawjson["total_interested_users"]),
         totalFavouriteUsers: Adapter.forceInt(rawjson["total_favourite_users"]),
         parameters: rawjson["parameters"] == null
             ? []
             : List<Parameter>.from((rawjson["parameters"] as List).map((x) {
-                return Parameter.fromMap(x);
-              })),
+          return Parameter.fromMap(x);
+        })),
         assignedOutdoorFacility: rawjson["assign_facilities"] == null
             ? []
             : List<AssignedOutdoorFacility>.from(
-                (rawjson["assign_facilities"] as List).map((x) {
-                return AssignedOutdoorFacility.fromJson(x);
-              })),
+            (rawjson["assign_facilities"] as List).map((x) {
+              return AssignedOutdoorFacility.fromJson(x);
+            })),
         titleimagehash: rawjson['title_image_hash']);
   }
 
   Map<String, dynamic> toMap() => {
-        "id": id,
-        "rentduration": rentduration,
-        "mobile": customerNumber,
-        "email": customerEmail,
-        "customer_name": customerName,
-        "rera": rera,
-        "brokerage": brokerage,
-        "profile": customerProfile,
-        "role": customerRole,
-        "threeD_image": threeDImage,
-        "title": title,
-        "type": type,
-        "latitude": latitude,
-        "longitude": longitude,
-        "advertisment": advertisment,
-        'video_link': video,
-        "price": price,
-        "code": code,
-        "category": category?.toMap() ?? {},
-        "built_up_area": builtUpArea,
-        "plot_area": plotArea,
-        "hecta_area": hectaArea,
-        "acre": acre,
-        "house_type": houseType,
-        "furnished": furnished,
-        "unit_type": unitType?.toMap() ?? {},
-        "description": description,
-        "address": address,
-        "client_address": clientAddress,
-        "property_type": properyType,
-        "title_image": titleImage,
-        "post_created": postCreated,
-        "sqft": sqft,
-        "gallery": List<Gallery>.from(gallery?.map((x) => x) ?? []),
-        "total_view": totalView,
-        "status": status,
-        "state": state,
-        "city": city,
-        "meta_title": metaTitle,
-        "meta_description": metaDescription,
-        "meta_keywords": metaKeywords,
-        "meta_image": metaImage,
-        "highlight": highlight,
-        "country": country,
-        "added_by": addedBy,
-        "inquiry": inquiry,
-        "promoted": promoted,
-        "is_favourite": isFavourite,
-        "view_contact": viewContact,
-        "is_interested": isInterested,
-        "is_premium": isPremium,
-        "is_deal": isDeal,
-        "add_on": addOn,
-        "favourite_users": favouriteUsers == null
-            ? null
-            : List<dynamic>.from(favouriteUsers?.map((x) => x) ?? []),
-        "amenity": amenity == null
-            ? null
-            : List<dynamic>.from(amenity?.map((x) => x) ?? []),
-        "interested_users": interestedUsers == null
-            ? null
-            : List<dynamic>.from(interestedUsers?.map((x) => x) ?? []),
-        "total_interested_users": totalInterestedUsers,
-        "total_favourite_users": totalFavouriteUsers,
-        "assign_facilities": assignedOutdoorFacility == null
-            ? null
-            : List<dynamic>.from(
-                assignedOutdoorFacility?.map((e) => e.toJson()) ?? []),
-        "parameters": parameters == null
-            ? null
-            : List<dynamic>.from(parameters?.map((x) => x.toMap()) ?? []),
-        "title_image_hash": titleimagehash
-      };
+    "id": id,
+    "rentduration": rentduration,
+    "mobile": customerNumber,
+    "email": customerEmail,
+    "customer_name": customerName,
+    "rera": rera,
+    "brokerage": brokerage,
+    "profile": customerProfile,
+    "role": customerRole,
+    "threeD_image": threeDImage,
+    "title": title,
+    "type": type,
+    "latitude": latitude,
+    "longitude": longitude,
+    "advertisment": advertisment,
+    'video_link': video,
+    "price": price,
+    "code": code,
+    "floor_no": floor,
+    "category": category?.toMap() ?? {},
+    "built_up_area": builtUpArea,
+    "plot_area": plotArea,
+    "hecta_area": hectaArea,
+    "acre": acre,
+    "house_type": houseType,
+    "furnished": furnished,
+    "unit_type": unitType?.toMap() ?? {},
+    "description": description,
+    "address": address,
+    "client_address": clientAddress,
+    "property_type": properyType,
+    "title_image": titleImage,
+    "post_created": postCreated,
+    "sqft": sqft,
+    "gallery": List<Gallery>.from(gallery?.map((x) => x) ?? []),
+    "total_view": totalView,
+    "status": status,
+    "state": state,
+    "city": city,
+    "meta_title": metaTitle,
+    "meta_description": metaDescription,
+    "meta_keywords": metaKeywords,
+    "meta_image": metaImage,
+    "highlight": highlight,
+    "country": country,
+    "added_by": addedBy,
+    "inquiry": inquiry,
+    "promoted": promoted,
+    "is_favourite": isFavourite,
+    "view_contact": viewContact,
+    "is_interested": isInterested,
+    "is_premium": isPremium,
+    "is_deal": isDeal,
+    "add_on": addOn,
+    "favourite_users": favouriteUsers == null
+        ? null
+        : List<dynamic>.from(favouriteUsers?.map((x) => x) ?? []),
+    "amenity": amenity == null
+        ? null
+        : List<dynamic>.from(amenity?.map((x) => x) ?? []),
+    "interested_users": interestedUsers == null
+        ? null
+        : List<dynamic>.from(interestedUsers?.map((x) => x) ?? []),
+    "total_interested_users": totalInterestedUsers,
+    "total_favourite_users": totalFavouriteUsers,
+    "assign_facilities": assignedOutdoorFacility == null
+        ? null
+        : List<dynamic>.from(
+        assignedOutdoorFacility?.map((e) => e.toJson()) ?? []),
+    "parameters": parameters == null
+        ? null
+        : List<dynamic>.from(parameters?.map((x) => x.toMap()) ?? []),
+    "title_image_hash": titleimagehash
+  };
 
   @override
   String toString() {
@@ -449,16 +455,16 @@ class Categorys {
   String toJson() => json.encode(toMap());
 
   factory Categorys.fromMap(Map<String, dynamic> json) => Categorys(
-        id: json["id"],
-        category: json["category"],
-        image: json["image"],
-      );
+    id: json["id"],
+    category: json["category"],
+    image: json["image"],
+  );
 
   Map<String, dynamic> toMap() => {
-        "id": id,
-        "category": category,
-        "image": image,
-      };
+    "id": id,
+    "category": category,
+    "image": image,
+  };
 }
 
 class Parameter {
@@ -515,13 +521,13 @@ class Parameter {
   }
 
   Map<String, dynamic> toMap() => {
-        "id": id,
-        "name": name,
-        "type_of_parameter": typeOfParameter,
-        "type_values": typeValues,
-        "image": image,
-        "value": value,
-      };
+    "id": id,
+    "name": name,
+    "type_of_parameter": typeOfParameter,
+    "type_values": typeValues,
+    "image": image,
+    "value": value,
+  };
 
   @override
   String toString() {
@@ -602,14 +608,14 @@ class UnitType {
   String toJson() => json.encode(toMap());
 
   factory UnitType.fromMap(Map<String, dynamic> json) => UnitType(
-        id: json["id"],
-        measurement: json["measurement"],
-      );
+    id: json["id"],
+    measurement: json["measurement"],
+  );
 
   Map<String, dynamic> toMap() => {
-        "id": id,
-        "measurement": measurement,
-      };
+    "id": id,
+    "measurement": measurement,
+  };
 }
 
 class Gallery {
@@ -619,9 +625,9 @@ class Gallery {
   final bool? isVideo;
   Gallery(
       {required this.id,
-      required this.image,
-      required this.imageUrl,
-      this.isVideo});
+        required this.image,
+        required this.imageUrl,
+        this.isVideo});
 
   Gallery copyWith({
     int? id,
@@ -681,7 +687,7 @@ class ProjectDocument {
     required this.id,
     required this.image,
     required this.imageUrl,
-     this.isVideo
+    this.isVideo
   });
 
   // Factory method to create a ProjectDocument from a JSON map
@@ -709,13 +715,13 @@ class AssignedOutdoorFacility {
 
   AssignedOutdoorFacility(
       {this.id,
-      this.propertyId,
-      this.facilityId,
-      this.distance,
-      this.createdAt,
-      this.name,
-      this.image,
-      this.updatedAt});
+        this.propertyId,
+        this.facilityId,
+        this.distance,
+        this.createdAt,
+        this.name,
+        this.image,
+        this.updatedAt});
 
   AssignedOutdoorFacility.fromJson(Map<String, dynamic> json) {
     id = json['id'];

@@ -40,6 +40,7 @@ import '../construction/constructionhome.dart';
 import '../home/Widgets/property_horizontal_card.dart';
 import '../jointventure/jontventurehome.dart';
 import '../projects/myProjectScreen.dart';
+import '../projects/projectDetailsScreen.dart';
 import '../proprties/my_properties_screen.dart';
 import '../widgets/AnimatedRoutes/blur_page_route.dart';
 import '../widgets/all_gallary_image.dart';
@@ -67,7 +68,7 @@ class _ProfileScreenState extends State<UserDetailProfileScreen> {
   bool isGuest = false;
   Map? userData;
   bool loading = false;
-
+  List<bool> likeLoading = [];
 
   List<Map<String, dynamic>> dropDownList = [
     {"id": 0, "name": "Sell"},
@@ -83,6 +84,7 @@ class _ProfileScreenState extends State<UserDetailProfileScreen> {
   int offset = 0, total = 0;
   List<PropertyModel> propertylist = [];
   List propertyLikeLoading = [];
+  List myProjectList = [];
 
   bool propertyLoading = false;
   bool propertyLoadingMore = false;
@@ -92,7 +94,11 @@ class _ProfileScreenState extends State<UserDetailProfileScreen> {
     getUser();
     getStatus();
     getCatgory();
-    getProperties(propertyType: "");
+    if(widget.isAgent == true) {
+      getProperties(propertyType: "");
+    } else {
+      getMyprojects('', '');
+    }
     super.initState();
   }
 
@@ -109,6 +115,18 @@ class _ProfileScreenState extends State<UserDetailProfileScreen> {
         loading = false;
       });
     }
+  }
+
+  String formatAmount(number) {
+    String result = '';
+    if(number >= 10000000) {
+      result = '${(number/10000000).toStringAsFixed(2)} Cr';
+    } else if(number >= 100000) {
+      result = '${(number/100000).toStringAsFixed(2)} Laks';
+    } else {
+      result = number.toStringAsFixed(2);
+    }
+    return result;
   }
 
   List statusList = [];
@@ -182,6 +200,24 @@ class _ProfileScreenState extends State<UserDetailProfileScreen> {
     }
   }
 
+  Future<void> getMyprojects(cat, status) async {
+    setState(() {
+      propertyLoading = true;
+    });
+    var response = await Api.get(url: Api.getProject, queryParameters: {
+      'userid': widget.id,
+      'category_id': cat ?? '',
+      'status': status ?? '',
+    });
+    if(!response['error']) {
+      setState(() {
+        myProjectList = response['data'];
+        likeLoading = List.filled(response['data'].length, false);
+        propertyLoading = false;
+      });
+    }
+  }
+
 
   @override
   Widget build(BuildContext context) {
@@ -241,12 +277,18 @@ class _ProfileScreenState extends State<UserDetailProfileScreen> {
                                     children: [
                                       Row(
                                         children: [
-                                          Text('${userData!['name']}')
-                                              .color(
-                                                  context.color.textColorDark)
-                                              .size(18)
-                                              .bold(weight: FontWeight.w600)
-                                              .setMaxLines(lines: 1),
+                                          Container(
+                                            width: MediaQuery.sizeOf(context).width * 0.5,
+                                            child: Text('${userData!['name']}',
+                                            style: TextStyle(
+                                              overflow: TextOverflow.ellipsis,
+                                            ),)
+                                                .color(
+                                                    context.color.textColorDark)
+                                                .size(16)
+                                                .bold(weight: FontWeight.w600)
+                                                .setMaxLines(lines: 2),
+                                          ),
                                           const SizedBox(
                                             width: 5,
                                           ),
@@ -600,6 +642,7 @@ class _ProfileScreenState extends State<UserDetailProfileScreen> {
                                onChanged: (value) {
                                  setState(() {
                                    selectedValue = value;
+                                   offset = 0;
                                    getProperties(propertyType: value.toString());
                                  });
                                },
@@ -659,10 +702,10 @@ class _ProfileScreenState extends State<UserDetailProfileScreen> {
                               mainAxisAlignment: MainAxisAlignment.spaceBetween,
                               children: [
                                 SizedBox(
-                                  child: const Text(
-                                    'Projects by AR Foundation',
+                                  child: Text(
+                                    'Projects by ${userData!['company_name'] ?? 'Unknown'}',
                                     maxLines: 1,overflow: TextOverflow.ellipsis,
-                                    style: TextStyle(
+                                    style: const TextStyle(
                                         fontWeight: FontWeight.w600, fontSize: 14),
                                   ),
                                 ),
@@ -694,7 +737,7 @@ class _ProfileScreenState extends State<UserDetailProfileScreen> {
                                       underline: const SizedBox(),
                                       isExpanded: true,
                                       style: const TextStyle(fontSize: 14,color: Colors.black),
-                                      hint: const Text("Select an status",style: TextStyle(fontSize: 14),maxLines: 1,overflow: TextOverflow.ellipsis,),
+                                      hint: const Text("status",style: TextStyle(fontSize: 14),maxLines: 1,overflow: TextOverflow.ellipsis,),
                                       value: selectedStatus,
                                       items: statusList.map<DropdownMenuItem<String>>((item) {
                                         return DropdownMenuItem<String>(
@@ -731,9 +774,9 @@ class _ProfileScreenState extends State<UserDetailProfileScreen> {
                                       underline: const SizedBox(),
                                       isExpanded: true,
                                       style: const TextStyle(fontSize: 14,color: Colors.black,),
-                                      hint: const Text("Select an categories",style: TextStyle(fontSize: 14),maxLines: 1,overflow: TextOverflow.ellipsis,),
+                                      hint: const Text("categories",style: TextStyle(fontSize: 14),maxLines: 1,overflow: TextOverflow.ellipsis,),
                                       value: selectedCategory,
-                                      items: getCatgoryList.map<DropdownMenuItem<String>>((item) {
+                                      items: getCatgoryList.take(2).toList().map<DropdownMenuItem<String>>((item) {
                                         return DropdownMenuItem<String>(
                                           value: item['id'].toString(),
                                           child: Text(item['category']),
@@ -750,7 +793,8 @@ class _ProfileScreenState extends State<UserDetailProfileScreen> {
                                 const SizedBox(width: 10,),
                                 InkWell(
                                   onTap: (){
-                                    getProperties(status: selectedStatus,propertyType: selectedCategory);
+                                    // getProperties(status: selectedStatus,propertyType: selectedCategory);
+                                    getMyprojects(selectedCategory, selectedStatus);
                                   },
                                   child: Container(
                                     height: 40,
@@ -773,10 +817,10 @@ class _ProfileScreenState extends State<UserDetailProfileScreen> {
                               padding: const EdgeInsets.symmetric(horizontal: 15),
                               child: buildPropertiesShimmer(context,),
                             )
-                                :propertylist.isEmpty
+                                :myProjectList.isEmpty
                                 ? const Center(
                               child: Text(
-                                'No properties available',
+                                'No projects available',
                                 style: TextStyle(fontSize: 14, color: Colors.black),
                               ),
                             )
@@ -784,23 +828,300 @@ class _ProfileScreenState extends State<UserDetailProfileScreen> {
                               padding: const EdgeInsets.symmetric(horizontal: 15),
                               separatorBuilder: (context,i)=>const SizedBox(width: 10,),
                               scrollDirection: Axis.horizontal,
-                              itemCount: propertylist.length,
+                              itemCount: myProjectList.length,
                               itemBuilder: (context, index) {
-                                PropertyModel property = propertylist[index];
-                                return GestureDetector(
-                                  onTap: () {
-                                    Navigator.pushNamed(
-                                      context,
-                                      Routes.propertyDetails,
-                                      arguments: {
-                                        'propertyData': property,
-                                        'propertiesList': propertylist,
-                                        'fromMyProperty': false,
-                                      },
-                                    );
-                                  },
-                                  child: PropertyVerticalCard(
-                                    property: property,
+                                var project = myProjectList;
+                                return Container(
+                                  width: MediaQuery.sizeOf(context).width * 0.5,
+                                  child: GestureDetector(
+                                    onTap: () {
+                                      Navigator.push(
+                                        context,
+                                        MaterialPageRoute(
+                                          builder: (context) => ProjectDetails(
+                                            property: project![index],
+                                            fromMyProperty: true,
+                                            fromCompleteEnquiry: true,
+                                            fromSlider: false,
+                                            fromPropertyAddSuccess: true,
+                                          ),
+                                        ),
+                                      );
+                                    },
+                                    child: Container(
+                                      decoration: BoxDecoration(
+                                        color: Colors.white,
+                                        borderRadius: BorderRadius.circular(15),
+                                        border: Border.all(
+                                          width: 1,
+                                          color: const Color(0xffe0e0e0),
+                                        ),
+                                      ),
+                                      child: Stack(
+                                        fit: StackFit.expand,
+                                        children: [
+                                          Column(
+                                            mainAxisSize: MainAxisSize.min,
+                                            children: [
+                                              ClipRRect(
+                                                borderRadius: const BorderRadius.only(
+                                                  topRight: Radius.circular(15),
+                                                  topLeft: Radius.circular(15),
+                                                ),
+                                                child: Stack(
+                                                  children: [
+                                                    UiUtils.getImage(
+                                                      project![index]['image'] ?? "",
+                                                      width: double.infinity,
+                                                      fit: BoxFit.cover,
+                                                      height: 103,
+                                                    ),
+                                                    Positioned(
+                                                      right: 8,
+                                                      top: 8,
+                                                      child: Row(
+                                                        children: [
+                                                          if (project![index]['gallary_images'] != null)
+                                                            InkWell(
+                                                              onTap: () {
+                                                                Navigator.push(
+                                                                  context,
+                                                                  BlurredRouter(
+                                                                    builder: (context) {
+                                                                      return AllGallaryImages(
+                                                                        images: project![index]['gallary_images'] ?? [],
+                                                                        isProject: true,
+                                                                      );
+                                                                    },
+                                                                  ),
+                                                                );
+                                                              },
+                                                              child: Container(
+                                                                width: 35,
+                                                                height: 28,
+                                                                decoration: BoxDecoration(
+                                                                  color: const Color(0xff000000).withOpacity(0.35),
+                                                                  borderRadius: BorderRadius.circular(8),
+                                                                  border: Border.all(width: 1, color: const Color(0xffe0e0e0)),
+                                                                  boxShadow: const [
+                                                                    BoxShadow(
+                                                                      color: Color.fromARGB(12, 0, 0, 0),
+                                                                      offset: Offset(0, 2),
+                                                                      blurRadius: 15,
+                                                                      spreadRadius: 0,
+                                                                    ),
+                                                                  ],
+                                                                ),
+                                                                child: Row(
+                                                                  mainAxisAlignment: MainAxisAlignment.center,
+                                                                  children: [
+                                                                    const Icon(Icons.image, color: Color(0xffe0e0e0), size: 15),
+                                                                    const SizedBox(width: 3),
+                                                                    Text('${project![index]['gallary_images']!.length}',
+                                                                      style: const TextStyle(color: Color(0xffe0e0e0), fontSize: 10),
+                                                                    ),
+                                                                  ],
+                                                                ),
+                                                              ),
+                                                            ),
+                                                          const SizedBox(width: 8),
+                                                          InkWell(
+                                                            onTap: () {
+                                                              GuestChecker.check(onNotGuest: () async {
+                                                                setState(() {
+                                                                  likeLoading![index] = true;
+                                                                });
+                                                                var body = {
+                                                                  "type": project![index]['is_favourite'] == 1 ? 0 : 1,
+                                                                  "project_id": project![index]['id'],
+                                                                };
+                                                                var response = await Api.post(
+                                                                  url: Api.addFavProject,
+                                                                  parameter: body,
+                                                                );
+                                                                if (!response['error']) {
+                                                                  project![index]['is_favourite'] =
+                                                                  (project![index]['is_favourite'] == 1 ? 0 : 1);
+                                                                  setState(() {
+                                                                    likeLoading![index] = false;
+                                                                  });
+                                                                }
+                                                              });
+                                                            },
+                                                            child: Container(
+                                                              width: 32,
+                                                              height: 30,
+                                                              decoration: BoxDecoration(
+                                                                color: context.color.secondaryColor,
+                                                                shape: BoxShape.circle,
+                                                                boxShadow: const [
+                                                                  BoxShadow(
+                                                                    color: Color.fromARGB(12, 0, 0, 0),
+                                                                    offset: Offset(0, 2),
+                                                                    blurRadius: 15,
+                                                                    spreadRadius: 0,
+                                                                  ),
+                                                                ],
+                                                              ),
+                                                              child: Container(
+                                                                width: 32,
+                                                                height: 32,
+                                                                decoration: BoxDecoration(
+                                                                  color: context.color.primaryColor,
+                                                                  shape: BoxShape.circle,
+                                                                  boxShadow: const [
+                                                                    BoxShadow(
+                                                                      color: Color.fromARGB(33, 0, 0, 0),
+                                                                      offset: Offset(0, 2),
+                                                                      blurRadius: 15,
+                                                                      spreadRadius: 0,
+                                                                    ),
+                                                                  ],
+                                                                ),
+                                                                child: Center(
+                                                                  child: (likeLoading![index])
+                                                                      ? UiUtils.progress(width: 20, height: 20)
+                                                                      : project![index]['is_favourite'] == 1
+                                                                      ? UiUtils.getSvg(AppIcons.like_fill, color: context.color.tertiaryColor)
+                                                                      : UiUtils.getSvg(AppIcons.like, color: context.color.tertiaryColor),
+                                                                ),
+                                                              ),
+                                                            ),
+                                                          ),
+                                                        ],
+                                                      ),
+                                                    ),
+                                                  ],
+                                                ),
+                                              ),
+                                              Expanded(
+                                                child: Padding(
+                                                  padding: const EdgeInsets.symmetric(horizontal: 10),
+                                                  child: Column(
+                                                    crossAxisAlignment: CrossAxisAlignment.start,
+                                                    mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                                                    children: [
+                                                      Text(
+                                                        project![index]['title'],
+                                                        maxLines: 1,
+                                                        overflow: TextOverflow.ellipsis,
+                                                        style: const TextStyle(
+                                                          color: Color(0xff333333),
+                                                          fontSize: 12.5,
+                                                          fontWeight: FontWeight.w500,
+                                                        ),
+                                                      ),
+
+                                                      if (project![index]['min_price'] == null)
+                                                        Row(
+                                                          children: [
+                                                            Text(
+                                                              '₹${project![index]['project_details'].isNotEmpty
+                                                                  ? formatAmount(project![index]['project_details'][0]['avg_price'] ?? 0)
+                                                                  : 0}',
+                                                              style: const TextStyle(
+                                                                color: Color(0xff333333),
+                                                                fontSize: 12,
+                                                                fontFamily: 'Robato',
+                                                                fontWeight: FontWeight.w500,
+                                                              ),
+                                                            ),
+                                                            Padding(
+                                                              padding: const EdgeInsets.symmetric(horizontal: 8.0),
+                                                              child: Container(height: 12, width: 2, color: Colors.black54),
+                                                            ),
+                                                            Text(
+                                                              '${project![index]['project_details'].isNotEmpty
+                                                                  ? project![index]['project_details'][0]['size']
+                                                                  : 0} Sq.ft',
+                                                              style: const TextStyle(
+                                                                color: Colors.black87,
+                                                                fontSize: 9,
+                                                                fontWeight: FontWeight.w500,
+                                                              ),
+                                                            ),
+                                                          ],
+                                                        ),
+                                                      if (project![index]['min_price'] != null)
+                                                        Row(
+                                                          children: [
+                                                            Text(
+                                                              '₹${formatAmount(project![index]['min_price'] ?? 0)} - ${formatAmount(project![index]['max_price'] ?? 0)}',
+                                                              style: const TextStyle(
+                                                                color: Color(0xff333333),
+                                                                fontSize: 12,
+                                                                fontFamily: 'Robato',
+                                                                fontWeight: FontWeight.w500,
+                                                              ),
+                                                            ),
+                                                          ],
+                                                        ),
+                                                      if (project![index]['min_price'] != null)
+                                                        Row(
+                                                          children: [
+                                                            Text(
+                                                              '${project![index]['min_size']} - ${project![index]['max_size']} Sq.ft',
+                                                              style: const TextStyle(
+                                                                color: Colors.black87,
+                                                                fontSize: 10,
+                                                                fontWeight: FontWeight.w500,
+                                                              ),
+                                                            ),
+                                                          ],
+                                                        ),
+
+                                                      if (project![index]['address'] != "")
+                                                        Padding(
+                                                          padding: const EdgeInsets.only(bottom: 4),
+                                                          child: Row(
+                                                            children: [
+                                                              Image.asset("assets/Home/__location.png", width: 15, height: 15),
+                                                              const SizedBox(width: 5),
+                                                              Expanded(
+                                                                child: Text(
+                                                                  project![index]['address']?.trim() ?? "",
+                                                                  maxLines: 1,
+                                                                  overflow: TextOverflow.ellipsis,
+                                                                  style: const TextStyle(
+                                                                    color: Colors.black87,
+                                                                    fontSize: 9,
+                                                                    fontWeight: FontWeight.w500,
+                                                                  ),
+                                                                ),
+                                                              ),
+                                                            ],
+                                                          ),
+                                                        ),
+
+                                                      if (project![index]['project_details'] != null && project![index]['project_details'].isNotEmpty)
+                                                        Padding(
+                                                          padding: const EdgeInsets.only(bottom: 4),
+                                                          child: Row(
+                                                            children: [
+                                                              Expanded(
+                                                                child: Text(
+                                                                  project![index]['project_details'][0]['project_status_name'] ?? "",
+                                                                  maxLines: 1,
+                                                                  overflow: TextOverflow.ellipsis,
+                                                                  style: const TextStyle(
+                                                                    color: Colors.black87,
+                                                                    fontSize: 9,
+                                                                    fontWeight: FontWeight.w500,
+                                                                  ),
+                                                                ),
+                                                              ),
+                                                            ],
+                                                          ),
+                                                        ),
+                                                    ],
+                                                  ),
+                                                ),
+                                              ),
+                                            ],
+                                          ),
+                                        ],
+                                      ),
+                                    ),
                                   ),
                                 );
                               },
@@ -810,385 +1131,6 @@ class _ProfileScreenState extends State<UserDetailProfileScreen> {
                         ],
 
                       const SizedBox(height: 30,)
-
-
-
-                      // Column(
-                      //   children: [
-                      //     if (propertyLoading)
-                      //       Expanded(
-                      //         child: Padding(
-                      //           padding: const EdgeInsets.symmetric(horizontal: 15),
-                      //           child: buildPropertiesShimmer(context),
-                      //         ),
-                      //       ),
-                      //     if (!propertyLoading)
-                      //
-                      //   ],
-                      // ),
-
-                      //               SizedBox(
-                      // height: 200,
-                      // child: GridView.builder(
-                      // shrinkWrap: true,
-                      // scrollDirection: Axis.horizontal,
-                      // itemCount:
-                      // widget.projectLoading! ? 10 : widget.projectList!.length,
-                      // gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
-                      // crossAxisCount: 1,
-                      // crossAxisSpacing: 8,
-                      // mainAxisSpacing: 8,
-                      // // mainAxisExtent: 200,
-                      // childAspectRatio: MediaQuery.sizeOf(context).height / 950),
-                      // itemBuilder: (context, index) {
-                      // if (!widget.projectLoading!) {
-                      // return Padding(
-                      // padding: EdgeInsets.only(
-                      // left: (index == 0 ? 10 : 0),
-                      // right: (widget.projectLoading!
-                      // ? 10
-                      //     : widget.projectList!.length) ==
-                      // (index + 1)
-                      // ? 10
-                      //     : 0),
-                      // child: Container(
-                      // width: 230,
-                      // child: GestureDetector(
-                      // onTap: () {
-                      // Navigator.push(
-                      // context,
-                      // MaterialPageRoute(
-                      // builder: (context) => ProjectDetails(
-                      // property: widget.projectList![index],
-                      // fromMyProperty: true,
-                      // fromCompleteEnquiry: true,
-                      // fromSlider: false,
-                      // fromPropertyAddSuccess: true)),
-                      // );
-                      // },
-                      // child: Container(
-                      // // height: addBottom == null ? 124 : (124 + (additionalHeight ?? 0)),
-                      // decoration: BoxDecoration(
-                      // color: Colors.white,
-                      // borderRadius: BorderRadius.circular(15),
-                      // border: Border.all(
-                      // width: 1, color: Color(0xffe0e0e0))),
-                      // child: Stack(
-                      // fit: StackFit.expand,
-                      // children: [
-                      // Column(
-                      // mainAxisSize: MainAxisSize.min,
-                      // children: [
-                      // Column(
-                      // children: [
-                      // ClipRRect(
-                      // borderRadius: BorderRadius.only(
-                      // topRight: Radius.circular(15),
-                      // topLeft: Radius.circular(15),
-                      // ),
-                      // child: Stack(
-                      // children: [
-                      // UiUtils.getImage(
-                      // widget.projectList![index]
-                      // ['image'] ??
-                      // "",
-                      // width: double.infinity,
-                      // fit: BoxFit.cover,
-                      // height: 103,
-                      // ),
-                      // // const PositionedDirectional(
-                      // //     start: 5,
-                      // //     top: 5,
-                      // //     child: PromotedCard(
-                      // //         type: PromoteCardType.icon)),
-                      // // PositionedDirectional(
-                      // //   bottom: 6,
-                      // //   start: 6,
-                      // //   child: Container(
-                      // //     height: 19,
-                      // //     clipBehavior: Clip.antiAlias,
-                      // //     decoration: BoxDecoration(
-                      // //         color: context.color.secondaryColor
-                      // //             .withOpacity(0.7),
-                      // //         borderRadius:
-                      // //         BorderRadius.circular(4)),
-                      // //     child: BackdropFilter(
-                      // //       filter: ImageFilter.blur(
-                      // //           sigmaX: 2, sigmaY: 3),
-                      // //       child: Padding(
-                      // //         padding: const EdgeInsets.symmetric(
-                      // //             horizontal: 8.0),
-                      // //         child: Center(
-                      // //           child: Text(widget.projectList![index]['category'] != null ?
-                      // //             widget.projectList![index]['category']!['category'] : '',
-                      // //           )
-                      // //               .color(
-                      // //             context.color.textColorDark,
-                      // //           )
-                      // //               .bold(weight: FontWeight.w500)
-                      // //               .size(10),
-                      // //         ),
-                      // //       ),
-                      // //     ),
-                      // //   ),
-                      // // ),
-                      // Positioned(
-                      // right: 8,
-                      // top: 8,
-                      // child: InkWell(
-                      // onTap: () {
-                      // GuestChecker.check(
-                      // onNotGuest: () async {
-                      // setState(() {
-                      // widget.likeLoading![
-                      // index] = true;
-                      // });
-                      // var body = {
-                      // "type": widget.projectList![
-                      // index][
-                      // 'is_favourite'] ==
-                      // 1
-                      // ? 0
-                      //     : 1,
-                      // "project_id":
-                      // widget.projectList![
-                      // index]['id']
-                      // };
-                      // var response =
-                      // await Api.post(
-                      // url: Api
-                      //     .addFavProject,
-                      // parameter: body);
-                      // if (!response['error']) {
-                      // widget.projectList![
-                      // index][
-                      // 'is_favourite'] =
-                      // (widget.projectList![
-                      // index]
-                      // [
-                      // 'is_favourite'] ==
-                      // 1
-                      // ? 0
-                      //     : 1);
-                      // setState(() {
-                      // widget.likeLoading![
-                      // index] = false;
-                      // });
-                      // }
-                      // });
-                      // },
-                      // child: Container(
-                      // width: 32,
-                      // height: 32,
-                      // decoration: BoxDecoration(
-                      // color: context
-                      //     .color.secondaryColor,
-                      // shape: BoxShape.circle,
-                      // boxShadow: const [
-                      // BoxShadow(
-                      // color: Color.fromARGB(
-                      // 12, 0, 0, 0),
-                      // offset: Offset(0, 2),
-                      // blurRadius: 15,
-                      // spreadRadius: 0,
-                      // )
-                      // ],
-                      // ),
-                      // child: Container(
-                      // width: 32,
-                      // height: 32,
-                      // decoration: BoxDecoration(
-                      // color: context
-                      //     .color.primaryColor,
-                      // shape: BoxShape.circle,
-                      // boxShadow: const [
-                      // BoxShadow(
-                      // color: Color
-                      //     .fromARGB(33,
-                      // 0, 0, 0),
-                      // offset:
-                      // Offset(0, 2),
-                      // blurRadius: 15,
-                      // spreadRadius: 0)
-                      // ],
-                      // ),
-                      // child: Center(
-                      // child: (widget
-                      //     .likeLoading![
-                      // index])
-                      // ? UiUtils
-                      //     .progress(
-                      // width: 20,
-                      // height:
-                      // 20)
-                      //     : widget.projectList![
-                      // index]
-                      // [
-                      // 'is_favourite'] ==
-                      // 1
-                      // ? UiUtils
-                      //     .getSvg(
-                      // AppIcons
-                      //     .like_fill,
-                      // color: context
-                      //     .color
-                      //     .tertiaryColor,
-                      // )
-                      //     : UiUtils.getSvg(
-                      // AppIcons
-                      //     .like,
-                      // color: context
-                      //     .color
-                      //     .tertiaryColor)),
-                      // ),
-                      // ),
-                      // ),
-                      // ),
-                      // ],
-                      // ),
-                      // ),
-                      // ],
-                      // ),
-                      // Padding(
-                      // padding: const EdgeInsets.only(
-                      // left: 10, right: 10),
-                      // child: Column(
-                      // crossAxisAlignment:
-                      // CrossAxisAlignment.start,
-                      // mainAxisAlignment:
-                      // MainAxisAlignment.spaceEvenly,
-                      // children: [
-                      // SizedBox(
-                      // height: 6,
-                      // ),
-                      // Text(
-                      // widget.projectList![index]['title'],
-                      // maxLines: 1,
-                      // overflow: TextOverflow.ellipsis,
-                      // style: TextStyle(
-                      // color: Color(0xff333333),
-                      // fontSize: 12.5,
-                      // fontWeight: FontWeight.w500),
-                      // ),
-                      // SizedBox(
-                      // height: 4,
-                      // ),
-                      // if (widget.projectList![index]
-                      // ['address'] !=
-                      // "")
-                      // Padding(
-                      // padding: const EdgeInsets.only(
-                      // bottom: 4),
-                      // child: Row(
-                      // children: [
-                      // Image.asset(
-                      // "assets/Home/__location.png",
-                      // width: 15,
-                      // fit: BoxFit.cover,
-                      // height: 15,
-                      // ),
-                      // SizedBox(
-                      // width: 5,
-                      // ),
-                      // Expanded(
-                      // child: Text(
-                      // widget.projectList![index]
-                      // ['address']
-                      //     ?.trim() ??
-                      // "",
-                      // maxLines: 1,
-                      // overflow:
-                      // TextOverflow.ellipsis,
-                      // style: TextStyle(
-                      // color:
-                      // Color(0xffa2a2a2),
-                      // fontSize: 9,
-                      // fontWeight:
-                      // FontWeight.w400),
-                      // ))
-                      // ],
-                      // ),
-                      // ),
-                      // SizedBox(
-                      // height: 4,
-                      // ),
-                      // Row(
-                      // children: [
-                      // Text(
-                      // '${widget.projectList![index]['project_details'].length > 0 ? formatAmount(widget.projectList![index]['project_details'][0]['avg_price'] ?? 0) : 0}'
-                      //     .toString()
-                      //     .formatAmount(
-                      // prefix: true,
-                      // ),
-                      // maxLines: 1,
-                      // overflow: TextOverflow.ellipsis,
-                      // style: TextStyle(
-                      // color: Color(0xff333333),
-                      // fontSize: 9,
-                      // fontWeight:
-                      // FontWeight.w500),
-                      // ),
-                      // Padding(
-                      // padding:
-                      // const EdgeInsets.symmetric(
-                      // horizontal: 8.0),
-                      // child: Container(
-                      // height: 12,
-                      // width: 2,
-                      // color: Colors.black54,
-                      // ),
-                      // ),
-                      // Text(
-                      // '${widget.projectList![index]['project_details'].length > 0 ? formatAmount(widget.projectList![index]['project_details'][0]['size'] ?? 0) : 0} Sq.ft'
-                      //     .toString(),
-                      // maxLines: 1,
-                      // overflow: TextOverflow.ellipsis,
-                      // style: TextStyle(
-                      // color: Color(0xff333333),
-                      // fontSize: 9,
-                      // fontWeight:
-                      // FontWeight.w500),
-                      // ),
-                      // ],
-                      // ),
-                      // SizedBox(
-                      // height: 4,
-                      // ),
-                      // Row(
-                      // mainAxisAlignment:
-                      // MainAxisAlignment.end,
-                      // children: [
-                      // // Text("Posted By ${premiumPropertiesList[i]['role'] == 1 ? 'Owner' : premiumPropertiesList[i]['role'] == 2 ? 'Agent' : premiumPropertiesList[i]['role'] == 3 ? 'Builder' : 'Housepecker'}",
-                      // //   maxLines: 1,
-                      // //   overflow: TextOverflow.ellipsis,
-                      // //   style: TextStyle(
-                      // //       color: Color(0xffa2a2a2),
-                      // //       fontSize: 8,
-                      // //       fontWeight: FontWeight.w400
-                      // //   ),
-                      // // ),
-                      // ],
-                      // ),
-                      // ],
-                      // ),
-                      // ),
-                      // ],
-                      // ),
-                      // ],
-                      // ),
-                      // )),
-                      // ),
-                      // );
-                      // } else {
-                      // return ClipRRect(
-                      // clipBehavior: Clip.antiAliasWithSaveLayer,
-                      // borderRadius: BorderRadius.all(Radius.circular(15)),
-                      // child: CustomShimmer(height: 90, width: 90),
-                      // );
-                      // }
-                      // },
-                      // ),
-                      // ),
                     ]),
               ),
             ),

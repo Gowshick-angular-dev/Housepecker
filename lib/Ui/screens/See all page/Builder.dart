@@ -28,6 +28,10 @@ class _TopBuildersState extends State<see_allBuilders> {
   String currentPlace = '';
   String currentCity = '';
   String currentMainCity = '';
+  int offset = 0;
+  late ScrollController controller;
+  bool AgentLoadingMore = false;
+  int totalcount = 0;
 
   String? locationValue='';
   TextEditingController locationControler = TextEditingController();
@@ -39,15 +43,17 @@ class _TopBuildersState extends State<see_allBuilders> {
 
     try {
       var response = await Api.get(url: Api.gettop_builder, queryParameters: {
-        'limit': 25,
+        'limit': 10,
+        'offset': offset,
         'city': city!,
-        // 'current_user': HiveUtils.getUserId()
       });
 
       if (!response['error']) {
         setState(() {
           topBuilderList = response['data'] ?? [];
+          totalcount = response['total'];
           builderLoading = false;
+          offset += 10;
         });
       }
     } catch (e) {
@@ -60,9 +66,46 @@ class _TopBuildersState extends State<see_allBuilders> {
     }
   }
 
+
+  Future<void> getAgentMore() async {
+    setState(() {
+      AgentLoadingMore = true;
+    });
+    var response = await Api.get(url: Api.gettop_builder, queryParameters: {
+      'offset': offset,
+      'limit': 10,
+      'city': locationValue ?? '',
+    });
+    if(!response['error']) {
+      setState(() {
+        topBuilderList.addAll((response['data'] as List).toList());
+        AgentLoadingMore = false;
+        offset += 10;
+      });
+    }
+  }
+
+  @override
+  void dispose() {
+    controller.removeListener(_loadMore);
+    controller.dispose();
+    super.dispose();
+  }
+
+
+  void _loadMore() async {
+    if (controller.isEndReached()) {
+      if (totalcount > topBuilderList.length && !builderLoading && !AgentLoadingMore) {
+        getAgentMore();
+      }
+    }
+  }
+
+
   @override
   void initState() {
     getTopBuilder('');
+    controller = ScrollController()..addListener(_loadMore);
     super.initState();
   }
 
@@ -73,7 +116,7 @@ class _TopBuildersState extends State<see_allBuilders> {
     return Scaffold(
       appBar: UiUtils.buildAppBar(context,
           showBackButton: true,
-          title:'Top Builders (${topBuilderList?.length ?? 0})',
+          title:'Top Builders (${totalcount ?? 0})',
           actions: [
           ]),
      /* appBar:  AppBar(
@@ -205,16 +248,19 @@ class _TopBuildersState extends State<see_allBuilders> {
                       List address = prediction.description!.split(',').reversed.toList();
                       if(address.length >= 3) {
                         locationValue = address[2];
-                        getTopBuilder(locationValue);
+                        offset=0;
                         setState(() { });
+                        getTopBuilder(locationValue);
                       } else if(address.length == 2) {
                         locationValue = address[1];
-                        getTopBuilder(locationValue);
+                        offset=0;
                         setState(() { });
+                        getTopBuilder(locationValue);
                       } else if(address.length == 1) {
                         locationValue = address[0];
-                        getTopBuilder(locationValue);
+                        offset=0;
                         setState(() { });
+                        getTopBuilder(locationValue);
                       }
 
                     },
@@ -259,6 +305,7 @@ class _TopBuildersState extends State<see_allBuilders> {
                 child: ListView.builder(
                             shrinkWrap: true,
                             scrollDirection: Axis.vertical,
+                           controller: controller,
                             itemCount: topBuilderList.length,
                             itemBuilder: (context, index) {
                 return InkWell(
@@ -276,6 +323,7 @@ class _TopBuildersState extends State<see_allBuilders> {
                             },
                           ),
               ),
+          if (AgentLoadingMore) UiUtils.progress()
         ],
       ),
     );
@@ -344,12 +392,15 @@ class _TopBuildersState extends State<see_allBuilders> {
                 Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    Text(
-                      agent['name'] ?? 'Unknown Agent', // Fallback if null
-                      style: TextStyle(
-                          fontSize: 14.5,
-                          fontWeight: FontWeight.w500,
-                          overflow: TextOverflow.ellipsis),
+                    Container(
+                      width: MediaQuery.sizeOf(context).width * 0.7,
+                      child: Text(
+                        agent['name'] ?? 'Unknown Agent', // Fallback if null
+                        style: TextStyle(
+                            fontSize: 14.5,
+                            fontWeight: FontWeight.w500,
+                            overflow: TextOverflow.ellipsis),
+                      ),
                     ),
                     Padding(
                       padding: const EdgeInsets.only(top: 5),

@@ -92,6 +92,8 @@ class UserProfileScreenState extends State<UserProfileScreen> {
   final TextEditingController rentNumberController = TextEditingController();
   final TextEditingController saleNumberController = TextEditingController();
 
+  final TextEditingController emptyContoller = TextEditingController();
+
   final FocusNode placesFocusNode = FocusNode();
 
   dynamic size;
@@ -273,6 +275,13 @@ class UserProfileScreenState extends State<UserProfileScreen> {
     }
   }
 
+  //
+  // List<Map<String, dynamic>> roleList = [
+  //   {"id": "1", "name": "Sell"},
+  //   {"id": "2", "name": "Rent"},
+  // ];
+
+
   @override
   Widget build(BuildContext context) {
     size = MediaQuery.of(context).size;
@@ -404,71 +413,77 @@ class UserProfileScreenState extends State<UserProfileScreen> {
                                           controller: companyController,
                                           // validator: selectedRole == '3' ? CustomTextFieldValidator.nullCheck : null,
                                         ),
-                                      // Column(
-                                      //   crossAxisAlignment: CrossAxisAlignment.start,
-                                      //   children: [
-                                      //     SizedBox(
-                                      //       height: 10.rh(context),
-                                      //     ),
-                                      //     Text(UiUtils.getTranslatedLabel(context, 'Role')),
-                                      //     SizedBox(
-                                      //       height: 10.rh(context),
-                                      //     ),
-                                      //     Row(
-                                      //       children: [
-                                      //         Expanded(
-                                      //           child: MultiSelectDropDown(
-                                      //             backgroundColor: Color(0xfff5f5f5),
-                                      //             borderColor: roleError ? Colors.red : Color(0xffededed),
-                                      //             borderWidth: 1.3,
-                                      //             padding: EdgeInsets.all(15),
-                                      //             onOptionSelected: (List<ValueItem> selectedOptions) {
-                                      //               if(selectedOptions.length > 0) {
-                                      //                 setState(() {
-                                      //                   selectedRole =
-                                      //                   selectedOptions[0]
-                                      //                       .value!;
-                                      //                   selectedRoleWidget =
-                                      //                   selectedOptions[0];
-                                      //                 });
-                                      //               } else {
-                                      //                 setState(() {
-                                      //                   selectedRole = '';
-                                      //                   selectedRoleWidget = null;
-                                      //                 });
-                                      //               }
-                                      //             },
-                                      //             selectedOptions: selectedRoleWidget == null ? [] : [selectedRoleWidget!],
-                                      //             options: [
-                                      //               for(int i = 0; i < roleList.length; i++)
-                                      //                 ValueItem(label: roleList[i]['name'], value: roleList[i]['id'].toString()),
-                                      //             ],
-                                      //             selectionType: SelectionType.single,
-                                      //             chipConfig: const ChipConfig(wrapType: WrapType.wrap),
-                                      //             dropdownHeight: 300,
-                                      //             optionTextStyle: const TextStyle(fontSize: 16),
-                                      //             selectedOptionIcon: const Icon(Icons.check_circle),
-                                      //           ),
-                                      //         ),
-                                      //       ],
-                                      //     ),
-                                      //     if(roleError)
-                                      //       Column(
-                                      //         children: [
-                                      //           SizedBox(height: 5,),
-                                      //           Padding(
-                                      //             padding: const EdgeInsets.only(left: 15),
-                                      //             child: Text('Field must not be empty',
-                                      //             style: TextStyle(
-                                      //               color: Colors.red,
-                                      //               fontSize: 11
-                                      //             ),),
-                                      //           ),
-                                      //         ],
-                                      //       ),
-                                      //     SizedBox(height: 15,),
-                                      //   ],
-                                      // ),
+                                     if(HiveUtils.getUserDetails().email == ''||HiveUtils.getUserDetails().name == '')
+                                      Column(
+                                        crossAxisAlignment: CrossAxisAlignment.start,
+                                        children: [
+                                          SizedBox(
+                                            height: 5.rh(context),
+                                          ),
+                                          Row(
+                                            children: [
+                                              Text(UiUtils.getTranslatedLabel(context, 'Role'),style: TextStyle(fontWeight: FontWeight.w500,fontSize: 14),),
+                                             Text("*",style: TextStyle(fontWeight: FontWeight.w500,fontSize: 14,color: Colors.red),)
+                                            ],
+                                          ),
+                                          SizedBox(
+                                            height: 10.rh(context),
+                                          ),
+                                          Row(
+                                            children: [
+                                              Expanded(
+                                                child: MultiSelectDropDown(
+                                                  backgroundColor: Color(0xfff5f5f5),
+                                                  borderColor: roleError ? Colors.red : Color(0xffededed),
+                                                  borderWidth: 1.3,
+                                                  padding: EdgeInsets.all(15),
+                                                  onOptionSelected: (List<ValueItem> selectedOptions) {
+                                                    if(selectedOptions.length > 0) {
+                                                      setState(() {
+                                                        selectedRole =
+                                                        selectedOptions[0]
+                                                            .value!;
+                                                        selectedRoleWidget =
+                                                        selectedOptions[0];
+                                                      });
+                                                    } else {
+                                                      setState(() {
+                                                        selectedRole = '';
+                                                        selectedRoleWidget = null;
+                                                      });
+                                                    }
+                                                  },
+                                                  selectedOptions: selectedRoleWidget == null ? [] : [selectedRoleWidget!],
+                                                  options: [
+                                                    for(int i = 0; i < roleList.length; i++)
+                                                      ValueItem(label: roleList[i]['id'] == 1 ? '${roleList[i]['name']}/User' : roleList[i]['name'], value: roleList[i]['id'].toString()),
+                                                  ],
+                                                  selectionType: SelectionType.single,
+                                                  chipConfig: const ChipConfig(wrapType: WrapType.wrap),
+                                                  dropdownHeight: 300,
+                                                  optionTextStyle: const TextStyle(fontSize: 16),
+                                                  selectedOptionIcon: const Icon(Icons.check_circle),
+                                                ),
+                                              ),
+                                            ],
+                                          ),
+                                          if(roleError)
+                                            Column(
+                                              children: [
+                                                SizedBox(height: 5,),
+                                                Padding(
+                                                  padding: const EdgeInsets.only(left: 15),
+                                                  child: Text('Field must not be empty',
+                                                  style: TextStyle(
+                                                    color: Colors.red,
+                                                    fontSize: 11
+                                                  ),),
+                                                ),
+                                              ],
+                                            ),
+                                          SizedBox(height: 15,),
+                                        ],
+                                      ),
                                       if(selectedRole == '2' || selectedRole == '3')
                                         buildTextField(
                                           context,
@@ -1073,7 +1088,6 @@ class UserProfileScreenState extends State<UserProfileScreen> {
                                       SizedBox(
                                         height: 25.rh(context),
                                       ),
-
 
                                     ],
                                   ),

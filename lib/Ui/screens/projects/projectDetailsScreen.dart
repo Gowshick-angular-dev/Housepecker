@@ -1693,8 +1693,7 @@ class PropertyDetailsState extends State<ProjectDetails> {
                          const SizedBox(height: 15,),
 
                             Container(
-                              padding: const EdgeInsets.symmetric(horizontal: 15),
-                              height: 60,
+                              padding: const EdgeInsets.symmetric(horizontal: 15,vertical: 10),
                               margin: const EdgeInsets.symmetric(horizontal: 15),
                               decoration:  BoxDecoration(
                                 color: const Color(0xffebedff), borderRadius: BorderRadius.circular(10),
@@ -1711,6 +1710,7 @@ class PropertyDetailsState extends State<ProjectDetails> {
                               child: Row(
                                 mainAxisAlignment: MainAxisAlignment.center,
                                 children: [
+
                                   Image.asset("assets/assets/Images/__offer.png",height: 28,),
                                   const SizedBox(width: 8,),
                                   const Text("Offer",style: TextStyle(fontSize: 14,fontWeight: FontWeight.w600),),
@@ -1729,7 +1729,7 @@ class PropertyDetailsState extends State<ProjectDetails> {
                                   const SizedBox(width: 5,),
                                   Expanded(
                                     child: Text('${property!['project_details'][0]['offers']}',
-                                      maxLines: 1,
+                                      maxLines: 3,
                                       overflow: TextOverflow.ellipsis,
                                       style:  TextStyle(
                                           color:Colors.grey[800],

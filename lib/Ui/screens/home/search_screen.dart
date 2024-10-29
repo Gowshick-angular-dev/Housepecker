@@ -22,14 +22,16 @@ import '../../../utils/ui_utils.dart';
 import '../projects/projectDetailsScreen.dart';
 import '../widgets/AnimatedRoutes/blur_page_route.dart';
 import '../widgets/Erros/something_went_wrong.dart';
+import '../widgets/all_gallary_image.dart';
 import '../widgets/promoted_widget.dart';
 import 'Widgets/property_horizontal_card.dart';
 
 class SearchScreen extends StatefulWidget {
   final bool autoFocus;
   final bool openFilterScreen;
+  final bool isProject;
   const SearchScreen(
-      {Key? key, required this.autoFocus, required this.openFilterScreen})
+      {Key? key, required this.autoFocus, required this.openFilterScreen, required this.isProject})
       : super(key: key);
   static Route route(RouteSettings settings) {
     Map? arguments = settings.arguments as Map?;
@@ -38,6 +40,7 @@ class SearchScreen extends StatefulWidget {
         return SearchScreen(
           autoFocus: arguments?['autoFocus'],
           openFilterScreen: arguments?['openFilterScreen'],
+          isProject : arguments?['isProject']
         );
       },
     );
@@ -57,6 +60,7 @@ class SearchScreenState extends State<SearchScreen>
   int offset = 0;
   late ScrollController controller;
   List<PropertyModel> propertylist = [];
+  List<bool> likeLoading = [];
   List idlist = [];
   Timer? _searchDelay;
   bool showContent = true;
@@ -149,8 +153,8 @@ class SearchScreenState extends State<SearchScreen>
       ),
       body: Column(
         children: [
-          SizedBox(height: 10,),
-          searchTextField(),
+          // SizedBox(height: 10,),
+          // searchTextField(),
           // BlocBuilder<PropertyCubit, PropertyState>(
           //   builder: (context, state) {
           //     log("state isss $state");
@@ -199,6 +203,18 @@ class SearchScreenState extends State<SearchScreen>
     );
   }
 
+  String formatAmount(number) {
+    String result = '';
+    if(number >= 10000000) {
+      result = '${(number/10000000).toStringAsFixed(2)} Cr';
+    } else if(number >= 100000) {
+      result = '${(number/100000).toStringAsFixed(2)} Laks';
+    } else {
+      result = number.toStringAsFixed(2);
+    }
+    return result;
+  }
+
   Widget listWidget(SearchPropertyState state) {
     if (state is SearchPropertyFetchProgress) {
       return Center(
@@ -218,7 +234,8 @@ class SearchScreenState extends State<SearchScreen>
     }
 
     if (state is SearchPropertySuccess) {
-      if (state.searchedroperties.isEmpty) {
+      print('hhhhhhhhhhhhhhhhhhhhhhhhhh${state.searchedProjects}');
+      if (state.searchedroperties.isEmpty && state.searchedProjects!.isEmpty) {
         return Center(
           child: Text(
             UiUtils.getTranslatedLabel(context, "nodatafound"),
@@ -257,13 +274,19 @@ class SearchScreenState extends State<SearchScreen>
                   itemBuilder: (context, index) {
                     List data = [...state.searchedroperties, ...?state.searchedProjects];
                     // data.shuffle(Random());
+                    likeLoading = List.filled(data.length, false);
                     PropertyModel? property;
                     Map? projects;
                     var type = '';
-                    if(data[index].type == 'property') {
-                      property = data[index];
-                      type = 'property';
-                    } else {
+                    try {
+                      if (data[index].type == 'property') {
+                        property = data[index];
+                        type = 'property';
+                      } else {
+                        projects = data[index];
+                        type = 'project';
+                      }
+                    } catch(err) {
                       projects = data[index];
                       type = 'project';
                     }
@@ -285,19 +308,22 @@ class SearchScreenState extends State<SearchScreen>
                       child: PropertyHorizontalCard(property: property!),
                     ),
                   ) : Container(
-                    width: 230,
+                    width: 200,
                     child: GestureDetector(
                         onTap: () {
                           Navigator.push(
                             context,
                             MaterialPageRoute(builder: (context) =>
-                                ProjectDetails(property: projects!, fromMyProperty: true,
-                                    fromCompleteEnquiry: true, fromSlider: false, fromPropertyAddSuccess: true
+                                ProjectDetails(
+                                    property: projects,
+                                    fromMyProperty: true,
+                                    fromCompleteEnquiry: true,
+                                    fromSlider: false,
+                                    fromPropertyAddSuccess: true
                                 )),
                           );
                         },
                         child: Container(
-                          // height: addBottom == null ? 124 : (124 + (additionalHeight ?? 0)),
                           decoration: BoxDecoration(
                               color: Colors.white,
                               borderRadius: BorderRadius.circular(15),
@@ -312,195 +338,245 @@ class SearchScreenState extends State<SearchScreen>
                               Column(
                                 mainAxisSize: MainAxisSize.min,
                                 children: [
-                                  Column(
-                                    children: [
-                                      ClipRRect(
-                                        borderRadius: BorderRadius.only(
-                                          topRight: Radius.circular(15),
-                                          topLeft:Radius.circular(15),
+                                  ClipRRect(
+                                    borderRadius: BorderRadius.only(
+                                      topRight: Radius.circular(15),
+                                      topLeft: Radius.circular(15),
+                                    ),
+                                    child: Stack(
+                                      children: [
+                                        UiUtils.getImage(
+                                          projects?['image'] ?? "",
+                                          width: double.infinity, fit: BoxFit.cover, height: 103,
                                         ),
-                                        child: Stack(
-                                          children: [
-                                            UiUtils.getImage(
-                                              projects!['image'] ?? "",
-                                              width: double.infinity,fit: BoxFit.cover,height: 103,
-                                            ),
-                                            const PositionedDirectional(
-                                                start: 5,
-                                                top: 5,
-                                                child: PromotedCard(
-                                                    type: PromoteCardType.icon)),
-                                            PositionedDirectional(
-                                              bottom: 6,
-                                              start: 6,
+                                        Positioned(
+                                          right: 8,
+                                          top: 8,
+                                          child: InkWell(
+                                            onTap: () {
+                                              GuestChecker.check(onNotGuest: () async {
+                                                setState(() {
+                                                  likeLoading![index] = true;
+                                                });
+                                                var body = {
+                                                  "type": projects?['is_favourite'] == 1 ? 0 : 1,
+                                                  "project_id": projects?['id']
+                                                };
+                                                var response = await Api.post(
+                                                    url: Api.addFavProject, parameter: body);
+                                                if (!response['error']) {
+                                                  projects?['is_favourite'] = (projects?['is_favourite'] == 1 ? 0 : 1);
+                                                  setState(() {
+                                                    likeLoading![index] = false;
+                                                  });
+                                                }
+                                              });
+                                            },
+                                            child: Container(
+                                              width: 32,
+                                              height: 32,
+                                              decoration: BoxDecoration(
+                                                color: context.color.secondaryColor,
+                                                shape: BoxShape.circle,
+                                                boxShadow: const [
+                                                  BoxShadow(
+                                                    color: Color.fromARGB(12, 0, 0, 0),
+                                                    offset: Offset(0, 2),
+                                                    blurRadius: 15,
+                                                    spreadRadius: 0,
+                                                  )
+                                                ],
+                                              ),
                                               child: Container(
-                                                height: 19,
-                                                clipBehavior: Clip.antiAlias,
+                                                width: 32,
+                                                height: 32,
                                                 decoration: BoxDecoration(
-                                                    color: context.color.secondaryColor
-                                                        .withOpacity(0.7),
-                                                    borderRadius:
-                                                    BorderRadius.circular(4)),
-                                                child: BackdropFilter(
-                                                  filter: ImageFilter.blur(
-                                                      sigmaX: 2, sigmaY: 3),
-                                                  child: Padding(
-                                                    padding: const EdgeInsets.symmetric(
-                                                        horizontal: 8.0),
-                                                    child: Center(
-                                                      child: Text(projects![index]['category'] != null ?
-                                                      projects![index]['category']!['category'] : '',
-                                                      )
-                                                          .color(
-                                                        context.color.textColorDark,
-                                                      )
-                                                          .bold(weight: FontWeight.w500)
-                                                          .size(10),
-                                                    ),
-                                                  ),
+                                                  color: context.color.primaryColor,
+                                                  shape: BoxShape.circle,
+                                                  boxShadow: const [
+                                                    BoxShadow(
+                                                        color: Color.fromARGB(33, 0, 0, 0),
+                                                        offset: Offset(0, 2),
+                                                        blurRadius: 15,
+                                                        spreadRadius: 0)
+                                                  ],
+                                                ),
+                                                child: Center(
+                                                    child: (likeLoading![index])
+                                                        ? UiUtils.progress(width: 20, height: 20)
+                                                        : projects?['is_favourite'] == 1
+                                                        ? UiUtils.getSvg(
+                                                      AppIcons.like_fill,
+                                                      color: context.color.tertiaryColor,
+                                                    )
+                                                        : UiUtils.getSvg(AppIcons.like,
+                                                        color: context.color.tertiaryColor)
                                                 ),
                                               ),
                                             ),
-                                            // Positioned(
-                                            //   right: 8,
-                                            //   top: 8,
-                                            //   child: InkWell(
-                                            //     onTap: () {
-                                            //       GuestChecker.check(onNotGuest: () async {
-                                            //         setState(() {
-                                            //           widget.likeLoading![index] = true;
-                                            //         });
-                                            //         var body = {
-                                            //           "type": widget.projectList![index]['is_favourite'] == 1 ? 0 : 1,
-                                            //           "project_id": widget.projectList![index]['id']
-                                            //         };
-                                            //         var response = await Api.post(
-                                            //             url: Api.addFavProject, parameter: body);
-                                            //         if (!response['error']) {
-                                            //           widget.projectList![index]['is_favourite'] = (widget.projectList![index]['is_favourite'] == 1 ? 0 : 1);
-                                            //           setState(() {
-                                            //             widget.likeLoading![index] = false;
-                                            //           });
-                                            //
-                                            //         }
-                                            //       });
-                                            //     },
-                                            //     child: Container(
-                                            //       width: 32,
-                                            //       height: 32,
-                                            //       decoration: BoxDecoration(
-                                            //         color: context.color.secondaryColor,
-                                            //         shape: BoxShape.circle,
-                                            //         boxShadow: const [
-                                            //           BoxShadow(
-                                            //             color:
-                                            //             Color.fromARGB(12, 0, 0, 0),
-                                            //             offset: Offset(0, 2),
-                                            //             blurRadius: 15,
-                                            //             spreadRadius: 0,
-                                            //           )
-                                            //         ],
-                                            //       ),
-                                            //       child: Container(
-                                            //         width: 32,
-                                            //         height: 32,
-                                            //         decoration: BoxDecoration(
-                                            //           color: context.color.primaryColor,
-                                            //           shape: BoxShape.circle,
-                                            //           boxShadow: const [
-                                            //             BoxShadow(
-                                            //                 color: Color.fromARGB(33, 0, 0, 0),
-                                            //                 offset: Offset(0, 2),
-                                            //                 blurRadius: 15,
-                                            //                 spreadRadius: 0)
-                                            //           ],
-                                            //         ),
-                                            //         child: Center(
-                                            //             child:
-                                            //             (widget.likeLoading![index])
-                                            //                 ? UiUtils.progress(width: 20, height: 20)
-                                            //                 : widget.projectList![index]['is_favourite'] == 1
-                                            //                 ?
-                                            //             UiUtils.getSvg(
-                                            //               AppIcons.like_fill,
-                                            //               color: context.color.tertiaryColor,
-                                            //             )
-                                            //                 : UiUtils.getSvg(AppIcons.like,
-                                            //                 color: context.color.tertiaryColor)
-                                            //         ),
-                                            //       ),
-                                            //     ),
-                                            //   ),
-                                            // ),
-                                          ],
-                                        ),
-                                      ),
-                                    ],
-                                  ),
-                                  Padding(
-                                    padding: const EdgeInsets.only(left:10,right: 10),
-                                    child: Column(
-                                      crossAxisAlignment: CrossAxisAlignment.start,
-                                      mainAxisAlignment:
-                                      MainAxisAlignment.spaceEvenly,
-                                      children: [
-                                        SizedBox(height: 6,),
-                                        Text(
-                                          projects![index]['title'],
-                                          maxLines: 1,
-                                          overflow: TextOverflow.ellipsis,
-                                          style: TextStyle(
-                                              color: Color(0xff333333),
-                                              fontSize: 12.5,
-                                              fontWeight: FontWeight.w500
                                           ),
                                         ),
-                                        SizedBox(height: 4,),
-                                        if (projects![index]['address'] != "")
-                                          Padding(
-                                            padding: const EdgeInsets.only(bottom: 4),
-                                            child: Row(
-                                              children: [
-                                                Image.asset("assets/Home/__location.png",width:15,fit: BoxFit.cover,height: 15,),
-                                                SizedBox(width: 5,),
-                                                Expanded(
-                                                    child: Text(
-                                                      projects![index]['address']?.trim() ?? "",  maxLines: 1,
-                                                      overflow: TextOverflow.ellipsis,
+                                        if (projects?['gallary_images'] != null)
+                                          Positioned(
+                                            right: 48,
+                                            top: 8,
+                                            child: InkWell(
+                                              onTap: () {
+                                                Navigator.push(context,
+                                                    BlurredRouter(
+                                                      builder: (context) {
+                                                        return AllGallaryImages(
+                                                            images: projects?['gallary_images'] ?? [],
+                                                            isProject: true);
+                                                      },
+                                                    ));
+                                              },
+                                              child: Container(
+                                                width: 35,
+                                                height: 25,
+                                                decoration: BoxDecoration(
+                                                  color: Color(0xff000000).withOpacity(0.35),
+                                                  borderRadius: BorderRadius.circular(8),
+                                                  border: Border.all(width: 1, color: Color(0xffe0e0e0)),
+                                                  boxShadow: const [
+                                                    BoxShadow(
+                                                      color: Color.fromARGB(12, 0, 0, 0),
+                                                      offset: Offset(0, 2),
+                                                      blurRadius: 15,
+                                                      spreadRadius: 0,
+                                                    )
+                                                  ],
+                                                ),
+                                                child: Row(
+                                                  mainAxisAlignment: MainAxisAlignment.center,
+                                                  children: [
+                                                    Icon(
+                                                        Icons.image,
+                                                        color: Color(0xffe0e0e0),
+                                                        size: 15
+                                                    ),
+                                                    SizedBox(width: 3,),
+                                                    Text('${projects?['gallary_images']!.length}',
                                                       style: TextStyle(
-                                                          color: Color(0xffa2a2a2),
-                                                          fontSize: 9,
-                                                          fontWeight: FontWeight.w400
-                                                      ),)
-                                                )
-                                              ],
+                                                          color: Color(0xffe0e0e0),
+                                                          fontSize: 10
+                                                      ),),
+                                                  ],
+                                                ),
+                                              ),
                                             ),
                                           ),
-                                        Text(
-                                          '${projects![index]['project_details'].length > 0 ? projects![index]['project_details'][0]['avg_price'] : 0}'
-                                              .toString()
-                                              .formatAmount(
-                                            prefix: true,
-                                          ),
-                                          maxLines: 1,
-                                          overflow: TextOverflow.ellipsis,
-                                          style: TextStyle(
-                                              color: Color(0xff333333),
-                                              fontSize: 9,
-                                              fontWeight: FontWeight.w500
-                                          ),
-                                        ),
-                                        SizedBox(height: 4,),
-                                        Text("Ready To Move",
-                                          maxLines: 1,
-                                          overflow: TextOverflow.ellipsis,
-                                          style: TextStyle(
-                                              color: Color(0xffa2a2a2),
-                                              fontSize: 9,
-                                              fontWeight: FontWeight.w400
-                                          ),
-                                        ),
                                       ],
+                                    ),
+                                  ),
+                                  Expanded(
+                                    child: Padding(
+                                      padding: const EdgeInsets.only(left: 10, right: 10),
+                                      child: Column(
+                                        crossAxisAlignment: CrossAxisAlignment.start,
+                                        mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                                        children: [
+                                          Text(
+                                            projects?['title'],
+                                            maxLines: 1,
+                                            overflow: TextOverflow.ellipsis,
+                                            style: TextStyle(
+                                                color: Color(0xff333333),
+                                                fontSize: 12.5,
+                                                fontWeight: FontWeight.w500
+                                            ),
+                                          ),
+                                          if (projects?['min_price'] == null)
+                                            Row(
+                                              children: [
+                                                Text(
+                                                  '₹${projects?['project_details'].length > 0 ? formatAmount(projects?['project_details'][0]['avg_price'] ?? 0) : 0}'
+                                                      .toString(),
+                                                  maxLines: 1,
+                                                  overflow: TextOverflow.ellipsis,
+                                                  style: TextStyle(
+                                                      color: Color(0xff333333),
+                                                      fontSize: 12,
+                                                      fontFamily: 'Robato',
+                                                      fontWeight: FontWeight.w500
+                                                  ),
+                                                ),
+                                                Padding(
+                                                  padding: const EdgeInsets.symmetric(horizontal: 8.0),
+                                                  child: Container(
+                                                    height: 12,
+                                                    width: 2,
+                                                    color: Colors.black54,
+                                                  ),
+                                                ),
+                                                Text(
+                                                  '${projects?['project_details'].length > 0 ? formatAmount(projects?['project_details'][0]['size'] ?? 0) : 0} Sq.ft'
+                                                      .toString(),
+                                                  maxLines: 1,
+                                                  overflow: TextOverflow.ellipsis,
+                                                  style: TextStyle(
+                                                      color: Color(0xffa2a2a2),
+                                                      fontSize: 9,
+                                                      fontWeight: FontWeight.w500
+                                                  ),
+                                                ),
+                                              ],
+                                            ),
+                                          if (projects?['min_price'] != null)
+                                            Row(
+                                              children: [
+                                                Text(
+                                                  '₹${formatAmount(projects?['min_price'] ?? 0)} - ${formatAmount(projects?['max_price'] ?? 0)}'
+                                                      .toString(),
+                                                  maxLines: 1,
+                                                  overflow: TextOverflow.ellipsis,
+                                                  style: TextStyle(
+                                                      color: Color(0xff333333),
+                                                      fontSize: 12,
+                                                      fontFamily: 'Robato',
+                                                      fontWeight: FontWeight.w500
+                                                  ),
+                                                ),
+                                              ],
+                                            ),
+                                          if (projects?['min_price'] != null)
+                                            Row(
+                                              children: [
+                                                Text(
+                                                  '${projects?['min_size']} - ${projects?['max_size']} Sq.ft'
+                                                      .toString(),
+                                                  maxLines: 1,
+                                                  overflow: TextOverflow.ellipsis,
+                                                  style: TextStyle(
+                                                      color: Color(0xffa2a2a2),
+                                                      fontSize: 10,
+                                                      fontWeight: FontWeight.w500
+                                                  ),
+                                                ),
+                                              ],
+                                            ),
+                                          if (projects?['address'] != "")
+                                            Padding(
+                                              padding: const EdgeInsets.only(bottom: 4),
+                                              child: Row(
+                                                children: [
+                                                  Image.asset("assets/Home/__location.png", width: 15, fit: BoxFit.cover, height: 15,),
+                                                  SizedBox(width: 5,),
+                                                  Expanded(
+                                                      child: Text(
+                                                        projects?['address']?.trim() ?? "", maxLines: 1,
+                                                        overflow: TextOverflow.ellipsis,
+                                                        style: TextStyle(
+                                                            color: Color(0xffa2a2a2),
+                                                            fontSize: 9,
+                                                            fontWeight: FontWeight.w400
+                                                        ),)
+                                                  )
+                                                ],
+                                              ),
+                                            ),
+                                        ],
+                                      ),
                                     ),
                                   ),
                                 ],

@@ -77,6 +77,18 @@ class _FavoritesScreenState extends State<FavoritesScreen> {
     }
   }
 
+  String formatAmount(number) {
+    String result = '';
+    if(number >= 10000000) {
+      result = '${(number/10000000).toStringAsFixed(2)} Cr';
+    } else if(number >= 100000) {
+      result = '${(number/100000).toStringAsFixed(2)} Laks';
+    } else {
+      result = number.toStringAsFixed(2);
+    }
+    return result;
+  }
+
   @override
   void dispose() {
     _pageScrollController.dispose();
@@ -256,7 +268,7 @@ class _FavoritesScreenState extends State<FavoritesScreen> {
                                     crossAxisCount: 2,
                                     crossAxisSpacing: 8,
                                     mainAxisSpacing: 8,
-                                        childAspectRatio: MediaQuery.sizeOf(context).height / 950,
+                                        childAspectRatio: MediaQuery.sizeOf(context).height / 1000,
 
                                   ),
                                   itemBuilder: (context, index) {
@@ -492,25 +504,63 @@ class _FavoritesScreenState extends State<FavoritesScreen> {
                                                             SizedBox(
                                                               height: 4,
                                                             ),
-                                                            Text(
-                                                              '${favProjectsList[index]['project_details'].length > 0 ? favProjectsList[index]['project_details'][0]['avg_price'] : 0}'
-                                                                  .toString()
-                                                                  .formatAmount(
-                                                                    prefix:
-                                                                        true,
+                                                            if (favProjectsList[index]['min_price'] == null)
+                                                              Row(
+                                                                children: [
+                                                                  Text(
+                                                                    '₹${favProjectsList[index]['project_details'].isNotEmpty
+                                                                        ? formatAmount(favProjectsList[index]['project_details'][0]['avg_price'] ?? 0)
+                                                                        : 0}',
+                                                                    style: const TextStyle(
+                                                                      color: Color(0xff333333),
+                                                                      fontSize: 12,
+                                                                      fontFamily: 'Robato',
+                                                                      fontWeight: FontWeight.w500,
+                                                                    ),
                                                                   ),
-                                                              maxLines: 1,
-                                                              overflow:
-                                                                  TextOverflow
-                                                                      .ellipsis,
-                                                              style: TextStyle(
-                                                                  color: Color(
-                                                                      0xff333333),
-                                                                  fontSize: 9,
-                                                                  fontWeight:
-                                                                      FontWeight
-                                                                          .w500),
-                                                            ),
+                                                                  Padding(
+                                                                    padding: const EdgeInsets.symmetric(horizontal: 8.0),
+                                                                    child: Container(height: 12, width: 2, color: Colors.black54),
+                                                                  ),
+                                                                  Text(
+                                                                    '${favProjectsList[index]['project_details'].isNotEmpty
+                                                                        ? favProjectsList[index]['project_details'][0]['size']
+                                                                        : 0} Sq.ft',
+                                                                    style: const TextStyle(
+                                                                      color: Colors.black87,
+                                                                      fontSize: 9,
+                                                                      fontWeight: FontWeight.w500,
+                                                                    ),
+                                                                  ),
+                                                                ],
+                                                              ),
+                                                            if (favProjectsList[index]['min_price'] != null)
+                                                              Row(
+                                                                children: [
+                                                                  Text(
+                                                                    '₹${formatAmount(favProjectsList[index]['min_price'] ?? 0)} - ${formatAmount(favProjectsList[index]['max_price'] ?? 0)}',
+                                                                    style: const TextStyle(
+                                                                      color: Color(0xff333333),
+                                                                      fontSize: 12,
+                                                                      fontFamily: 'Robato',
+                                                                      fontWeight: FontWeight.w500,
+                                                                    ),
+                                                                  ),
+                                                                ],
+                                                              ),
+                                                            if (favProjectsList[index]['min_price'] != null)
+                                                              Row(
+                                                                children: [
+                                                                  Text(
+                                                                    '${favProjectsList[index]['min_size']} - ${favProjectsList[index]['max_size']} Sq.ft',
+                                                                    style: const TextStyle(
+                                                                      color: Colors.black87,
+                                                                      fontSize: 10,
+                                                                      fontWeight: FontWeight.w500,
+                                                                    ),
+                                                                  ),
+                                                                ],
+                                                              ),
                                                             SizedBox(
                                                               height: 4,
                                                             ),

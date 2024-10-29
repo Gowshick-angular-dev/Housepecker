@@ -72,19 +72,19 @@ class _AddPropertyDetailsState extends State<AddPropertyDetails> {
   FocusNode placesFocusNode = FocusNode();
 
   late final TextEditingController _propertyNameController =
-      TextEditingController(text: widget.propertyDetails?['name']);
+      TextEditingController(text: widget.propertyDetails?['title']);
   late final TextEditingController _reraController =
       TextEditingController(text: widget.propertyDetails?['rera']);
   late final TextEditingController _FLoorController =
-      TextEditingController(text: widget.propertyDetails?['']);
+      TextEditingController(text: widget.propertyDetails?['floor_no']);
   late final TextEditingController _sqftController =
       TextEditingController(text: widget.propertyDetails?['sqft'].toString());
   late final TextEditingController _highlightController =
       TextEditingController(text: widget.propertyDetails?['highlight']);
   late final TextEditingController _brokerageControler =
-      TextEditingController(text: widget.propertyDetails?['brokerage']);
+      TextEditingController(text: (widget.propertyDetails?['brokerage'] ?? '')!.toLowerCase());
   late final TextEditingController _descriptionController =
-      TextEditingController(text: widget.propertyDetails?['desc']);
+      TextEditingController(text: widget.propertyDetails?['description']);
   late final TextEditingController _priceController =
       TextEditingController(text: widget.propertyDetails?['price']);
   late final TextEditingController _clientAddressController =
@@ -111,7 +111,13 @@ class _AddPropertyDetailsState extends State<AddPropertyDetails> {
 
   @override
   void initState() {
+
     print("dddddddd${widget.propertyDetails}");
+    if(widget.propertyDetails != null) {
+      print('rrrrrrrrrrrrrrrrrrrrrrrrrrr: ${widget.propertyDetails?['floor_no']}');
+      PropertyTyperole = widget.propertyDetails!['property_type'] == 'sell' ? 'Sell' : 'Rent/Lease';
+      selectedDuration = widget.propertyDetails?['rentduration'];
+    }
 
     getPackages();
     print(
@@ -133,13 +139,12 @@ class _AddPropertyDetailsState extends State<AddPropertyDetails> {
       Map settings =
           await _systemRepository.fetchSystemSettings(isAnonymouse: false);
 
-      List allPacks = settings['data']['package']['user_purchased_package'];
+      List allPacks = settings['data']['package'] != null ? settings['data']['package']['user_purchased_package'] : [];
       Map freepackage = settings['data']['free_package'];
-
       if (freepackage != null) {
         setState(() {
-          remainFreeProPost = freepackage['property_limit'] -
-              freepackage['used_property_limit'];
+          freeDuration = freepackage['duration'] ?? 0;
+          remainFreeProPost = freepackage['property_limit'] - freepackage['used_property_limit'];
         });
       }
 
@@ -178,56 +183,209 @@ class _AddPropertyDetailsState extends State<AddPropertyDetails> {
     }
   }
 
-  void _onTapContinue() async {
-      _formKey.currentState?.save();
+  // void _onTapContinue() async {
+  //     _formKey.currentState?.save();
+  //
+  //     if (_propertyNameController.text == '' || PropertyTyperole == '' || (PropertyTyperole == 'Rent/Lease' && selectedDuration == '') ||  _priceController.text == '' ||
+  //         _descriptionController.text == '' || _sqftController.text == '' || _brokerageControler.text == '' || ((Constant.addProperty['category']
+  //         as Category).id != '3' && _FLoorController.text == '') || !((remainFreeProPost > 0 &&
+  //         selectedPackage == 0 && selectedRole == 'Free Listing') || selectedPackage != 0)) {
+  //       Future.delayed(Duration.zero, () {
+  //         UiUtils.showBlurredDialoge(context,
+  //             sigmaX: 5,
+  //             sigmaY: 5,
+  //             dialoge: BlurredDialogBox(
+  //               svgImagePath: AppIcons.warning,
+  //               title: UiUtils.getTranslatedLabel(context, "incomplete"),
+  //               showCancleButton: false,
+  //               acceptTextColor: context.color.buttonColor,
+  //               onAccept: () async {
+  //                 // Navigator.pop(context);
+  //               },
+  //               content: RichText(
+  //                 text: const TextSpan(
+  //                   children: [
+  //                     TextSpan(
+  //                       text: 'Please fill all the "',
+  //                       style: TextStyle(
+  //                           color: Colors.black,
+  //                           fontSize: 15,
+  //                           fontWeight: FontWeight.w600),
+  //                     ),
+  //                     TextSpan(
+  //                       text: "*",
+  //                       style: TextStyle(
+  //                           color:
+  //                           Colors.red), // Customize asterisk color
+  //                     ),
+  //                     TextSpan(
+  //                       text: '" fields!',
+  //                       style: TextStyle(
+  //                           color: Colors.black,
+  //                           fontSize: 15,
+  //                           fontWeight: FontWeight.w600),
+  //                     ),
+  //                   ],
+  //                 ),
+  //               ),
+  //             ));
+  //       });
+  //       return;
+  //     }
+  //
+  //     propertyData.addAll({
+  //       'userid': HiveUtils.getUserId(),
+  //       'package_id': selectedPackage.toString(),
+  //       "title": _propertyNameController.text,
+  //       "rera": _reraController.text,
+  //       "sqft": _sqftController.text,
+  //       "rentduration": selectedDuration,
+  //       "highlight": _highlightController.text,
+  //       "brokerage": _brokerageControler.text.toLowerCase(),
+  //       "description": _descriptionController.text,
+  //       "client_address": _clientAddressController.text,
+  //       "price": _priceController.text,
+  //       "floor_no": _FLoorController.text,
+  //       "category_id": (Constant.addProperty['category'] as Category).id,
+  //       "property_type": PropertyTyperole == 'Rent/Lease' ? '1' : '0',
+  //       if ((widget.propertyDetails == null
+  //                   ? (Constant.addProperty['propertyType'] as PropertyType)
+  //                       .name
+  //                   : widget.propertyDetails?['propType'])
+  //               .toString()
+  //               .toLowerCase() ==
+  //           "rent")
+  //       "rentduration": selectedRentType,
+  //     });
+  //
+  //     if (widget.propertyDetails?.containsKey("assign_facilities") ?? false) {
+  //       propertyData?["assign_facilities"] =
+  //           widget.propertyDetails!['assign_facilities'];
+  //     }
+  //     if (widget.propertyDetails != null) {
+  //       propertyData['id'] = widget.propertyDetails?['id'];
+  //       propertyData['action_type'] = "0";
+  //     }
+  //
+  //     Future.delayed(
+  //       Duration.zero,
+  //       () {
+  //
+  //         Navigator.push(context,
+  //           MaterialPageRoute(
+  //               builder:
+  //                   (context) => PropertyParametersPage(
+  //               details: propertyData,
+  //               propertyDetails: widget.propertyDetails,
+  //               isUpdate: (widget.propertyDetails != null)
+  //         )));
+  //
+  //         // Navigator.pushNamed(
+  //         //   context,
+  //         //   Routes.setPropertyParametersScreen,
+  //         //   arguments: {
+  //         //     "details": propertyData,
+  //         //     "isUpdate": (widget.propertyDetails != null)
+  //         //   },
+  //         // ).then((value) {
+  //         //   _pickTitleImage.resumeSubscription();
+  //         // });
+  //       },
+  //     );
+  //   // }
+  // }
 
-      if (_propertyNameController.text == '' || PropertyTyperole == '' ||  _priceController.text == ''
-          || _descriptionController.text == '' || _sqftController.text == '' || _FLoorController.text == ''
-          || !((remainFreeProPost > 0 && selectedPackage == 0 && selectedRole == 'Free Listing') || selectedPackage != 0)
-      ) {
-        Future.delayed(Duration.zero, () {
-          UiUtils.showBlurredDialoge(context,
-              sigmaX: 5,
-              sigmaY: 5,
-              dialoge: BlurredDialogBox(
-                svgImagePath: AppIcons.warning,
-                title: UiUtils.getTranslatedLabel(context, "incomplete"),
-                showCancleButton: false,
-                acceptTextColor: context.color.buttonColor,
-                onAccept: () async {
-                  // Navigator.pop(context);
-                },
-                content: RichText(
-                  text: const TextSpan(
-                    children: [
-                      TextSpan(
-                        text: 'Please fill all the "',
-                        style: TextStyle(
-                            color: Colors.black,
-                            fontSize: 15,
-                            fontWeight: FontWeight.w600),
-                      ),
-                      TextSpan(
-                        text: "*",
-                        style: TextStyle(
-                            color:
-                            Colors.red), // Customize asterisk color
-                      ),
-                      TextSpan(
-                        text: '" fields!',
-                        style: TextStyle(
-                            color: Colors.black,
-                            fontSize: 15,
-                            fontWeight: FontWeight.w600),
-                      ),
-                    ],
+  void _onTapContinue() async {
+    if(loading) {
+      return;
+    }
+    _formKey.currentState?.save();
+
+    if (!((remainFreeProPost > 0 && selectedPackage == 0 && selectedRole == 'Free Listing') || selectedPackage != 0)) {
+      Future.delayed(Duration.zero, () {
+        UiUtils.showBlurredDialoge(
+          context,
+          sigmaX: 5,
+          sigmaY: 5,
+          dialoge: BlurredDialogBox(
+            svgImagePath: AppIcons.warning,
+            title: "",
+            showCancleButton: false,
+            acceptTextColor: context.color.buttonColor,
+            onAccept: () async {
+              // Navigator.pop(context);
+            },
+            content: RichText(
+              text: const TextSpan(
+                children: [
+                  TextSpan(
+                    text: "Property type dose not match this package",
+                    style: TextStyle(
+                        color: Colors.black,
+                        fontSize: 15,
+                        fontWeight: FontWeight.w600),
                   ),
+                ],
+              ),
+            ),
+          ),
+        );
+      });
+    }else{
+      List<String> missingFields = [];
+
+      if (_propertyNameController.text == '') missingFields.add("Property Name");
+      if (PropertyTyperole == '') missingFields.add("Property Type Role");
+      if (_priceController.text == '') missingFields.add("Price");
+      if (_brokerageControler.text == '') missingFields.add("Brokerage");
+      if (_descriptionController.text == '') missingFields.add("Description");
+      if (_sqftController.text == '') missingFields.add("Square Feet");
+      if ((Constant.addProperty['category'] as Category).id != '3' && _FLoorController.text == '') {
+        missingFields.add("Floor");
+      }
+
+
+
+
+      if (missingFields.isNotEmpty) {
+        Future.delayed(Duration.zero, () {
+          UiUtils.showBlurredDialoge(
+            context,
+            sigmaX: 5,
+            sigmaY: 5,
+            dialoge: BlurredDialogBox(
+              svgImagePath: AppIcons.warning,
+              title: UiUtils.getTranslatedLabel(context, "incomplete"),
+              showCancleButton: false,
+              acceptTextColor: context.color.buttonColor,
+              onAccept: () async {
+                // Navigator.pop(context);
+              },
+              content: RichText(
+                text: TextSpan(
+                  children: [
+                    TextSpan(
+                      text: 'Please fill in the following required fields:\n',
+                      style: TextStyle(
+                          color: Colors.black,
+                          fontSize: 15,
+                          fontWeight: FontWeight.w600),
+                    ),
+                    ...missingFields.map((field) => TextSpan(
+                      text: "- $field\n",
+                      style: TextStyle(
+                          color: Colors.red,
+                          fontSize: 15,
+                          fontWeight: FontWeight.w500),
+                    )),
+                  ],
                 ),
-              ));
+              ),
+            ),
+          );
         });
         return;
       }
-
       propertyData.addAll({
         'userid': HiveUtils.getUserId(),
         'package_id': selectedPackage.toString(),
@@ -240,23 +398,21 @@ class _AddPropertyDetailsState extends State<AddPropertyDetails> {
         "client_address": _clientAddressController.text,
         "price": _priceController.text,
         "floor": _FLoorController.text,
-        "category_id": widget.propertyDetails == null
-            ? (Constant.addProperty['category'] as Category).id
-            : widget.propertyDetails?['catId'],
+        "category_id": (Constant.addProperty['category'] as Category).id,
         "property_type": PropertyTyperole == 'Rent/Lease' ? '1' : '0',
         if ((widget.propertyDetails == null
-                    ? (Constant.addProperty['propertyType'] as PropertyType)
-                        .name
-                    : widget.propertyDetails?['propType'])
-                .toString()
-                .toLowerCase() ==
+            ? (Constant.addProperty['propertyType'] as PropertyType)
+            .name
+            : widget.propertyDetails?['propType'])
+            .toString()
+            .toLowerCase() ==
             "rent")
-        "rentduration": selectedRentType,
+          "rentduration": selectedRentType,
       });
 
       if (widget.propertyDetails?.containsKey("assign_facilities") ?? false) {
         propertyData?["assign_facilities"] =
-            widget.propertyDetails!['assign_facilities'];
+        widget.propertyDetails!['assign_facilities'];
       }
       if (widget.propertyDetails != null) {
         propertyData['id'] = widget.propertyDetails?['id'];
@@ -265,16 +421,16 @@ class _AddPropertyDetailsState extends State<AddPropertyDetails> {
 
       Future.delayed(
         Duration.zero,
-        () {
+            () {
 
           Navigator.push(context,
-            MaterialPageRoute(
-                builder:
-                    (context) => PropertyParametersPage(
-                details: propertyData,
-                propertyDetails: widget.propertyDetails,
-                isUpdate: (widget.propertyDetails != null)
-          )));
+              MaterialPageRoute(
+                  builder:
+                      (context) => PropertyParametersPage(
+                      details: propertyData,
+                      propertyDetails: widget.propertyDetails,
+                      isUpdate: (widget.propertyDetails != null)
+                  )));
 
           // Navigator.pushNamed(
           //   context,
@@ -288,6 +444,56 @@ class _AddPropertyDetailsState extends State<AddPropertyDetails> {
           // });
         },
       );
+    }
+
+
+    // if (propertyNameController.text == '' || PropertyTyperole == '' ||  priceController.text == '' ||
+    //     descriptionController.text == '' || sqftController.text == '' || ((Constant.addProperty['category']
+    // as Category).id != '3' && _FLoorController.text == '') || !((remainFreeProPost > 0 && selectedPackage == 0 && selectedRole == 'Free Listing') || selectedPackage != 0)) {
+    //   Future.delayed(Duration.zero, () {
+    //     UiUtils.showBlurredDialoge(context,
+    //         sigmaX: 5,
+    //         sigmaY: 5,
+    //         dialoge: BlurredDialogBox(
+    //           svgImagePath: AppIcons.warning,
+    //           title: UiUtils.getTranslatedLabel(context, "incomplete"),
+    //           showCancleButton: false,
+    //           acceptTextColor: context.color.buttonColor,
+    //           onAccept: () async {
+    //             // Navigator.pop(context);
+    //           },
+    //           content: RichText(
+    //             text: const TextSpan(
+    //               children: [
+    //                 TextSpan(
+    //                   text: 'Please fill all the "',
+    //                   style: TextStyle(
+    //                       color: Colors.black,
+    //                       fontSize: 15,
+    //                       fontWeight: FontWeight.w600),
+    //                 ),
+    //                 TextSpan(
+    //                   text: "*",
+    //                   style: TextStyle(
+    //                       color:
+    //                       Colors.red), // Customize asterisk color
+    //                 ),
+    //                 TextSpan(
+    //                   text: '" fields!',
+    //                   style: TextStyle(
+    //                       color: Colors.black,
+    //                       fontSize: 15,
+    //                       fontWeight: FontWeight.w600),
+    //                 ),
+    //               ],
+    //             ),
+    //           ),
+    //         ));
+    //   });
+    //   return;
+    // }
+
+
     // }
   }
 
@@ -328,7 +534,7 @@ class _AddPropertyDetailsState extends State<AddPropertyDetails> {
         context,
         title: widget.propertyDetails == null
             ? 'Post Property'
-            : 'Update property',
+            : 'Edit Property',
         actions: const [
           Text(
             "2/5",
@@ -350,6 +556,7 @@ class _AddPropertyDetailsState extends State<AddPropertyDetails> {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
+                  // Text('${widget.propertyDetails}'),
                   const Text("Property Details",
                     style: TextStyle(
                       color: Colors.black54,
@@ -384,7 +591,8 @@ class _AddPropertyDetailsState extends State<AddPropertyDetails> {
                       if (selectedRole == 'Free Listing' && !loading)
                         Text(
                           remainFreeProPost > 0
-                              ? "Note: This post is valid for $freeDuration days from the date of posting."
+                              ? HiveUtils.getUserDetails().role == '3' ? "Note: This post is valid for 1 year from the date of posting." : "Note: This post is valid for $freeDuration months from the date of posting."
+                              // ? "Note: This post is valid for 1 year from the date of posting."
                               : "Free Listing limit exceeded.",
                           style:
                               const TextStyle(color: Colors.red, fontSize: 12),
@@ -803,9 +1011,11 @@ class _AddPropertyDetailsState extends State<AddPropertyDetails> {
                                     value: 'Sell',
                                     groupValue: PropertyTyperole,
                                     onChanged: (value) {
-                                      setState(() {
-                                        PropertyTyperole = value!;
-                                      });
+                                      if(widget.propertyDetails == null) {
+                                        setState(() {
+                                          PropertyTyperole = value!;
+                                        });
+                                      }
                                     },
                                   ),
                                   Text(
@@ -834,9 +1044,11 @@ class _AddPropertyDetailsState extends State<AddPropertyDetails> {
                                     value: 'Rent/Lease',
                                     groupValue: PropertyTyperole,
                                     onChanged: (value) {
-                                      setState(() {
-                                        PropertyTyperole = value!;
-                                      });
+                                      if(widget.propertyDetails == null) {
+                                        setState(() {
+                                          PropertyTyperole = value!;
+                                        });
+                                      }
                                     },
                                   ),
                                   const Text(
@@ -884,8 +1096,7 @@ class _AddPropertyDetailsState extends State<AddPropertyDetails> {
                         controller: _propertyNameController,
                         // validator: CustomTextFieldValidator1.nullCheck,
                         action: TextInputAction.next,
-                        hintText: UiUtils.getTranslatedLabel(
-                            context, "propertyNameLbl"),
+                        hintText: 'Enter Property Title',
                       ),
                       SizedBox(
                         height: 15.rh(context),
@@ -1120,7 +1331,7 @@ class _AddPropertyDetailsState extends State<AddPropertyDetails> {
                         action: TextInputAction.next,
                         controller: _descriptionController,
                         // validator: CustomTextFieldValidator1.nullCheck,
-                        hintText: 'Enter about property',
+                        hintText: 'Enter About Property',
                         maxLine: 100,
                         minLine: 6,
                       ),
@@ -1153,7 +1364,7 @@ class _AddPropertyDetailsState extends State<AddPropertyDetails> {
                       CustomTextFormField1(
                         controller: _reraController,
                         action: TextInputAction.next,
-                        hintText: 'RERA No.',
+                        hintText: 'Sdsd/213232/Fsf/6',
                       ),
                       SizedBox(
                         height: 15.rh(context),
@@ -1186,15 +1397,72 @@ class _AddPropertyDetailsState extends State<AddPropertyDetails> {
                       ),
                       CustomTextFormField1(
                         controller: _sqftController,
+                        keyboard: TextInputType.number,
                         // validator: CustomTextFieldValidator1.nullCheck,
                         action: TextInputAction.next,
-                        hintText: 'Property Area',
+                        hintText: '2650 Sq.Ft',
                       ),
                       SizedBox(
                         height: 15.rh(context),
                       ),
                     ],
                   ),
+                  // Column(
+                  //   crossAxisAlignment: CrossAxisAlignment.start,
+                  //   children: [
+                  //     RichText(
+                  //       text: const TextSpan(
+                  //         children: [
+                  //           TextSpan(
+                  //             text: "Brokerage",
+                  //             style: TextStyle(
+                  //                 color: Colors.black,
+                  //                 fontSize: 15,
+                  //                 fontWeight: FontWeight.w600),
+                  //           ),
+                  //           TextSpan(
+                  //             text: " *",
+                  //             style: TextStyle(
+                  //                 color:
+                  //                 Colors.red), // Customize asterisk color
+                  //           ),
+                  //         ],
+                  //       ),
+                  //     ),
+                  //     const SizedBox(
+                  //       height: 10,
+                  //     ),
+                  //     Row(
+                  //       children: [
+                  //         Expanded(
+                  //           child: MultiSelectDropDown(
+                  //             onOptionSelected:
+                  //                 (List<ValueItem> selectedOptions) {
+                  //               setState(() {
+                  //                 _brokerageControler.text =
+                  //                 selectedOptions[0].value!;
+                  //               });
+                  //             },
+                  //             options: [
+                  //               const ValueItem(label: "Yes", value: "yes"),
+                  //               const ValueItem(label: "No", value: "no"),
+                  //             ],
+                  //             selectionType: SelectionType.single,
+                  //             chipConfig:
+                  //             const ChipConfig(wrapType: WrapType.wrap),
+                  //             dropdownHeight: 300,
+                  //             optionTextStyle: const TextStyle(fontSize: 15),
+                  //             selectedOptionIcon:
+                  //             const Icon(Icons.check_circle),
+                  //           ),
+                  //         ),
+                  //       ],
+                  //     ),
+                  //     const SizedBox(
+                  //       height: 15,
+                  //     ),
+                  //   ],
+                  // ),
                   Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
@@ -1204,50 +1472,58 @@ class _AddPropertyDetailsState extends State<AddPropertyDetails> {
                             TextSpan(
                               text: "Brokerage",
                               style: TextStyle(
-                                  color: Colors.black,
-                                  fontSize: 15,
-                                  fontWeight: FontWeight.w600),
+                                color: Colors.black,
+                                fontSize: 15,
+                                fontWeight: FontWeight.w600,
+                              ),
                             ),
                             TextSpan(
                               text: " *",
                               style: TextStyle(
-                                  color:
-                                  Colors.red), // Customize asterisk color
+                                color:
+                                Colors.red, // Customize asterisk color
+                              ),
                             ),
                           ],
                         ),
                       ),
-                      const SizedBox(
-                        height: 10,
-                      ),
-                      Row(
-                        children: [
-                          Expanded(
-                            child: MultiSelectDropDown(
-                              onOptionSelected:
-                                  (List<ValueItem> selectedOptions) {
-                                setState(() {
-                                  _brokerageControler.text =
-                                  selectedOptions[0].value!;
-                                });
-                              },
-                              options: [
-                                const ValueItem(label: "Yes", value: "yes"),
-                                const ValueItem(label: "No", value: "no"),
-                              ],
-                              selectionType: SelectionType.single,
-                              chipConfig:
-                              const ChipConfig(wrapType: WrapType.wrap),
-                              dropdownHeight: 300,
-                              optionTextStyle: const TextStyle(fontSize: 16),
-                              selectedOptionIcon:
-                              const Icon(Icons.check_circle),
-                            ),
+                      SizedBox(
+                          height: 10), // Add spacing between text and dropdown
+                      Container(
+                        width: size.width,
+                        height: 60,
+                        padding: EdgeInsets.symmetric(
+                            horizontal: 15), // Add horizontal padding
+                        decoration: BoxDecoration(
+                          color: Color(
+                              0xFFf4f5f4), // Background color for the container
+                          borderRadius:
+                          BorderRadius.circular(8), // Rounded corners
+                          // border: Border.all(color: Colors.grey), // Border styling
+                        ),
+                        child: DropdownButtonHideUnderline(
+                          child: DropdownButton<String>(
+                            hint: Text('Select'),
+                            value: _brokerageControler.text == '' ? null : _brokerageControler.text, // Store selected value in a variable
+                            onChanged: (String? newValue) {
+                              setState(() {
+                                _brokerageControler.text = newValue!;
+                              });
+                            },
+                            items: <String>[
+                              'yes',
+                              'no'
+                            ].map<DropdownMenuItem<String>>((String value) {
+                              return DropdownMenuItem<String>(
+                                value: value,
+                                child: Text(value),
+                              );
+                            }).toList(),
                           ),
-                        ],
+                        ),
                       ),
-                      const SizedBox(
-                        height: 15,
+                      SizedBox(
+                        height: 15.rh(context),
                       ),
                     ],
                   ),
@@ -1278,7 +1554,7 @@ class _AddPropertyDetailsState extends State<AddPropertyDetails> {
                         controller: _highlightController,
                         // validator: CustomTextFieldValidator1.nullCheck,
                         action: TextInputAction.next,
-                        hintText: 'Highlights',
+                        hintText: '',
                         minLine: 4,
                         maxLine: 4,
                       ),
@@ -1287,7 +1563,8 @@ class _AddPropertyDetailsState extends State<AddPropertyDetails> {
                       ),
                     ],
                   ),
-                  Column(
+                  if((Constant.addProperty['category'] as Category).id != '3')
+                    Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       RichText(
@@ -1313,9 +1590,10 @@ class _AddPropertyDetailsState extends State<AddPropertyDetails> {
                       ),
                       CustomTextFormField1(
                         controller: _FLoorController,
+                        keyboard: TextInputType.number,
                         // validator: CustomTextFieldValidator1.nullCheck,
                         action: TextInputAction.next,
-                        hintText: '0',
+                        hintText: 'Enter floors',
                       ),
                       SizedBox(
                         height: 15.rh(context),

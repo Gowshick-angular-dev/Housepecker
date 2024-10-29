@@ -1385,7 +1385,7 @@ class HomeScreenState extends State<HomeScreen>
                       ),
                     );
                   }),
-              if(HiveUtils.getUserDetails().role != null && HiveUtils.getUserDetails().role == '3')
+              if(HiveUtils.getUserDetails().role != null && HiveUtils.getUserDetails().role == '3'|| HiveUtils.getUserDetails().role == '2')
                 AnimatedBuilder(
                   animation: _forRentController,
                   builder: (context, c) {
@@ -3061,6 +3061,7 @@ class HomeScreenState extends State<HomeScreen>
                     Navigator.pushNamed(context, Routes.searchScreenRoute, arguments: {
                       'autoFocus': false,
                       'openFilterScreen': false,
+                      'isProject': false
                     });
                   }
                   if (index == 2) {
@@ -4222,12 +4223,17 @@ Widget buildMeetOurTopBuildes(BuildContext context,bool builderLoading,List topB
                 Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    Text(
-                      agent['name'] ?? 'Unknown', // Fallback if null
-                      style: const TextStyle(
-                          fontSize: 14.5,
-                          fontWeight: FontWeight.w500,
-                          overflow: TextOverflow.ellipsis),
+                    Container(
+                      width: MediaQuery.sizeOf(context).width * 0.45,
+                      child: Text(
+                        agent['company_name'] ?? 'Unknown',
+                        overflow: TextOverflow.ellipsis,
+                        maxLines: 2,
+                        style: const TextStyle(
+                            fontSize: 13,
+                            fontWeight: FontWeight.w500,
+                            overflow: TextOverflow.ellipsis),
+                      ),
                     ),
                     Padding(
                       padding: const EdgeInsets.only(top: 5),

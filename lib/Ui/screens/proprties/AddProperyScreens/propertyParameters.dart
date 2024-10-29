@@ -1,11 +1,15 @@
+import 'package:Housepecker/exports/main_export.dart';
 import 'package:Housepecker/utils/Extensions/extensions.dart';
 import 'package:Housepecker/utils/responsiveSize.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
-
 import '../../../../app/routes.dart';
+import '../../../../data/cubits/category/fetch_category_cubit.dart';
+import '../../../../data/model/category.dart';
+import '../../../../utils/AppIcon.dart';
 import '../../../../utils/constant.dart';
 import '../../../../utils/ui_utils.dart';
+import '../../widgets/blurred_dialoge_box.dart';
 
 class PropertyParametersPage extends StatefulWidget {
   final Map? details;
@@ -22,8 +26,73 @@ class _PropertyParametersPageState extends State<PropertyParametersPage> {
   List propertyParametersValues = [];
 
   List parameters = [];
+  List categories = [];
 
   TextEditingController sampleControler = TextEditingController();
+
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    List cat = context.watch<FetchCategoryCubit>().getCategories();
+    if(widget.propertyDetails != null) {
+      print('7777777777777777777777: ${widget.propertyDetails}');
+      List allparameters = [];
+      if(Category.fromJson(widget.propertyDetails!['category']).id == (Constant.addProperty['category'] as Category).id) {
+        allparameters =
+        cat.firstWhere((item) => item.id == Category.fromJson(widget.propertyDetails!['category']).id).parameterTypes!['parameters'].map((
+            item) {
+          // widget.propertyDetails?.firstWhere((item) => item[''] == )
+          Map newOne = {
+            ...item,
+            'selectedVal': (item['type_of_parameter'] == 'dropdown')
+                ? ''
+                : (item['type_of_parameter'] ==
+                'textbox' || item['type_of_parameter'] == 'textarea' ||
+                item['type_of_parameter'] == 'number')
+                ? TextEditingController() : (item['type_of_parameter'] ==
+                'checkbox') ? [] : '',
+          };
+          return newOne;
+        }).toList();
+      } else {
+        allparameters =
+        cat.firstWhere((item) => item.id == (Constant.addProperty['category'] as Category).id).parameterTypes!['parameters'].map((
+            item) {
+          // widget.propertyDetails?.firstWhere((item) => item[''] == )
+          Map newOne = {
+            ...item,
+            'selectedVal': (item['type_of_parameter'] == 'dropdown')
+                ? ''
+                : (item['type_of_parameter'] ==
+                'textbox' || item['type_of_parameter'] == 'textarea' ||
+                item['type_of_parameter'] == 'number')
+                ? TextEditingController() : (item['type_of_parameter'] ==
+                'checkbox') ? [] : '',
+          };
+          return newOne;
+        }).toList();
+      }
+
+      List fhif = allparameters.map((dat) {
+        for(int i = 0; i < widget.propertyDetails!['parameters'].length; i++) {
+          if(widget.propertyDetails!['parameters'][i]['id'] == dat['id']) {
+            if(dat['type_of_parameter'] == 'checkbox') {
+              print('00000000000000000000000000000000: ${widget.propertyDetails!['parameters'][i]['value']}');
+            }
+            dat['selectedVal'] = (dat['type_of_parameter'] == 'dropdown')
+                ? '${widget.propertyDetails!['parameters'][i]['value']}' : (dat['type_of_parameter'] ==
+                'textbox' || dat['type_of_parameter'] == 'textarea' ||
+                dat['type_of_parameter'] == 'number')
+                ? TextEditingController(text: '${widget.propertyDetails!['parameters'][i]['value']}') : (dat['type_of_parameter'] ==
+                'checkbox') ? widget.propertyDetails!['parameters'][i]['value'].split(',') : '';
+          }
+        }
+        return dat;
+      }).toList();
+      print('000000000000000000000000000${fhif}');
+      parameters = fhif;
+    }
+  }
 
   @override
   void initState() {
@@ -32,23 +101,6 @@ class _PropertyParametersPageState extends State<PropertyParametersPage> {
       parameters =
           Constant.addProperty['category']?.parameterTypes!['parameters'].map((
               item) {
-            Map newOne = {
-              ...item,
-              'selectedVal': (item['type_of_parameter'] == 'dropdown')
-                  ? ''
-                  : (item['type_of_parameter'] ==
-                  'textbox' || item['type_of_parameter'] == 'textarea' ||
-                  item['type_of_parameter'] == 'number')
-                  ? TextEditingController() : (item['type_of_parameter'] ==
-                  'checkbox') ? [] : '',
-            };
-            return newOne;
-          }).toList();
-    } else {
-      parameters =
-          Constant.addProperty['category']?.parameterTypes!['parameters'].map((
-              item) {
-            // widget.propertyDetails?.firstWhere((item) => item[''] == )
             Map newOne = {
               ...item,
               'selectedVal': (item['type_of_parameter'] == 'dropdown')
@@ -346,6 +398,49 @@ class _PropertyParametersPageState extends State<PropertyParametersPage> {
     );
   }
 
+  void alertPop() {
+    Future.delayed(Duration.zero, () {
+      UiUtils.showBlurredDialoge(context,
+          sigmaX: 5,
+          sigmaY: 5,
+          dialoge: BlurredDialogBox(
+            svgImagePath: AppIcons.warning,
+            title: UiUtils.getTranslatedLabel(context, "incomplete"),
+            showCancleButton: false,
+            acceptTextColor: context.color.buttonColor,
+            onAccept: () async {
+              // Navigator.pop(context);
+            },
+            content: RichText(
+              text: const TextSpan(
+                children: [
+                  TextSpan(
+                    text: 'Please fill all the "',
+                    style: TextStyle(
+                        color: Colors.black,
+                        fontSize: 15,
+                        fontWeight: FontWeight.w600),
+                  ),
+                  TextSpan(
+                    text: "*",
+                    style: TextStyle(
+                        color:
+                        Colors.red), // Customize asterisk color
+                  ),
+                  TextSpan(
+                    text: '" fields!',
+                    style: TextStyle(
+                        color: Colors.black,
+                        fontSize: 15,
+                        fontWeight: FontWeight.w600),
+                  ),
+                ],
+              ),
+            ),
+          ));
+    });
+  }
+
   void _onTapContinue() async {
     List postParamData = [];
     for(int i = 0; i < parameters.length; i++) {
@@ -370,14 +465,71 @@ class _PropertyParametersPageState extends State<PropertyParametersPage> {
       }
       postParamData.add(param);
     }
-    print('777777777777777777777777777 :${postParamData}');
-    // if(postParamData.any((item) => item['parameter_id'] == 33))
-    Map reqData = {
+    print('777777777777777777777777777 :${postParamData}, ${widget.details!}');
+    if(widget.details!['category_id'] == 4 || widget.details!['category_id'] == '4') {
+      if(widget.details!['property_type'] == '0') {
+        if(!(postParamData.any((item) => item['parameter_id'] == 33) &&
+            postParamData.any((item) => item['parameter_id'] == 4) &&
+            postParamData.any((item) => item['parameter_id'] == 1) &&
+            postParamData.any((item) => item['parameter_id'] == 2))) {
+          alertPop();
+          return;
+        }
+      } else {
+        if(!(postParamData.any((item) => item['parameter_id'] == 42) &&
+            postParamData.any((item) => item['parameter_id'] == 4) &&
+            postParamData.any((item) => item['parameter_id'] == 1) &&
+            postParamData.any((item) => item['parameter_id'] == 2))) {
+          alertPop();
+          return;
+        }
+      }
+    } else if(widget.details!['category_id'] == 2 || widget.details!['category_id'] == '2') {
+      if(widget.details!['property_type'] == '0') {
+        if(!(postParamData.any((item) => item['parameter_id'] == 33) &&
+            postParamData.any((item) => item['parameter_id'] == 13))) {
+          alertPop();
+          return;
+        }
+      } else {
+        if(!(postParamData.any((item) => item['parameter_id'] == 42) &&
+            postParamData.any((item) => item['parameter_id'] == 13))) {
+          alertPop();
+          return;
+        }
+      }
+    } else if(widget.details!['category_id'] == 1 || widget.details!['category_id'] == '1') {
+      if(!(postParamData.any((item) => item['parameter_id'] == 52) &&
+          postParamData.any((item) => item['parameter_id'] == 12) &&
+          postParamData.any((item) => item['parameter_id'] == 45) &&
+          postParamData.any((item) => item['parameter_id'] == 1) &&
+          postParamData.any((item) => item['parameter_id'] == 2))) {
+        alertPop();
+        return;
+      }
+    } else {
+      if(widget.details!['property_type'] == '0') {
+        if(!postParamData.any((item) => item['parameter_id'] == 11)) {
+          alertPop();
+          return;
+        }
+      } else {
+        if(!(postParamData.any((item) => item['parameter_id'] == 42) &&
+            postParamData.any((item) => item['parameter_id'] == 11))) {
+          alertPop();
+          return;
+        }
+      }
+    }
+
+    // if(postParamData.any((item) => item['parameter_id'] == 33) && )
+    Map<String, dynamic> reqData = {
       ...widget.details!,
       'parameters': postParamData,
       'updateDetails': widget.propertyDetails,
       'isUpdate': widget.isUpdate
     };
+    print('tttttttttttttttttttttttt: ${postParamData}');
     Navigator.pushNamed(context, Routes.selectOutdoorFacility,
         arguments: reqData);
   }
@@ -386,7 +538,7 @@ class _PropertyParametersPageState extends State<PropertyParametersPage> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: UiUtils.buildAppBar(context,
-        title: 'Post Property',
+        title: widget.propertyDetails != null ? "Edit Property" : 'Post Properties',
         showBackButton: true,
       ),
       bottomNavigationBar: Container(
@@ -427,26 +579,14 @@ class _PropertyParametersPageState extends State<PropertyParametersPage> {
                         (val) {
                           item['selectedVal'] = val;
                           if(Constant.addProperty['category']?.id == '4') {
-                            // parameters
-                            //     .where((data) => data['id'] == 4)
-                            //     .toList()[0]['selectedVal'] = '';
                             int index = parameters.indexWhere((item) => item['id'] == 4);
                             if (index != -1) {
-                              print('.....................................................................1');
                               parameters[index]['selectedVal'] = '';
-                            } else {
-                              print('.....................................................................2');
                             }
                           } else {
-                            // parameters
-                            //     .where((data) => data['id'] == 13)
-                            //     .toList()[0]['selectedVal'] = '';
                             int index = parameters.indexWhere((item) => item['id'] == 13);
                             if (index != -1) {
-                              print('.....................................................................3');
                               parameters[index]['selectedVal'] = '';
-                            } else {
-                              print('.....................................................................4');
                             }
                           }
                           setState(() { });
@@ -461,26 +601,14 @@ class _PropertyParametersPageState extends State<PropertyParametersPage> {
                         item['required'] == 1,
                         (val) {
                           if(Constant.addProperty['category']?.id == '4') {
-                            // parameters
-                            //     .where((data) => data['id'] == 4)
-                            //     .toList()[0]['selectedVal'] = '';
                             int index = parameters.indexWhere((item) => item['id'] == 4);
                             if (index != -1) {
-                              print('.....................................................................5');
                               parameters[index]['selectedVal'] = '';
-                            } else {
-                              print('.....................................................................6');
                             }
                           } else {
-                            // parameters
-                            //     .where((data) => data['id'] == 13)
-                            //     .toList()[0]['selectedVal'] = '';
                             int index = parameters.indexWhere((item) => item['id'] == 13);
                             if (index != -1) {
-                              print('.....................................................................7');
                               parameters[index]['selectedVal'] = '';
-                            } else {
-                              print('.....................................................................8');
                             }
                           }
                           item['selectedVal'] = val;

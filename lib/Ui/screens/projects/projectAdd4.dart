@@ -122,7 +122,7 @@ class _ProjectFormFourState extends State<ProjectFormFour> {
                                         selectedFacilities.add(widget.facilityList![index]);
                                         facilities.add({
                                           'facility_id': widget.facilityList![index]['id'],
-                                          'distance': ''
+                                          'distance': '0'
                                         });
                                         setState(() {});
                                       }

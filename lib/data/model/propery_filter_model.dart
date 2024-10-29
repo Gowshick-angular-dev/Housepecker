@@ -8,6 +8,8 @@ class PropertyFilterModel {
   final String minPrice;
   final String categoryId;
   final String? amenities;
+  final String? possessionStart;
+  final String? projectType;
   final String? post_by;
   final String? max_size;
   final String? min_size;
@@ -19,6 +21,9 @@ class PropertyFilterModel {
   final String country;
   final String? area;
   final String? allProperties;
+  final String? allProjects;
+  final String? premium;
+  final String? deal;
   final String? brokerage;
   PropertyFilterModel(
       {required this.propertyType,
@@ -26,15 +31,20 @@ class PropertyFilterModel {
       required this.minPrice,
       required this.categoryId,
       this.amenities,
+      this.possessionStart,
+      this.projectType,
       this.post_by,
       this.max_size,
       this.min_size,
-        this.SaleType,
+      this.SaleType,
       this.parametersId,
       this.parametersVal,
       this.area,
       this.allProperties,
+      this.allProjects,
       this.brokerage,
+      this.premium,
+      this.deal,
       required this.postedSince,
       required this.city,
       required this.state,
@@ -47,6 +57,8 @@ class PropertyFilterModel {
       String? minPrice,
       String? categoryId,
       String? amenities,
+      String? possessionStart,
+      String? projectType,
       String? post_by,
       String? max_size,
       String? min_size,
@@ -57,7 +69,10 @@ class PropertyFilterModel {
       String? state,
       String? country,
       String? area,
+      String? premium,
+      String? deal,
       String? allProperties,
+      String? allProjects,
       String? brokerage,
       }) {
     return PropertyFilterModel(
@@ -66,6 +81,8 @@ class PropertyFilterModel {
         minPrice: minPrice ?? this.minPrice,
         categoryId: categoryId ?? this.categoryId,
         amenities: amenities ?? this.amenities,
+        possessionStart: possessionStart ?? this.possessionStart,
+        projectType: projectType ?? this.projectType,
         post_by: post_by ?? this.post_by,
         max_size: max_size ?? this.max_size,
         min_size: min_size ?? this.min_size,
@@ -76,7 +93,10 @@ class PropertyFilterModel {
         state: state ?? this.state,
         country: country ?? this.country,
         area: area ?? this.area,
+        premium: premium ?? this.premium,
+        deal: deal ?? this.deal,
         allProperties: allProperties ?? this.allProperties,
+        allProjects: allProjects ?? this.allProjects,
         brokerage: brokerage ?? this.brokerage,
     );
   }
@@ -88,17 +108,22 @@ class PropertyFilterModel {
       'min_price': minPrice,
       'category_id': categoryId,
       'amenities': amenities,
+      'possession_start': possessionStart,
+      'proj_type': projectType,
       'post_by': post_by,
       'max_size': max_size,
       'min_size': min_size,
       'param_id': parametersId,
       'param_value': parametersVal,
       'posted_since': postedSince,
+      "area": area,
       "city": city,
       "state": state,
       "country": country,
-      "area": area,
+      "premium": premium,
+      "deal_of_month": deal,
       "all_properties": allProperties,
+      "all_project": allProjects,
       "brokerage": brokerage,
     };
   }
@@ -126,7 +151,10 @@ class PropertyFilterModel {
         state: '',
         area: '',
         allProperties: '',
+        allProjects: '',
         brokerage: '',
+        premium: '',
+        deal: '',
     );
   }
   factory PropertyFilterModel.fromMap(Map<String, dynamic> map) {
@@ -147,7 +175,10 @@ class PropertyFilterModel {
       parametersVal: map['param_value'].toString(),
       area: map['area'].toString(),
       allProperties: map['all_properties'].toString(),
+      allProjects: map['all_projects'].toString(),
       brokerage: map['brokerage'].toString(),
+      premium: map['premium'].toString(),
+      deal: map['deal_of_month'].toString(),
     );
   }
 

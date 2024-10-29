@@ -96,6 +96,8 @@ class _ProfileScreenState extends State<ProfileScreen>
         systemSetting = response['data'];
         var data = response['data']['free_package'] ?? {};
 
+       // print("dddddddddddddddd${data}");
+
         propertyLimit = data['property_limit']??0;
         projectLimit = data['project_limit']??0;
         advertisementLimit = data['advertisement_limit']??0;
@@ -168,7 +170,7 @@ class _ProfileScreenState extends State<ProfileScreen>
         appBar: UiUtils.buildAppBar(
           context,
           title: '${UiUtils.getTranslatedLabel(context, "myProfile")} (${HiveUtils
-              .getUserDetails().role == 1 ? 'Owner' : HiveUtils.getUserDetails().role == 2 ? 'Agent' : 'Builder'})',
+              .getUserDetails().role == "1" ? 'Owner' : HiveUtils.getUserDetails().role == "2" ? 'Agent' : HiveUtils.getUserDetails().role == "3"  ? 'Builder' : 'Owner'})',
         ),
         body: ScrollConfiguration(
           behavior: RemoveGlow(),
@@ -705,9 +707,9 @@ class _ProfileScreenState extends State<ProfileScreen>
                           );
                         },
                       ),
-                      if(HiveUtils.getUserDetails().role != null && HiveUtils.getUserDetails().role == '3')
+                      if(HiveUtils.getUserDetails().role != null && HiveUtils.getUserDetails().role == '3'||HiveUtils.getUserDetails().role == '2')
                         dividerWithSpacing(),
-                      if(HiveUtils.getUserDetails().role != null && HiveUtils.getUserDetails().role == '3')
+                      if(HiveUtils.getUserDetails().role != null && HiveUtils.getUserDetails().role == '3'||HiveUtils.getUserDetails().role == '2')
                         customTile(
                           context,
                           title: UiUtils.getTranslatedLabel(context, "My Projects"),

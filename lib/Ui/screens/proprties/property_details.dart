@@ -219,9 +219,11 @@ class PropertyDetailsState extends State<PropertyDetails>
         widget.property?.video != null &&
         HelperUtils.isYoutubeVideo(widget.property?.video ?? "")) {
       String? videoId = YoutubePlayer.convertUrlToId(property!.video!);
-      String thumbnail = YoutubePlayer.getThumbnail(videoId: videoId!);
-      youtubeVideoThumbnail = thumbnail;
-      setState(() {});
+      if(videoId != null) {
+        String thumbnail = YoutubePlayer.getThumbnail(videoId: videoId!);
+        youtubeVideoThumbnail = thumbnail;
+        setState(() {});
+      }
     }
   }
 
